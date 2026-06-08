@@ -1,0 +1,362 @@
+@font-face {
+  font-family: "Logo Dit Magi";
+  src: local("Dit Magi"), local("Dit Magi Demo"), local("Dit-Magi-Demo");
+  font-style: normal;
+  font-weight: 400 1000;
+}
+
+.app-shell,
+.splash-screen {
+  position: relative;
+  width: min(100%, 430px);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas) 42%, var(--page) 100%);
+  overflow-x: hidden;
+  box-shadow: 0 0 0 1px var(--color-hairline);
+}
+
+.screen-content {
+  min-height: 100vh;
+  padding: calc(var(--top-nav-height) + var(--screen-top-gap)) 0 calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+.screen-content.without-bottom {
+  padding-bottom: 0;
+}
+
+.top-nav {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 430px);
+  height: var(--top-nav-height);
+  padding: 0 12px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+}
+
+.brand-mark {
+  width: 136px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.brand-mark:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.38);
+  outline-offset: 3px;
+}
+
+.top-leading-spacer {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+}
+
+.top-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 178px);
+  overflow: hidden;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-spacer {
+  flex: 1;
+}
+
+.top-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  background: transparent;
+  font-size: 18px;
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.heart-button {
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.heart-button.active {
+  color: #ff4d4d;
+  border-color: rgba(255, 77, 77, 0.24);
+  background: rgba(255, 77, 77, 0.08);
+}
+
+.icon-button:active {
+  color: var(--color-teal);
+  background: var(--verified-soft);
+}
+
+@media (hover: hover) {
+  .icon-button:hover,
+  .bottom-tab:hover {
+    color: var(--color-teal);
+    background: var(--verified-soft);
+  }
+}
+
+.bottom-nav {
+  position: fixed;
+  z-index: 40;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 430px);
+  min-height: var(--bottom-nav-height);
+  padding: 7px 4px calc(10px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 12px rgba(10, 11, 13, 0.04);
+  backdrop-filter: blur(18px);
+}
+
+.bottom-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  transition: color 120ms ease, transform 120ms ease;
+}
+
+.bottom-tab.active,
+.bottom-tab.primary.active {
+  color: var(--color-teal);
+  background: transparent;
+}
+
+.bottom-tab.primary.active {
+  color: var(--accent);
+}
+
+.bottom-tab.active::after {
+  display: none;
+}
+
+.tab-icon {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: background-color 120ms ease, box-shadow 120ms ease, padding 120ms ease;
+}
+
+.bottom-tab.active .tab-icon {
+  padding: 5px;
+  background: rgba(0, 82, 255, 0.1);
+  box-shadow: none;
+  stroke-width: 2.5;
+}
+
+.bottom-tab.primary.active .tab-icon {
+  background: rgba(0, 82, 255, 0.1);
+  box-shadow: none;
+}
+
+.splash-screen {
+  padding: 120px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.splash-mark {
+  text-align: center;
+}
+
+.app-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, var(--color-primary), var(--color-primary-active)),
+    var(--panel);
+  box-shadow: var(--shadow-map);
+}
+
+.splash-mark h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+}
+
+.splash-mark p,
+.page-intro p,
+.detail-body p,
+.result-hero p,
+.reason-panel p,
+.feed-body p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.splash-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.step-dots b,
+.step-dots i {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.step-dots b {
+  width: 24px;
+  background: var(--text);
+}
+
+.step-dots i {
+  width: 6px;
+}
+
+.scenik-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  color: var(--color-primary);
+  background: transparent;
+  font-family: "Avenir Next", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.scenik-logo--nav {
+  width: 136px;
+  height: 42px;
+  justify-content: flex-start;
+  font-size: 32px;
+}
+
+.scenik-logo--splash {
+  width: 300px;
+  height: 92px;
+  margin: 0 auto 18px;
+  font-size: clamp(58px, 15vw, 68px);
+}
+
+.scenik-logo--font-dit-magi {
+  font-family: "Logo Dit Magi", "Avenir Next", "Segoe UI", Arial, sans-serif;
+}
+
+.scenik-logo--font-dit-magi .scenik-logo__sceni,
+.scenik-logo--font-dit-magi .scenik-logo__k {
+  font-weight: 1000;
+  -webkit-text-stroke: 0.45px currentColor;
+}
+
+.scenik-logo__sceni,
+.scenik-logo__k {
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.home-screen,
+.explore-screen,
+.search-screen,
+.list-screen,
+.course-step,
+.detail-screen,
+.result-screen,
+.community-screen,
+.my-page,
+.map-screen,
+.preference-screen,
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.result-screen,
+.community-screen,
+.my-page {
+  gap: 12px;
+}
+
+.home-screen > .section-header,
+.home-screen > .chip-row,
+.home-screen > .notice-list,
+.home-screen > .stack-list,
+.explore-screen,
+.list-screen,
+.search-screen,
+.course-step,
+.detail-screen,
+.result-screen,
+.community-screen,
+.my-page,
+.map-screen,
+.preference-screen,
+.auth-form {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.home-screen > .section-header {
+  padding-top: 16px;
+}

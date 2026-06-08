@@ -1,0 +1,168 @@
+[
+  {
+    "name": "01-home",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\01-home.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/home",
+      "recentImages": [
+        {
+          "naturalWidth": 1024,
+          "src": "/images/seoul-street.jpg"
+        },
+        {
+          "naturalWidth": 1024,
+          "src": "/images/kdrama-scene.jpg"
+        },
+        {
+          "naturalWidth": 1024,
+          "src": "/images/onboarding-hero.jpg"
+        }
+      ],
+      "scrollHeight": 1212,
+      "visibleHeadings": [
+        {
+          "fontSize": "18px",
+          "text": "최근 본 장소",
+          "top": 68
+        },
+        {
+          "fontSize": "18px",
+          "text": "추천 콘텐츠",
+          "top": 266
+        },
+        {
+          "fontSize": "18px",
+          "text": "인기 여행 코스",
+          "top": 595
+        },
+        {
+          "fontSize": "18px",
+          "text": "공지사항",
+          "top": 947
+        }
+      ]
+    }
+  },
+  {
+    "name": "02-explore",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\02-explore.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/explore",
+      "recentImages": [],
+      "scrollHeight": 943,
+      "visibleHeadings": [
+        {
+          "fontSize": "18px",
+          "text": "인기 콘텐츠",
+          "top": 261
+        }
+      ]
+    }
+  },
+  {
+    "name": "03-ai-course",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\03-ai-course.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/ai",
+      "recentImages": [],
+      "scrollHeight": 1068,
+      "visibleHeadings": [
+        {
+          "fontSize": "22px",
+          "text": "어떤 콘텐츠로 여행할까요?",
+          "top": 128
+        }
+      ]
+    }
+  },
+  {
+    "name": "04-ai-result",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\04-ai-result.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/ai/result",
+      "recentImages": [],
+      "scrollHeight": 1491,
+      "visibleHeadings": [
+        {
+          "fontSize": "22px",
+          "text": "서울 드라마 AI 코스",
+          "top": 100
+        }
+      ]
+    }
+  },
+  {
+    "name": "05-community",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\05-community.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/community",
+      "recentImages": [],
+      "scrollHeight": 1160,
+      "visibleHeadings": []
+    }
+  },
+  {
+    "name": "06-my-page",
+    "filePath": "C:\\Users\\SSAFY\\Downloads\\KC\\qa-screenshots\\mobile-390\\06-my-page.png",
+    "metrics": {
+      "horizontalOverflow": false,
+      "navTexts": [
+        "AI코스",
+        "탐색",
+        "홈",
+        "커뮤니티",
+        "마이"
+      ],
+      "path": "/my",
+      "recentImages": [],
+      "scrollHeight": 844,
+      "visibleHeadings": [
+        {
+          "fontSize": "32px",
+          "text": "로그인하고 나만의 sceniK 기록을 관리하세요",
+          "top": 90
+        }
+      ]
+    }
+  }
+]

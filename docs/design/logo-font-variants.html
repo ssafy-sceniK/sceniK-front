@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sceniK font logo variants</title>
+    <style>
+      :root {
+        --blue: #0052ff;
+        --blue-soft: rgba(0, 82, 255, 0.08);
+        --ink: #0a0b0d;
+        --muted: #626874;
+        --line: #dee1e6;
+        --page: #f7f7f7;
+        --card: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      }
+
+      main {
+        width: min(100%, 1180px);
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 30px;
+        letter-spacing: 0;
+      }
+
+      header p {
+        max-width: 760px;
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .group {
+        margin-top: 26px;
+      }
+
+      .group-head {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .group-head h2 {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .group-head span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        min-height: 212px;
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--card);
+      }
+
+      .card[data-group="favourite"] {
+        border-color: rgba(0, 82, 255, 0.28);
+        box-shadow: 0 10px 26px rgba(0, 82, 255, 0.07);
+      }
+
+      .meta {
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .status {
+        padding: 4px 8px;
+        border-radius: 999px;
+        color: var(--muted);
+        background: #f0f1f3;
+        white-space: nowrap;
+      }
+
+      .status.available {
+        color: var(--blue);
+        background: var(--blue-soft);
+      }
+
+      .logo {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        color: var(--blue);
+        font-size: 54px;
+        line-height: 1;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .logo .sceni {
+        font-style: italic;
+      }
+
+      .logo .k {
+        font-style: normal;
+      }
+
+      .sample-bar {
+        height: 56px;
+        padding: 0 12px 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        background: #ffffff;
+      }
+
+      .sample-bar .logo {
+        min-height: 0;
+        font-size: 31px;
+      }
+
+      .sample-actions {
+        display: flex;
+        gap: 2px;
+      }
+
+      .sample-actions i {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .fallback-note {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>sceniK font logo variants</h1>
+        <p>
+          These are text-only logo previews using the requested font-family names. If a font is not installed on this machine, the card is marked as fallback and the browser will render the closest available system font.
+        </p>
+      </header>
+
+      <section class="group">
+        <div class="group-head"><h2>Requested</h2><span>Initial candidate list</span></div>
+        <div class="grid" id="requested-grid"></div>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Favourite</h2><span>User marked favourites</span></div>
+        <div class="grid" id="favourite-grid"></div>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Current</h2><span>Current shortlist</span></div>
+        <div class="grid" id="current-grid"></div>
+      </section>
+    </main>
+
+    <script>
+      const groups = {
+        requested: [
+          "Ragika",
+          "Call Heart",
+          "FERRON",
+          "SPACE RABBIT",
+          "RUSKYN",
+          "Sunday Ridges",
+          "Ciguatera",
+          "Devina Garden",
+          "Dit Magi",
+        ],
+        favourite: [
+          "ROUTINE",
+          "CHABUL",
+          "Rulingpen",
+          "OGG",
+          "Neue Haas Unica Pro",
+          "Viana Script",
+        ],
+        current: [
+          "Aspect Range",
+          "The Bellonte",
+          "Ledira",
+          "San Brainy",
+        ],
+      };
+
+      const fallbackStack = '"Avenir Next", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif';
+
+      function canUseFont(fontName) {
+        const probeText = "sceniK";
+        const size = "72px";
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        context.font = `${size} monospace`;
+        const monoWidth = context.measureText(probeText).width;
+        context.font = `${size} "${fontName}", monospace`;
+        const candidateWidth = context.measureText(probeText).width;
+        return Math.abs(candidateWidth - monoWidth) > 0.1;
+      }
+
+      function createCard(fontName, group) {
+        const available = canUseFont(fontName);
+        const article = document.createElement("article");
+        article.className = "card";
+        article.dataset.group = group;
+        article.innerHTML = `
+          <div class="meta">
+            <span>${fontName}</span>
+            <span class="status ${available ? "available" : ""}">${available ? "available" : "fallback"}</span>
+          </div>
+          <div class="logo" style='font-family: "${fontName}", ${fallbackStack};'>
+            <span class="sceni">sceni</span><span class="k">K</span>
+          </div>
+          <div class="sample-bar">
+            <div class="logo" style='font-family: "${fontName}", ${fallbackStack};'>
+              <span class="sceni">sceni</span><span class="k">K</span>
+            </div>
+            <div class="sample-actions"><i></i><i></i></div>
+          </div>
+          <p class="fallback-note">${available ? "Rendered with the requested local font family." : "Font file was not detected locally, so this preview may be using fallback rendering."}</p>
+        `;
+        return article;
+      }
+
+      Object.entries(groups).forEach(([group, fonts]) => {
+        const grid = document.getElementById(`${group}-grid`);
+        fonts.forEach((fontName) => {
+          grid.appendChild(createCard(fontName, group));
+        });
+      });
+    </script>
+  </body>
+</html>

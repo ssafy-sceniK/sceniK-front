@@ -1,0 +1,638 @@
+.course-detail-screen,
+.course-edit-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-inline: 16px;
+  padding-bottom: calc(var(--bottom-nav-height) + 24px + env(safe-area-inset-bottom));
+}
+
+.course-edit-screen {
+  padding-bottom: calc(var(--bottom-nav-height) + 108px + env(safe-area-inset-bottom));
+}
+
+.course-manage-header {
+  margin-top: 2px;
+}
+
+.course-delete-button {
+  margin-top: 2px;
+  font-weight: 800;
+}
+
+.course-empty-panel {
+  min-height: 194px;
+  padding: 24px 20px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.course-empty-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border-radius: var(--radius-full);
+  font-size: 20px;
+}
+
+.course-empty-panel h1 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.course-empty-panel p {
+  max-width: 285px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.empty-action-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.course-warning {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: rgba(207, 32, 47, 0.16);
+}
+
+.course-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.course-meta-grid > div {
+  min-width: 0;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-meta-grid span {
+  color: var(--dim);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.course-meta-grid strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-intro {
+  padding: 8px 0 4px;
+}
+
+.compact-intro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.course-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.all-day-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.course-day-section {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.course-day-header span {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.course-day-header small {
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.day-stop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editable-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editable-stop-card {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-canvas);
+  box-shadow: none;
+  transition: border-color 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+
+.editable-stop-card.is-dragging {
+  opacity: 0.5;
+}
+
+.editable-stop-card.is-drag-over {
+  border-color: var(--color-primary);
+  transform: translateY(1px);
+}
+
+.editable-stop-main {
+  display: grid;
+  grid-template-columns: 38px 74px minmax(0, 1fr) 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.drag-grip {
+  min-width: 38px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: var(--color-surface-strong);
+  border-radius: 12px;
+  cursor: grab;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -5px;
+  line-height: 1;
+  touch-action: none;
+  transform: rotate(90deg);
+}
+
+.drag-grip:active {
+  cursor: grabbing;
+}
+
+.time-picker-wrap {
+  position: relative;
+}
+
+.time-pill {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border: 1px solid rgba(0, 82, 255, 0.16);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 800;
+  font-feature-settings: "tnum";
+}
+
+.time-menu {
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  top: calc(100% + 6px);
+  width: 96px;
+  max-height: 188px;
+  overflow-y: auto;
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.time-menu button {
+  min-height: 34px;
+  padding: 0 8px;
+  color: var(--text);
+  background: transparent;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  font-feature-settings: "tnum";
+}
+
+.time-menu button:hover,
+.time-menu button:focus-visible {
+  background: var(--color-surface-strong);
+}
+
+.editable-stop-copy {
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.editable-stop-copy strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editable-stop-copy small {
+  overflow: hidden;
+  color: var(--muted);
+  display: -webkit-box;
+  font-size: 11px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.remove-stop-button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: var(--color-surface-strong);
+  border-radius: var(--radius-full);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.editable-stop-actions {
+  padding-left: 30px;
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.editable-stop-actions button {
+  min-height: 34px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--color-surface-strong);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.editable-stop-actions button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.day-candidate-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-top: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-candidate-row span,
+.day-candidate-row button {
+  min-height: 34px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.day-candidate-row span {
+  color: var(--dim);
+}
+
+.day-candidate-row button {
+  padding: 0 10px;
+  color: var(--text);
+  background: var(--color-surface-strong);
+  border: 1px solid var(--border);
+}
+
+.editable-stop-panel {
+  margin-top: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+
+.editable-stop-panel label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.editable-stop-panel input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--text);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.course-edit-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.edit-card-head {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.edit-card-head span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.edit-card-head strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidate-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.course-recommend-panel {
+  padding: 16px;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-recommend-panel > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.course-recommend-panel .empty-state {
+  min-height: auto;
+  padding: 16px 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.course-recommend-panel .empty-state::before,
+.course-recommend-panel .empty-state::after {
+  display: none;
+}
+
+.course-recommend-panel .empty-state__visual {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+}
+
+.candidate-day-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.candidate-day-tabs button {
+  min-width: 66px;
+  min-height: 36px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  color: var(--muted);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.candidate-day-tabs button.active {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.candidate-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.candidate-chip-grid button {
+  min-height: 38px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--color-surface-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recommended-place-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.recommended-place-grid button {
+  min-height: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 12px;
+  align-items: center;
+  color: var(--text);
+  background: var(--color-surface-soft);
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.recommended-place-grid strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommended-place-grid small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommended-place-grid span {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-height: 30px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.result-actions .regenerate-button {
+  grid-column: 1 / -1;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border-color: rgba(0, 82, 255, 0.18);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  position: relative;
+}
+
+.timeline-marker {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.timeline-marker::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, var(--color-primary), rgba(0, 82, 255, 0.12));
+}
+
+.timeline-item:last-child .timeline-marker::after {
+  display: none;
+}
+
+.timeline-marker span {
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.timeline-card {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-card small {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.timeline-card strong {
+  display: block;
+  margin: 4px 0;
+  font-size: var(--text-sm);
+}
+
+.timeline-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sceniK logo text variants</title>
+    <style>
+      :root {
+        --blue: #0052ff;
+        --blue-deep: #003ecc;
+        --ink: #0a0b0d;
+        --muted: #5b616e;
+        --line: #dee1e6;
+        --page: #f7f7f7;
+        --card: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      }
+
+      main {
+        width: min(100%, 1040px);
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        min-height: 214px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+      }
+
+      .card.recommended {
+        border-color: rgba(0, 82, 255, 0.32);
+        box-shadow: 0 10px 28px rgba(0, 82, 255, 0.08);
+      }
+
+      .label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .tag {
+        padding: 4px 8px;
+        border-radius: 999px;
+        color: var(--blue);
+        background: rgba(0, 82, 255, 0.08);
+      }
+
+      .logo {
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+        color: var(--blue);
+        font-size: 52px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .sceni {
+        font-style: italic;
+        letter-spacing: 0;
+      }
+
+      .k {
+        font-style: normal;
+        letter-spacing: 0;
+      }
+
+      .v1 {
+        font-family: "Avenir Next", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
+      }
+
+      .v1 .sceni {
+        font-weight: 760;
+      }
+
+      .v1 .k {
+        font-weight: 780;
+      }
+
+      .v2 {
+        font-family: "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
+      }
+
+      .v2 .sceni {
+        font-weight: 750;
+      }
+
+      .v2 .k {
+        color: var(--ink);
+        font-weight: 850;
+      }
+
+      .v3 {
+        font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      }
+
+      .v3 .sceni {
+        font-weight: 700;
+      }
+
+      .v3 .k {
+        color: var(--blue-deep);
+        font-weight: 800;
+      }
+
+      .v4 {
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      .v4 .sceni {
+        font-weight: 700;
+      }
+
+      .v4 .k {
+        color: var(--blue-deep);
+        font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+        font-weight: 900;
+      }
+
+      .v5 {
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 48px;
+      }
+
+      .v5 .sceni {
+        font-weight: 700;
+      }
+
+      .v5 .k {
+        color: var(--blue-deep);
+        font-weight: 800;
+      }
+
+      .v6 {
+        font-family: "Arial Rounded MT Bold", "Avenir Next", "Segoe UI", Arial, sans-serif;
+      }
+
+      .v6 .sceni {
+        font-weight: 800;
+      }
+
+      .v6 .k {
+        color: var(--blue-deep);
+        font-weight: 900;
+      }
+
+      .v7 {
+        color: var(--ink);
+        font-family: "Avenir Next", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
+      }
+
+      .v7 .sceni {
+        font-weight: 760;
+      }
+
+      .v7 .k {
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      .v8 {
+        font-family: "Segoe UI Variable Display", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
+      }
+
+      .v8 .sceni {
+        font-weight: 680;
+      }
+
+      .v8 .k {
+        color: var(--blue-deep);
+        font-weight: 780;
+      }
+
+      .nav-sample {
+        height: 56px;
+        margin-top: 18px;
+        padding: 0 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        background: #ffffff;
+      }
+
+      .nav-sample .logo {
+        min-height: 0;
+        font-size: 31px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .dot {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>sceniK text logo variants</h1>
+        <p>All options are text-only. No SVG, canvas, image, roof, or ribbon motif.</p>
+      </header>
+
+      <section class="grid">
+        <article class="card recommended">
+          <div class="label"><span>01 Avenir italic</span><span class="tag">Recommended</span></div>
+          <div class="logo v1"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v1"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>02 Blue + ink K</span></div>
+          <div class="logo v2"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v2"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>03 Trebuchet soft</span></div>
+          <div class="logo v3"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v3"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>04 Editorial serif</span></div>
+          <div class="logo v4"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v4"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>05 Verdana practical</span></div>
+          <div class="logo v5"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v5"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>06 Rounded bold</span></div>
+          <div class="logo v6"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v6"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>07 Ink word + blue K</span></div>
+          <div class="logo v7"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v7"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label"><span>08 Light premium</span></div>
+          <div class="logo v8"><span class="sceni">sceni</span><span class="k">K</span></div>
+          <div class="nav-sample">
+            <div class="logo v8"><span class="sceni">sceni</span><span class="k">K</span></div>
+            <div class="actions"><i class="dot"></i><i class="dot"></i></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

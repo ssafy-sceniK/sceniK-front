@@ -1,0 +1,208 @@
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUiStore } from '../stores/uiStore.js';
+import AppLayout from '../components/layout/AppLayout.vue';
+import PlaceCard from '../components/place/PlaceCard.vue';
+import EmptyState from '../components/common/EmptyState.vue';
+
+const router = useRouter();
+const uiStore = useUiStore();
+const activeTab = ref('activity');
+
+onMounted(async () => {
+  if (!uiStore.currentUser) return;
+  await Promise.all([
+    uiStore.loadSavedCourses(),
+    uiStore.loadEngagementState(),
+    uiStore.loadCommunityPosts(),
+  ]);
+});
+
+function ownsPost(post) {
+  if (!uiStore.currentUser) return false;
+  return post.userId ? post.userId === uiStore.currentUser.userId : post.user === uiStore.currentUser.nickname;
+}
+
+function hasUserComment(post) {
+  if (!uiStore.currentUser) return false;
+  return (post.comments ?? []).some((comment) => (
+    comment.userId ? comment.userId === uiStore.currentUser.userId : comment.user === uiStore.currentUser.nickname
+  ));
+}
+
+const myPosts = computed(() => uiStore.communityPosts.filter(ownsPost));
+const commentedPosts = computed(() => uiStore.currentUser
+  ? uiStore.communityPosts.filter(hasUserComment)
+  : []);
+const scrappedPosts = computed(() => uiStore.currentUser
+  ? uiStore.communityPosts.filter((post) => (post.scrappedBy ?? []).includes(uiStore.currentUser.userId))
+  : []);
+const profileInitial = computed(() => uiStore.currentUser?.nickname?.slice(0, 1).toUpperCase() ?? 'K');
+const profileBio = computed(() => uiStore.currentUser?.bio || 'K-content 여행 중');
+const plannedCount = computed(() => uiStore.plannedVisitItems.length);
+const completedCount = computed(() => uiStore.completedVisitItems.length);
+const totalVisitCount = computed(() => plannedCount.value + completedCount.value);
+const visitProgress = computed(() => totalVisitCount.value ? Math.round((completedCount.value / totalVisitCount.value) * 100) : 0);
+const tabs = computed(() => [
+  {
+    id: 'activity',
+    label: '내 활동',
+  },
+  {
+    id: 'visits',
+    label: '방문 관리',
+  },
+  {
+    id: 'posts',
+    label: '게시글',
+  },
+]);
+</script>
+
+<template>
+  <AppLayout>
+    <section v-if="!uiStore.currentUser" class="my-login">
+      <div class="profile-card guest">
+        <span class="badge ai">My Page</span>
+        <h1>로그인하고 나만의 sceniK 여행 기록을 관리하세요</h1>
+        <p>좋아요, 방문 예정, 저장한 AI Course가 한곳에 모입니다.</p>
+        <RouterLink class="button button-primary my-login-button" to="/login">로그인 / 회원가입</RouterLink>
+      </div>
+    </section>
+
+    <section v-else class="my-page">
+      <div class="profile-card my-profile-card">
+        <button class="avatar profile-avatar-button" type="button" aria-label="프로필 편집" @click="router.push('/my/profile-edit')">
+          {{ profileInitial }}
+          <span class="avatar-edit-badge">✎</span>
+        </button>
+        <div class="profile-copy">
+          <div class="profile-name-row">
+            <h1>{{ uiStore.currentUser.nickname }}</h1>
+            <span>Level 3 여행자</span>
+          </div>
+          <p>{{ profileBio }}</p>
+          <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
+        </div>
+        <RouterLink class="profile-edit-button" to="/my/profile-edit">프로필 편집</RouterLink>
+      </div>
+
+      <div class="stats-grid">
+        <button type="button" @click="router.push('/my/activity/saved-routes')">
+          <b>{{ uiStore.savedCourses.length }}</b><span>코스</span>
+        </button>
+        <button type="button" @click="router.push('/my/posts')">
+          <b>{{ myPosts.length }}</b><span>게시글</span>
+        </button>
+        <button type="button" @click="router.push('/my/visit-completed')">
+          <b>{{ completedCount }}</b><span>방문 완료</span>
+        </button>
+      </div>
+
+      <div class="my-section-tabs" aria-label="My Page sections">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          type="button"
+          :class="{ active: activeTab === tab.id }"
+          @click="activeTab = tab.id"
+        >
+          <strong>{{ tab.label }}</strong>
+        </button>
+      </div>
+
+      <div v-if="activeTab === 'activity'" class="my-section-panel">
+        <div class="my-menu-list">
+          <RouterLink class="my-menu-row" to="/my/activity/liked-content">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 20.5 5.4 14A4.6 4.6 0 0 1 12 7.5 4.6 4.6 0 0 1 18.6 14L12 20.5Z" /></svg>
+            </span>
+            <span><strong>좋아요한 콘텐츠</strong><small>콘텐츠 {{ uiStore.likedContentItems.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/activity/liked-places">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11.2A7 7 0 0 0 5 9.8C5 15.6 12 21 12 21Z" /><circle cx="12" cy="9.8" r="2.3" /></svg>
+            </span>
+            <span><strong>좋아요한 장소</strong><small>장소 {{ uiStore.likedPlaceItems.length }}곳</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/activity/saved-routes">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 4.5h12v15l-6-3.4-6 3.4v-15Z" /><path d="M9 9h6" /><path d="M9 12h4" /></svg>
+            </span>
+            <span><strong>저장한 AI 코스</strong><small>코스 {{ uiStore.savedCourses.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+        </div>
+      </div>
+
+      <div v-else-if="activeTab === 'visits'" class="my-section-panel stack-list">
+        <div class="visit-control-row">
+          <RouterLink to="/my/visit-planned">방문 예정 {{ plannedCount }}</RouterLink>
+          <RouterLink to="/my/visit-completed">방문 완료 {{ completedCount }}</RouterLink>
+          <RouterLink to="/my/visit-map">지도</RouterLink>
+        </div>
+
+        <div class="visit-progress-card" :style="{ '--visit-progress': `${visitProgress}%` }">
+          <strong>총 {{ totalVisitCount }}곳 중 {{ completedCount }}곳 방문 완료</strong>
+          <b><span></span></b>
+          <small>{{ visitProgress }}% 완료</small>
+        </div>
+
+        <div class="section-mini-header">
+          <h2>방문 예정</h2>
+          <span>{{ plannedCount }}곳</span>
+        </div>
+        <RouterLink v-for="place in uiStore.plannedVisitItems" :key="`planned-${place.placeId}`" :to="`/places/${place.placeId}`">
+          <PlaceCard :place="place" compact />
+        </RouterLink>
+
+        <div class="section-mini-header with-divider">
+          <h2>방문 완료</h2>
+          <span>{{ completedCount }}곳</span>
+        </div>
+        <RouterLink v-for="place in uiStore.completedVisitItems" :key="`completed-${place.placeId}`" :to="`/places/${place.placeId}`">
+          <PlaceCard :place="place" compact />
+        </RouterLink>
+        <EmptyState
+          v-if="!totalVisitCount"
+          icon="GO"
+          tone="route"
+          compact
+          title="방문 기록이 없습니다"
+          text="장소 상세에서 방문 예정 또는 완료를 눌러 여행 기록을 시작해보세요."
+          action-label="장소 탐색하기"
+          action-to="/places"
+        />
+      </div>
+
+      <div v-else class="my-section-panel">
+        <div class="my-menu-list">
+          <RouterLink class="my-menu-row" to="/my/posts">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg>
+            </span>
+            <span><strong>내가 쓴 글</strong><small>게시글 {{ myPosts.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/comments">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 5.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" /></svg>
+            </span>
+            <span><strong>댓글 단 글</strong><small>댓글 글 {{ commentedPosts.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/scraps">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 4.5h12v16l-6-3.6-6 3.6v-16Z" /></svg>
+            </span>
+            <span><strong>스크랩</strong><small>스크랩 {{ scrappedPosts.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+        </div>
+      </div>
+    </section>
+  </AppLayout>
+</template>

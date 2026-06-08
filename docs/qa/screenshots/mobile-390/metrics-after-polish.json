@@ -1,0 +1,281 @@
+[
+  {
+    "name": "home",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 375,
+        "top": 770,
+        "width": 375,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "최근 본 장소",
+      "horizontalOverflow": false,
+      "path": "/home",
+      "scrollHeight": 1244,
+      "scrollWidth": 375,
+      "stickyActions": null,
+      "topCards": [
+        {
+          "cls": "place-card",
+          "h": 137,
+          "top": 104,
+          "w": 108
+        },
+        {
+          "cls": "place-card",
+          "h": 137,
+          "top": 104,
+          "w": 108
+        },
+        {
+          "cls": "place-card",
+          "h": 137,
+          "top": 104,
+          "w": 108
+        },
+        {
+          "cls": "poster-card",
+          "h": 210,
+          "top": 366,
+          "w": 116
+        },
+        {
+          "cls": "poster-card",
+          "h": 210,
+          "top": 366,
+          "w": 116
+        },
+        {
+          "cls": "course-card",
+          "h": 115,
+          "top": 701,
+          "w": 343
+        }
+      ]
+    }
+  },
+  {
+    "name": "explore",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 375,
+        "top": 770,
+        "width": 375,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "인기 콘텐츠",
+      "horizontalOverflow": false,
+      "path": "/explore",
+      "scrollHeight": 953,
+      "scrollWidth": 375,
+      "stickyActions": null,
+      "topCards": [
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 305,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 305,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 597,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 597,
+          "w": 167
+        }
+      ]
+    }
+  },
+  {
+    "name": "ai-course",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 375,
+        "top": 770,
+        "width": 375,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "어떤 콘텐츠로 여행할까요?",
+      "horizontalOverflow": false,
+      "path": "/ai",
+      "scrollHeight": 1165,
+      "scrollWidth": 375,
+      "stickyActions": {
+        "bottom": 770,
+        "height": 73,
+        "left": 0,
+        "right": 375,
+        "top": 697,
+        "width": 375,
+        "x": 0,
+        "y": 697
+      },
+      "topCards": [
+        {
+          "cls": "poster-card selected",
+          "h": 282,
+          "top": 357,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 357,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 649,
+          "w": 167
+        },
+        {
+          "cls": "poster-card",
+          "h": 282,
+          "top": 649,
+          "w": 167
+        }
+      ]
+    }
+  },
+  {
+    "name": "ai-result",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 375,
+        "top": 770,
+        "width": 375,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "서울 드라마 AI 코스",
+      "horizontalOverflow": false,
+      "path": "/ai/result",
+      "scrollHeight": 1556,
+      "scrollWidth": 375,
+      "stickyActions": null,
+      "topCards": [
+        {
+          "cls": "result-hero",
+          "h": 211,
+          "top": 52,
+          "w": 343
+        },
+        {
+          "cls": "map-preview",
+          "h": 281,
+          "top": 363,
+          "w": 343
+        },
+        {
+          "cls": "timeline-card",
+          "h": 150,
+          "top": 802,
+          "w": 311
+        },
+        {
+          "cls": "timeline-card",
+          "h": 150,
+          "top": 966,
+          "w": 311
+        },
+        {
+          "cls": "timeline-card",
+          "h": 150,
+          "top": 1130,
+          "w": 311
+        }
+      ]
+    }
+  },
+  {
+    "name": "community",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 375,
+        "top": 770,
+        "width": 375,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "",
+      "horizontalOverflow": false,
+      "path": "/community",
+      "scrollHeight": 1202,
+      "scrollWidth": 375,
+      "stickyActions": null,
+      "topCards": [
+        {
+          "cls": "feed-card",
+          "h": 484,
+          "top": 208,
+          "w": 343
+        },
+        {
+          "cls": "feed-card",
+          "h": 426,
+          "top": 702,
+          "w": 343
+        }
+      ]
+    }
+  },
+  {
+    "name": "my-page",
+    "metrics": {
+      "bottomNav": {
+        "bottom": 844,
+        "height": 74,
+        "left": 0,
+        "right": 390,
+        "top": 770,
+        "width": 390,
+        "x": 0,
+        "y": 770
+      },
+      "firstHeading": "로그인하고 나만의 sceniK 기록을 관리하세요",
+      "horizontalOverflow": false,
+      "path": "/my",
+      "scrollHeight": 844,
+      "scrollWidth": 390,
+      "stickyActions": null,
+      "topCards": [
+        {
+          "cls": "profile-card guest",
+          "h": 216,
+          "top": 68,
+          "w": 358
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,945 @@
+﻿import { defineStore } from 'pinia';
+import {
+  clearAccessToken,
+  fetchMe,
+  login as loginRequest,
+  logout as logoutRequest,
+  readAccessToken,
+  saveAccessToken,
+  signup as signupRequest,
+  updateMe,
+} from '../api/authApi.js';
+import { getUserMessage } from '../api/error.js';
+import {
+  fetchContentDetail,
+} from '../api/contentApi.js';
+import {
+  fetchPlaceDetail,
+} from '../api/placeApi.js';
+import {
+  createRoute,
+  deleteRoute,
+  fetchMyRoutes,
+  fetchRoute,
+  updateRoute,
+} from '../api/routeApi.js';
+import {
+  fetchMyLikes,
+  fetchMyVisitStatus,
+  likeContent,
+  likePlace,
+  setPlaceVisitStatus,
+  unlikeContent,
+  unlikePlace,
+} from '../api/engagementApi.js';
+import {
+  createComment as createCommunityComment,
+  createPost as createCommunityPost,
+  getPost as fetchCommunityPost,
+  getPosts as fetchCommunityPosts,
+  likePost as likeCommunityPost,
+  normalizePost as normalizeCommunityPost,
+  unlikePost as unlikeCommunityPost,
+} from '../api/communityApi.js';
+import { contentPlaces, contents, courseTemplates, places } from '../data/mockData.js';
+import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
+import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
+
+const STORAGE_KEY = 'scenik-vue-mvp-state';
+
+function formatWon(value) {
+  const amount = Number(value) || 0;
+  if (amount >= 10000) return `${Math.round(amount / 10000)}만원`;
+  return `${amount.toLocaleString('ko-KR')}원`;
+}
+
+function formatBudgetRange(min, max) {
+  return `${formatWon(min)} ~ ${formatWon(max)}`;
+}
+
+function flattenPreferences(preferences) {
+  if (!preferences) return [];
+  if (Array.isArray(preferences)) return preferences.filter(Boolean);
+  return Object.values(preferences)
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter(Boolean);
+}
+
+function defaultState() {
+  return {
+    onboardingSeen: false,
+    currentUser: null,
+    users: [],
+    likedContent: [],
+    likedPlaces: [],
+    likedContentDetails: [],
+    likedPlaceDetails: [],
+    plannedVisits: [],
+    completedVisits: [],
+    plannedVisitDetails: [],
+    completedVisitDetails: [],
+    recentViewedPlaces: [],
+    recentViewedPlaceDetails: [],
+    savedCourses: [],
+    communityPosts: [],
+    selectedContentId: '',
+    selectedContentIds: [],
+    courseConditions: {
+      region: '서울',
+      duration: 1,
+      startDate: dateAfter(7),
+      endDate: dateAfter(7),
+      transport: '대중교통',
+      companion: '친구',
+      style: '감성 여행',
+      budgetMin: 100000,
+      budgetMax: 300000,
+      budget: '10만원 ~ 30만원',
+    },
+    generatedRoute: null,
+  };
+}
+
+function readState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const state = raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
+    state.selectedContentId = '';
+    state.selectedContentIds = [];
+    const dateRange = ensureDateRange(state.courseConditions);
+    const conditionDefaults = defaultState().courseConditions;
+    const budgetMin = Number(state.courseConditions?.budgetMin ?? conditionDefaults.budgetMin);
+    const budgetMax = Number(state.courseConditions?.budgetMax ?? conditionDefaults.budgetMax);
+    const normalizedBudgetMin = Math.min(budgetMin, budgetMax);
+    const normalizedBudgetMax = Math.max(budgetMin, budgetMax);
+    state.courseConditions = {
+      ...conditionDefaults,
+      ...state.courseConditions,
+      ...dateRange,
+      budgetMin: normalizedBudgetMin,
+      budgetMax: normalizedBudgetMax,
+      budget: formatBudgetRange(normalizedBudgetMin, normalizedBudgetMax),
+      duration: getTripDurationDays({ ...state.courseConditions, ...dateRange }),
+    };
+    state.likedContent = [];
+    state.likedPlaces = [];
+    state.likedContentDetails = [];
+    state.likedPlaceDetails = [];
+    state.plannedVisits = [];
+    state.completedVisits = [];
+    state.plannedVisitDetails = [];
+    state.completedVisitDetails = [];
+    state.savedCourses = [];
+    state.communityPosts = [];
+    return state;
+  } catch {
+    return defaultState();
+  }
+}
+
+function makeCandidatePlace(place, relatedContent) {
+  return {
+    placeId: place.placeId,
+    name: place.placeName,
+    region: place.region,
+    category: place.category,
+    address: place.address,
+    latitude: place.latitude,
+    longitude: place.longitude,
+    relatedContentId: relatedContent?.contentId ?? place.relatedContentIds?.[0] ?? 'content-local',
+    relatedContentTitle: relatedContent?.title ?? 'Saved course',
+    sceneDescription: place.description ?? 'Verified sceniK place',
+    verified: place.verified === true,
+    imageUrl: place.imageUrl,
+  };
+}
+
+function routePlaceIdsFromDays(days = []) {
+  return [...new Set(days.flatMap((day) => day.places ?? []).map((place) => place.placeId).filter(Boolean))];
+}
+
+function relatedContentForPlace(place, preferredContentIds = []) {
+  const preferred = preferredContentIds.find((contentId) => place.relatedContentIds?.includes(contentId));
+  return contents.find((content) => content.contentId === preferred)
+    ?? contents.find((content) => place.relatedContentIds?.includes(content.contentId));
+}
+
+function inferCourseContentIds(course = {}, placeIds = []) {
+  const ids = new Set();
+  if (course.contentId) ids.add(course.contentId);
+  (course.contentIds ?? []).forEach((contentId) => ids.add(contentId));
+  (course.candidatePlaces ?? []).forEach((candidate) => {
+    if (candidate.relatedContentId) ids.add(candidate.relatedContentId);
+  });
+  placeIds.forEach((placeId) => {
+    const place = places.find((item) => item.placeId === placeId);
+    (place?.relatedContentIds ?? []).forEach((contentId) => ids.add(contentId));
+  });
+  return [...ids].filter(Boolean);
+}
+
+function relatedVerifiedPlacesForCourse(course = {}, placeIds = []) {
+  const contentIds = inferCourseContentIds(course, placeIds);
+  const mappedPlaceIds = new Set();
+
+  contentPlaces.forEach((item) => {
+    if (contentIds.includes(item.contentId)) mappedPlaceIds.add(item.placeId);
+  });
+
+  places.forEach((place) => {
+    if ((place.relatedContentIds ?? []).some((contentId) => contentIds.includes(contentId))) {
+      mappedPlaceIds.add(place.placeId);
+    }
+  });
+
+  const relatedPlaces = [...mappedPlaceIds]
+    .map((placeId) => places.find((place) => place.placeId === placeId))
+    .filter((place) => place?.verified === true);
+
+  if (!course.region) return relatedPlaces;
+  return relatedPlaces.filter((place) => place.region === course.region);
+}
+
+function buildCandidatePlaces(placeIds = [], course = {}) {
+  const existing = new Map((course.candidatePlaces ?? []).map((place) => [place.placeId, place]));
+  const candidates = new Map();
+  const preferredContentIds = inferCourseContentIds(course, placeIds);
+
+  function addCandidate(candidate) {
+    if (candidate?.placeId && !candidates.has(candidate.placeId)) {
+      candidates.set(candidate.placeId, candidate);
+    }
+  }
+
+  (course.candidatePlaces ?? []).forEach(addCandidate);
+
+  [...new Set(placeIds)].forEach((placeId) => {
+    const candidate = existing.get(placeId);
+    if (candidate) {
+      addCandidate(candidate);
+      return;
+    }
+
+    const place = places.find((item) => item.placeId === placeId);
+    if (!place) return;
+
+    addCandidate(makeCandidatePlace(place, relatedContentForPlace(place, preferredContentIds)));
+  });
+
+  relatedVerifiedPlacesForCourse(course, placeIds).forEach((place) => {
+    addCandidate(makeCandidatePlace(place, relatedContentForPlace(place, preferredContentIds)));
+  });
+
+  return [...candidates.values()];
+}
+
+function normalizeDays(days = []) {
+  return days.map((day, dayIndex) => ({
+    ...day,
+    dayNumber: dayIndex + 1,
+    places: (day.places ?? []).map((stop, stopIndex) => {
+      const place = places.find((item) => item.placeId === stop.placeId);
+      return {
+        ...stop,
+        placeId: stop.placeId,
+        placeName: stop.placeName ?? stop.name ?? place?.placeName ?? '검증 장소',
+        dayNumber: dayIndex + 1,
+        visitOrder: stopIndex + 1,
+        recommendedTime: stop.recommendedTime ?? '10:00',
+        reason: stop.reason ?? `${place?.placeName ?? 'This place'} is part of a verified sceniK route.`,
+        travelTip: stop.travelTip ?? 'Check opening hours and transit before visiting.',
+      };
+    }),
+  }));
+}
+
+function normalizeCourseToRoute(course) {
+  if (!course) return null;
+  if (Array.isArray(course.days) && course.days.length) {
+    const days = normalizeDays(course.days);
+    const placeIds = routePlaceIdsFromDays(days);
+    return {
+      ...course,
+      routeId: course.routeId ?? `course-${Date.now()}`,
+      summary: course.summary ?? `${course.region ?? 'Korea'} verified places connected into a sceniK travel course.`,
+      duration: course.duration ?? course.durationDays ?? days.length,
+      durationDays: days.length,
+      transport: course.transport ?? 'Transit',
+      style: course.style ?? course.tags?.[0] ?? 'K-content travel',
+      trustMessage: course.trustMessage ?? 'This course uses only verified sceniK places.',
+      places: placeIds,
+      candidatePlaces: buildCandidatePlaces(placeIds, course),
+      days,
+    };
+  }
+
+  const placeIds = Array.isArray(course.places) ? course.places : [];
+  const routePlaces = placeIds.map((id) => places.find((place) => place.placeId === id)).filter(Boolean);
+  const dayCount = Math.max(1, Math.min(Number(course.durationDays ?? course.duration ?? 1), routePlaces.length || 1));
+  const candidatePlaces = routePlaces.map((place) => {
+    const relatedContent = contents.find((content) => place.relatedContentIds?.includes(content.contentId));
+    return makeCandidatePlace(place, relatedContent);
+  });
+  const groups = Array.from({ length: dayCount }, () => []);
+
+  candidatePlaces.forEach((place, index) => {
+    groups[index % dayCount].push(place);
+  });
+
+  return {
+    ...course,
+    routeId: course.routeId ?? `course-${Date.now()}`,
+    summary: course.summary ?? `${course.region ?? 'Korea'} verified places connected into a sceniK travel course.`,
+    durationDays: dayCount,
+    transport: course.transport ?? 'Transit',
+    style: course.style ?? course.tags?.[0] ?? 'K-content travel',
+    trustMessage: course.trustMessage ?? 'This course uses only verified sceniK places.',
+    candidatePlaces,
+    days: groups.map((group, dayIndex) => ({
+      dayNumber: dayIndex + 1,
+      estimatedTravelTime: dayIndex === 0 ? 'About 60 min' : 'About 75 min',
+      places: group.map((place, placeIndex) => ({
+        placeId: place.placeId,
+        placeName: place.name,
+        dayNumber: dayIndex + 1,
+        visitOrder: placeIndex + 1,
+        recommendedTime: placeIndex === 0 ? '10:00' : placeIndex === 1 ? '14:00' : '17:30',
+        reason: `${place.relatedContentTitle} related verified place for this course.`,
+        travelTip: `Check opening hours before visiting ${place.name}.`,
+      })),
+    })),
+  };
+}
+
+function validateRoute(route) {
+  if (!route) {
+    return { ok: false, errors: ['Course route was not found.'] };
+  }
+
+  return validateAiRoute(route, route.candidatePlaces, {
+    region: route.region,
+    durationDays: route.durationDays,
+  });
+}
+
+function sameId(left, right) {
+  return String(left) === String(right);
+}
+
+function apiErrorMessage(error, fallback = '요청을 처리하지 못했습니다.') {
+  return getUserMessage(error, fallback);
+}
+
+async function loadContentDetails(contentIds = []) {
+  const uniqueIds = [...new Set(contentIds.filter(Boolean))];
+  const results = await Promise.allSettled(uniqueIds.map((contentId) => fetchContentDetail(contentId)));
+  return results
+    .filter((result) => result.status === 'fulfilled' && result.value)
+    .map((result) => result.value);
+}
+
+async function loadPlaceDetails(placeIds = []) {
+  const uniqueIds = [...new Set(placeIds.filter(Boolean))];
+  const results = await Promise.allSettled(uniqueIds.map((placeId) => fetchPlaceDetail(placeId)));
+  return results
+    .filter((result) => result.status === 'fulfilled' && result.value)
+    .map((result) => result.value);
+}
+
+function mergeCommunityPost(posts, post) {
+  const normalized = normalizeCommunityPost(post);
+  const key = normalized.postId ?? normalized.id;
+  const existingIndex = posts.findIndex((item) => sameId(item.postId ?? item.id, key));
+  if (existingIndex < 0) return [normalized, ...posts];
+  return posts.map((item, index) => (index === existingIndex ? normalized : item));
+}
+
+export const useUiStore = defineStore('ui', {
+  state: () => ({
+    ...defaultState(),
+    toast: '',
+    loginRequiredMessage: '',
+    authLoading: false,
+    savedCoursesLoading: false,
+    routeActionLoading: false,
+    routeError: '',
+    communityLoading: false,
+    communityError: '',
+  }),
+  getters: {
+    isLoggedIn: (state) => Boolean(state.currentUser),
+    likedContentItems: (state) => state.likedContentDetails,
+    likedPlaceItems: (state) => state.likedPlaceDetails,
+    plannedVisitItems: (state) => state.plannedVisitDetails,
+    completedVisitItems: (state) => state.completedVisitDetails,
+    recentPlaceItems: (state) => state.recentViewedPlaceDetails,
+  },
+  actions: {
+    restore() {
+      Object.assign(this, readState());
+      this.users = [];
+      if (!readAccessToken()) {
+        this.currentUser = null;
+        return;
+      }
+      this.syncSessionFromServer();
+    },
+    persist() {
+      const {
+        toast,
+        loginRequiredMessage,
+        authLoading,
+        savedCoursesLoading,
+        routeActionLoading,
+        routeError,
+        savedCourses,
+        likedContent,
+        likedPlaces,
+        likedContentDetails,
+        likedPlaceDetails,
+        plannedVisits,
+        completedVisits,
+        plannedVisitDetails,
+        completedVisitDetails,
+        recentViewedPlaceDetails,
+        communityPosts,
+        communityLoading,
+        communityError,
+        selectedContentId,
+        selectedContentIds,
+        ...persisted
+      } = this.$state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+    },
+    notify(message) {
+      this.toast = message;
+      window.setTimeout(() => {
+        if (this.toast === message) this.toast = '';
+      }, 2400);
+    },
+    requireAuth(message) {
+      if (this.currentUser) return true;
+      this.loginRequiredMessage = message;
+      return false;
+    },
+    async syncSessionFromServer() {
+      if (!readAccessToken()) return;
+      this.authLoading = true;
+      try {
+        this.currentUser = await fetchMe();
+        this.onboardingSeen = true;
+        await this.loadSavedCourses();
+        await this.loadEngagementState();
+        this.persist();
+      } catch {
+        clearAccessToken();
+        this.currentUser = null;
+        this.savedCourses = [];
+        this.persist();
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async loadSavedCourses() {
+      if (!this.currentUser || !readAccessToken()) return [];
+      this.savedCoursesLoading = true;
+      this.routeError = '';
+      try {
+        const routes = await fetchMyRoutes();
+        this.savedCourses = routes.map((route) => normalizeCourseToRoute(route)).filter(Boolean);
+        this.persist();
+        return this.savedCourses;
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, '저장한 코스를 불러오지 못했습니다.');
+        this.savedCourses = [];
+        this.persist();
+        return [];
+      } finally {
+        this.savedCoursesLoading = false;
+      }
+    },
+    async loadCommunityPosts(params = {}) {
+      this.communityLoading = true;
+      this.communityError = '';
+      try {
+        this.communityPosts = await fetchCommunityPosts(params);
+        return this.communityPosts;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '커뮤니티 글을 불러오지 못했습니다.');
+        this.communityPosts = [];
+        return [];
+      } finally {
+        this.communityLoading = false;
+      }
+    },
+    async loadCommunityPost(postId) {
+      if (!postId) return null;
+      this.communityLoading = true;
+      this.communityError = '';
+      try {
+        const post = await fetchCommunityPost(postId);
+        this.communityPosts = mergeCommunityPost(this.communityPosts, post);
+        return post;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글을 불러오지 못했습니다.');
+        return null;
+      } finally {
+        this.communityLoading = false;
+      }
+    },
+    async loadEngagementState() {
+      if (!this.currentUser || !readAccessToken()) return;
+      try {
+        const [likes, visitStatuses] = await Promise.all([
+          fetchMyLikes(),
+          fetchMyVisitStatus(),
+        ]);
+        this.likedContent = likes.contentIds ?? [];
+        this.likedPlaces = likes.placeIds ?? [];
+        this.likedContentDetails = await loadContentDetails(this.likedContent);
+        this.likedPlaceDetails = await loadPlaceDetails(this.likedPlaces);
+        this.plannedVisits = visitStatuses
+          .filter((item) => item.status === 'planned')
+          .map((item) => item.placeId);
+        this.completedVisits = visitStatuses
+          .filter((item) => item.status === 'completed')
+          .map((item) => item.placeId);
+        this.plannedVisitDetails = await loadPlaceDetails(this.plannedVisits);
+        this.completedVisitDetails = await loadPlaceDetails(this.completedVisits);
+        this.persist();
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '좋아요와 방문 상태를 불러오지 못했습니다.'));
+      }
+    },
+    async loadCourseDetail(routeId) {
+      if (!routeId || !this.currentUser || !readAccessToken()) return this.resolveCourseDetail(routeId);
+      this.savedCoursesLoading = true;
+      this.routeError = '';
+      try {
+        const loaded = normalizeCourseToRoute(await fetchRoute(routeId));
+        if (loaded) {
+          this.savedCourses = [loaded, ...this.savedCourses.filter((item) => item.routeId !== loaded.routeId)];
+          this.persist();
+        }
+        return this.resolveCourseDetail(routeId);
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, '코스 상세를 불러오지 못했습니다.');
+        return null;
+      } finally {
+        this.savedCoursesLoading = false;
+      }
+    },
+    async signUp({ email, password, nickname }) {
+      const safeEmail = email?.trim() ?? '';
+      const safeNickname = nickname?.trim() ?? '';
+      if (!safeEmail) throw new Error('이메일을 입력해 주세요.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) throw new Error('올바른 이메일 형식이 아닙니다.');
+      if (!password) throw new Error('비밀번호를 입력해 주세요.');
+      if (password.length < 8) throw new Error('비밀번호는 8자 이상이어야 합니다.');
+      if (!safeNickname) throw new Error('닉네임을 입력해 주세요.');
+      this.authLoading = true;
+      try {
+        const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname });
+        saveAccessToken(session.accessToken, session.refreshToken);
+        this.currentUser = session.user;
+        this.onboardingSeen = true;
+        await this.loadSavedCourses();
+        await this.loadEngagementState();
+        this.persist();
+        this.notify('회원가입이 완료되었습니다.');
+        return this.currentUser;
+      } catch (error) {
+        throw new Error(apiErrorMessage(error, '회원가입에 실패했습니다.'));
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async login({ email, password }) {
+      const safeEmail = email?.trim() ?? '';
+      if (!safeEmail) throw new Error('이메일을 입력해 주세요.');
+      if (!password) throw new Error('비밀번호를 입력해 주세요.');
+      this.authLoading = true;
+      try {
+        const session = await loginRequest({ email: safeEmail, password });
+        saveAccessToken(session.accessToken, session.refreshToken);
+        this.currentUser = session.user;
+        this.onboardingSeen = true;
+        await this.loadSavedCourses();
+        await this.loadEngagementState();
+        this.persist();
+        this.notify('로그인되었습니다.');
+        return this.currentUser;
+      } catch (error) {
+        throw new Error(apiErrorMessage(error, '로그인에 실패했습니다.'));
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async logout() {
+      try {
+        if (readAccessToken()) await logoutRequest();
+      } catch {
+        // Local logout should still clear client state if the token is already invalid.
+      }
+      clearAccessToken();
+      this.currentUser = null;
+      this.savedCourses = [];
+      this.persist();
+      this.notify('로그아웃되었습니다.');
+    },
+    async savePreferences(preferences) {
+      if (this.currentUser) {
+        try {
+          const updated = readAccessToken()
+            ? await updateMe({
+                nickname: this.currentUser.nickname,
+                preferences: flattenPreferences(preferences),
+              })
+            : {};
+          this.currentUser = {
+            ...this.currentUser,
+            ...updated,
+            preferences,
+          };
+        } catch (error) {
+          this.currentUser.preferences = preferences;
+          this.notify(apiErrorMessage(error, '취향 설정을 서버에 저장하지 못했습니다.'));
+        }
+      }
+      this.onboardingSeen = true;
+      this.persist();
+    },
+    async updateProfile({ nickname, bio, preferences }) {
+      if (!this.requireAuth('로그인하면 프로필을 수정할 수 있습니다.')) return false;
+      const safeNickname = nickname?.trim();
+      if (!safeNickname || safeNickname.length < 2) {
+        this.notify('닉네임은 2자 이상 입력해 주세요.');
+        return false;
+      }
+
+      this.authLoading = true;
+      try {
+        const updated = await updateMe({
+          nickname: safeNickname,
+          bio: bio?.trim() ?? '',
+          preferences: flattenPreferences(preferences ?? this.currentUser.preferences),
+        });
+        this.currentUser = {
+          ...this.currentUser,
+          ...updated,
+          nickname: updated.nickname ?? safeNickname,
+          bio: updated.bio ?? bio?.trim() ?? '',
+          preferences: preferences ?? updated.preferences ?? this.currentUser.preferences ?? {},
+        };
+        this.persist();
+        this.notify('프로필을 저장했습니다.');
+        return true;
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '프로필을 저장하지 못했습니다.'));
+        return false;
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async toggleContentLike(contentId) {
+      if (!this.requireAuth('로그인하면 콘텐츠를 좋아요로 저장할 수 있습니다.')) return;
+      const liked = this.likedContent.includes(contentId);
+      try {
+        if (liked) await unlikeContent(contentId);
+        else await likeContent(contentId);
+        this.likedContent = liked
+          ? this.likedContent.filter((id) => id !== contentId)
+          : [...this.likedContent, contentId];
+        if (liked) {
+          this.likedContentDetails = this.likedContentDetails.filter((item) => item.contentId !== contentId);
+        } else {
+          const detail = await fetchContentDetail(contentId).catch(() => null);
+          if (detail) this.likedContentDetails = [detail, ...this.likedContentDetails.filter((item) => item.contentId !== contentId)];
+        }
+        this.persist();
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '콘텐츠 좋아요를 저장하지 못했습니다.'));
+      }
+    },
+    toggleSelectedContent(contentId) {
+      const current = Array.isArray(this.selectedContentIds) ? this.selectedContentIds : [this.selectedContentId].filter(Boolean);
+      this.selectedContentIds = current.includes(contentId)
+        ? current.filter((id) => id !== contentId)
+        : [...current, contentId];
+      this.selectedContentId = this.selectedContentIds[0] ?? '';
+    },
+    setAiSelection(contentIds) {
+      this.selectedContentIds = [...new Set(contentIds.filter(Boolean))];
+      this.selectedContentId = this.selectedContentIds[0] ?? '';
+    },
+    resetAiSelection() {
+      this.selectedContentId = '';
+      this.selectedContentIds = [];
+    },
+    async togglePlaceLike(placeId) {
+      if (!this.requireAuth('로그인하면 장소를 좋아요로 저장할 수 있습니다.')) return;
+      const liked = this.likedPlaces.includes(placeId);
+      try {
+        if (liked) await unlikePlace(placeId);
+        else await likePlace(placeId);
+        this.likedPlaces = liked
+          ? this.likedPlaces.filter((id) => id !== placeId)
+          : [...this.likedPlaces, placeId];
+        if (liked) {
+          this.likedPlaceDetails = this.likedPlaceDetails.filter((item) => item.placeId !== placeId);
+        } else {
+          const detail = await fetchPlaceDetail(placeId).catch(() => null);
+          if (detail) this.likedPlaceDetails = [detail, ...this.likedPlaceDetails.filter((item) => item.placeId !== placeId)];
+        }
+        this.persist();
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '장소 좋아요를 저장하지 못했습니다.'));
+      }
+    },
+    async setVisit(placeId, status) {
+      if (!this.requireAuth('로그인하면 방문 상태를 저장할 수 있습니다.')) return;
+      try {
+        await setPlaceVisitStatus(placeId, status);
+        this.plannedVisits = this.plannedVisits.filter((id) => id !== placeId);
+        this.completedVisits = this.completedVisits.filter((id) => id !== placeId);
+        this.plannedVisitDetails = this.plannedVisitDetails.filter((item) => item.placeId !== placeId);
+        this.completedVisitDetails = this.completedVisitDetails.filter((item) => item.placeId !== placeId);
+        const detail = await fetchPlaceDetail(placeId).catch(() => null);
+        if (status === 'planned') this.plannedVisits.push(placeId);
+        if (status === 'completed') this.completedVisits.push(placeId);
+        if (status === 'planned' && detail) this.plannedVisitDetails = [detail, ...this.plannedVisitDetails];
+        if (status === 'completed' && detail) this.completedVisitDetails = [detail, ...this.completedVisitDetails];
+        this.persist();
+        this.notify(status === 'completed' ? '방문 완료로 저장했습니다.' : '방문 예정으로 저장했습니다.');
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '방문 상태를 저장하지 못했습니다.'));
+      }
+    },
+    markViewedPlace(placeId, placeDetail = null) {
+      this.recentViewedPlaces = [placeId, ...this.recentViewedPlaces.filter((id) => id !== placeId)].slice(0, 12);
+      if (placeDetail) {
+        this.recentViewedPlaceDetails = [placeDetail, ...this.recentViewedPlaceDetails.filter((item) => item.placeId !== placeId)].slice(0, 12);
+      }
+      this.persist();
+    },
+    async saveCourse(route) {
+      if (!this.requireAuth('로그인하면 AI 코스를 저장할 수 있습니다.')) return;
+      const normalized = normalizeCourseToRoute(route);
+      const validation = validateRoute(normalized);
+      if (!validation.ok) {
+        console.warn('Route validation failed before save', validation.errors);
+        this.notify(AI_ROUTE_VALIDATION_USER_MESSAGE);
+        return;
+      }
+      this.routeActionLoading = true;
+      this.routeError = '';
+      try {
+        const savingGeneratedRoute = this.generatedRoute?.routeId === normalized.routeId;
+        const placeIds = normalized.places ?? routePlaceIdsFromDays(normalized.days);
+        const saved = normalizeCourseToRoute(await createRoute({
+          ...normalized,
+          duration: normalized.duration ?? normalized.durationDays,
+          places: placeIds,
+          tags: normalized.tags ?? ['AI 코스', normalized.region, normalized.style].filter(Boolean),
+        }));
+        this.savedCourses = [saved, ...this.savedCourses.filter((item) => item.routeId !== saved.routeId)];
+        if (savingGeneratedRoute || this.generatedRoute?.routeId === saved.routeId) this.generatedRoute = saved;
+        this.persist();
+        this.notify('AI 코스를 저장했습니다.');
+        return saved;
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, 'AI 코스를 저장하지 못했습니다.');
+        this.notify(this.routeError);
+        return null;
+      } finally {
+        this.routeActionLoading = false;
+      }
+
+    },
+    resolveCourseDetail(routeId) {
+      const source = this.savedCourses.find((course) => course.routeId === routeId)
+        ?? courseTemplates.find((course) => course.routeId === routeId)
+        ?? (this.generatedRoute?.routeId === routeId ? this.generatedRoute : null)
+        ?? (!routeId ? this.savedCourses[0] ?? this.generatedRoute ?? null : null);
+
+      const route = normalizeCourseToRoute(source);
+      if (!route) return null;
+
+      return {
+        route,
+        validation: validateRoute(route),
+        source: this.savedCourses.some((course) => course.routeId === route.routeId) ? 'saved' : 'template',
+      };
+    },
+    async updateSavedCourse(route) {
+      if (!this.requireAuth('로그인하면 저장한 코스를 수정할 수 있습니다.')) return false;
+
+      const normalized = normalizeCourseToRoute(route);
+      const validation = validateRoute(normalized);
+      if (!validation.ok) {
+        console.warn('Route validation failed before update', validation.errors);
+        this.notify(AI_ROUTE_VALIDATION_USER_MESSAGE);
+        return false;
+      }
+
+      const existing = this.savedCourses.find((course) => course.routeId === normalized.routeId);
+      if (!existing) {
+        this.notify('저장한 코스를 찾을 수 없습니다.');
+        return false;
+      }
+
+      this.routeActionLoading = true;
+      this.routeError = '';
+      try {
+        const saved = normalizeCourseToRoute(await updateRoute(normalized.routeId, {
+          ...existing,
+          ...normalized,
+          places: normalized.places ?? routePlaceIdsFromDays(normalized.days),
+          duration: normalized.duration ?? normalized.durationDays,
+        }));
+        this.savedCourses = this.savedCourses.map((course) => course.routeId === saved.routeId ? saved : course);
+        if (this.generatedRoute?.routeId === saved.routeId) this.generatedRoute = saved;
+        this.persist();
+        this.notify('코스를 수정했습니다.');
+        return true;
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, '저장한 코스를 수정하지 못했습니다.');
+        this.notify(this.routeError);
+        return false;
+      } finally {
+        this.routeActionLoading = false;
+      }
+    },
+    updateGeneratedRoute(route) {
+      const normalized = normalizeCourseToRoute(route);
+      const validation = validateRoute(normalized);
+      if (!validation.ok) {
+        console.warn('Generated route validation failed before update', validation.errors);
+        this.notify(AI_ROUTE_VALIDATION_USER_MESSAGE);
+        return false;
+      }
+
+      this.generatedRoute = normalized;
+      this.persist();
+      this.notify('AI 코스를 수정했습니다.');
+      return true;
+    },
+    async deleteSavedCourse(routeId) {
+      if (!this.requireAuth('로그인하면 저장한 코스를 삭제할 수 있습니다.')) return false;
+      this.routeActionLoading = true;
+      this.routeError = '';
+      try {
+        await deleteRoute(routeId);
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, '저장한 코스를 삭제하지 못했습니다.');
+        this.notify(this.routeError);
+        this.routeActionLoading = false;
+        return false;
+      }
+      const before = this.savedCourses.length;
+      this.savedCourses = this.savedCourses.filter((course) => course.routeId !== routeId);
+      if (this.generatedRoute?.routeId === routeId) this.generatedRoute = null;
+      if (this.savedCourses.length === before) {
+        this.routeActionLoading = false;
+        return false;
+      }
+      this.persist();
+      this.routeActionLoading = false;
+      this.notify('코스를 삭제했습니다.');
+      return true;
+    },
+    openCourse(course) {
+      const route = normalizeCourseToRoute(course);
+      if (!route) return false;
+      this.generatedRoute = route;
+      this.persist();
+      return true;
+    },
+    async createPost(payload) {
+      if (!this.requireAuth('로그인하면 커뮤니티 글을 작성할 수 있습니다.')) return null;
+      try {
+        const post = await createCommunityPost({
+          title: payload.title || '커뮤니티 글',
+          body: payload.body || payload.content || '',
+          region: payload.region || this.courseConditions.region,
+          duration: payload.duration || `${this.courseConditions.duration} days`,
+          routeId: payload.routeId ?? null,
+          prefix: payload.prefix ?? '',
+          attachments: payload.attachments ?? [],
+          tags: payload.tags || ['AI 코스', this.courseConditions.region],
+        });
+        this.communityPosts = mergeCommunityPost(this.communityPosts, post);
+        this.notify('게시글을 작성했습니다.');
+        return post;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글을 작성하지 못했습니다.');
+        this.notify(this.communityError);
+        return null;
+      }
+    },
+    async togglePostLike(postId) {
+      if (!this.requireAuth('로그인하면 게시글에 좋아요를 누를 수 있습니다.')) return;
+      const current = this.communityPosts.find((post) => sameId(post.id, postId) || sameId(post.postId, postId));
+      if (!current) return;
+      const likedBy = current.likedBy ?? [];
+      const liked = current.isLiked || likedBy.includes(this.currentUser.userId);
+      try {
+        const updated = liked ? await unlikeCommunityPost(postId) : await likeCommunityPost(postId);
+        const nextPost = updated ?? {
+          ...current,
+          isLiked: !liked,
+          likedBy: liked ? likedBy.filter((id) => id !== this.currentUser.userId) : [...likedBy, this.currentUser.userId],
+          likes: liked ? Math.max(0, current.likes - 1) : current.likes + 1,
+        };
+        this.communityPosts = mergeCommunityPost(this.communityPosts, nextPost);
+        return;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글 좋아요를 변경하지 못했습니다.');
+        this.notify(this.communityError);
+        return;
+      }
+    },
+    togglePostScrap(postId) {
+      if (!this.requireAuth('로그인하면 커뮤니티 글을 스크랩할 수 있습니다.')) return;
+      let scrappedPost = false;
+      let changed = false;
+      this.communityPosts = this.communityPosts.map((post) => {
+        if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
+        const scrappedBy = post.scrappedBy ?? [];
+        const scrapped = scrappedBy.includes(this.currentUser.userId);
+        scrappedPost = !scrapped;
+        changed = true;
+        return {
+          ...post,
+          scrappedBy: scrapped
+            ? scrappedBy.filter((id) => id !== this.currentUser.userId)
+            : [...scrappedBy, this.currentUser.userId],
+        };
+      });
+      if (!changed) return;
+      this.persist();
+      this.notify(scrappedPost ? '게시글을 스크랩했습니다.' : '게시글 스크랩을 해제했습니다.');
+    },
+    async addComment(postId, text) {
+      if (!this.requireAuth('로그인하면 댓글을 작성할 수 있습니다.')) return null;
+      if (!text?.trim()) {
+        this.notify('댓글 내용을 입력해 주세요.');
+        return null;
+      }
+      try {
+        const comment = await createCommunityComment(postId, { text: text.trim() });
+        this.communityPosts = this.communityPosts.map((post) => (sameId(post.id, postId) || sameId(post.postId, postId))
+          ? {
+              ...post,
+              comments: [...(post.comments ?? []), comment],
+            }
+          : post);
+        return comment;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '댓글을 등록하지 못했습니다.');
+        this.notify(this.communityError);
+        return null;
+      }
+    },
+  },
+});

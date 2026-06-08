@@ -1,0 +1,10 @@
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/shell.css";
+@import "./styles/controls.css";
+@import "./styles/content-cards.css";
+@import "./styles/detail-map-panels.css";
+@import "./styles/ai-course.css";
+@import "./styles/course-management.css";
+@import "./styles/community.css";
+@import "./styles/profile-utility-overlays.css";
