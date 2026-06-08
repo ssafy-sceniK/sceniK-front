@@ -35,11 +35,13 @@ import {
 import {
   createComment as createCommunityComment,
   createPost as createCommunityPost,
+  deleteComment as deleteCommunityComment,
   getPost as fetchCommunityPost,
   getPosts as fetchCommunityPosts,
   likePost as likeCommunityPost,
   normalizePost as normalizeCommunityPost,
   unlikePost as unlikeCommunityPost,
+  updateComment as updateCommunityComment,
 } from '../api/communityApi.js';
 import { contentPlaces, contents, courseTemplates, places } from '../data/mockData.js';
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
@@ -939,6 +941,52 @@ export const useUiStore = defineStore('ui', {
         this.communityError = apiErrorMessage(error, '댓글을 등록하지 못했습니다.');
         this.notify(this.communityError);
         return null;
+      }
+    },
+    async editComment(postId, commentId, text) {
+      if (!this.requireAuth('로그인하면 댓글을 수정할 수 있습니다.')) return null;
+      if (!text?.trim()) {
+        this.notify('댓글 내용을 입력해 주세요.');
+        return null;
+      }
+      try {
+        const updated = await updateCommunityComment(postId, commentId, { text: text.trim() });
+        this.communityPosts = this.communityPosts.map((post) => {
+          if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
+          return {
+            ...post,
+            comments: (post.comments ?? []).map((comment) => (
+              sameId(comment.id, commentId) || sameId(comment.commentId, commentId) ? updated : comment
+            )),
+          };
+        });
+        this.notify('댓글을 수정했습니다.');
+        return updated;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '댓글을 수정하지 못했습니다.');
+        this.notify(this.communityError);
+        return null;
+      }
+    },
+    async removeComment(postId, commentId) {
+      if (!this.requireAuth('로그인하면 댓글을 삭제할 수 있습니다.')) return false;
+      try {
+        await deleteCommunityComment(postId, commentId);
+        this.communityPosts = this.communityPosts.map((post) => {
+          if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
+          return {
+            ...post,
+            comments: (post.comments ?? []).filter((comment) => (
+              !sameId(comment.id, commentId) && !sameId(comment.commentId, commentId)
+            )),
+          };
+        });
+        this.notify('댓글을 삭제했습니다.');
+        return true;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '댓글을 삭제하지 못했습니다.');
+        this.notify(this.communityError);
+        return false;
       }
     },
   },

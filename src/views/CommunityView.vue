@@ -14,6 +14,9 @@ const query = ref('');
 const title = ref('');
 const body = ref('');
 const commentText = ref('');
+const editingCommentId = ref('');
+const editingCommentText = ref('');
+const commentActionLoading = ref(false);
 const shareTarget = ref(null);
 
 const boards = [
@@ -106,6 +109,15 @@ function isPostScrapped(post) {
   return Boolean(uiStore.currentUser?.userId && (post.scrappedBy ?? []).includes(uiStore.currentUser.userId));
 }
 
+function isCommentOwner(comment) {
+  return Boolean(uiStore.currentUser?.userId)
+    && String(comment?.userId ?? '') === String(uiStore.currentUser.userId);
+}
+
+function commentKey(comment) {
+  return comment?.commentId ?? comment?.id;
+}
+
 function linkedCourseTo(post) {
   return post?.routeId
     ? { name: 'course-detail', params: { routeId: post.routeId } }
@@ -130,6 +142,38 @@ async function addComment(postId) {
   if (created) {
     commentText.value = '';
   }
+}
+
+function startEditComment(comment) {
+  editingCommentId.value = commentKey(comment);
+  editingCommentText.value = comment.text ?? '';
+}
+
+function cancelEditComment() {
+  editingCommentId.value = '';
+  editingCommentText.value = '';
+}
+
+async function saveEditedComment(postId) {
+  if (!editingCommentId.value || commentActionLoading.value) return;
+  if (!editingCommentText.value.trim()) {
+    uiStore.notify('댓글 내용을 입력해 주세요.');
+    return;
+  }
+  commentActionLoading.value = true;
+  const updated = await uiStore.editComment(postId, editingCommentId.value, editingCommentText.value);
+  commentActionLoading.value = false;
+  if (updated) cancelEditComment();
+}
+
+async function deleteComment(postId, comment) {
+  const targetId = commentKey(comment);
+  if (!targetId || commentActionLoading.value) return;
+  if (!window.confirm('댓글을 삭제할까요?')) return;
+  commentActionLoading.value = true;
+  const deleted = await uiStore.removeComment(postId, targetId);
+  commentActionLoading.value = false;
+  if (deleted && editingCommentId.value === targetId) cancelEditComment();
 }
 
 function clearQuery() {
@@ -268,14 +312,38 @@ async function nativeShare() {
 
           <section id="community-comments" class="comments-panel">
             <h2>댓글 {{ selectedPost.comments?.length ?? 0 }}</h2>
-            <div v-for="(comment, index) in selectedPost.comments" :key="index" class="comment-row">
+            <div v-for="comment in selectedPost.comments" :key="commentKey(comment)" class="comment-row">
               <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
               <div>
                 <div class="comment-meta">
                   <b>{{ comment.user }}</b>
                   <small>방금 전</small>
                 </div>
-                <p>{{ comment.text }}</p>
+                <template v-if="editingCommentId === commentKey(comment)">
+                  <textarea
+                    v-model="editingCommentText"
+                    class="comment-edit-input"
+                    maxlength="500"
+                    placeholder="댓글 내용을 입력해 주세요."
+                  ></textarea>
+                  <div class="comment-row-actions">
+                    <button
+                      type="button"
+                      :disabled="commentActionLoading || !editingCommentText.trim()"
+                      @click="saveEditedComment(postKey(selectedPost))"
+                    >
+                      저장
+                    </button>
+                    <button type="button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                  </div>
+                </template>
+                <template v-else>
+                  <p>{{ comment.text }}</p>
+                  <div v-if="isCommentOwner(comment)" class="comment-row-actions">
+                    <button type="button" @click="startEditComment(comment)">수정</button>
+                    <button type="button" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
+                  </div>
+                </template>
               </div>
             </div>
             <EmptyState

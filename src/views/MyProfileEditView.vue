@@ -40,7 +40,7 @@ function validateNickname() {
 }
 
 function notifyImageShell() {
-  uiStore.notify('프로필 이미지는 MVP에서 기본 아바타를 사용합니다.');
+  uiStore.notify('프로필 이미지는 추후 지원 예정입니다.');
 }
 
 async function saveProfile() {
