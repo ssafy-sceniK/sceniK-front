@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
@@ -8,13 +9,19 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
+const route = useRoute();
+const router = useRouter();
 const query = ref('');
 const region = ref('전체');
 const category = ref('전체');
 const sort = ref('latest');
 const visibleLimit = ref(12);
+const restoringQuery = ref(false);
 
-onMounted(() => placeStore.load({ sort: sort.value, size: 50 }));
+onMounted(() => {
+  restoreQueryState();
+  placeStore.load({ sort: sort.value, size: 50 });
+});
 
 const filteredPlaces = computed(() => placeStore.search({
   region: region.value,
@@ -29,9 +36,51 @@ const sortedPlaces = computed(() => [...filteredPlaces.value].sort((a, b) => {
 const visiblePlaces = computed(() => sortedPlaces.value.slice(0, visibleLimit.value));
 const hasMorePlaces = computed(() => visiblePlaces.value.length < sortedPlaces.value.length);
 
+function queryValue(value, fallback = '') {
+  if (Array.isArray(value)) return value[0] ?? fallback;
+  return value ?? fallback;
+}
+
+function positiveSize(value, fallback = 12) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 12 ? Math.min(60, parsed) : fallback;
+}
+
+function restoreQueryState() {
+  restoringQuery.value = true;
+  const routeSort = queryValue(route.query.sort, 'latest');
+  query.value = queryValue(route.query.keyword);
+  region.value = queryValue(route.query.region, '전체');
+  category.value = queryValue(route.query.category, '전체');
+  sort.value = ['latest', 'popular', 'name'].includes(routeSort) ? routeSort : 'latest';
+  visibleLimit.value = positiveSize(route.query.size);
+  queueMicrotask(() => {
+    restoringQuery.value = false;
+  });
+}
+
+function syncQueryState() {
+  if (restoringQuery.value) return;
+  router.replace({
+    query: {
+      ...route.query,
+      keyword: query.value.trim() || undefined,
+      region: region.value !== '전체' ? region.value : undefined,
+      category: category.value !== '전체' ? category.value : undefined,
+      sort: sort.value !== 'latest' ? sort.value : undefined,
+      size: visibleLimit.value !== 12 ? String(visibleLimit.value) : undefined,
+    },
+  });
+}
+
 watch([query, region, category, sort], () => {
+  if (restoringQuery.value) return;
   visibleLimit.value = 12;
+  syncQueryState();
 });
+
+watch(visibleLimit, syncQueryState);
+watch(() => route.query, restoreQueryState);
 
 function resetFilters() {
   query.value = '';

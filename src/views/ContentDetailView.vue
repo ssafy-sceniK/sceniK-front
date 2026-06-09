@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FavoriteToggleStatus from '../components/common/FavoriteToggleStatus.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -93,15 +95,13 @@ function useFallbackImage(event) {
       title="콘텐츠를 불러오는 중입니다"
       text="검증된 촬영지 정보를 함께 확인하고 있어요."
     />
-    <EmptyState
+    <DetailNotFoundPanel
       v-else-if="errorMessage"
-      icon="!"
-      tone="error"
-      compact
       title="콘텐츠를 불러오지 못했습니다"
       :text="errorMessage"
-      action-label="다시 시도"
-      @action="loadContentDetail"
+      list-label="콘텐츠 목록으로 돌아가기"
+      list-to="/contents"
+      @retry="loadContentDetail"
     />
     <section v-else-if="content" class="detail-screen">
       <div class="detail-hero">
@@ -119,6 +119,13 @@ function useFallbackImage(event) {
         <div class="action-grid single">
           <BaseButton @click="startCourse">AI Course 만들기</BaseButton>
         </div>
+        <FavoriteToggleStatus
+          :active="Boolean(liked)"
+          :pending="likePending"
+          active-text="좋아요 완료"
+          inactive-text="좋아요를 누르면 마이페이지에 저장됩니다."
+          pending-text="콘텐츠 좋아요 상태를 저장하는 중입니다."
+        />
       </div>
 
       <div class="section-header"><h2>관련 장소</h2></div>

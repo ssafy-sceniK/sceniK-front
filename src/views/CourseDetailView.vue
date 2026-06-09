@@ -5,7 +5,9 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import MapPreview from '../components/course/MapPreview.vue';
+import RouteProgressSummary from '../components/course/RouteProgressSummary.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
@@ -34,12 +36,14 @@ const routePlaces = computed(() => (course.value?.days ?? []).flatMap((day) => d
   placeName: stop.placeName ?? stop.name ?? routeCandidateMap.value.get(stop.placeId)?.placeName ?? routeCandidateMap.value.get(stop.placeId)?.name,
 })) ?? []);
 
-onMounted(async () => {
+async function loadDetail() {
   if (!isMyCourseRoute.value) return;
   loadingDetail.value = true;
   await uiStore.loadCourseDetail(routeId.value);
   loadingDetail.value = false;
-});
+}
+
+onMounted(loadDetail);
 
 watch(course, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
@@ -179,20 +183,12 @@ async function deleteCourse() {
 
       <MapPreview :route-places="routePlaces" />
 
-      <div class="course-meta-grid">
-        <div>
-          <span>Places</span>
-          <strong>{{ routePlaces.length }}</strong>
-        </div>
-        <div>
-          <span>Style</span>
-          <strong>{{ course.style }}</strong>
-        </div>
-        <div>
-          <span>Transport</span>
-          <strong>{{ course.transport }}</strong>
-        </div>
-      </div>
+      <RouteProgressSummary
+        :places-count="routePlaces.length"
+        :duration-days="course.durationDays"
+        :transport="course.transport"
+        :style-label="course.style"
+      />
 
       <div v-if="dayTabs.length > 1" class="day-tabs">
         <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
@@ -227,15 +223,12 @@ async function deleteCourse() {
     </section>
 
     <section v-else class="course-detail-screen">
-      <EmptyState
-        icon="AI"
-        :tone="uiStore.routeError ? 'error' : 'route'"
+      <DetailNotFoundPanel
         title="코스를 찾을 수 없습니다"
         :text="uiStore.routeError || '저장 목록에서 삭제되었거나 아직 저장한 코스가 없습니다. 저장한 코스를 다시 선택하거나 새 AI 코스를 만들어보세요.'"
-        action-label="저장한 코스 보기"
-        action-to="/my/activity/saved-routes"
-        secondary-label="새 AI 코스 만들기"
-        secondary-to="/ai"
+        list-label="저장한 코스 보기"
+        list-to="/my/activity/saved-routes"
+        @retry="loadDetail"
       />
     </section>
   </AppLayout>

@@ -71,13 +71,19 @@
   border-color: rgba(207, 32, 47, 0.16);
 }
 
-.course-meta-grid {
+.course-meta-grid,
+.route-progress-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-.course-meta-grid > div {
+.route-progress-summary {
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+}
+
+.course-meta-grid > div,
+.route-progress-summary > div {
   min-width: 0;
   padding: 12px;
   display: grid;
@@ -88,13 +94,15 @@
   box-shadow: var(--shadow-sm);
 }
 
-.course-meta-grid span {
+.course-meta-grid span,
+.route-progress-summary span {
   color: var(--dim);
   font-size: 10px;
   font-weight: 600;
 }
 
-.course-meta-grid strong {
+.course-meta-grid strong,
+.route-progress-summary strong {
   overflow: hidden;
   color: var(--text);
   font-size: 12px;

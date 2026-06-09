@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const router = useRouter();
@@ -180,15 +181,7 @@ function postFromShareSheet() {
         <p v-if="savingRoute" class="form-help">코스를 저장하는 중입니다...</p>
         <p v-if="saveError" class="form-error">{{ saveError }}</p>
 
-        <div class="ai-context-panel result">
-          <strong>검증된 장소 데이터 기반 추천</strong>
-          <dl>
-            <template v-for="row in resultEvidenceRows" :key="row.label">
-              <dt>{{ row.label }}</dt>
-              <dd>{{ row.value }}</dd>
-            </template>
-          </dl>
-        </div>
+        <AiPromptContextSummary class="result" title="사용된 조건 요약 · 검증된 장소 데이터 기반 추천" :rows="resultEvidenceRows" />
 
         <div class="ai-result-map-card">
           <span>지도 기반 동선</span>

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
+import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue';
 import { generateAiRoute } from '../api/aiApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useContentStore } from '../stores/contentStore.js';
@@ -325,15 +326,7 @@ onBeforeUnmount(() => {
         <p>{{ loadingStatusText }}</p>
       </div>
 
-      <div class="ai-context-panel compact">
-        <strong>AI 참고 조건</strong>
-        <dl>
-          <template v-for="row in loadingContextRows" :key="row.label">
-            <dt>{{ row.label }}</dt>
-            <dd>{{ row.value }}</dd>
-          </template>
-        </dl>
-      </div>
+      <AiPromptContextSummary compact title="AI가 참고하는 조건" :rows="loadingContextRows" />
 
       <ol class="loading-steps" aria-label="AI 코스 생성 단계">
         <li

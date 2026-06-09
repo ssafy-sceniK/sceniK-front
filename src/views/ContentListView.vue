@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
@@ -9,15 +9,18 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { useContentStore } from '../stores/contentStore.js';
 
 const router = useRouter();
+const route = useRoute();
 const contentStore = useContentStore();
 const query = ref('');
 const category = ref('전체');
 const mode = ref('콘텐츠 탐색');
 const sort = ref('popular');
 const visibleLimit = ref(12);
+const restoringQuery = ref(false);
 const exploreCategories = computed(() => contentStore.categories);
 
 onMounted(() => {
+  restoreQueryState();
   contentStore.load({ sort: sort.value, size: 50 });
 });
 
@@ -33,9 +36,48 @@ const sortedContents = computed(() => [...filteredContents.value].sort((a, b) =>
 const visibleContents = computed(() => sortedContents.value.slice(0, visibleLimit.value));
 const hasMoreContents = computed(() => visibleContents.value.length < sortedContents.value.length);
 
+function queryValue(value, fallback = '') {
+  if (Array.isArray(value)) return value[0] ?? fallback;
+  return value ?? fallback;
+}
+
+function positiveSize(value, fallback = 12) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 12 ? Math.min(60, parsed) : fallback;
+}
+
+function restoreQueryState() {
+  restoringQuery.value = true;
+  const routeSort = queryValue(route.query.sort, 'popular');
+  query.value = queryValue(route.query.keyword);
+  category.value = queryValue(route.query.category, '전체');
+  sort.value = ['popular', 'latest'].includes(routeSort) ? routeSort : 'popular';
+  visibleLimit.value = positiveSize(route.query.size);
+  queueMicrotask(() => {
+    restoringQuery.value = false;
+  });
+}
+
+function syncQueryState() {
+  if (restoringQuery.value) return;
+  const nextQuery = {
+    ...route.query,
+    keyword: query.value.trim() || undefined,
+    category: category.value !== '전체' ? category.value : undefined,
+    sort: sort.value !== 'popular' ? sort.value : undefined,
+    size: visibleLimit.value !== 12 ? String(visibleLimit.value) : undefined,
+  };
+  router.replace({ query: nextQuery });
+}
+
 watch([query, category, sort], () => {
+  if (restoringQuery.value) return;
   visibleLimit.value = 12;
+  syncQueryState();
 });
+
+watch(visibleLimit, syncQueryState);
+watch(() => route.query, restoreQueryState);
 
 function resetFilters() {
   query.value = '';

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import FollowUserListItem from '../components/follow/FollowUserListItem.vue';
 import ContentCard from '../components/content/ContentCard.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import CourseCard from '../components/course/CourseCard.vue';
@@ -393,36 +394,17 @@ async function toggleFollowFromList(user) {
           :title="listNotice.title"
           :text="listNotice.text"
         />
-        <article
+        <FollowUserListItem
           v-for="user in type === 'following' ? uiStore.followingUsers : uiStore.followerUsers"
           :key="user.userId"
-          class="user-list-row"
-        >
-          <span class="user-list-avatar">{{ followUserInitial(user) }}</span>
-          <div>
-            <strong>
-              {{ user.nickname }}
-              <em v-if="isMutualFollow(user)" class="mutual-follow-badge">맞팔</em>
-            </strong>
-            <small>팔로워 {{ user.followerCount }} · 팔로잉 {{ user.followingCount }}</small>
-          </div>
-          <button
-            v-if="type === 'following' && user.userId !== uiStore.currentUser?.userId"
-            type="button"
-            :disabled="isFollowActionPending(user.userId)"
-            @click="toggleFollowFromList(user)"
-          >
-            {{ followButtonLabel(user) }}
-          </button>
-          <button
-            v-else-if="user.userId !== uiStore.currentUser?.userId"
-            type="button"
-            :disabled="isFollowActionPending(user.userId)"
-            @click="toggleFollowFromList(user)"
-          >
-            {{ followButtonLabel(user) }}
-          </button>
-        </article>
+          :user="user"
+          :initial="followUserInitial(user)"
+          :mutual="isMutualFollow(user)"
+          :current-user-id="uiStore.currentUser?.userId"
+          :pending="isFollowActionPending(user.userId)"
+          :button-label="followButtonLabel(user)"
+          @toggle="toggleFollowFromList"
+        />
       </div>
 
       <div v-else class="stack-list">

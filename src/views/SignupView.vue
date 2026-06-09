@@ -6,7 +6,7 @@ import { checkEmailAvailability } from '../api/authApi.js';
 import { getUserMessage } from '../api/error.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
-import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import SignupValidationPanel from '../components/auth/SignupValidationPanel.vue';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -31,6 +31,7 @@ const passwordPolicy = computed(() => [
 ]);
 const passwordValid = computed(() => passwordPolicy.value.every((item) => item.passed));
 const passwordMatches = computed(() => Boolean(confirm.value) && password.value === confirm.value);
+const confirmEntered = computed(() => Boolean(confirm.value));
 const canSubmit = computed(() => (
   nickname.value.trim()
   && emailCheckStatus.value === 'available'
@@ -163,28 +164,17 @@ async function submit() {
           </button>
         </span>
       </label>
-      <FormStatusNotice
-        compact
-        :tone="emailNoticeTone()"
-        title="이메일 확인"
-        :text="emailCheckMessage"
-      />
       <label class="form-field">비밀번호<input v-model="password" type="password" placeholder="8자 이상" autocomplete="new-password" /></label>
-      <ul class="password-policy-list" aria-label="비밀번호 정책">
-        <li v-for="item in passwordPolicy" :key="item.label" :class="{ passed: item.passed }">
-          <span aria-hidden="true">{{ item.passed ? '✓' : '•' }}</span>{{ item.label }}
-        </li>
-      </ul>
       <label class="form-field">비밀번호 확인<input v-model="confirm" type="password" placeholder="다시 입력" autocomplete="new-password" /></label>
-      <FormStatusNotice
-        v-if="confirm"
-        compact
-        :tone="passwordMatches ? 'success' : 'error'"
-        title="비밀번호 확인"
-        :text="passwordMatches ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.'"
+      <SignupValidationPanel
+        :email-tone="emailNoticeTone()"
+        :email-message="emailCheckMessage"
+        :password-policy="passwordPolicy"
+        :confirm-entered="confirmEntered"
+        :password-matches="passwordMatches"
+        :error="error"
+        :success="success"
       />
-      <FormStatusNotice v-if="error" tone="error" title="회원가입 실패" :text="error" />
-      <FormStatusNotice v-if="success" tone="success" title="회원가입 완료" :text="success" />
       <BaseButton block :disabled="!canSubmit">{{ loading ? '가입 중...' : '가입 완료' }}</BaseButton>
     </form>
   </AppLayout>
@@ -211,27 +201,6 @@ async function submit() {
 .email-check-row button:disabled {
   color: var(--dim);
   background: var(--color-surface-strong);
-}
-
-.password-policy-list {
-  margin: -2px 0 2px;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-  list-style: none;
-}
-
-.password-policy-list li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.password-policy-list li.passed {
-  color: var(--color-semantic-up);
 }
 
 @media (max-width: 360px) {

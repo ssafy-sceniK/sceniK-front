@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import ContentCard from '../components/content/ContentCard.vue';
@@ -8,19 +9,48 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { useSearchStore } from '../stores/searchStore.js';
 
 const searchStore = useSearchStore();
+const route = useRoute();
+const router = useRouter();
 const keyword = ref(searchStore.keyword);
+const restoringQuery = ref(false);
 const hasResults = computed(() => (
   searchStore.results.contents.length + searchStore.results.places.length
 ) > 0);
 
+function queryValue(value, fallback = '') {
+  if (Array.isArray(value)) return value[0] ?? fallback;
+  return value ?? fallback;
+}
+
+function restoreQueryState() {
+  restoringQuery.value = true;
+  keyword.value = queryValue(route.query.keyword);
+  if (keyword.value) searchStore.search(keyword.value);
+  queueMicrotask(() => {
+    restoringQuery.value = false;
+  });
+}
+
 function runSearch() {
   searchStore.search(keyword.value);
+  if (!restoringQuery.value) {
+    router.replace({
+      query: {
+        ...route.query,
+        keyword: keyword.value.trim() || undefined,
+      },
+    });
+  }
 }
 
 function clearSearch() {
   keyword.value = '';
   searchStore.search('');
+  router.replace({ query: { ...route.query, keyword: undefined } });
 }
+
+onMounted(restoreQueryState);
+watch(() => route.query.keyword, restoreQueryState);
 </script>
 
 <template>

@@ -7,6 +7,11 @@ import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
+import CommentActionSheet from '../components/community/CommentActionSheet.vue';
+import CommentThread from '../components/community/CommentThread.vue';
+import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
+import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
+import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const route = useRoute();
@@ -14,6 +19,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const query = ref('');
 const sort = ref('latest');
+const restoringQuery = ref(false);
 const sortOptions = [
   { value: 'latest', label: '최신순' },
   { value: 'popular', label: '인기순' },
@@ -67,15 +73,56 @@ async function loadCommunity() {
   }
 }
 
-onMounted(loadCommunity);
+function queryValue(value, fallback = '') {
+  if (Array.isArray(value)) return value[0] ?? fallback;
+  return value ?? fallback;
+}
+
+function positiveSize(value, fallback = 8) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 8 ? Math.min(50, parsed) : fallback;
+}
+
+function restoreQueryState() {
+  restoringQuery.value = true;
+  const routeSort = queryValue(route.query.sort, 'latest');
+  query.value = queryValue(route.query.keyword);
+  sort.value = ['latest', 'popular'].includes(routeSort) ? routeSort : 'latest';
+  visibleLimit.value = positiveSize(route.query.size);
+  queueMicrotask(() => {
+    restoringQuery.value = false;
+  });
+}
+
+function syncQueryState() {
+  if (restoringQuery.value) return;
+  router.replace({
+    query: {
+      ...route.query,
+      keyword: query.value.trim() || undefined,
+      sort: sort.value !== 'latest' ? sort.value : undefined,
+      size: visibleLimit.value !== 8 ? String(visibleLimit.value) : undefined,
+    },
+  });
+}
+
+onMounted(() => {
+  restoreQueryState();
+  void loadCommunity();
+});
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
 watch(sort, () => {
+  if (restoringQuery.value) return;
   visibleLimit.value = 8;
+  syncQueryState();
   void loadCommunity();
 });
 watch(query, () => {
+  if (restoringQuery.value) return;
   visibleLimit.value = 8;
+  syncQueryState();
 });
+watch(visibleLimit, syncQueryState);
 
 const filteredPosts = computed(() => {
   const normalizedQuery = query.value.trim().toLowerCase();
@@ -630,25 +677,16 @@ async function nativeShare() {
       </template>
 
       <template v-else-if="isPostDetail">
-        <template v-if="selectedPost">
+        <CommunityPostDetailPanel v-if="selectedPost">
           <article class="post-detail-card">
-            <div class="user-row">
-              <div>
-                <b>{{ selectedPost.user }}</b>
-                <span>{{ selectedPost.date }} · {{ selectedPost.region }}</span>
-              </div>
-              <button
-                v-if="canFollowSelectedAuthor"
-                type="button"
-                class="author-follow-button"
-                :class="{ 'is-following': selectedAuthorFollowed }"
-                :aria-pressed="selectedAuthorFollowed"
-                :disabled="selectedAuthorFollowLoading"
-                @click="toggleSelectedAuthorFollow"
-              >
-                {{ selectedAuthorFollowLoading ? '처리 중' : selectedAuthorFollowed ? '팔로잉' : '팔로우' }}
-              </button>
-            </div>
+            <AuthorFollowCard
+              :author-name="selectedPost.user"
+              :meta="`${selectedPost.date} · ${selectedPost.region}`"
+              :can-follow="canFollowSelectedAuthor"
+              :following="selectedAuthorFollowed"
+              :loading="selectedAuthorFollowLoading"
+              @toggle="toggleSelectedAuthorFollow"
+            />
             <FormStatusNotice
               v-if="postNotice"
               compact
@@ -736,8 +774,7 @@ async function nativeShare() {
             </div>
           </article>
 
-          <section id="community-comments" class="comments-panel">
-            <h2>댓글 {{ selectedComments.length }}</h2>
+          <CommentThread :count="selectedComments.length">
             <FormStatusNotice
               v-if="commentNotice"
               compact
@@ -930,30 +967,15 @@ async function nativeShare() {
               <input v-model="commentText" placeholder="댓글을 입력하세요" @keyup.enter="addComment(postKey(selectedPost))" />
               <button type="button" :disabled="!commentText.trim()" @click="addComment(postKey(selectedPost))">등록</button>
             </div>
-            <div v-if="commentActionTarget" class="sheet-backdrop comment-action-backdrop" @click="closeCommentActions">
-              <div
-                class="bottom-sheet comment-action-sheet"
-                role="dialog"
-                aria-modal="true"
-                aria-label="댓글 관리"
-                tabindex="-1"
-                @keydown.esc.prevent="closeCommentActions"
-                @click.stop
-              >
-                <div class="sheet-handle"></div>
-                <h2>댓글을 관리할까요?</h2>
-                <p>내가 작성한 댓글만 수정하거나 삭제할 수 있습니다. 삭제하면 목록에서 바로 제거됩니다.</p>
-                <div class="sheet-actions two">
-                  <BaseButton variant="secondary" @click="startEditComment(commentActionTarget)">수정</BaseButton>
-                  <BaseButton variant="danger" :disabled="commentActionLoading" @click="deleteComment(postKey(selectedPost), commentActionTarget)">
-                    {{ commentActionLoading ? '삭제 중...' : '삭제' }}
-                  </BaseButton>
-                </div>
-                <BaseButton variant="secondary" block @click="closeCommentActions">취소</BaseButton>
-              </div>
-            </div>
-          </section>
-        </template>
+            <CommentActionSheet
+              v-if="commentActionTarget"
+              :loading="commentActionLoading"
+              @edit="startEditComment(commentActionTarget)"
+              @delete="deleteComment(postKey(selectedPost), commentActionTarget)"
+              @cancel="closeCommentActions"
+            />
+          </CommentThread>
+        </CommunityPostDetailPanel>
         <EmptyState
           v-else-if="uiStore.communityLoading"
           tone="loading"
@@ -961,14 +983,13 @@ async function nativeShare() {
           title="게시글을 불러오는 중입니다"
           text="커뮤니티 이야기를 확인하고 있어요."
         />
-        <EmptyState
+        <DetailNotFoundPanel
           v-else
-          icon="!"
-          tone="error"
           title="게시글을 찾을 수 없습니다"
           text="삭제되었거나 접근할 수 없는 글입니다."
-          action-label="커뮤니티로 돌아가기"
-          action-to="/community"
+          list-label="커뮤니티로 돌아가기"
+          list-to="/community"
+          @retry="loadCommunity"
         />
       </template>
 

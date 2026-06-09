@@ -4,8 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FavoriteToggleStatus from '../components/common/FavoriteToggleStatus.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import MapPreview from '../components/course/MapPreview.vue';
+import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
+import ReviewPanel from '../components/review/ReviewPanel.vue';
 import {
   createPlaceReview,
   deletePlaceReview,
@@ -299,15 +302,13 @@ function useFallbackImage(event) {
       title="장소를 불러오는 중입니다"
       text="검증된 촬영지와 지도 정보를 확인하고 있어요."
     />
-    <EmptyState
+    <DetailNotFoundPanel
       v-else-if="errorMessage"
-      icon="!"
-      tone="error"
-      compact
       title="장소를 불러오지 못했습니다"
       :text="errorMessage"
-      action-label="다시 시도"
-      @action="loadPlaceDetail"
+      list-label="장소 목록으로 돌아가기"
+      list-to="/places"
+      @retry="loadPlaceDetail"
     />
     <section v-else-if="place" class="detail-screen">
       <div class="detail-hero place">
@@ -337,125 +338,140 @@ function useFallbackImage(event) {
             방문 완료
           </BaseButton>
         </div>
-      </div>
-
-      <div class="section-header">
-        <h2>방문 리뷰</h2>
-        <span>{{ reviewCount }}개<span v-if="reviewCount"> · 평균 ★ {{ averageRating }}</span></span>
-      </div>
-      <div class="review-summary-panel" aria-label="방문 리뷰 요약">
-        <strong>★ {{ averageRating }}</strong>
-        <span>{{ reviewCount }}개의 방문 기록</span>
-        <small>실제 촬영지를 다녀온 사용자의 분위기, 이동 팁, 검증 의견을 모아 보여줍니다.</small>
-        <div v-if="reviews.length" class="rating-distribution" aria-label="평점 분포">
-          <span v-for="item in ratingSummary" :key="item.score">
-            <b>{{ item.score }}점</b>
-            <i><em :style="{ width: `${item.percent}%` }"></em></i>
-            <small>{{ item.count }}</small>
-          </span>
-        </div>
-      </div>
-      <FormStatusNotice
-        v-if="reviewNotice"
-        :tone="reviewNotice.tone"
-        :title="reviewNotice.title"
-        :text="reviewNotice.text"
-      />
-      <EmptyState
-        v-if="reviewLoading"
-        tone="loading"
-        compact
-        title="리뷰를 불러오는 중입니다"
-        text="이 장소를 다녀온 여행자의 기록을 확인하고 있어요."
-      />
-      <EmptyState
-        v-else-if="reviewError && !reviews.length"
-        icon="!"
-        tone="error"
-        compact
-        title="리뷰를 불러오지 못했습니다"
-        :text="reviewError"
-        action-label="다시 시도"
-        @action="loadReviews"
-      />
-      <div v-else class="review-list">
-        <article v-for="review in reviews" :key="review.reviewId" class="review-row">
-          <div class="review-row-head">
-            <strong>{{ review.nickname }}</strong>
-            <span>★ {{ review.rating }}</span>
-          </div>
-          <template v-if="editingReviewId === review.reviewId">
-            <label class="form-field compact">
-              평점
-              <input v-model.number="editReviewForm.rating" type="number" min="0" max="5" step="0.5" />
-            </label>
-            <label class="form-field compact">
-              리뷰
-              <textarea
-                v-model="editReviewForm.content"
-                maxlength="500"
-                placeholder="리뷰 내용을 입력해 주세요."
-              ></textarea>
-            </label>
-            <div class="review-row-actions">
-              <button
-                type="button"
-                :disabled="reviewSubmitting || !editReviewForm.content.trim()"
-                @click="submitReviewEdit(review)"
-              >
-                저장
-              </button>
-              <button type="button" :disabled="reviewSubmitting" @click="cancelEditReview">취소</button>
-            </div>
-          </template>
-          <template v-else>
-            <p>{{ review.content }}</p>
-            <div v-if="isReviewOwner(review)" class="review-row-actions">
-              <button type="button" @click="startEditReview(review)">수정</button>
-              <button type="button" @click="removeReview(review)">삭제</button>
-            </div>
-          </template>
-        </article>
-        <EmptyState
-          v-if="!reviews.length"
-          icon="R"
-          tone="search"
-          compact
-          title="아직 등록된 리뷰가 없습니다"
-          text="이 장소를 다녀왔다면 첫 리뷰를 남겨보세요."
+        <FavoriteToggleStatus
+          :active="Boolean(liked)"
+          :pending="likePending"
+          active-text="좋아요 완료"
+          inactive-text="좋아요를 누르면 마이페이지 좋아한 장소에 저장됩니다."
+          pending-text="장소 좋아요 상태를 저장하는 중입니다."
         />
       </div>
-      <form v-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
-        <label class="form-field">
-          평점
-          <input v-model.number="reviewForm.rating" type="number" min="0" max="5" step="0.5" />
-        </label>
-        <label class="form-field">
-          리뷰
-          <textarea v-model="reviewForm.content" maxlength="500" placeholder="장소 분위기, 이동 팁, 촬영지 느낌을 남겨주세요"></textarea>
-        </label>
-        <p v-if="reviewError" class="form-error">{{ reviewError }}</p>
-        <BaseButton block :disabled="reviewSubmitting || !reviewForm.content.trim()">
-          {{ reviewSubmitting ? '등록 중...' : '리뷰 등록' }}
-        </BaseButton>
-      </form>
-      <FormStatusNotice
-        v-else-if="uiStore.currentUser"
-        tone="info"
-        compact
-        title="이미 이 장소에 리뷰를 작성했습니다."
-        :text="myReview ? '중복 리뷰 대신 아래 내 리뷰에서 수정 또는 삭제할 수 있습니다.' : '한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.'"
-      />
-      <EmptyState
-        v-else
-        icon="K"
-        tone="login"
-        compact
-        title="로그인하면 리뷰를 남길 수 있습니다"
-        text="방문한 촬영지의 분위기와 이동 팁을 공유해 주세요."
-        action-label="로그인하기"
-        action-to="/login"
-      />
+
+      <ReviewPanel :review-count="reviewCount" :average-rating="averageRating">
+        <template #summary>
+          <div class="review-summary-panel" aria-label="방문 리뷰 요약">
+            <strong>★ {{ averageRating }}</strong>
+            <span>{{ reviewCount }}개의 방문 기록</span>
+            <small>실제 촬영지를 다녀온 사용자의 분위기, 이동 팁, 검증 의견을 모아 보여줍니다.</small>
+            <div v-if="reviews.length" class="rating-distribution" aria-label="평점 분포">
+              <span v-for="item in ratingSummary" :key="item.score">
+                <b>{{ item.score }}점</b>
+                <i><em :style="{ width: `${item.percent}%` }"></em></i>
+                <small>{{ item.count }}</small>
+              </span>
+            </div>
+          </div>
+        </template>
+        <template #status>
+          <FormStatusNotice
+            v-if="reviewNotice"
+            :tone="reviewNotice.tone"
+            :title="reviewNotice.title"
+            :text="reviewNotice.text"
+          />
+        </template>
+        <template #states>
+          <EmptyState
+            v-if="reviewLoading"
+            tone="loading"
+            compact
+            title="리뷰를 불러오는 중입니다"
+            text="이 장소를 다녀온 여행자의 기록을 확인하고 있어요."
+          />
+          <EmptyState
+            v-else-if="reviewError && !reviews.length"
+            icon="!"
+            tone="error"
+            compact
+            title="리뷰를 불러오지 못했습니다"
+            :text="reviewError"
+            action-label="다시 시도"
+            @action="loadReviews"
+          />
+        </template>
+        <template #list>
+          <div v-if="!reviewLoading && !(reviewError && !reviews.length)" class="review-list">
+            <article v-for="review in reviews" :key="review.reviewId" class="review-row">
+              <div class="review-row-head">
+                <strong>{{ review.nickname }}</strong>
+                <span>★ {{ review.rating }}</span>
+              </div>
+              <template v-if="editingReviewId === review.reviewId">
+                <label class="form-field compact">
+                  평점
+                  <input v-model.number="editReviewForm.rating" type="number" min="0" max="5" step="0.5" />
+                </label>
+                <label class="form-field compact">
+                  리뷰
+                  <textarea
+                    v-model="editReviewForm.content"
+                    maxlength="500"
+                    placeholder="리뷰 내용을 입력해 주세요."
+                  ></textarea>
+                </label>
+                <div class="review-row-actions">
+                  <button
+                    type="button"
+                    :disabled="reviewSubmitting || !editReviewForm.content.trim()"
+                    @click="submitReviewEdit(review)"
+                  >
+                    저장
+                  </button>
+                  <button type="button" :disabled="reviewSubmitting" @click="cancelEditReview">취소</button>
+                </div>
+              </template>
+              <template v-else>
+                <p>{{ review.content }}</p>
+                <div v-if="isReviewOwner(review)" class="review-row-actions">
+                  <button type="button" @click="startEditReview(review)">수정</button>
+                  <button type="button" @click="removeReview(review)">삭제</button>
+                </div>
+              </template>
+            </article>
+            <EmptyState
+              v-if="!reviews.length"
+              icon="R"
+              tone="search"
+              compact
+              title="아직 등록된 리뷰가 없습니다"
+              text="이 장소를 다녀왔다면 첫 리뷰를 남겨보세요."
+            />
+          </div>
+        </template>
+        <template #form>
+          <form v-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
+            <label class="form-field">
+              평점
+              <input v-model.number="reviewForm.rating" type="number" min="0" max="5" step="0.5" />
+            </label>
+            <label class="form-field">
+              리뷰
+              <textarea v-model="reviewForm.content" maxlength="500" placeholder="장소 분위기, 이동 팁, 촬영지 느낌을 남겨주세요"></textarea>
+            </label>
+            <p v-if="reviewError" class="form-error">{{ reviewError }}</p>
+            <BaseButton block :disabled="reviewSubmitting || !reviewForm.content.trim()">
+              {{ reviewSubmitting ? '등록 중...' : '리뷰 등록' }}
+            </BaseButton>
+          </form>
+          <FormStatusNotice
+            v-else-if="uiStore.currentUser"
+            tone="info"
+            compact
+            title="이미 이 장소에 리뷰를 작성했습니다."
+            :text="myReview ? '중복 리뷰 대신 아래 내 리뷰에서 수정 또는 삭제할 수 있습니다.' : '한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.'"
+          />
+          <EmptyState
+            v-else
+            icon="K"
+            tone="login"
+            compact
+            title="로그인하면 리뷰를 남길 수 있습니다"
+            text="방문한 촬영지의 분위기와 이동 팁을 공유해 주세요."
+            action-label="로그인하기"
+            action-to="/login"
+          />
+        </template>
+      </ReviewPanel>
 
       <div class="section-header"><h2>관련 콘텐츠</h2></div>
       <div class="chip-row wrap">

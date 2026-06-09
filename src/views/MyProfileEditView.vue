@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const router = useRouter();
@@ -20,6 +21,7 @@ const selectedRegions = ref([...(uiStore.currentUser?.preferences?.regions ?? ['
 const selectedThemes = ref([...(uiStore.currentUser?.preferences?.themes ?? ['감성 여행'])]);
 const nicknameError = ref('');
 const saving = ref(false);
+const saveNotice = ref(null);
 
 const profileInitial = computed(() => nickname.value?.slice(0, 1).toUpperCase() || 'K');
 
@@ -33,6 +35,11 @@ function validateNickname() {
   const value = nickname.value.trim();
   if (value.length < 2) {
     nicknameError.value = '닉네임은 2자 이상 입력해 주세요.';
+    saveNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: nicknameError.value,
+    };
     return false;
   }
   nicknameError.value = '';
@@ -56,7 +63,18 @@ async function saveProfile() {
     },
   });
   saving.value = false;
-  if (ok) router.push('/my');
+  saveNotice.value = ok
+    ? {
+        tone: 'success',
+        title: '프로필이 저장되었습니다.',
+        text: '닉네임, 소개, 콘텐츠 취향과 선호 지역/테마가 업데이트되었습니다.',
+      }
+    : {
+        tone: 'error',
+        title: '프로필을 저장하지 못했습니다.',
+        text: uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      };
+  if (ok) window.setTimeout(() => router.push('/my'), 450);
 }
 </script>
 
@@ -108,6 +126,12 @@ async function saveProfile() {
         </label>
 
         <div class="form-divider"></div>
+        <FormStatusNotice
+          v-if="saveNotice"
+          :tone="saveNotice.tone"
+          :title="saveNotice.title"
+          :text="saveNotice.text"
+        />
 
         <div class="preference-block compact">
           <h2>콘텐츠 취향</h2>

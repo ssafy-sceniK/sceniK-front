@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import RouteProgressSummary from '../components/course/RouteProgressSummary.vue';
 import { getUserMessage } from '../api/error.js';
 import { fetchPlaces } from '../api/placeApi.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -38,6 +39,9 @@ const candidateById = computed(() => new Map((course.value?.candidatePlaces ?? [
 const availableCandidates = computed(() => (course.value?.candidatePlaces ?? [])
   .filter((place) => !usedPlaceIds.value.has(place.placeId)));
 const verifiedSearchCandidates = computed(() => searchedPlaces.value);
+const currentPlaceCount = computed(() => draftDays.value.reduce((sum, day) => sum + day.places.length, 0));
+const originalPlaceCount = computed(() => (course.value?.days ?? []).reduce((sum, day) => sum + (day.places?.length ?? 0), 0));
+const changedPlaceCount = computed(() => Math.abs(currentPlaceCount.value - originalPlaceCount.value));
 
 function cloneDays(value) {
   return (value?.days ?? []).map((day, dayIndex) => ({
@@ -402,6 +406,14 @@ onBeforeUnmount(() => {
         <h1>{{ course.title }}</h1>
         <p>프로토타입처럼 모든 Day를 한 화면에서 확인하고, 왼쪽 핸들을 드래그해 순서를 바꿉니다. 장소는 검증된 후보에서만 추가됩니다.</p>
       </div>
+
+      <RouteProgressSummary
+        :places-count="currentPlaceCount"
+        :duration-days="course.durationDays"
+        :transport="course.transport"
+        :style-label="course.style"
+        :changed-count="changedPlaceCount"
+      />
 
       <div class="all-day-edit-list">
         <section
