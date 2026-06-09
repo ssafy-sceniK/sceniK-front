@@ -201,8 +201,8 @@ const tabs = computed(() => [
           icon="GO"
           tone="route"
           compact
-          title="방문 기록이 없습니다"
-          text="장소 상세에서 방문 예정 또는 완료를 눌러 여행 기록을 시작해보세요."
+          title="아직 방문 기록이 없어요"
+          text="장소 상세에서 방문 예정이나 방문 완료를 눌러 여행 기록을 시작해보세요."
           action-label="장소 탐색하기"
           action-to="/places"
         />

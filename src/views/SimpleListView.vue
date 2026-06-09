@@ -83,7 +83,7 @@ const emptyStateConfig = computed(() => {
     'liked-content': {
       icon: '♥',
       tone: 'route',
-      title: '좋아요한 콘텐츠가 없습니다',
+      title: '좋아요한 콘텐츠가 없어요',
       text: '마음에 드는 K-content를 발견하면 하트로 모아둘 수 있어요.',
       actionLabel: '콘텐츠 둘러보기',
       actionTo: '/contents',
@@ -91,7 +91,7 @@ const emptyStateConfig = computed(() => {
     'liked-places': {
       icon: 'P',
       tone: 'search',
-      title: '좋아요한 장소가 없습니다',
+      title: '좋아요한 장소가 없어요',
       text: '가보고 싶은 촬영지를 저장해 나만의 여행 후보를 만들어보세요.',
       actionLabel: '장소 둘러보기',
       actionTo: '/places',
@@ -99,7 +99,7 @@ const emptyStateConfig = computed(() => {
     recent: {
       icon: 'KR',
       tone: 'search',
-      title: '최근 본 장소가 없습니다',
+      title: '최근 본 장소가 없어요',
       text: '장소를 열어보면 다시 찾기 쉽도록 이곳에 기록됩니다.',
       actionLabel: '장소 탐색하기',
       actionTo: '/places',
@@ -107,23 +107,23 @@ const emptyStateConfig = computed(() => {
     planned: {
       icon: 'GO',
       tone: 'route',
-      title: '방문 예정 장소가 없습니다',
-      text: '장소 상세에서 방문 예정으로 저장하면 여행 준비 목록이 생깁니다.',
+      title: '예정된 방문 장소가 없어요',
+      text: '장소 상세에서 방문 예정으로 저장하면 여행 준비 목록이 생겨요.',
       actionLabel: '장소 탐색하기',
       actionTo: '/places',
     },
     completed: {
       icon: 'OK',
       tone: 'route',
-      title: '방문 완료 내역이 없습니다',
-      text: '다녀온 촬영지를 방문 완료로 표시하면 여행 기록이 쌓입니다.',
+      title: '방문 완료한 장소가 없어요',
+      text: '다녀온 촬영지를 방문 완료로 표시하면 여행 기록이 쌓여요.',
       actionLabel: '장소 탐색하기',
       actionTo: '/places',
     },
     'saved-routes': {
       icon: 'AI',
       tone: 'route',
-      title: '저장한 AI 코스가 없습니다',
+      title: '저장한 코스가 없어요',
       text: '좋아하는 K-content를 고르고 첫 여행 코스를 만들어보세요.',
       actionLabel: 'AI 코스 만들기',
       actionTo: '/ai',
@@ -133,15 +133,15 @@ const emptyStateConfig = computed(() => {
     posts: {
       icon: 'C',
       tone: 'community',
-      title: '작성한 게시글이 없습니다',
+      title: '아직 작성한 게시글이 없어요',
       text: '다녀온 코스나 촬영지 팁을 커뮤니티에 공유해보세요.',
-      actionLabel: '첫 글 작성하기',
+      actionLabel: '게시글 작성하기',
       actionTo: '/community/write',
     },
     comments: {
       icon: 'C',
       tone: 'community',
-      title: '댓글 단 글이 없습니다',
+      title: '댓글 단 글이 없어요',
       text: '관심 있는 여행 후기에 댓글을 남기면 이곳에서 다시 볼 수 있어요.',
       actionLabel: '커뮤니티 둘러보기',
       actionTo: '/community',
@@ -149,7 +149,7 @@ const emptyStateConfig = computed(() => {
     scraps: {
       icon: 'S',
       tone: 'community',
-      title: '스크랩한 게시글이 없습니다',
+      title: '스크랩한 게시글이 없어요',
       text: '다시 보고 싶은 여행 후기와 코스를 스크랩해두세요.',
       actionLabel: '커뮤니티 둘러보기',
       actionTo: '/community',
@@ -157,7 +157,7 @@ const emptyStateConfig = computed(() => {
     reviews: {
       icon: 'R',
       tone: 'search',
-      title: '작성한 리뷰가 없습니다',
+      title: '아직 리뷰가 없어요',
       text: '다녀온 촬영지의 분위기와 이동 팁을 장소 상세에서 남겨보세요.',
       actionLabel: '장소 둘러보기',
       actionTo: '/places',
@@ -165,7 +165,7 @@ const emptyStateConfig = computed(() => {
     following: {
       icon: 'F',
       tone: 'community',
-      title: '팔로잉한 사용자가 없습니다',
+      title: '팔로잉한 사용자가 없어요',
       text: '커뮤니티 게시글 작성자를 팔로우하면 이곳에서 다시 볼 수 있어요.',
       actionLabel: '커뮤니티 둘러보기',
       actionTo: '/community',
@@ -182,7 +182,7 @@ const emptyStateConfig = computed(() => {
   return map[type.value] ?? {
     icon: 'SK',
     tone: 'neutral',
-    title: '표시할 항목이 없습니다',
+    title: '표시할 항목이 없어요',
     text: '서비스를 사용하면 기록이 이곳에 차곡차곡 쌓입니다.',
   };
 });
@@ -384,6 +384,7 @@ function isFollowActionPending(userId) {
         :tone="emptyStateConfig.tone"
         :title="emptyStateConfig.title"
         :text="emptyStateConfig.text"
+        compact
         :action-label="emptyStateConfig.actionLabel"
         :action-to="emptyStateConfig.actionTo"
         :secondary-label="emptyStateConfig.secondaryLabel"
