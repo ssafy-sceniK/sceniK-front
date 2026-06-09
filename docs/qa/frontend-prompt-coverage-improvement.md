@@ -73,3 +73,23 @@
 - 이번 작업은 analyzer-visible 구조 보강이며, 점수 상승을 확정하지 않는다.
 - 커뮤니티 상세를 완전한 별도 View로 분리하는 작업은 현재 `CommunityView` 내부 상태와 CRUD 흐름의 회귀 위험이 커서 패널 분리로 제한했다.
 - backend와 `sceniK-ai`는 변경하지 않았다.
+
+## 8. 최종 targeted pass 추가 보강
+
+생성일: 2026-06-09
+
+최신 analyzer 결과에서 남은 프론트 partial 항목인 `#01 Core data management CRUD`, `#07 Profile management`를 대상으로 추가 보강했다. 점수 상승을 확정하지 않고, evaluator가 화면 구조와 상태를 더 쉽게 식별하도록 하는 데 목적을 둔다.
+
+| 항목 | 보강 내용 | 파일 |
+| --- | --- | --- |
+| #01 Course CRUD | `CourseCrudPanel`로 코스 관리 섹션, routeId, 장소 수, 수정/저장/공유/삭제 action을 명시했다. | `CourseDetailView.vue`, `CourseCrudPanel.vue` |
+| #01 Course save | `CourseSaveStatusPanel`로 AI 결과 저장 전 확인, 저장 중/성공/실패, 저장 후 수정 가능 안내를 표시했다. | `AiResultView.vue`, `CourseSaveStatusPanel.vue` |
+| #01 Course delete | `CourseDeleteActionSheet`로 삭제 confirmation과 삭제 중 상태를 분리했다. | `CourseDetailView.vue`, `CourseDeleteActionSheet.vue` |
+| #01 Course edit | 코스 제목 field, 장소 수 validation, `변경사항 저장`, `취소`, 저장 상태 안내를 추가했다. | `CourseEditView.vue` |
+| #07 Profile preview | profile image local preview와 upload deferred 안내를 추가했다. | `MyProfileEditView.vue` |
+| #07 Profile preferences | 이메일 read-only, nickname/bio, preference chips, `aria-pressed`, MyPage preference summary를 보강했다. | `MyProfileEditView.vue`, `MyPageView.vue` |
+
+남은 수동 QA:
+- 코스 저장, 편집 저장, 삭제 confirmation/status 확인
+- 프로필 이미지 local preview 확인
+- 프로필 preference 저장 후 MyPage summary 반영 확인

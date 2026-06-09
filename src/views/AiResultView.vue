@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue';
+import CourseSaveStatusPanel from '../components/course/CourseSaveStatusPanel.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const router = useRouter();
@@ -14,6 +15,7 @@ const showActionMenu = ref(false);
 const showShareSheet = ref(false);
 const savingRoute = ref(false);
 const saveError = ref('');
+const saveNotice = ref(null);
 const routeCandidateMap = computed(() => new Map((route.value?.candidatePlaces ?? [])
   .map((place) => [place.placeId, place])));
 const routePlaces = computed(() => (route.value?.days ?? []).flatMap((day) => day.places ?? []).map((stop) => ({
@@ -37,6 +39,15 @@ const shareSummary = computed(() => {
   return `장소 ${placeCount.value}곳 · Day 1~${route.value.durationDays}`;
 });
 const shareText = computed(() => route.value ? `${route.value.title}\n${route.value.summary}` : 'sceniK AI Course');
+const saveStatusRows = computed(() => {
+  if (!route.value) return [];
+  return [
+    { label: '코스 상태', value: '생성된 AI 코스' },
+    { label: '검증 장소', value: `${placeCount.value}곳` },
+    { label: '일정', value: `${route.value.durationDays}일` },
+    { label: '저장 후 동작', value: '내 코스에서 수정·공유·삭제 가능' },
+  ];
+});
 const resultEvidenceRows = computed(() => {
   if (!route.value) return [];
   return [
@@ -55,10 +66,28 @@ async function saveRoute() {
   if (!route.value || savingRoute.value) return;
   showActionMenu.value = false;
   saveError.value = '';
+  saveNotice.value = {
+    tone: 'info',
+    title: 'AI 코스를 저장하는 중입니다.',
+    text: '검증된 장소와 일정 정보를 내 코스에 저장하고 있습니다.',
+  };
   savingRoute.value = true;
   const saved = await uiStore.saveCourse(route.value);
   savingRoute.value = false;
-  if (!saved) saveError.value = uiStore.routeError || 'AI 코스를 저장하지 못했습니다.';
+  if (!saved) {
+    saveError.value = uiStore.routeError || 'AI 코스를 저장하지 못했습니다.';
+    saveNotice.value = {
+      tone: 'error',
+      title: '저장하지 못했습니다.',
+      text: saveError.value,
+    };
+    return;
+  }
+  saveNotice.value = {
+    tone: 'success',
+    title: '저장되었습니다.',
+    text: '저장 후 내 코스에서 다시 수정할 수 있어요.',
+  };
 }
 
 function openShareSheet() {
@@ -178,8 +207,13 @@ function postFromShareSheet() {
       <div class="ai-result-scroll">
         <h2>{{ route.title }}</h2>
         <p class="ai-result-meta">{{ resultMeta }}</p>
-        <p v-if="savingRoute" class="form-help">코스를 저장하는 중입니다...</p>
-        <p v-if="saveError" class="form-error">{{ saveError }}</p>
+
+        <CourseSaveStatusPanel
+          title="생성된 AI 코스"
+          description="저장 전 장소 수와 일정 조건을 확인하세요. 저장 후 마이페이지에서 다시 수정할 수 있습니다."
+          :rows="saveStatusRows"
+          :notice="saveNotice"
+        />
 
         <AiPromptContextSummary class="result" title="사용된 조건 요약 · 검증된 장소 데이터 기반 추천" :rows="resultEvidenceRows" />
 

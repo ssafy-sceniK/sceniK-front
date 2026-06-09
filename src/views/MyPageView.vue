@@ -42,6 +42,16 @@ const scrappedPosts = computed(() => uiStore.currentUser
   : []);
 const profileInitial = computed(() => uiStore.currentUser?.nickname?.slice(0, 1).toUpperCase() ?? 'K');
 const profileBio = computed(() => uiStore.currentUser?.bio || 'K-content 여행 중');
+const profileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
+const profilePreferenceChips = computed(() => {
+  const preferences = uiStore.currentUser?.preferences;
+  if (!preferences) return [];
+  if (Array.isArray(preferences)) return preferences.filter(Boolean).slice(0, 6);
+  return Object.values(preferences)
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter(Boolean)
+    .slice(0, 6);
+});
 const plannedCount = computed(() => uiStore.plannedVisitItems.length);
 const completedCount = computed(() => uiStore.completedVisitItems.length);
 const totalVisitCount = computed(() => plannedCount.value + completedCount.value);
@@ -77,7 +87,8 @@ const tabs = computed(() => [
     <section v-else class="my-page">
       <div class="profile-card my-profile-card">
         <button class="avatar profile-avatar-button" type="button" aria-label="프로필 편집" @click="router.push('/my/profile-edit')">
-          {{ profileInitial }}
+          <img v-if="profileImageUrl" :src="profileImageUrl" alt="내 프로필 이미지" />
+          <span v-else>{{ profileInitial }}</span>
           <span class="avatar-edit-badge">✎</span>
         </button>
         <div class="profile-copy">
@@ -87,6 +98,9 @@ const tabs = computed(() => [
           </div>
           <p>{{ profileBio }}</p>
           <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
+          <div v-if="profilePreferenceChips.length" class="profile-preference-chips" aria-label="내 여행 취향">
+            <span v-for="item in profilePreferenceChips" :key="item">{{ item }}</span>
+          </div>
         </div>
         <div class="profile-actions">
           <RouterLink class="profile-edit-button" to="/my/profile-edit">프로필 편집</RouterLink>

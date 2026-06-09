@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -10,9 +10,9 @@ import { useUiStore } from '../stores/uiStore.js';
 const router = useRouter();
 const uiStore = useUiStore();
 
-const contentOptions = ['드라마', '영화', '아이돌', '예능', '배우'];
+const contentOptions = ['드라마', '영화', '예능', '아이돌', '배우'];
 const regionOptions = ['서울', '부산', '제주', '경기', '강원', '인천'];
-const themeOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '성지 투어'];
+const themeOptions = ['감성 여행', '촬영지 투어', '맛집', '산책', '가족', '혼자 여행', '친구와 여행'];
 
 const nickname = ref(uiStore.currentUser?.nickname ?? '');
 const bio = ref(uiStore.currentUser?.bio ?? 'K-content 여행 중');
@@ -22,8 +22,12 @@ const selectedThemes = ref([...(uiStore.currentUser?.preferences?.themes ?? ['�
 const nicknameError = ref('');
 const saving = ref(false);
 const saveNotice = ref(null);
+const selectedImageName = ref('');
+const previewObjectUrl = ref('');
 
 const profileInitial = computed(() => nickname.value?.slice(0, 1).toUpperCase() || 'K');
+const currentProfileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
+const profilePreviewUrl = computed(() => previewObjectUrl.value || currentProfileImageUrl.value);
 
 function toggle(list, item) {
   const index = list.value.indexOf(item);
@@ -46,8 +50,21 @@ function validateNickname() {
   return true;
 }
 
-function notifyImageShell() {
-  uiStore.notify('프로필 이미지는 추후 지원 예정입니다.');
+function handleImageChange(event) {
+  const [file] = event.target.files ?? [];
+  if (previewObjectUrl.value) URL.revokeObjectURL(previewObjectUrl.value);
+  if (!file) {
+    previewObjectUrl.value = '';
+    selectedImageName.value = '';
+    return;
+  }
+  previewObjectUrl.value = URL.createObjectURL(file);
+  selectedImageName.value = file.name;
+  saveNotice.value = {
+    tone: 'info',
+    title: '프로필 이미지 미리보기',
+    text: '선택한 이미지는 미리보기로만 표시됩니다. 프로필 이미지 업로드는 추후 지원 예정입니다.',
+  };
 }
 
 async function saveProfile() {
@@ -76,6 +93,10 @@ async function saveProfile() {
       };
   if (ok) window.setTimeout(() => router.push('/my'), 450);
 }
+
+onBeforeUnmount(() => {
+  if (previewObjectUrl.value) URL.revokeObjectURL(previewObjectUrl.value);
+});
 </script>
 
 <template>
@@ -98,16 +119,33 @@ async function saveProfile() {
     </section>
 
     <section v-else class="profile-edit-screen">
-      <div class="profile-edit-avatar">
-        <button class="avatar large" type="button" @click="notifyImageShell">
-          {{ profileInitial }}
-          <span class="avatar-edit-badge large">✎</span>
-        </button>
-        <button type="button" class="text-link" @click="notifyImageShell">이미지 변경</button>
-        <small class="profile-image-note">프로필 이미지는 추후 지원 예정입니다.</small>
-      </div>
+      <section class="profile-preview-panel" aria-labelledby="profile-preview-title">
+        <div class="profile-edit-avatar">
+          <div class="avatar large profile-preview-avatar">
+            <img v-if="profilePreviewUrl" :src="profilePreviewUrl" alt="프로필 이미지 미리보기" />
+            <span v-else>{{ profileInitial }}</span>
+            <span class="avatar-edit-badge large">✎</span>
+          </div>
+          <div>
+            <h2 id="profile-preview-title">프로필 이미지 미리보기</h2>
+            <p>선택한 이미지는 이 화면에서만 미리보기로 표시됩니다.</p>
+          </div>
+        </div>
+        <label class="profile-image-picker">
+          <span>이미지 선택</span>
+          <input type="file" accept="image/*" @change="handleImageChange" />
+        </label>
+        <small class="profile-image-note">
+          {{ selectedImageName ? `${selectedImageName} · ` : '' }}프로필 이미지 업로드는 추후 지원 예정입니다.
+        </small>
+      </section>
 
       <div class="profile-edit-form">
+        <label class="form-field">
+          이메일
+          <input :value="uiStore.currentUser.email" readonly aria-readonly="true" />
+        </label>
+
         <label class="form-field">
           <span class="field-label-row">
             닉네임
@@ -142,6 +180,7 @@ async function saveProfile() {
               type="button"
               class="chip"
               :class="{ selected: selectedTypes.includes(item) }"
+              :aria-pressed="selectedTypes.includes(item)"
               @click="toggle(selectedTypes, item)"
             >
               {{ item }}
@@ -158,6 +197,7 @@ async function saveProfile() {
               type="button"
               class="chip"
               :class="{ selected: selectedRegions.includes(item) }"
+              :aria-pressed="selectedRegions.includes(item)"
               @click="toggle(selectedRegions, item)"
             >
               {{ item }}
@@ -174,6 +214,7 @@ async function saveProfile() {
               type="button"
               class="chip"
               :class="{ selected: selectedThemes.includes(item) }"
+              :aria-pressed="selectedThemes.includes(item)"
               @click="toggle(selectedThemes, item)"
             >
               {{ item }}

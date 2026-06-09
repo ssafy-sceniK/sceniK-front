@@ -5,6 +5,8 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import CourseCrudPanel from '../components/course/CourseCrudPanel.vue';
+import CourseDeleteActionSheet from '../components/course/CourseDeleteActionSheet.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import RouteProgressSummary from '../components/course/RouteProgressSummary.vue';
@@ -35,6 +37,14 @@ const routePlaces = computed(() => (course.value?.days ?? []).flatMap((day) => d
   ...stop,
   placeName: stop.placeName ?? stop.name ?? routeCandidateMap.value.get(stop.placeId)?.placeName ?? routeCandidateMap.value.get(stop.placeId)?.name,
 })) ?? []);
+const courseSourceLabel = computed(() => (isSavedCourse.value ? 'Saved Course CRUD' : 'AI Course template'));
+const courseUpdatedLabel = computed(() => (
+  course.value?.updatedAt
+  ?? course.value?.createdAt
+  ?? course.value?.dateRangeLabel
+  ?? (isSavedCourse.value ? '저장한 코스' : '저장 전 템플릿')
+));
+const deleteLoading = computed(() => uiStore.routeActionLoading && showDeleteSheet.value);
 
 async function loadDetail() {
   if (!isMyCourseRoute.value) return;
@@ -112,6 +122,11 @@ function shareCourse() {
 
 async function deleteCourse() {
   if (!isSavedCourse.value || !course.value?.routeId) return;
+  actionNotice.value = {
+    tone: 'info',
+    title: '코스를 삭제하는 중입니다.',
+    text: '저장한 코스 목록에서 제거하고 있습니다.',
+  };
   const deleted = await uiStore.deleteSavedCourse(course.value.routeId);
   if (!deleted) {
     actionNotice.value = {
@@ -190,6 +205,41 @@ async function deleteCourse() {
         :style-label="course.style"
       />
 
+      <CourseCrudPanel
+        title="코스 관리"
+        :description="isSavedCourse ? '저장한 코스를 수정, 공유, 삭제할 수 있습니다.' : '저장 전 코스는 먼저 저장하면 내 코스에서 수정과 삭제가 가능합니다.'"
+        :course-title="course.title"
+        :route-id="course.routeId"
+        :source-label="courseSourceLabel"
+        :place-count="routePlaces.length"
+        :updated-at="courseUpdatedLabel"
+      >
+        <template #status>
+          <FormStatusNotice
+            compact
+            tone="info"
+            :title="isSavedCourse ? '저장된 코스입니다.' : '저장 전 코스입니다.'"
+            :text="isSavedCourse ? '내 코스에서 장소 순서와 방문 시간을 수정하고 삭제할 수 있습니다.' : '저장하면 마이페이지의 저장한 AI 코스에서 다시 수정할 수 있습니다.'"
+          />
+        </template>
+        <template #actions>
+          <BaseButton @click="editCourse">{{ isSavedCourse ? '코스 수정' : 'AI 결과 편집' }}</BaseButton>
+          <BaseButton v-if="!isSavedCourse" variant="secondary" :disabled="uiStore.routeActionLoading" @click="saveTemplateCourse">
+            {{ uiStore.routeActionLoading ? '저장 중...' : '코스 저장' }}
+          </BaseButton>
+          <BaseButton variant="secondary" @click="shareCourse">공유</BaseButton>
+          <BaseButton variant="secondary" @click="viewAsAiResult">AI 결과로 보기</BaseButton>
+          <BaseButton
+            v-if="isSavedCourse"
+            variant="danger"
+            :disabled="uiStore.routeActionLoading"
+            @click="showDeleteSheet = true"
+          >
+            코스 삭제
+          </BaseButton>
+        </template>
+      </CourseCrudPanel>
+
       <div v-if="dayTabs.length > 1" class="day-tabs">
         <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
           Day {{ day }}
@@ -198,28 +248,12 @@ async function deleteCourse() {
 
       <Timeline :stops="stops" />
 
-      <div class="action-grid result-actions">
-        <BaseButton @click="editCourse">코스 편집</BaseButton>
-        <BaseButton v-if="!isSavedCourse" variant="secondary" @click="saveTemplateCourse">코스 저장</BaseButton>
-        <BaseButton variant="secondary" @click="shareCourse">공유</BaseButton>
-        <BaseButton variant="secondary" @click="viewAsAiResult">AI 결과로 보기</BaseButton>
-      </div>
-
-      <BaseButton v-if="isSavedCourse" variant="danger" block class="course-delete-button" @click="showDeleteSheet = true">
-        저장한 코스 삭제
-      </BaseButton>
-
-      <div v-if="showDeleteSheet" class="sheet-backdrop" @click="showDeleteSheet = false">
-        <div class="bottom-sheet delete-course-sheet" role="dialog" aria-modal="true" aria-label="저장한 코스 삭제" @click.stop>
-          <div class="sheet-handle"></div>
-          <h2>저장한 코스를 삭제할까요?</h2>
-          <p>삭제하면 마이페이지 저장 코스 목록에서 사라집니다. 같은 조건으로 다시 생성하거나 저장할 수 있습니다.</p>
-          <div class="sheet-actions two">
-            <BaseButton variant="secondary" @click="showDeleteSheet = false">취소</BaseButton>
-            <BaseButton variant="danger" @click="deleteCourse">삭제</BaseButton>
-          </div>
-        </div>
-      </div>
+      <CourseDeleteActionSheet
+        v-if="showDeleteSheet"
+        :loading="deleteLoading"
+        @cancel="showDeleteSheet = false"
+        @confirm="deleteCourse"
+      />
     </section>
 
     <section v-else class="course-detail-screen">

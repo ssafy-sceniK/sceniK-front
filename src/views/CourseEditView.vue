@@ -16,6 +16,7 @@ const uiStore = useUiStore();
 const draftDays = ref([]);
 const saveError = ref('');
 const saveNotice = ref(null);
+const draftTitle = ref('');
 const activeTimePicker = ref('');
 const candidateTargetDay = ref(1);
 const placeSearchKeyword = ref('');
@@ -56,6 +57,7 @@ function cloneDays(value) {
 }
 
 watch(course, (value) => {
+  draftTitle.value = value?.title ?? '';
   draftDays.value = cloneDays(value);
   saveError.value = '';
   saveNotice.value = null;
@@ -230,6 +232,11 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
   }
   targetDay.places.splice(Math.max(0, insertIndex), 0, item);
   draftDays.value = renumberDays(days);
+  saveNotice.value = {
+    tone: 'success',
+    title: '순서가 변경되었습니다.',
+    text: '변경사항 저장을 누르면 새 순서가 코스에 반영됩니다.',
+  };
   finishDrag();
 }
 
@@ -297,6 +304,11 @@ function removeStop(dayIndex, stopIndex) {
 function setStopTime(stop, value) {
   stop.recommendedTime = value;
   activeTimePicker.value = '';
+  saveNotice.value = {
+    tone: 'info',
+    title: '방문 시간이 변경되었습니다.',
+    text: '저장 전까지는 현재 편집 화면의 초안에만 반영됩니다.',
+  };
 }
 
 function buildEditedRoute() {
@@ -308,6 +320,7 @@ function buildEditedRoute() {
     .forEach((place) => candidateMap.set(place.placeId, place));
   return {
     ...course.value,
+    title: draftTitle.value.trim() || course.value.title,
     candidatePlaces: [...candidateMap.values()],
     days,
   };
@@ -316,6 +329,24 @@ function buildEditedRoute() {
 async function saveEdit() {
   if (!course.value) return;
   saveError.value = '';
+  if (!draftTitle.value.trim()) {
+    saveError.value = '코스 제목을 입력해 주세요.';
+    saveNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: saveError.value,
+    };
+    return;
+  }
+  if (!currentPlaceCount.value) {
+    saveError.value = '장소를 1개 이상 포함해 주세요.';
+    saveNotice.value = {
+      tone: 'warning',
+      title: '코스 구성을 확인해 주세요.',
+      text: saveError.value,
+    };
+    return;
+  }
   saveNotice.value = {
     tone: 'info',
     title: '수정 내용을 저장하는 중입니다.',
@@ -359,6 +390,14 @@ async function saveEdit() {
     text: '저장한 코스의 일정과 장소 순서가 업데이트되었습니다.',
   };
   window.setTimeout(() => router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
+}
+
+function cancelEdit() {
+  if (isAiEdit.value) {
+    router.push('/ai/result');
+    return;
+  }
+  router.push({ name: 'my-course-manage', params: { routeId: routeId.value } });
 }
 
 onBeforeUnmount(() => {
@@ -406,6 +445,23 @@ onBeforeUnmount(() => {
         <h1>{{ course.title }}</h1>
         <p>프로토타입처럼 모든 Day를 한 화면에서 확인하고, 왼쪽 핸들을 드래그해 순서를 바꿉니다. 장소는 검증된 후보에서만 추가됩니다.</p>
       </div>
+
+      <section class="course-edit-entity-form" aria-labelledby="course-edit-form-title">
+        <div class="section-mini-header">
+          <h2 id="course-edit-form-title">코스 수정 폼</h2>
+          <span>{{ isAiEdit ? '생성 결과 초안' : '저장 코스' }}</span>
+        </div>
+        <label class="form-field">
+          코스 제목
+          <input v-model="draftTitle" maxlength="48" placeholder="코스 제목" />
+        </label>
+        <FormStatusNotice
+          compact
+          tone="info"
+          title="저장 방식"
+          :text="isAiEdit ? 'AI 결과 편집은 저장 전 초안에 반영됩니다. 저장하면 내 코스에서 다시 수정할 수 있습니다.' : '변경사항 저장을 누르면 저장한 코스의 장소 순서와 시간이 backend에 반영됩니다.'"
+        />
+      </section>
 
       <RouteProgressSummary
         :places-count="currentPlaceCount"
@@ -544,7 +600,10 @@ onBeforeUnmount(() => {
       <p v-if="saveError" class="form-error">{{ saveError }}</p>
 
       <div class="sticky-actions">
-        <BaseButton block @click="saveEdit">수정 완료</BaseButton>
+        <BaseButton block :disabled="uiStore.routeActionLoading" @click="saveEdit">
+          {{ uiStore.routeActionLoading ? '저장 중입니다.' : '변경사항 저장' }}
+        </BaseButton>
+        <BaseButton variant="ghost" block :disabled="uiStore.routeActionLoading" @click="cancelEdit">취소</BaseButton>
       </div>
     </section>
   </AppLayout>
