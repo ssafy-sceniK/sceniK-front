@@ -1,4 +1,6 @@
 <script setup>
+import scenikLogoBlue from '../../assets/brand/scenik_single_wordmark_blue.png';
+
 const props = defineProps({
   size: {
     type: String,
@@ -10,11 +12,9 @@ const props = defineProps({
 
 <template>
   <span
-    class="scenik-logo scenik-logo--text"
-    :class="[`scenik-logo--${props.size}`, 'scenik-logo--font-dit-magi']"
-    aria-label="sceniK"
-    role="img"
+    class="scenik-logo"
+    :class="`scenik-logo--${props.size}`"
   >
-    <span class="scenik-logo__sceni" aria-hidden="true">sceni</span><span class="scenik-logo__k" aria-hidden="true">K</span>
+    <img class="scenik-logo__image" :src="scenikLogoBlue" alt="sceniK" />
   </span>
 </template>

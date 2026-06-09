@@ -1,10 +1,3 @@
-@font-face {
-  font-family: "Logo Dit Magi";
-  src: local("Dit Magi"), local("Dit Magi Demo"), local("Dit-Magi-Demo");
-  font-style: normal;
-  font-weight: 400 1000;
-}
-
 .app-shell,
 .splash-screen {
   position: relative;
@@ -285,7 +278,6 @@
   max-width: 100%;
   color: var(--color-primary);
   background: transparent;
-  font-family: "Avenir Next", "Segoe UI", "Pretendard Variable", Pretendard, Arial, sans-serif;
   line-height: 1;
   white-space: nowrap;
 }
@@ -294,30 +286,24 @@
   width: 136px;
   height: 42px;
   justify-content: flex-start;
-  font-size: 32px;
 }
 
 .scenik-logo--splash {
   width: 300px;
   height: 92px;
   margin: 0 auto 18px;
-  font-size: clamp(58px, 15vw, 68px);
 }
 
-.scenik-logo--font-dit-magi {
-  font-family: "Logo Dit Magi", "Avenir Next", "Segoe UI", Arial, sans-serif;
+.scenik-logo__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
 }
 
-.scenik-logo--font-dit-magi .scenik-logo__sceni,
-.scenik-logo--font-dit-magi .scenik-logo__k {
-  font-weight: 1000;
-  -webkit-text-stroke: 0.45px currentColor;
-}
-
-.scenik-logo__sceni,
-.scenik-logo__k {
-  font-style: normal;
-  letter-spacing: 0;
+.scenik-logo--splash .scenik-logo__image {
+  object-position: center;
 }
 
 .home-screen,

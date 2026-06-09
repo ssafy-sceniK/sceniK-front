@@ -54,9 +54,23 @@ const notificationToggles = ref({
       <div class="settings-section">
         <h2>계정</h2>
         <div class="settings-card">
-          <RouterLink to="/my/profile-edit">프로필 / 취향 수정</RouterLink>
-          <button v-if="uiStore.currentUser" type="button" class="danger-text" @click="uiStore.logout()">로그아웃</button>
-          <RouterLink v-else to="/login">로그인</RouterLink>
+          <RouterLink class="settings-action-row" to="/my/profile-edit">
+            <span>프로필 / 취향 수정</span>
+            <em aria-hidden="true">›</em>
+          </RouterLink>
+          <button
+            v-if="uiStore.currentUser"
+            type="button"
+            class="settings-action-row settings-action-row--logout"
+            @click="uiStore.logout()"
+          >
+            <span>로그아웃</span>
+            <em aria-hidden="true">›</em>
+          </button>
+          <RouterLink v-else class="settings-action-row" to="/login">
+            <span>로그인</span>
+            <em aria-hidden="true">›</em>
+          </RouterLink>
         </div>
       </div>
     </section>

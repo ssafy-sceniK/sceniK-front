@@ -27,7 +27,12 @@ onMounted(() => {
     </section>
   </div>
 
-  <div v-if="uiStore.toast" class="toast-message">
+  <div
+    v-if="uiStore.toast"
+    :class="['toast-message', `toast-message--${uiStore.toastTone || 'info'}`]"
+    role="status"
+    aria-live="polite"
+  >
     {{ uiStore.toast }}
   </div>
 </template>

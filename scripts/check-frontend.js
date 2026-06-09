@@ -20,6 +20,7 @@ const requiredFiles = [
   'src/views/HomeView.vue',
   'src/views/CourseView.vue',
   'src/views/AiResultView.vue',
+  'src/assets/brand/scenik_single_wordmark_blue.png',
   'src/components/brand/BrandLogo.vue',
   'src/components/layout/BottomNav.vue',
   'src/components/content/ContentCard.vue',
@@ -102,13 +103,17 @@ if ([topNav, splashView].some((file) => file.includes('scenik-logo-brand-2026052
   process.exit(1);
 }
 
-if (!brandLogo.includes('scenik-logo__sceni') || !brandLogo.includes('scenik-logo__k')) {
-  console.error('BrandLogo must render the text-only sceniK wordmark spans.');
+if (
+  !brandLogo.includes('scenik_single_wordmark_blue.png')
+  || !brandLogo.includes('<img')
+  || !brandLogo.includes('alt="sceniK"')
+) {
+  console.error('BrandLogo must render the blue PNG generated from the original sceniK wordmark asset.');
   process.exit(1);
 }
 
-if (brandLogo.includes('<svg') || brandLogo.includes('data:image/svg') || brandLogo.includes('<canvas') || brandLogo.includes('<img')) {
-  console.error('BrandLogo must not use SVG, canvas, or image logo rendering.');
+if (brandLogo.includes('<svg') || brandLogo.includes('data:image/svg') || brandLogo.includes('<canvas')) {
+  console.error('BrandLogo must not use the previous inline SVG or canvas logo rendering.');
   process.exit(1);
 }
 
@@ -117,23 +122,18 @@ if (brandLogo.includes("fillText('K'") || brandLogo.includes('drawEaveLayer') ||
   process.exit(1);
 }
 
-if (!brandLogo.includes('scenik-logo--font-dit-magi') || brandLogo.includes('useRoute') || brandLogo.includes('logoFontVariant')) {
-  console.error('BrandLogo must use the final Dit Magi logo treatment globally, without route-based font switching.');
+if (brandLogo.includes('useRoute') || brandLogo.includes('logoFontVariant')) {
+  console.error('BrandLogo must use one global logo treatment without route-based switching.');
   process.exit(1);
 }
 
-if (/\.scenik-logo__k\s*\{[^}]*color\s*:/m.test(shellCss)) {
-  console.error('The active text logo K must inherit the same color as sceni.');
+if (!/\.scenik-logo\s*\{[^}]*color:\s*var\(--color-primary\)\s*;/m.test(shellCss)) {
+  console.error('The active logo must use the primary sceniK blue token.');
   process.exit(1);
 }
 
-if (/(^|\n)\.scenik-logo__k\s*\{[^}]*font-weight\s*:/m.test(shellCss)) {
-  console.error('The final logo must not give K a separate base font weight.');
-  process.exit(1);
-}
-
-if (!shellCss.includes('Logo Dit Magi')) {
-  console.error('Missing final active logo font: Logo Dit Magi');
+if (/#000(?:000)?\b|black/i.test(brandLogo) || /#000(?:000)?\b|black/i.test(shellCss.match(/\.scenik-logo[\s\S]*?\.home-screen/)?.[0] ?? '')) {
+  console.error('The active logo must not render as a black logo in visible headers.');
   process.exit(1);
 }
 
@@ -144,13 +144,13 @@ if (!shellCss.includes('Logo Dit Magi')) {
   }
 });
 
-if (!/\.scenik-logo__sceni,\s*\.scenik-logo__k\s*\{[^}]*font-style:\s*normal\s*;[^}]*letter-spacing:\s*0\s*;/m.test(shellCss)) {
-  console.error('Final logo must keep sceni and K in one shared base text rule.');
+if (!/\.scenik-logo__image\s*\{[^}]*object-fit:\s*contain\s*;[^}]*object-position:\s*left center\s*;/m.test(shellCss)) {
+  console.error('Final logo image must preserve the original PNG proportions and left header alignment.');
   process.exit(1);
 }
 
-if (!/\.scenik-logo--font-dit-magi\s+\.scenik-logo__sceni,\s*\.scenik-logo--font-dit-magi\s+\.scenik-logo__k\s*\{[^}]*font-weight:\s*1000\s*;[^}]*-webkit-text-stroke:\s*0\.45px\s+currentColor\s*;/m.test(shellCss)) {
-  console.error('Dit Magi test logo must render sceni and K with the same maximum weight plus optical bold stroke.');
+if (/scenik-logo__(wordmark|route|plane|svg)/.test(brandLogo) || /scenik-logo__(wordmark|route|plane|svg)/.test(shellCss)) {
+  console.error('The previous inline SVG logo classes must not remain active.');
   process.exit(1);
 }
 
@@ -196,6 +196,11 @@ if (!/html\s*\{[^}]*scrollbar-gutter:\s*stable both-edges\s*;[^}]*overflow-y:\s*
 
 if (!communityView.includes(':title="isPostDetail ? \'게시글\' : composeMode ? \'커뮤니티\' : \'\'"')) {
   console.error('Community main tabs must use the same logo-led header as the other primary tabs.');
+  process.exit(1);
+}
+
+if (!communityView.includes('SortSegmentedControl') || communityView.includes('<select v-model="sort"')) {
+  console.error('Community latest/popular sorting must use the mobile segmented control instead of a native select.');
   process.exit(1);
 }
 

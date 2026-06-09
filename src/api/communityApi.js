@@ -6,6 +6,8 @@ function firstDefined(...values) {
 
 function normalizeComment(comment = {}) {
   const commentId = firstDefined(comment.commentId, comment.id);
+  const likeCount = Number(firstDefined(comment.likeCount, comment.likes, 0));
+  const likedByMe = Boolean(firstDefined(comment.likedByMe, comment.isLiked, comment.liked, false));
   return {
     ...comment,
     id: comment.id ?? commentId,
@@ -15,6 +17,10 @@ function normalizeComment(comment = {}) {
     userId: firstDefined(comment.userId, comment.authorId),
     text: firstDefined(comment.text, comment.body, comment.content, ''),
     date: firstDefined(comment.date, comment.createdAt?.slice?.(0, 10), ''),
+    likeCount,
+    likes: likeCount,
+    likedByMe,
+    isLiked: likedByMe,
   };
 }
 
@@ -103,6 +109,16 @@ export async function updateComment(postId, commentId, payload) {
 export async function deleteComment(postId, commentId) {
   await http.delete(`/posts/${postId}/comments/${commentId}`);
   return true;
+}
+
+export async function likeComment(commentId) {
+  const { data } = await http.post(`/posts/comments/${commentId}/likes`);
+  return data ? normalizeComment(data.comment ?? data) : null;
+}
+
+export async function unlikeComment(commentId) {
+  const { data } = await http.delete(`/posts/comments/${commentId}/likes`);
+  return data ? normalizeComment(data.comment ?? data) : null;
 }
 
 export async function likePost(postId) {

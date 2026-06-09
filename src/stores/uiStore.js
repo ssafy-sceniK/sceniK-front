@@ -38,8 +38,10 @@ import {
   deleteComment as deleteCommunityComment,
   getPost as fetchCommunityPost,
   getPosts as fetchCommunityPosts,
+  likeComment as likeCommunityComment,
   likePost as likeCommunityPost,
   normalizePost as normalizeCommunityPost,
+  unlikeComment as unlikeCommunityComment,
   unlikePost as unlikeCommunityPost,
   updateComment as updateCommunityComment,
 } from '../api/communityApi.js';
@@ -366,10 +368,34 @@ function mergeCommunityPost(posts, post) {
   return posts.map((item, index) => (index === existingIndex ? normalized : item));
 }
 
+function mergeCommunityComment(posts, comment) {
+  const key = comment?.commentId ?? comment?.id;
+  if (!key) return posts;
+  return posts.map((post) => {
+    const comments = post.comments ?? [];
+    const hasComment = comments.some((item) => sameId(item.commentId ?? item.id, key));
+    if (!hasComment) return post;
+    return {
+      ...post,
+      comments: comments.map((item) => (
+        sameId(item.commentId ?? item.id, key)
+          ? {
+              ...item,
+              ...comment,
+              id: comment.id ?? key,
+              commentId: comment.commentId ?? key,
+            }
+          : item
+      )),
+    };
+  });
+}
+
 export const useUiStore = defineStore('ui', {
   state: () => ({
     ...defaultState(),
     toast: '',
+    toastTone: 'info',
     loginRequiredMessage: '',
     authLoading: false,
     savedCoursesLoading: false,
@@ -384,6 +410,7 @@ export const useUiStore = defineStore('ui', {
     pendingContentLikes: [],
     pendingPlaceLikes: [],
     pendingPostLikes: [],
+    pendingCommentLikes: [],
     followActionLoadingIds: [],
   }),
   getters: {
@@ -408,6 +435,7 @@ export const useUiStore = defineStore('ui', {
     persist() {
       const {
         toast,
+        toastTone,
         loginRequiredMessage,
         authLoading,
         savedCoursesLoading,
@@ -436,6 +464,7 @@ export const useUiStore = defineStore('ui', {
         pendingContentLikes,
         pendingPlaceLikes,
         pendingPostLikes,
+        pendingCommentLikes,
         followActionLoadingIds,
         selectedContentId,
         selectedContentIds,
@@ -443,10 +472,14 @@ export const useUiStore = defineStore('ui', {
       } = this.$state;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
     },
-    notify(message) {
+    notify(message, tone = 'info') {
       this.toast = message;
+      this.toastTone = tone;
       window.setTimeout(() => {
-        if (this.toast === message) this.toast = '';
+        if (this.toast === message) {
+          this.toast = '';
+          this.toastTone = 'info';
+        }
       }, 2400);
     },
     requireAuth(message) {
@@ -580,7 +613,7 @@ export const useUiStore = defineStore('ui', {
         await this.loadEngagementState();
         await this.loadFollowState();
         this.persist();
-        this.notify('회원가입이 완료되었습니다.');
+        this.notify('회원가입이 완료되었습니다.', 'success');
         return this.currentUser;
       } catch (error) {
         throw new Error(apiErrorMessage(error, '회원가입에 실패했습니다.'));
@@ -602,7 +635,7 @@ export const useUiStore = defineStore('ui', {
         await this.loadEngagementState();
         await this.loadFollowState();
         this.persist();
-        this.notify('로그인되었습니다.');
+        this.notify('로그인되었습니다.', 'success');
         return this.currentUser;
       } catch (error) {
         throw new Error(apiErrorMessage(error, '로그인에 실패했습니다.'));
@@ -623,7 +656,7 @@ export const useUiStore = defineStore('ui', {
       this.followingUsers = [];
       this.followerUsers = [];
       this.persist();
-      this.notify('로그아웃되었습니다.');
+      this.notify('로그아웃되었습니다.', 'success');
     },
     async savePreferences(preferences) {
       if (this.currentUser) {
@@ -952,6 +985,38 @@ export const useUiStore = defineStore('ui', {
         this.pendingPostLikes = this.pendingPostLikes.filter((id) => !sameId(id, postId));
       }
     },
+    async toggleCommentLike(commentId) {
+      if (!this.requireAuth('로그인이 필요합니다.')) return;
+      if (this.pendingCommentLikes.some((id) => sameId(id, commentId))) return;
+
+      const current = this.communityPosts
+        .flatMap((post) => post.comments ?? [])
+        .find((comment) => sameId(comment.commentId ?? comment.id, commentId));
+      if (!current) return;
+
+      this.pendingCommentLikes = [...this.pendingCommentLikes, commentId];
+      const liked = Boolean(current.likedByMe || current.isLiked || current.liked);
+      const currentCount = Number(current.likeCount ?? current.likes ?? 0);
+
+      try {
+        const updated = liked ? await unlikeCommunityComment(commentId) : await likeCommunityComment(commentId);
+        const nextComment = updated ?? {
+          ...current,
+          likedByMe: !liked,
+          isLiked: !liked,
+          likeCount: liked ? Math.max(0, currentCount - 1) : currentCount + 1,
+          likes: liked ? Math.max(0, currentCount - 1) : currentCount + 1,
+        };
+        this.communityPosts = mergeCommunityComment(this.communityPosts, nextComment);
+        return nextComment;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '댓글 좋아요를 변경하지 못했습니다.');
+        this.notify(this.communityError);
+        return null;
+      } finally {
+        this.pendingCommentLikes = this.pendingCommentLikes.filter((id) => !sameId(id, commentId));
+      }
+    },
     togglePostScrap(postId) {
       if (!this.requireAuth('로그인하면 커뮤니티 글을 스크랩할 수 있습니다.')) return;
       let scrappedPost = false;
@@ -1087,7 +1152,7 @@ export const useUiStore = defineStore('ui', {
       try {
         await followUserRequest(userId);
         await this.loadFollowState();
-        this.notify('작성자를 팔로우했습니다.');
+        this.notify('작성자를 팔로우했습니다.', 'success');
         return true;
       } catch (error) {
         const message = apiErrorMessage(error, '팔로우하지 못했습니다.');
@@ -1105,7 +1170,7 @@ export const useUiStore = defineStore('ui', {
       try {
         await unfollowUserRequest(userId);
         this.followingUsers = this.followingUsers.filter((user) => !sameId(user.userId, userId));
-        this.notify('팔로우를 해제했습니다.');
+        this.notify('팔로우를 해제했습니다.', 'success');
         return true;
       } catch (error) {
         this.notify(apiErrorMessage(error, '팔로우를 해제하지 못했습니다.'));

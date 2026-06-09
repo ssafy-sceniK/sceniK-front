@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const route = useRoute();
@@ -12,6 +13,10 @@ const router = useRouter();
 const uiStore = useUiStore();
 const query = ref('');
 const sort = ref('latest');
+const sortOptions = [
+  { value: 'latest', label: '최신순' },
+  { value: 'popular', label: '인기순' },
+];
 const visibleLimit = ref(8);
 const title = ref('');
 const body = ref('');
@@ -116,6 +121,8 @@ const selectedPost = computed(() => {
   return uiStore.communityPosts.find((post) => String(post.id) === String(route.params.id)
     || String(post.postId) === String(route.params.id)) ?? null;
 });
+const selectedComments = computed(() => selectedPost.value?.comments ?? []);
+const topLevelComments = computed(() => selectedComments.value.filter((comment) => !comment.parentCommentId));
 
 function postKey(post) {
   return post?.postId ?? post?.id;
@@ -143,14 +150,103 @@ function isCommentOwner(comment) {
     && String(comment?.userId ?? '') === String(uiStore.currentUser.userId);
 }
 
+function isCommentLiked(comment) {
+  return Boolean(comment?.likedByMe || comment?.isLiked || comment?.liked);
+}
+
+function commentLikeCount(comment) {
+  return Number(comment?.likeCount ?? comment?.likes ?? 0);
+}
+
+function isCommentLikePending(comment) {
+  const key = commentKey(comment);
+  return Boolean(key && uiStore.pendingCommentLikes.some((id) => String(id) === String(key)));
+}
+
+function commentLikeLabel(comment) {
+  return isCommentLiked(comment) ? '댓글 좋아요 취소' : '댓글 좋아요';
+}
+
 function commentKey(comment) {
   return comment?.commentId ?? comment?.id;
+}
+
+function toggleCommentLike(comment) {
+  const key = commentKey(comment);
+  if (key) void uiStore.toggleCommentLike(key);
+}
+
+function repliesFor(comment) {
+  const parentId = commentKey(comment);
+  if (!parentId) return [];
+  return selectedComments.value.filter((item) => String(item.parentCommentId ?? '') === String(parentId));
+}
+
+function formatDateOnly(date) {
+  if (!date || Number.isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function commentTimeLabel(comment) {
+  const rawDate = comment?.createdAt ?? comment?.updatedAt ?? comment?.date;
+  if (!rawDate) return '방금 전';
+
+  const createdAt = new Date(rawDate);
+  if (Number.isNaN(createdAt.getTime())) return comment?.date || '방금 전';
+
+  const diffMs = Date.now() - createdAt.getTime();
+  if (diffMs < 0) return formatDateOnly(createdAt) || comment?.date || '방금 전';
+
+  const diffSeconds = Math.floor(diffMs / 1000);
+  if (diffSeconds < 10) return '방금 전';
+  if (diffSeconds < 60) return `${diffSeconds}초 전`;
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes}분 전`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}시간 전`;
+
+  return comment?.date || formatDateOnly(createdAt) || '방금 전';
+}
+
+function replyParentId(targetComment, threadParent = targetComment) {
+  return targetComment?.parentCommentId || commentKey(threadParent) || commentKey(targetComment);
+}
+
+function replyPlaceholder(comment) {
+  return `${comment?.user ?? '댓글 작성자'}에게 답글을 입력하세요`;
 }
 
 function linkedCourseTo(post) {
   return post?.routeId
     ? { name: 'course-detail', params: { routeId: post.routeId } }
     : '/ai/result';
+}
+
+function canShowAuthorFollow(post) {
+  const authorId = post?.userId;
+  if (!authorId) return false;
+  return !uiStore.currentUser?.userId || String(authorId) !== String(uiStore.currentUser.userId);
+}
+
+function isAuthorFollowed(post) {
+  const authorId = post?.userId;
+  return Boolean(authorId && uiStore.followingIds.some((id) => String(id) === String(authorId)));
+}
+
+function isAuthorFollowLoading(post) {
+  const authorId = post?.userId;
+  return Boolean(authorId && uiStore.followActionLoadingIds.some((id) => String(id) === String(authorId)));
+}
+
+async function toggleAuthorFollow(post) {
+  if (!post?.userId) return;
+  if (isAuthorFollowed(post)) await uiStore.unfollowUser(post.userId);
+  else await uiStore.followUser(post.userId);
 }
 
 async function createPost() {
@@ -183,8 +279,8 @@ function cancelReply() {
   replyText.value = '';
 }
 
-async function addReply(postId, comment) {
-  const parentId = commentKey(comment);
+async function addReply(postId, comment, threadParent = comment) {
+  const parentId = replyParentId(comment, threadParent);
   if (!parentId || commentActionLoading.value) return;
   if (!replyText.value.trim()) {
     uiStore.notify('댓글 내용을 입력해 주세요.');
@@ -236,24 +332,12 @@ function loadMorePosts() {
   visibleLimit.value += 8;
 }
 
-const canFollowSelectedAuthor = computed(() => Boolean(
-  selectedPost.value?.userId
-  && uiStore.currentUser?.userId
-  && String(selectedPost.value.userId) !== String(uiStore.currentUser.userId),
-));
-const selectedAuthorFollowed = computed(() => Boolean(
-  selectedPost.value?.userId
-  && uiStore.followingIds.some((id) => String(id) === String(selectedPost.value.userId)),
-));
-const selectedAuthorFollowLoading = computed(() => Boolean(
-  selectedPost.value?.userId
-  && uiStore.followActionLoadingIds.some((id) => String(id) === String(selectedPost.value.userId)),
-));
+const canFollowSelectedAuthor = computed(() => canShowAuthorFollow(selectedPost.value));
+const selectedAuthorFollowed = computed(() => isAuthorFollowed(selectedPost.value));
+const selectedAuthorFollowLoading = computed(() => isAuthorFollowLoading(selectedPost.value));
 
 async function toggleSelectedAuthorFollow() {
-  if (!selectedPost.value?.userId) return;
-  if (selectedAuthorFollowed.value) await uiStore.unfollowUser(selectedPost.value.userId);
-  else await uiStore.followUser(selectedPost.value.userId);
+  await toggleAuthorFollow(selectedPost.value);
 }
 
 function openShareSheet(post) {
@@ -348,10 +432,12 @@ async function nativeShare() {
                 v-if="canFollowSelectedAuthor"
                 type="button"
                 class="author-follow-button"
+                :class="{ 'is-following': selectedAuthorFollowed }"
+                :aria-pressed="selectedAuthorFollowed"
                 :disabled="selectedAuthorFollowLoading"
                 @click="toggleSelectedAuthorFollow"
               >
-                {{ selectedAuthorFollowed ? '팔로잉' : '팔로우' }}
+                {{ selectedAuthorFollowLoading ? '처리 중' : selectedAuthorFollowed ? '팔로잉' : '팔로우' }}
               </button>
             </div>
             <h1>{{ selectedPost.title }}</h1>
@@ -400,55 +486,166 @@ async function nativeShare() {
           </article>
 
           <section id="community-comments" class="comments-panel">
-            <h2>댓글 {{ selectedPost.comments?.length ?? 0 }}</h2>
-            <div v-for="comment in selectedPost.comments" :key="commentKey(comment)" class="comment-row">
-              <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
-              <div>
-                <div class="comment-meta">
-                  <b>{{ comment.user }}</b>
-                  <small>{{ comment.parentCommentId ? '답글' : '방금 전' }}</small>
+            <h2>댓글 {{ selectedComments.length }}</h2>
+            <div
+              v-for="comment in topLevelComments"
+              :key="commentKey(comment)"
+              class="comment-thread"
+            >
+              <div class="comment-row">
+                <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <div class="comment-meta">
+                      <b>{{ comment.user }}</b>
+                      <small>{{ commentTimeLabel(comment) }}</small>
+                    </div>
+                    <button
+                      type="button"
+                      class="comment-heart-button"
+                      :class="{ 'is-active': isCommentLiked(comment) }"
+                      :aria-pressed="isCommentLiked(comment)"
+                      :aria-label="commentLikeLabel(comment)"
+                      :disabled="isCommentLikePending(comment)"
+                      @click="toggleCommentLike(comment)"
+                    >
+                      <span class="action-icon" aria-hidden="true">{{ isCommentLiked(comment) ? '♥' : '♡' }}</span>
+                      <span v-if="commentLikeCount(comment)" class="comment-heart-count">{{ commentLikeCount(comment) }}</span>
+                    </button>
+                  </div>
+                  <template v-if="editingCommentId === commentKey(comment)">
+                    <textarea
+                      v-model="editingCommentText"
+                      class="comment-edit-input"
+                      maxlength="500"
+                      placeholder="댓글 내용을 입력해 주세요."
+                    ></textarea>
+                    <div class="comment-row-actions">
+                      <button
+                        type="button"
+                        class="comment-action-button is-primary"
+                        :disabled="commentActionLoading || !editingCommentText.trim()"
+                        @click="saveEditedComment(postKey(selectedPost))"
+                      >
+                        저장
+                      </button>
+                      <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <p>{{ comment.text }}</p>
+                    <div class="comment-row-actions">
+                      <button
+                        type="button"
+                        class="comment-action-button"
+                        :aria-label="`${comment.user}에게 답글 작성`"
+                        @click="startReply(comment)"
+                      >
+                        답글
+                      </button>
+                      <button v-if="isCommentOwner(comment)" type="button" class="comment-action-button" @click="startEditComment(comment)">수정</button>
+                      <button v-if="isCommentOwner(comment)" type="button" class="comment-action-button is-danger" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
+                    </div>
+                    <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
+                      <input
+                        v-model="replyText"
+                        :placeholder="replyPlaceholder(comment)"
+                        @keyup.enter="addReply(postKey(selectedPost), comment)"
+                      />
+                      <button
+                        type="button"
+                        :disabled="commentActionLoading || !replyText.trim()"
+                        @click="addReply(postKey(selectedPost), comment)"
+                      >
+                        등록
+                      </button>
+                      <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
+                    </div>
+                  </template>
                 </div>
-                <template v-if="editingCommentId === commentKey(comment)">
-                  <textarea
-                    v-model="editingCommentText"
-                    class="comment-edit-input"
-                    maxlength="500"
-                    placeholder="댓글 내용을 입력해 주세요."
-                  ></textarea>
-                  <div class="comment-row-actions">
-                    <button
-                      type="button"
-                      :disabled="commentActionLoading || !editingCommentText.trim()"
-                      @click="saveEditedComment(postKey(selectedPost))"
-                    >
-                      저장
-                    </button>
-                    <button type="button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+              </div>
+
+              <div v-if="repliesFor(comment).length" class="reply-thread">
+                <div
+                  v-for="reply in repliesFor(comment)"
+                  :key="commentKey(reply)"
+                  class="comment-row comment-row--reply"
+                >
+                  <span class="comment-avatar comment-avatar--reply">{{ reply.user?.slice(0, 1) || 'U' }}</span>
+                  <div class="comment-content">
+                    <div class="comment-header">
+                      <div class="comment-meta">
+                        <b>{{ reply.user }}</b>
+                        <small>{{ commentTimeLabel(reply) }}</small>
+                      </div>
+                      <button
+                        type="button"
+                        class="comment-heart-button"
+                        :class="{ 'is-active': isCommentLiked(reply) }"
+                        :aria-pressed="isCommentLiked(reply)"
+                        :aria-label="commentLikeLabel(reply)"
+                        :disabled="isCommentLikePending(reply)"
+                        @click="toggleCommentLike(reply)"
+                      >
+                        <span class="action-icon" aria-hidden="true">{{ isCommentLiked(reply) ? '♥' : '♡' }}</span>
+                        <span v-if="commentLikeCount(reply)" class="comment-heart-count">{{ commentLikeCount(reply) }}</span>
+                      </button>
+                    </div>
+                    <template v-if="editingCommentId === commentKey(reply)">
+                      <textarea
+                        v-model="editingCommentText"
+                        class="comment-edit-input"
+                        maxlength="500"
+                        placeholder="댓글 내용을 입력해 주세요."
+                      ></textarea>
+                      <div class="comment-row-actions">
+                        <button
+                          type="button"
+                          class="comment-action-button is-primary"
+                          :disabled="commentActionLoading || !editingCommentText.trim()"
+                          @click="saveEditedComment(postKey(selectedPost))"
+                        >
+                          저장
+                        </button>
+                        <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <p>{{ reply.text }}</p>
+                      <div class="comment-row-actions">
+                        <button
+                          type="button"
+                          class="comment-action-button"
+                          :aria-label="`${reply.user}에게 답글 작성`"
+                          @click="startReply(reply)"
+                        >
+                          답글
+                        </button>
+                        <button v-if="isCommentOwner(reply)" type="button" class="comment-action-button" @click="startEditComment(reply)">수정</button>
+                        <button v-if="isCommentOwner(reply)" type="button" class="comment-action-button is-danger" @click="deleteComment(postKey(selectedPost), reply)">삭제</button>
+                      </div>
+                      <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
+                        <input
+                          v-model="replyText"
+                          :placeholder="replyPlaceholder(reply)"
+                          @keyup.enter="addReply(postKey(selectedPost), reply, comment)"
+                        />
+                        <button
+                          type="button"
+                          :disabled="commentActionLoading || !replyText.trim()"
+                          @click="addReply(postKey(selectedPost), reply, comment)"
+                        >
+                          등록
+                        </button>
+                        <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
+                      </div>
+                    </template>
                   </div>
-                </template>
-                <template v-else>
-                  <p>{{ comment.text }}</p>
-                  <div class="comment-row-actions">
-                    <button v-if="!comment.parentCommentId" type="button" @click="startReply(comment)">답글</button>
-                    <button v-if="isCommentOwner(comment)" type="button" @click="startEditComment(comment)">수정</button>
-                    <button v-if="isCommentOwner(comment)" type="button" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
-                  </div>
-                  <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
-                    <input v-model="replyText" placeholder="답글을 입력하세요" @keyup.enter="addReply(postKey(selectedPost), comment)" />
-                    <button
-                      type="button"
-                      :disabled="commentActionLoading || !replyText.trim()"
-                      @click="addReply(postKey(selectedPost), comment)"
-                    >
-                      답글 등록
-                    </button>
-                    <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
-                  </div>
-                </template>
+                </div>
               </div>
             </div>
             <EmptyState
-              v-if="!selectedPost.comments?.length"
+              v-if="!selectedComments.length"
               icon="C"
               tone="community"
               compact
@@ -481,15 +678,14 @@ async function nativeShare() {
 
       <template v-else>
         <SearchBar v-model="query" placeholder="게시글 / 태그 검색" />
-        <div class="list-control-row" aria-label="커뮤니티 정렬과 결과 수">
-          <label>
-            정렬
-            <select v-model="sort" class="sort-select">
-              <option value="latest">최신순</option>
-              <option value="popular">인기순</option>
-            </select>
-          </label>
-          <span>{{ sortedPosts.length }}개 결과</span>
+        <div class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
+          <span class="list-control-label">정렬</span>
+          <SortSegmentedControl
+            v-model="sort"
+            :options="sortOptions"
+            aria-label="커뮤니티 글 정렬"
+          />
+          <span class="list-result-count" aria-live="polite">{{ sortedPosts.length }}개 결과</span>
         </div>
         <div class="mode-toggle community-tabs" aria-label="Community sections">
           <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
@@ -536,12 +732,28 @@ async function nativeShare() {
 
         <div v-else class="feed-list compact-feed-list">
           <article v-for="post in visiblePosts" :key="postKey(post)" class="feed-card route-story-card">
+            <div class="feed-card-author-row">
+              <div class="user-row feed-author-copy">
+                <b>{{ post.user }}</b>
+                <span>{{ post.date }}</span>
+              </div>
+              <button
+                v-if="canShowAuthorFollow(post)"
+                type="button"
+                class="author-follow-button author-follow-button--compact"
+                :class="{ 'is-following': isAuthorFollowed(post) }"
+                :aria-pressed="isAuthorFollowed(post)"
+                :disabled="isAuthorFollowLoading(post)"
+                @click="toggleAuthorFollow(post)"
+              >
+                {{ isAuthorFollowLoading(post) ? '처리 중' : isAuthorFollowed(post) ? '팔로잉' : '팔로우' }}
+              </button>
+            </div>
             <RouterLink class="feed-card-main" :to="`/community/post/${postKey(post)}`">
               <div class="feed-thumb">
                 <span>{{ post.region?.slice(0, 2) || 'KR' }}</span>
               </div>
               <div class="feed-body">
-                <div class="user-row"><b>{{ post.user }}</b><span>{{ post.date }}</span></div>
                 <h2>{{ post.title }}</h2>
                 <p>{{ post.body }}</p>
                 <div class="tag-row"><span v-for="tag in post.tags" :key="tag">{{ tag }}</span></div>
