@@ -1,8 +1,9 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import ContentCard from '../components/content/ContentCard.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import CourseCard from '../components/course/CourseCard.vue';
@@ -13,6 +14,7 @@ const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
 const type = computed(() => route.meta.type);
+const listNotice = ref(null);
 onMounted(async () => {
   if (type.value === 'saved-routes') await uiStore.loadSavedCourses();
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) {
@@ -235,6 +237,48 @@ function followUserInitial(user) {
 function isFollowActionPending(userId) {
   return uiStore.followActionLoadingIds.some((id) => String(id) === String(userId));
 }
+
+const followingIdSet = computed(() => new Set(uiStore.followingUsers.map((user) => String(user.userId))));
+const followerIdSet = computed(() => new Set(uiStore.followerUsers.map((user) => String(user.userId))));
+
+function isMutualFollow(user) {
+  const userId = String(user.userId);
+  if (type.value === 'following') return followerIdSet.value.has(userId);
+  return followingIdSet.value.has(userId) || user.followedByMe;
+}
+
+function followButtonLabel(user) {
+  if (isFollowActionPending(user.userId)) return '처리 중';
+  if (isMutualFollow(user)) return '맞팔';
+  return user.followedByMe || followingIdSet.value.has(String(user.userId)) ? '팔로잉' : '팔로우';
+}
+
+async function toggleFollowFromList(user) {
+  if (!user?.userId || user.userId === uiStore.currentUser?.userId) return;
+  const following = user.followedByMe || followingIdSet.value.has(String(user.userId));
+  listNotice.value = {
+    tone: 'info',
+    title: following ? '팔로우를 취소하는 중입니다.' : '팔로우하는 중입니다.',
+    text: `${user.nickname}님의 팔로우 상태를 backend와 동기화하고 있습니다.`,
+  };
+  const ok = following
+    ? await uiStore.unfollowUser(user.userId)
+    : await uiStore.followUser(user.userId);
+  if (ok) {
+    await uiStore.loadFollowState();
+    listNotice.value = {
+      tone: 'success',
+      title: following ? '팔로우를 취소했습니다.' : '팔로우했습니다.',
+      text: '팔로워/팔로잉 목록이 갱신되었습니다.',
+    };
+    return;
+  }
+  listNotice.value = {
+    tone: 'error',
+    title: '팔로우 상태를 변경하지 못했습니다.',
+    text: uiStore.followError || '로그인 상태를 확인한 뒤 다시 시도해 주세요.',
+  };
+}
 </script>
 
 <template>
@@ -342,6 +386,13 @@ function isFollowActionPending(userId) {
       </div>
 
       <div v-else-if="type === 'following' || type === 'followers'" class="user-list">
+        <FormStatusNotice
+          v-if="listNotice"
+          compact
+          :tone="listNotice.tone"
+          :title="listNotice.title"
+          :text="listNotice.text"
+        />
         <article
           v-for="user in type === 'following' ? uiStore.followingUsers : uiStore.followerUsers"
           :key="user.userId"
@@ -349,24 +400,27 @@ function isFollowActionPending(userId) {
         >
           <span class="user-list-avatar">{{ followUserInitial(user) }}</span>
           <div>
-            <strong>{{ user.nickname }}</strong>
+            <strong>
+              {{ user.nickname }}
+              <em v-if="isMutualFollow(user)" class="mutual-follow-badge">맞팔</em>
+            </strong>
             <small>팔로워 {{ user.followerCount }} · 팔로잉 {{ user.followingCount }}</small>
           </div>
           <button
-            v-if="type === 'following'"
+            v-if="type === 'following' && user.userId !== uiStore.currentUser?.userId"
             type="button"
             :disabled="isFollowActionPending(user.userId)"
-            @click="uiStore.unfollowUser(user.userId)"
+            @click="toggleFollowFromList(user)"
           >
-            팔로잉
+            {{ followButtonLabel(user) }}
           </button>
           <button
             v-else-if="user.userId !== uiStore.currentUser?.userId"
             type="button"
             :disabled="isFollowActionPending(user.userId)"
-            @click="user.followedByMe ? uiStore.unfollowUser(user.userId) : uiStore.followUser(user.userId)"
+            @click="toggleFollowFromList(user)"
           >
-            {{ user.followedByMe ? '팔로잉' : '팔로우' }}
+            {{ followButtonLabel(user) }}
           </button>
         </article>
       </div>

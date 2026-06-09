@@ -173,6 +173,41 @@
   line-height: 1.45;
 }
 
+.rating-distribution {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.rating-distribution span {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.rating-distribution b {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.rating-distribution i {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-strong);
+}
+
+.rating-distribution em {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
 .review-row-head {
   display: flex;
   align-items: center;

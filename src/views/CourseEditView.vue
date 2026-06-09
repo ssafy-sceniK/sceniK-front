@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import { getUserMessage } from '../api/error.js';
 import { fetchPlaces } from '../api/placeApi.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -13,6 +14,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const draftDays = ref([]);
 const saveError = ref('');
+const saveNotice = ref(null);
 const activeTimePicker = ref('');
 const candidateTargetDay = ref(1);
 const placeSearchKeyword = ref('');
@@ -52,6 +54,7 @@ function cloneDays(value) {
 watch(course, (value) => {
   draftDays.value = cloneDays(value);
   saveError.value = '';
+  saveNotice.value = null;
   activeTimePicker.value = '';
   candidateTargetDay.value = draftDays.value[0]?.dayNumber ?? 1;
   placeSearchRegion.value = value?.region ?? '';
@@ -230,6 +233,11 @@ function addCandidateToDay(dayIndex, candidate) {
   if (!candidate || !draftDays.value[dayIndex]) return;
   if (usedPlaceIds.value.has(candidate.placeId)) {
     saveError.value = `${candidate.name ?? candidate.placeName}은 이미 코스에 포함되어 있습니다.`;
+    saveNotice.value = {
+      tone: 'warning',
+      title: '중복 장소입니다.',
+      text: saveError.value,
+    };
     uiStore.notify(saveError.value);
     return;
   }
@@ -244,6 +252,11 @@ function addCandidateToDay(dayIndex, candidate) {
     travelTip: '방문 전 운영 시간과 이동 동선을 확인해 주세요.',
   });
   draftDays.value = renumberDays(days);
+  saveNotice.value = {
+    tone: 'success',
+    title: '장소가 추가되었습니다.',
+    text: `${candidate.name ?? candidate.placeName}을 Day ${dayIndex + 1}에 추가했습니다.`,
+  };
 }
 
 function candidateDayIndex() {
@@ -259,12 +272,22 @@ function removeStop(dayIndex, stopIndex) {
   const day = draftDays.value[dayIndex];
   if (!day) return;
   if (day.places.length <= 1) {
+    saveNotice.value = {
+      tone: 'warning',
+      title: '삭제할 수 없습니다.',
+      text: '각 Day에는 최소 1개 장소가 필요합니다.',
+    };
     uiStore.notify('각 Day에는 최소 1개 장소가 필요합니다.');
     return;
   }
   const days = cloneDraftDays();
   days[dayIndex].places.splice(stopIndex, 1);
   draftDays.value = renumberDays(days);
+  saveNotice.value = {
+    tone: 'success',
+    title: '삭제되었습니다.',
+    text: '선택한 장소를 코스에서 제거했습니다. 저장해야 실제 코스에 반영됩니다.',
+  };
 }
 
 function setStopTime(stop, value) {
@@ -289,24 +312,49 @@ function buildEditedRoute() {
 async function saveEdit() {
   if (!course.value) return;
   saveError.value = '';
+  saveNotice.value = {
+    tone: 'info',
+    title: '수정 내용을 저장하는 중입니다.',
+    text: '장소 순서와 방문 시간을 backend 상태에 반영하고 있습니다.',
+  };
   const editedRoute = buildEditedRoute();
 
   if (isAiEdit.value) {
     const updated = uiStore.updateGeneratedRoute(editedRoute);
     if (!updated) {
       saveError.value = uiStore.toast || 'AI 코스를 저장하지 못했습니다.';
+      saveNotice.value = {
+        tone: 'error',
+        title: '저장하지 못했습니다.',
+        text: saveError.value,
+      };
       return;
     }
-    router.push('/ai/result');
+    saveNotice.value = {
+      tone: 'success',
+      title: '수정되었습니다.',
+      text: 'AI 코스 편집 결과가 반영되었습니다.',
+    };
+    window.setTimeout(() => router.push('/ai/result'), 450);
     return;
   }
 
   const updated = await uiStore.updateSavedCourse(editedRoute);
   if (!updated) {
     saveError.value = uiStore.toast || '저장 코스를 수정하지 못했습니다.';
+    saveNotice.value = {
+      tone: 'error',
+      title: '수정하지 못했습니다.',
+      text: saveError.value,
+    };
     return;
   }
-  router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } });
+  saveNotice.value = {
+    tone: 'success',
+    title: '수정되었습니다.',
+    text: '저장한 코스의 일정과 장소 순서가 업데이트되었습니다.',
+  };
+  window.setTimeout(() => router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
 }
 
 onBeforeUnmount(() => {
@@ -475,6 +523,12 @@ onBeforeUnmount(() => {
         />
       </section>
 
+      <FormStatusNotice
+        v-if="saveNotice"
+        :tone="saveNotice.tone"
+        :title="saveNotice.title"
+        :text="saveNotice.text"
+      />
       <p v-if="saveError" class="form-error">{{ saveError }}</p>
 
       <div class="sticky-actions">

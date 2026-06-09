@@ -149,6 +149,50 @@
   outline-offset: -3px;
 }
 
+.settings-session-card {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-session-card strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.settings-session-card p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.session-logout-button,
+.session-login-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.session-logout-button:focus-visible,
+.session-login-link:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.34);
+  outline-offset: 2px;
+}
+
 .settings-card b {
   width: 20px;
   height: 20px;
@@ -1149,6 +1193,21 @@
   display: block;
   color: var(--text);
   font-size: 14px;
+}
+
+.mutual-follow-badge {
+  margin-left: 6px;
+  padding: 2px 6px;
+  display: inline-flex;
+  vertical-align: middle;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(0, 82, 255, 0.14);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.2;
 }
 
 .user-list-row button {

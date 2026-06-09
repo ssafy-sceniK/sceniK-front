@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
@@ -26,6 +27,14 @@ const editingCommentText = ref('');
 const replyTargetId = ref('');
 const replyText = ref('');
 const commentActionLoading = ref(false);
+const commentActionTarget = ref(null);
+const commentNotice = ref(null);
+const postActionLoading = ref(false);
+const postNotice = ref(null);
+const editingPost = ref(false);
+const postEditTitle = ref('');
+const postEditBody = ref('');
+const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 
 const boards = [
@@ -150,6 +159,11 @@ function isCommentOwner(comment) {
     && String(comment?.userId ?? '') === String(uiStore.currentUser.userId);
 }
 
+function isPostOwner(post) {
+  return Boolean(uiStore.currentUser?.userId)
+    && String(post?.userId ?? '') === String(uiStore.currentUser.userId);
+}
+
 function isCommentLiked(comment) {
   return Boolean(comment?.likedByMe || comment?.isLiked || comment?.liked);
 }
@@ -262,11 +276,127 @@ async function createPost() {
   }
 }
 
+function startPostEdit() {
+  if (!selectedPost.value) return;
+  editingPost.value = true;
+  postEditTitle.value = selectedPost.value.title ?? '';
+  postEditBody.value = selectedPost.value.body ?? '';
+  postNotice.value = {
+    tone: 'info',
+    title: '게시글 수정',
+    text: '제목과 내용을 수정한 뒤 저장을 눌러 주세요.',
+  };
+}
+
+function cancelPostEdit() {
+  editingPost.value = false;
+  postEditTitle.value = '';
+  postEditBody.value = '';
+}
+
+async function savePostEdit() {
+  const target = selectedPost.value;
+  if (!target || postActionLoading.value) return;
+  if (postEditTitle.value.trim().length < 2 || postEditBody.value.trim().length < 5) {
+    postNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: '제목은 2자 이상, 내용은 5자 이상 입력해야 수정할 수 있습니다.',
+    };
+    return;
+  }
+  postActionLoading.value = true;
+  postNotice.value = {
+    tone: 'info',
+    title: '게시글을 수정하는 중입니다.',
+    text: '수정 내용을 backend에 저장하고 있습니다.',
+  };
+  const updated = await uiStore.editPost(postKey(target), {
+    title: postEditTitle.value.trim(),
+    body: postEditBody.value.trim(),
+    tags: target.tags ?? [],
+    region: target.region,
+    duration: target.duration,
+    routeId: target.routeId,
+    prefix: target.prefix,
+    attachments: target.attachments ?? [],
+  });
+  postActionLoading.value = false;
+  if (updated) {
+    cancelPostEdit();
+    postNotice.value = {
+      tone: 'success',
+      title: '수정되었습니다.',
+      text: '게시글 제목과 내용이 업데이트되었습니다.',
+    };
+    return;
+  }
+  postNotice.value = {
+    tone: 'error',
+    title: '게시글을 수정하지 못했습니다.',
+    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+  };
+}
+
+async function deletePost() {
+  const target = selectedPost.value;
+  if (!target || postActionLoading.value) return;
+  postActionLoading.value = true;
+  postNotice.value = {
+    tone: 'info',
+    title: '게시글을 삭제하는 중입니다.',
+    text: '작성한 게시글을 삭제하고 커뮤니티 목록을 갱신하고 있습니다.',
+  };
+  const deleted = await uiStore.removePost(postKey(target));
+  postActionLoading.value = false;
+  showPostDeleteSheet.value = false;
+  if (deleted) {
+    postNotice.value = {
+      tone: 'success',
+      title: '삭제되었습니다.',
+      text: '게시글이 커뮤니티에서 제거되었습니다.',
+    };
+    window.setTimeout(() => router.replace('/community'), 450);
+    return;
+  }
+  postNotice.value = {
+    tone: 'error',
+    title: '게시글을 삭제하지 못했습니다.',
+    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+  };
+}
+
 async function addComment(postId) {
+  if (!commentText.value.trim()) {
+    commentNotice.value = {
+      tone: 'warning',
+      title: '댓글 내용을 입력해 주세요.',
+      text: '댓글은 한 글자 이상 입력해야 등록할 수 있습니다.',
+    };
+    uiStore.notify('댓글 내용을 입력해 주세요.');
+    return;
+  }
+  commentNotice.value = {
+    tone: 'info',
+    title: '댓글을 등록하는 중입니다.',
+    text: '작성한 댓글을 backend에 저장하고 있습니다.',
+  };
   const created = await uiStore.addComment(postId, commentText.value);
   if (created) {
     commentText.value = '';
+    commentNotice.value = {
+      tone: 'success',
+      title: '댓글이 등록되었습니다.',
+      text: '게시글 댓글 목록에 새 댓글이 추가되었습니다.',
+    };
+    uiStore.notify('댓글이 등록되었습니다.', 'success');
+    return;
   }
+  commentNotice.value = {
+    tone: 'error',
+    title: '댓글을 등록하지 못했습니다.',
+    text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  };
 }
 
 function startReply(comment) {
@@ -283,18 +413,48 @@ async function addReply(postId, comment, threadParent = comment) {
   const parentId = replyParentId(comment, threadParent);
   if (!parentId || commentActionLoading.value) return;
   if (!replyText.value.trim()) {
+    commentNotice.value = {
+      tone: 'warning',
+      title: '댓글 내용을 입력해 주세요.',
+      text: '답글은 한 글자 이상 입력해야 등록할 수 있습니다.',
+    };
     uiStore.notify('댓글 내용을 입력해 주세요.');
     return;
   }
   commentActionLoading.value = true;
+  commentNotice.value = {
+    tone: 'info',
+    title: '답글을 등록하는 중입니다.',
+    text: '선택한 댓글의 답글로 저장하고 있습니다.',
+  };
   const created = await uiStore.addComment(postId, replyText.value, parentId);
   commentActionLoading.value = false;
-  if (created) cancelReply();
+  if (created) {
+    cancelReply();
+    commentNotice.value = {
+      tone: 'success',
+      title: '답글이 등록되었습니다.',
+      text: '답글은 한 단계 thread 안에 표시됩니다.',
+    };
+    uiStore.notify('답글이 등록되었습니다.', 'success');
+    return;
+  }
+  commentNotice.value = {
+    tone: 'error',
+    title: '답글을 등록하지 못했습니다.',
+    text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  };
 }
 
 function startEditComment(comment) {
   editingCommentId.value = commentKey(comment);
   editingCommentText.value = comment.text ?? '';
+  commentActionTarget.value = null;
+  commentNotice.value = {
+    tone: 'info',
+    title: '댓글 수정',
+    text: '내용을 수정한 뒤 저장을 눌러 주세요.',
+  };
 }
 
 function cancelEditComment() {
@@ -305,23 +465,72 @@ function cancelEditComment() {
 async function saveEditedComment(postId) {
   if (!editingCommentId.value || commentActionLoading.value) return;
   if (!editingCommentText.value.trim()) {
+    commentNotice.value = {
+      tone: 'warning',
+      title: '댓글 내용을 입력해 주세요.',
+      text: '수정할 댓글 내용은 비워둘 수 없습니다.',
+    };
     uiStore.notify('댓글 내용을 입력해 주세요.');
     return;
   }
   commentActionLoading.value = true;
+  commentNotice.value = {
+    tone: 'info',
+    title: '댓글을 수정하는 중입니다.',
+    text: '수정 내용을 backend에 저장하고 있습니다.',
+  };
   const updated = await uiStore.editComment(postId, editingCommentId.value, editingCommentText.value);
   commentActionLoading.value = false;
-  if (updated) cancelEditComment();
+  if (updated) {
+    cancelEditComment();
+    commentNotice.value = {
+      tone: 'success',
+      title: '댓글이 수정되었습니다.',
+      text: '수정한 내용이 댓글 목록에 반영되었습니다.',
+    };
+    return;
+  }
+  commentNotice.value = {
+    tone: 'error',
+    title: '댓글을 수정하지 못했습니다.',
+    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+  };
 }
 
 async function deleteComment(postId, comment) {
   const targetId = commentKey(comment);
   if (!targetId || commentActionLoading.value) return;
-  if (!window.confirm('댓글을 삭제할까요?')) return;
   commentActionLoading.value = true;
+  commentNotice.value = {
+    tone: 'info',
+    title: '댓글을 삭제하는 중입니다.',
+    text: '선택한 댓글을 삭제하고 목록을 갱신하고 있습니다.',
+  };
   const deleted = await uiStore.removeComment(postId, targetId);
   commentActionLoading.value = false;
-  if (deleted && editingCommentId.value === targetId) cancelEditComment();
+  commentActionTarget.value = null;
+  if (deleted) {
+    if (editingCommentId.value === targetId) cancelEditComment();
+    commentNotice.value = {
+      tone: 'success',
+      title: '댓글이 삭제되었습니다.',
+      text: '선택한 댓글이 목록에서 제거되었습니다.',
+    };
+    return;
+  }
+  commentNotice.value = {
+    tone: 'error',
+    title: '댓글을 삭제하지 못했습니다.',
+    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+  };
+}
+
+function openCommentActions(comment) {
+  commentActionTarget.value = comment;
+}
+
+function closeCommentActions() {
+  commentActionTarget.value = null;
 }
 
 function clearQuery() {
@@ -440,8 +649,37 @@ async function nativeShare() {
                 {{ selectedAuthorFollowLoading ? '처리 중' : selectedAuthorFollowed ? '팔로잉' : '팔로우' }}
               </button>
             </div>
-            <h1>{{ selectedPost.title }}</h1>
-            <p>{{ selectedPost.body }}</p>
+            <FormStatusNotice
+              v-if="postNotice"
+              compact
+              :tone="postNotice.tone"
+              :title="postNotice.title"
+              :text="postNotice.text"
+            />
+            <template v-if="editingPost">
+              <label class="form-field compact">
+                제목
+                <input v-model="postEditTitle" maxlength="50" placeholder="게시글 제목" />
+              </label>
+              <label class="form-field compact">
+                내용
+                <textarea v-model="postEditBody" maxlength="500" placeholder="게시글 내용을 입력해 주세요."></textarea>
+              </label>
+              <div class="post-owner-actions">
+                <BaseButton :disabled="postActionLoading || postEditTitle.trim().length < 2 || postEditBody.trim().length < 5" @click="savePostEdit">
+                  {{ postActionLoading ? '저장 중...' : '수정 저장' }}
+                </BaseButton>
+                <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">취소</BaseButton>
+              </div>
+            </template>
+            <template v-else>
+              <h1>{{ selectedPost.title }}</h1>
+              <p>{{ selectedPost.body }}</p>
+              <div v-if="isPostOwner(selectedPost)" class="post-owner-actions">
+                <BaseButton variant="secondary" @click="startPostEdit">게시글 수정</BaseButton>
+                <BaseButton variant="danger" @click="showPostDeleteSheet = true">게시글 삭제</BaseButton>
+              </div>
+            </template>
             <div class="post-gallery" aria-label="Route image previews">
               <span></span>
               <span></span>
@@ -483,10 +721,30 @@ async function nativeShare() {
               </button>
               <button type="button" @click="openShareSheet(selectedPost)">공유</button>
             </div>
+            <div v-if="showPostDeleteSheet" class="sheet-backdrop" @click="showPostDeleteSheet = false">
+              <div class="bottom-sheet delete-course-sheet" role="dialog" aria-modal="true" aria-label="게시글 삭제" @click.stop>
+                <div class="sheet-handle"></div>
+                <h2>게시글을 삭제할까요?</h2>
+                <p>삭제하면 커뮤니티 목록과 내 게시글 목록에서 사라집니다. 댓글도 함께 보이지 않게 됩니다.</p>
+                <div class="sheet-actions two">
+                  <BaseButton variant="secondary" :disabled="postActionLoading" @click="showPostDeleteSheet = false">취소</BaseButton>
+                  <BaseButton variant="danger" :disabled="postActionLoading" @click="deletePost">
+                    {{ postActionLoading ? '삭제 중...' : '삭제' }}
+                  </BaseButton>
+                </div>
+              </div>
+            </div>
           </article>
 
           <section id="community-comments" class="comments-panel">
             <h2>댓글 {{ selectedComments.length }}</h2>
+            <FormStatusNotice
+              v-if="commentNotice"
+              compact
+              :tone="commentNotice.tone"
+              :title="commentNotice.title"
+              :text="commentNotice.text"
+            />
             <div
               v-for="comment in topLevelComments"
               :key="commentKey(comment)"
@@ -543,8 +801,16 @@ async function nativeShare() {
                       >
                         답글
                       </button>
-                      <button v-if="isCommentOwner(comment)" type="button" class="comment-action-button" @click="startEditComment(comment)">수정</button>
-                      <button v-if="isCommentOwner(comment)" type="button" class="comment-action-button is-danger" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
+                      <button
+                        v-if="isCommentOwner(comment)"
+                        type="button"
+                        class="comment-action-button"
+                        :aria-label="`${comment.user} 댓글 관리`"
+                        :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(comment)"
+                        @click="openCommentActions(comment)"
+                      >
+                        더보기
+                      </button>
                     </div>
                     <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
                       <input
@@ -621,8 +887,16 @@ async function nativeShare() {
                         >
                           답글
                         </button>
-                        <button v-if="isCommentOwner(reply)" type="button" class="comment-action-button" @click="startEditComment(reply)">수정</button>
-                        <button v-if="isCommentOwner(reply)" type="button" class="comment-action-button is-danger" @click="deleteComment(postKey(selectedPost), reply)">삭제</button>
+                        <button
+                          v-if="isCommentOwner(reply)"
+                          type="button"
+                          class="comment-action-button"
+                          :aria-label="`${reply.user} 답글 관리`"
+                          :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(reply)"
+                          @click="openCommentActions(reply)"
+                        >
+                          더보기
+                        </button>
                       </div>
                       <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
                         <input
@@ -655,6 +929,28 @@ async function nativeShare() {
             <div class="comment-box">
               <input v-model="commentText" placeholder="댓글을 입력하세요" @keyup.enter="addComment(postKey(selectedPost))" />
               <button type="button" :disabled="!commentText.trim()" @click="addComment(postKey(selectedPost))">등록</button>
+            </div>
+            <div v-if="commentActionTarget" class="sheet-backdrop comment-action-backdrop" @click="closeCommentActions">
+              <div
+                class="bottom-sheet comment-action-sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-label="댓글 관리"
+                tabindex="-1"
+                @keydown.esc.prevent="closeCommentActions"
+                @click.stop
+              >
+                <div class="sheet-handle"></div>
+                <h2>댓글을 관리할까요?</h2>
+                <p>내가 작성한 댓글만 수정하거나 삭제할 수 있습니다. 삭제하면 목록에서 바로 제거됩니다.</p>
+                <div class="sheet-actions two">
+                  <BaseButton variant="secondary" @click="startEditComment(commentActionTarget)">수정</BaseButton>
+                  <BaseButton variant="danger" :disabled="commentActionLoading" @click="deleteComment(postKey(selectedPost), commentActionTarget)">
+                    {{ commentActionLoading ? '삭제 중...' : '삭제' }}
+                  </BaseButton>
+                </div>
+                <BaseButton variant="secondary" block @click="closeCommentActions">취소</BaseButton>
+              </div>
             </div>
           </section>
         </template>

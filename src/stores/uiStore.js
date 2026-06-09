@@ -36,6 +36,7 @@ import {
   createComment as createCommunityComment,
   createPost as createCommunityPost,
   deleteComment as deleteCommunityComment,
+  deletePost as deleteCommunityPost,
   getPost as fetchCommunityPost,
   getPosts as fetchCommunityPosts,
   likeComment as likeCommunityComment,
@@ -44,6 +45,7 @@ import {
   unlikeComment as unlikeCommunityComment,
   unlikePost as unlikeCommunityPost,
   updateComment as updateCommunityComment,
+  updatePost as updateCommunityPost,
 } from '../api/communityApi.js';
 import {
   fetchFollowers,
@@ -954,6 +956,32 @@ export const useUiStore = defineStore('ui', {
         this.communityError = apiErrorMessage(error, '게시글을 작성하지 못했습니다.');
         this.notify(this.communityError);
         return null;
+      }
+    },
+    async editPost(postId, payload) {
+      if (!this.requireAuth('로그인하면 게시글을 수정할 수 있습니다.')) return null;
+      try {
+        const post = await updateCommunityPost(postId, payload);
+        this.communityPosts = mergeCommunityPost(this.communityPosts, post);
+        this.notify('게시글을 수정했습니다.', 'success');
+        return post;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글을 수정하지 못했습니다.');
+        this.notify(this.communityError);
+        return null;
+      }
+    },
+    async removePost(postId) {
+      if (!this.requireAuth('로그인하면 게시글을 삭제할 수 있습니다.')) return false;
+      try {
+        await deleteCommunityPost(postId);
+        this.communityPosts = this.communityPosts.filter((post) => !sameId(post.id, postId) && !sameId(post.postId, postId));
+        this.notify('게시글을 삭제했습니다.', 'success');
+        return true;
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글을 삭제하지 못했습니다.');
+        this.notify(this.communityError);
+        return false;
       }
     },
     async togglePostLike(postId) {

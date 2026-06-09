@@ -46,6 +46,11 @@ export async function login(payload) {
   };
 }
 
+export async function checkEmailAvailability(email) {
+  const { data } = await http.get('/auth/check-email', { params: { email } });
+  return data;
+}
+
 export async function logout() {
   await http.post('/auth/logout');
 }

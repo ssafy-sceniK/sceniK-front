@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -26,6 +27,8 @@ const selectedPrefix = ref('');
 const title = ref('');
 const body = ref('');
 const attachments = ref([]);
+const posting = ref(false);
+const statusNotice = ref(null);
 const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
 const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5);
 
@@ -81,12 +84,28 @@ function handleAttachments(event) {
 }
 
 async function createPost() {
+  if (posting.value) return;
+  if (!canSubmit.value) {
+    statusNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: '제목은 2자 이상, 내용은 5자 이상 입력해야 게시할 수 있습니다.',
+    };
+    return;
+  }
+
   const tags = [
     selectedBoardMeta.value.tag,
     selectedPrefix.value,
     uiStore.courseConditions.region,
   ].filter(Boolean);
 
+  posting.value = true;
+  statusNotice.value = {
+    tone: 'info',
+    title: '게시글을 저장하는 중입니다.',
+    text: '커뮤니티 피드에 등록할 내용을 backend에 전송하고 있습니다.',
+  };
   const created = await uiStore.createPost({
     title: title.value.trim(),
     body: body.value.trim(),
@@ -96,8 +115,21 @@ async function createPost() {
     attachments: attachments.value,
   });
 
-  if (!created) return;
-  router.push('/community');
+  posting.value = false;
+  if (!created) {
+    statusNotice.value = {
+      tone: 'error',
+      title: '게시글을 작성하지 못했습니다.',
+      text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    };
+    return;
+  }
+  statusNotice.value = {
+    tone: 'success',
+    title: '저장되었습니다.',
+    text: '게시글이 커뮤니티 피드에 등록되었습니다.',
+  };
+  window.setTimeout(() => router.push('/community'), 450);
 }
 </script>
 
@@ -174,9 +206,16 @@ async function createPost() {
         </div>
       </div>
 
+      <FormStatusNotice
+        v-if="statusNotice"
+        :tone="statusNotice.tone"
+        :title="statusNotice.title"
+        :text="statusNotice.text"
+      />
+
       <div class="sticky-actions">
-        <BaseButton class="course-primary-cta" block :disabled="!canSubmit">
-          <span>게시하기</span>
+        <BaseButton class="course-primary-cta" block :disabled="!canSubmit || posting">
+          <span>{{ posting ? '게시 중...' : '게시하기' }}</span>
           <small>{{ canSubmit ? '커뮤니티 피드에 바로 등록됩니다' : '제목 2자, 내용 5자 이상 입력해 주세요' }}</small>
         </BaseButton>
       </div>

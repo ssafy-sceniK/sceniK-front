@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import {
   createPlaceReview,
@@ -25,6 +26,7 @@ const errorMessage = ref('');
 const reviews = ref([]);
 const reviewLoading = ref(false);
 const reviewError = ref('');
+const reviewNotice = ref(null);
 const reviewSubmitting = ref(false);
 const reviewForm = ref({
   rating: 5,
@@ -42,6 +44,9 @@ const likePending = computed(() => Boolean(place.value)
   && uiStore.pendingPlaceLikes.some((id) => String(id) === String(place.value.placeId)));
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
   && reviews.value.some((review) => review.userId === uiStore.currentUser.userId));
+const myReview = computed(() => reviews.value.find((review) => (
+  Boolean(uiStore.currentUser?.userId) && String(review.userId) === String(uiStore.currentUser.userId)
+)) ?? null);
 const reviewCount = computed(() => reviews.value.length || Number(place.value?.reviewCount ?? 0));
 const averageRating = computed(() => {
   const rated = reviews.value.map((review) => Number(review.rating)).filter((rating) => Number.isFinite(rating));
@@ -49,6 +54,14 @@ const averageRating = computed(() => {
   const fromPlace = Number(place.value?.averageRating ?? 0);
   return fromPlace > 0 ? fromPlace.toFixed(1) : '0.0';
 });
+const ratingSummary = computed(() => [5, 4, 3, 2, 1].map((score) => {
+  const count = reviews.value.filter((review) => Math.round(Number(review.rating)) === score).length;
+  return {
+    score,
+    count,
+    percent: reviewCount.value ? Math.round((count / reviewCount.value) * 100) : 0,
+  };
+}));
 
 function isReviewOwner(review) {
   return Boolean(uiStore.currentUser?.userId)
@@ -79,6 +92,7 @@ async function loadReviews() {
   if (!placeId.value) return;
   reviewLoading.value = true;
   reviewError.value = '';
+  reviewNotice.value = null;
   try {
     reviews.value = await fetchPlaceReviews(placeId.value);
   } catch (error) {
@@ -94,16 +108,31 @@ async function submitReview() {
   if (!uiStore.requireAuth('로그인하면 장소 리뷰를 작성할 수 있습니다.')) return;
   if (!reviewForm.value.content.trim()) {
     reviewError.value = '리뷰 내용을 입력해 주세요.';
+    reviewNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: reviewError.value,
+    };
     uiStore.notify(reviewError.value);
     return;
   }
   if (Number(reviewForm.value.rating) < 0 || Number(reviewForm.value.rating) > 5) {
     reviewError.value = '평점은 0점부터 5점까지 입력해 주세요.';
+    reviewNotice.value = {
+      tone: 'warning',
+      title: '평점을 확인해 주세요.',
+      text: reviewError.value,
+    };
     uiStore.notify(reviewError.value);
     return;
   }
   reviewSubmitting.value = true;
   reviewError.value = '';
+  reviewNotice.value = {
+    tone: 'info',
+    title: '리뷰를 등록하는 중입니다.',
+    text: '장소 방문 경험을 backend 리뷰 API에 저장하고 있습니다.',
+  };
   try {
     const created = await createPlaceReview(place.value.placeId, {
       rating: Number(reviewForm.value.rating),
@@ -111,9 +140,19 @@ async function submitReview() {
     });
     reviews.value = [created, ...reviews.value.filter((review) => review.reviewId !== created.reviewId)];
     reviewForm.value = { rating: 5, content: '' };
-    uiStore.notify('리뷰를 등록했습니다.');
+    reviewNotice.value = {
+      tone: 'success',
+      title: '저장되었습니다.',
+      text: '방문 리뷰가 등록되었습니다. 한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.',
+    };
+    uiStore.notify('리뷰를 등록했습니다.', 'success');
   } catch (error) {
     reviewError.value = getUserMessage(error, '리뷰를 등록하지 못했습니다.');
+    reviewNotice.value = {
+      tone: 'error',
+      title: '리뷰를 등록하지 못했습니다.',
+      text: reviewError.value,
+    };
   } finally {
     reviewSubmitting.value = false;
   }
@@ -126,6 +165,11 @@ function startEditReview(review) {
     content: review.content ?? '',
   };
   reviewError.value = '';
+  reviewNotice.value = {
+    tone: 'info',
+    title: '내 리뷰 수정',
+    text: '평점과 리뷰 내용을 수정한 뒤 저장을 눌러 주세요.',
+  };
 }
 
 function cancelEditReview() {
@@ -137,16 +181,31 @@ async function submitReviewEdit(review) {
   if (!place.value || !review?.reviewId || reviewSubmitting.value) return;
   if (!editReviewForm.value.content.trim()) {
     reviewError.value = '리뷰 내용을 입력해 주세요.';
+    reviewNotice.value = {
+      tone: 'warning',
+      title: '입력 내용을 확인해 주세요.',
+      text: reviewError.value,
+    };
     uiStore.notify(reviewError.value);
     return;
   }
   if (Number(editReviewForm.value.rating) < 0 || Number(editReviewForm.value.rating) > 5) {
     reviewError.value = '평점은 0점부터 5점까지 입력해 주세요.';
+    reviewNotice.value = {
+      tone: 'warning',
+      title: '평점을 확인해 주세요.',
+      text: reviewError.value,
+    };
     uiStore.notify(reviewError.value);
     return;
   }
   reviewSubmitting.value = true;
   reviewError.value = '';
+  reviewNotice.value = {
+    tone: 'info',
+    title: '리뷰를 수정하는 중입니다.',
+    text: '수정 내용을 저장하고 있습니다.',
+  };
   try {
     const updated = await updatePlaceReview(place.value.placeId, review.reviewId, {
       rating: Number(editReviewForm.value.rating),
@@ -154,9 +213,19 @@ async function submitReviewEdit(review) {
     });
     reviews.value = reviews.value.map((item) => (item.reviewId === updated.reviewId ? updated : item));
     cancelEditReview();
-    uiStore.notify('리뷰를 수정했습니다.');
+    reviewNotice.value = {
+      tone: 'success',
+      title: '수정되었습니다.',
+      text: '내 방문 리뷰가 업데이트되었습니다.',
+    };
+    uiStore.notify('리뷰를 수정했습니다.', 'success');
   } catch (error) {
     reviewError.value = getUserMessage(error, '리뷰를 수정하지 못했습니다.');
+    reviewNotice.value = {
+      tone: 'error',
+      title: '리뷰를 수정하지 못했습니다.',
+      text: reviewError.value,
+    };
   } finally {
     reviewSubmitting.value = false;
   }
@@ -167,13 +236,28 @@ async function removeReview(review) {
   if (!window.confirm('리뷰를 삭제할까요?')) return;
   reviewSubmitting.value = true;
   reviewError.value = '';
+  reviewNotice.value = {
+    tone: 'info',
+    title: '리뷰를 삭제하는 중입니다.',
+    text: '내 리뷰를 삭제하고 목록을 갱신하고 있습니다.',
+  };
   try {
     await deletePlaceReview(place.value.placeId, review.reviewId);
     reviews.value = reviews.value.filter((item) => item.reviewId !== review.reviewId);
     if (editingReviewId.value === review.reviewId) cancelEditReview();
-    uiStore.notify('리뷰를 삭제했습니다.');
+    reviewNotice.value = {
+      tone: 'success',
+      title: '삭제되었습니다.',
+      text: '내 방문 리뷰가 삭제되었습니다. 필요하면 다시 작성할 수 있습니다.',
+    };
+    uiStore.notify('리뷰를 삭제했습니다.', 'success');
   } catch (error) {
     reviewError.value = getUserMessage(error, '리뷰를 삭제하지 못했습니다.');
+    reviewNotice.value = {
+      tone: 'error',
+      title: '리뷰를 삭제하지 못했습니다.',
+      text: reviewError.value,
+    };
   } finally {
     reviewSubmitting.value = false;
   }
@@ -263,7 +347,20 @@ function useFallbackImage(event) {
         <strong>★ {{ averageRating }}</strong>
         <span>{{ reviewCount }}개의 방문 기록</span>
         <small>실제 촬영지를 다녀온 사용자의 분위기, 이동 팁, 검증 의견을 모아 보여줍니다.</small>
+        <div v-if="reviews.length" class="rating-distribution" aria-label="평점 분포">
+          <span v-for="item in ratingSummary" :key="item.score">
+            <b>{{ item.score }}점</b>
+            <i><em :style="{ width: `${item.percent}%` }"></em></i>
+            <small>{{ item.count }}</small>
+          </span>
+        </div>
       </div>
+      <FormStatusNotice
+        v-if="reviewNotice"
+        :tone="reviewNotice.tone"
+        :title="reviewNotice.title"
+        :text="reviewNotice.text"
+      />
       <EmptyState
         v-if="reviewLoading"
         tone="loading"
@@ -342,7 +439,13 @@ function useFallbackImage(event) {
           {{ reviewSubmitting ? '등록 중...' : '리뷰 등록' }}
         </BaseButton>
       </form>
-      <p v-else-if="uiStore.currentUser" class="review-helper">이미 이 장소에 리뷰를 작성했습니다.</p>
+      <FormStatusNotice
+        v-else-if="uiStore.currentUser"
+        tone="info"
+        compact
+        title="이미 이 장소에 리뷰를 작성했습니다."
+        :text="myReview ? '중복 리뷰 대신 아래 내 리뷰에서 수정 또는 삭제할 수 있습니다.' : '한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.'"
+      />
       <EmptyState
         v-else
         icon="K"

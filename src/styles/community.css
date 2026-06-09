@@ -269,6 +269,13 @@
   line-height: 1.6;
 }
 
+.post-owner-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .linked-course div {
   flex: 1;
 }
@@ -702,6 +709,27 @@
   color: var(--dim);
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.comment-action-backdrop {
+  z-index: 96;
+}
+
+.comment-action-sheet {
+  display: grid;
+  gap: 12px;
+}
+
+.comment-action-sheet h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.comment-action-sheet p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .author-follow-button {

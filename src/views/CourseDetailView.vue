@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
@@ -14,6 +15,7 @@ const uiStore = useUiStore();
 const selectedDay = ref(1);
 const showDeleteSheet = ref(false);
 const loadingDetail = ref(false);
+const actionNotice = ref(null);
 
 const routeId = computed(() => route.params.routeId ?? '');
 const isMyCourseRoute = computed(() => route.path.startsWith('/my/course-manage'));
@@ -58,7 +60,23 @@ function editCourse() {
 
 async function saveTemplateCourse() {
   if (!course.value) return;
-  await uiStore.saveCourse(course.value);
+  actionNotice.value = {
+    tone: 'info',
+    title: '코스를 저장하는 중입니다.',
+    text: '선택한 코스를 내 저장 목록에 추가하고 있습니다.',
+  };
+  const saved = await uiStore.saveCourse(course.value);
+  actionNotice.value = saved
+    ? {
+        tone: 'success',
+        title: '저장되었습니다.',
+        text: '마이페이지 저장한 코스에서 다시 확인할 수 있습니다.',
+      }
+    : {
+        tone: 'error',
+        title: '저장하지 못했습니다.',
+        text: uiStore.routeError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      };
 }
 
 function viewAsAiResult() {
@@ -70,16 +88,42 @@ function shareCourse() {
   if (!uiStore.requireAuth('로그인하면 코스를 공유할 수 있습니다.')) return;
   const text = course.value ? `${course.value.title}\n${course.value.summary}` : 'sceniK course';
   navigator.clipboard?.writeText?.(text)
-    .then(() => uiStore.notify('공유 문구를 복사했습니다.'))
-    .catch(() => uiStore.notify('공유 문구가 준비되었습니다.'));
+    .then(() => {
+      actionNotice.value = {
+        tone: 'success',
+        title: '공유 문구를 복사했습니다.',
+        text: '메신저나 노트에 붙여넣어 코스를 공유할 수 있습니다.',
+      };
+      uiStore.notify('공유 문구를 복사했습니다.', 'success');
+    })
+    .catch(() => {
+      actionNotice.value = {
+        tone: 'info',
+        title: '공유 문구가 준비되었습니다.',
+        text: '브라우저 권한 때문에 자동 복사는 제한되었지만 공유할 문구는 준비했습니다.',
+      };
+      uiStore.notify('공유 문구가 준비되었습니다.');
+    });
 }
 
 async function deleteCourse() {
   if (!isSavedCourse.value || !course.value?.routeId) return;
   const deleted = await uiStore.deleteSavedCourse(course.value.routeId);
-  if (!deleted) return;
+  if (!deleted) {
+    actionNotice.value = {
+      tone: 'error',
+      title: '삭제하지 못했습니다.',
+      text: uiStore.routeError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    };
+    return;
+  }
+  actionNotice.value = {
+    tone: 'success',
+    title: '삭제되었습니다.',
+    text: '저장한 코스 목록에서 제거되었습니다.',
+  };
   showDeleteSheet.value = false;
-  router.replace('/my/activity/saved-routes');
+  window.setTimeout(() => router.replace('/my/activity/saved-routes'), 450);
 }
 
 </script>
@@ -125,6 +169,13 @@ async function deleteCourse() {
       <div v-else class="trust-panel">
         {{ course.trustMessage }}
       </div>
+
+      <FormStatusNotice
+        v-if="actionNotice"
+        :tone="actionNotice.tone"
+        :title="actionNotice.title"
+        :text="actionNotice.text"
+      />
 
       <MapPreview :route-places="routePlaces" />
 
