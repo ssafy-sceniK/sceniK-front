@@ -86,6 +86,7 @@ async function saveProfile() {
           <span class="avatar-edit-badge large">✎</span>
         </button>
         <button type="button" class="text-link" @click="notifyImageShell">이미지 변경</button>
+        <small class="profile-image-note">프로필 이미지는 추후 지원 예정입니다.</small>
       </div>
 
       <div class="profile-edit-form">

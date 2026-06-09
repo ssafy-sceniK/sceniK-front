@@ -38,6 +38,8 @@ const editReviewForm = ref({
 const placeId = computed(() => route.params.id || '');
 const relatedContents = computed(() => place.value?.relatedContents ?? []);
 const liked = computed(() => place.value && uiStore.likedPlaces.includes(place.value.placeId));
+const likePending = computed(() => Boolean(place.value)
+  && uiStore.pendingPlaceLikes.some((id) => String(id) === String(place.value.placeId)));
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
   && reviews.value.some((review) => review.userId === uiStore.currentUser.userId));
 const reviewCount = computed(() => reviews.value.length || Number(place.value?.reviewCount ?? 0));
@@ -198,6 +200,8 @@ function useFallbackImage(event) {
         :class="{ active: liked }"
         type="button"
         aria-label="좋아요"
+        :aria-pressed="liked"
+        :disabled="likePending"
         @click="place && uiStore.togglePlaceLike(place.placeId)"
       >
         ♥
@@ -252,8 +256,13 @@ function useFallbackImage(event) {
       </div>
 
       <div class="section-header">
-        <h2>리뷰</h2>
+        <h2>방문 리뷰</h2>
         <span>{{ reviewCount }}개<span v-if="reviewCount"> · 평균 ★ {{ averageRating }}</span></span>
+      </div>
+      <div class="review-summary-panel" aria-label="방문 리뷰 요약">
+        <strong>★ {{ averageRating }}</strong>
+        <span>{{ reviewCount }}개의 방문 기록</span>
+        <small>실제 촬영지를 다녀온 사용자의 분위기, 이동 팁, 검증 의견을 모아 보여줍니다.</small>
       </div>
       <EmptyState
         v-if="reviewLoading"

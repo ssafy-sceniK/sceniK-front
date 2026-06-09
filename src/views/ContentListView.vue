@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -13,20 +13,38 @@ const contentStore = useContentStore();
 const query = ref('');
 const category = ref('전체');
 const mode = ref('콘텐츠 탐색');
+const sort = ref('popular');
+const visibleLimit = ref(12);
 const exploreCategories = computed(() => contentStore.categories);
 
 onMounted(() => {
-  contentStore.load();
+  contentStore.load({ sort: sort.value, size: 50 });
 });
 
 const filteredContents = computed(() => {
   const filterCategory = contentStore.categories.includes(category.value) ? category.value : '전체';
   return contentStore.search({ category: filterCategory, keyword: query.value });
 });
+const sortedContents = computed(() => [...filteredContents.value].sort((a, b) => {
+  if (sort.value === 'latest') return Number(b.releaseYear ?? 0) - Number(a.releaseYear ?? 0);
+  return Number(Boolean(b.isPopular)) - Number(Boolean(a.isPopular))
+    || Number(b.releaseYear ?? 0) - Number(a.releaseYear ?? 0);
+}));
+const visibleContents = computed(() => sortedContents.value.slice(0, visibleLimit.value));
+const hasMoreContents = computed(() => visibleContents.value.length < sortedContents.value.length);
+
+watch([query, category, sort], () => {
+  visibleLimit.value = 12;
+});
 
 function resetFilters() {
   query.value = '';
   category.value = '전체';
+  sort.value = 'popular';
+}
+
+function loadMore() {
+  visibleLimit.value += 12;
 }
 </script>
 
@@ -40,6 +58,16 @@ function resetFilters() {
       </div>
       <h3 class="subsection-title">카테고리</h3>
       <ChipGroup v-model="category" :items="exploreCategories" />
+      <div class="list-control-row" aria-label="콘텐츠 정렬과 결과 수">
+        <label>
+          정렬
+          <select v-model="sort" class="sort-select">
+            <option value="popular">인기순</option>
+            <option value="latest">최신순</option>
+          </select>
+        </label>
+        <span>{{ sortedContents.length }}개 결과</span>
+      </div>
 
       <div class="section-header"><h2>인기 콘텐츠</h2></div>
       <EmptyState
@@ -60,12 +88,15 @@ function resetFilters() {
         @action="contentStore.load()"
       />
       <div v-else class="content-grid">
-        <RouterLink v-for="content in filteredContents" :key="content.contentId" :to="`/contents/${content.contentId}`">
+        <RouterLink v-for="content in visibleContents" :key="content.contentId" :to="`/contents/${content.contentId}`">
           <ContentCard :content="content" />
         </RouterLink>
       </div>
+      <div v-if="hasMoreContents" class="load-more-row">
+        <button type="button" @click="loadMore">더 보기</button>
+      </div>
       <EmptyState
-        v-if="!contentStore.loading && !filteredContents.length"
+        v-if="!contentStore.loading && !sortedContents.length"
         icon="?"
         tone="search"
         title="조건에 맞는 콘텐츠가 없습니다"

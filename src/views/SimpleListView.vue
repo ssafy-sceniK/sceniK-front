@@ -19,6 +19,8 @@ onMounted(async () => {
     await uiStore.loadEngagementState();
   }
   if (['posts', 'comments', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (type.value === 'reviews') await uiStore.loadMyReviews();
+  if (['following', 'followers'].includes(type.value)) await uiStore.loadFollowState();
 });
 const title = computed(() => route.meta.title || '목록');
 
@@ -57,16 +59,23 @@ const visibleCount = computed(() => {
   if (type.value === 'posts') return myPosts.value.length;
   if (type.value === 'comments') return commentedPosts.value.length;
   if (type.value === 'scraps') return scrappedPosts.value.length;
+  if (type.value === 'reviews') return uiStore.myReviews.length;
+  if (type.value === 'following') return uiStore.followingUsers.length;
+  if (type.value === 'followers') return uiStore.followerUsers.length;
   return notices.length;
 });
 const isLoading = computed(() => {
   if (type.value === 'saved-routes') return uiStore.savedCoursesLoading;
   if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityLoading;
+  if (type.value === 'reviews') return uiStore.myReviewsLoading;
+  if (['following', 'followers'].includes(type.value)) return uiStore.followLoading;
   return false;
 });
 const errorMessage = computed(() => {
   if (type.value === 'saved-routes') return uiStore.routeError;
   if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityError;
+  if (type.value === 'reviews') return uiStore.myReviewsError;
+  if (['following', 'followers'].includes(type.value)) return uiStore.followError;
   return '';
 });
 const emptyStateConfig = computed(() => {
@@ -145,6 +154,30 @@ const emptyStateConfig = computed(() => {
       actionLabel: '커뮤니티 둘러보기',
       actionTo: '/community',
     },
+    reviews: {
+      icon: 'R',
+      tone: 'search',
+      title: '작성한 리뷰가 없습니다',
+      text: '다녀온 촬영지의 분위기와 이동 팁을 장소 상세에서 남겨보세요.',
+      actionLabel: '장소 둘러보기',
+      actionTo: '/places',
+    },
+    following: {
+      icon: 'F',
+      tone: 'community',
+      title: '팔로잉한 사용자가 없습니다',
+      text: '커뮤니티 게시글 작성자를 팔로우하면 이곳에서 다시 볼 수 있어요.',
+      actionLabel: '커뮤니티 둘러보기',
+      actionTo: '/community',
+    },
+    followers: {
+      icon: 'F',
+      tone: 'community',
+      title: '아직 팔로워가 없습니다',
+      text: '커뮤니티에 여행 후기와 촬영지 팁을 공유해보세요.',
+      actionLabel: '글 작성하기',
+      actionTo: '/community/write',
+    },
   };
   return map[type.value] ?? {
     icon: 'SK',
@@ -160,6 +193,8 @@ async function reloadList() {
     await uiStore.loadEngagementState();
   }
   if (['posts', 'comments', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (type.value === 'reviews') await uiStore.loadMyReviews();
+  if (['following', 'followers'].includes(type.value)) await uiStore.loadFollowState();
 }
 
 function openCourse(course) {
@@ -183,6 +218,22 @@ function postCommentPreview(post) {
 
 function postMeta(post) {
   return [post.date, post.region].filter(Boolean).join(' · ');
+}
+
+function reviewDate(review) {
+  return review.updatedAt?.slice?.(0, 10) || review.createdAt?.slice?.(0, 10) || '';
+}
+
+function reviewPlaceTo(review) {
+  return review.placeId ? `/places/${review.placeId}` : '/places';
+}
+
+function followUserInitial(user) {
+  return user.nickname?.slice(0, 1).toUpperCase() || 'U';
+}
+
+function isFollowActionPending(userId) {
+  return uiStore.followActionLoadingIds.some((id) => String(id) === String(userId));
 }
 </script>
 
@@ -272,6 +323,52 @@ function postMeta(post) {
             <span>{{ post.routeId ? 'AI 코스 연결됨' : '일반 후기' }}</span>
           </div>
         </RouterLink>
+      </div>
+
+      <div v-else-if="type === 'reviews'" class="stack-list">
+        <RouterLink
+          v-for="review in uiStore.myReviews"
+          :key="review.reviewId"
+          class="activity-review-card"
+          :to="reviewPlaceTo(review)"
+        >
+          <div>
+            <strong>★ {{ review.rating ?? '평점 없음' }}</strong>
+            <small>{{ reviewDate(review) }}</small>
+          </div>
+          <p>{{ review.content }}</p>
+          <span>{{ review.placeId }} 장소 상세에서 수정/삭제 가능</span>
+        </RouterLink>
+      </div>
+
+      <div v-else-if="type === 'following' || type === 'followers'" class="user-list">
+        <article
+          v-for="user in type === 'following' ? uiStore.followingUsers : uiStore.followerUsers"
+          :key="user.userId"
+          class="user-list-row"
+        >
+          <span class="user-list-avatar">{{ followUserInitial(user) }}</span>
+          <div>
+            <strong>{{ user.nickname }}</strong>
+            <small>팔로워 {{ user.followerCount }} · 팔로잉 {{ user.followingCount }}</small>
+          </div>
+          <button
+            v-if="type === 'following'"
+            type="button"
+            :disabled="isFollowActionPending(user.userId)"
+            @click="uiStore.unfollowUser(user.userId)"
+          >
+            팔로잉
+          </button>
+          <button
+            v-else-if="user.userId !== uiStore.currentUser?.userId"
+            type="button"
+            :disabled="isFollowActionPending(user.userId)"
+            @click="user.followedByMe ? uiStore.unfollowUser(user.userId) : uiStore.followUser(user.userId)"
+          >
+            {{ user.followedByMe ? '팔로잉' : '팔로우' }}
+          </button>
+        </article>
       </div>
 
       <div v-else class="stack-list">

@@ -43,6 +43,13 @@ import {
   unlikePost as unlikeCommunityPost,
   updateComment as updateCommunityComment,
 } from '../api/communityApi.js';
+import {
+  fetchFollowers,
+  fetchMyFollowing,
+  followUser as followUserRequest,
+  unfollowUser as unfollowUserRequest,
+} from '../api/followApi.js';
+import { fetchMyReviews } from '../api/reviewApi.js';
 import { contentPlaces, contents, courseTemplates, places } from '../data/mockData.js';
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
@@ -84,6 +91,9 @@ function defaultState() {
     recentViewedPlaceDetails: [],
     savedCourses: [],
     communityPosts: [],
+    myReviews: [],
+    followingUsers: [],
+    followerUsers: [],
     selectedContentId: '',
     selectedContentIds: [],
     courseConditions: {
@@ -367,6 +377,14 @@ export const useUiStore = defineStore('ui', {
     routeError: '',
     communityLoading: false,
     communityError: '',
+    myReviewsLoading: false,
+    myReviewsError: '',
+    followLoading: false,
+    followError: '',
+    pendingContentLikes: [],
+    pendingPlaceLikes: [],
+    pendingPostLikes: [],
+    followActionLoadingIds: [],
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.currentUser),
@@ -375,6 +393,7 @@ export const useUiStore = defineStore('ui', {
     plannedVisitItems: (state) => state.plannedVisitDetails,
     completedVisitItems: (state) => state.completedVisitDetails,
     recentPlaceItems: (state) => state.recentViewedPlaceDetails,
+    followingIds: (state) => state.followingUsers.map((user) => user.userId).filter(Boolean),
   },
   actions: {
     restore() {
@@ -407,6 +426,17 @@ export const useUiStore = defineStore('ui', {
         communityPosts,
         communityLoading,
         communityError,
+        myReviews,
+        myReviewsLoading,
+        myReviewsError,
+        followingUsers,
+        followerUsers,
+        followLoading,
+        followError,
+        pendingContentLikes,
+        pendingPlaceLikes,
+        pendingPostLikes,
+        followActionLoadingIds,
         selectedContentId,
         selectedContentIds,
         ...persisted
@@ -432,6 +462,7 @@ export const useUiStore = defineStore('ui', {
         this.onboardingSeen = true;
         await this.loadSavedCourses();
         await this.loadEngagementState();
+        await this.loadFollowState();
         this.persist();
       } catch {
         clearAccessToken();
@@ -547,6 +578,7 @@ export const useUiStore = defineStore('ui', {
         this.onboardingSeen = true;
         await this.loadSavedCourses();
         await this.loadEngagementState();
+        await this.loadFollowState();
         this.persist();
         this.notify('회원가입이 완료되었습니다.');
         return this.currentUser;
@@ -568,6 +600,7 @@ export const useUiStore = defineStore('ui', {
         this.onboardingSeen = true;
         await this.loadSavedCourses();
         await this.loadEngagementState();
+        await this.loadFollowState();
         this.persist();
         this.notify('로그인되었습니다.');
         return this.currentUser;
@@ -586,6 +619,9 @@ export const useUiStore = defineStore('ui', {
       clearAccessToken();
       this.currentUser = null;
       this.savedCourses = [];
+      this.myReviews = [];
+      this.followingUsers = [];
+      this.followerUsers = [];
       this.persist();
       this.notify('로그아웃되었습니다.');
     },
@@ -645,6 +681,8 @@ export const useUiStore = defineStore('ui', {
     },
     async toggleContentLike(contentId) {
       if (!this.requireAuth('로그인하면 콘텐츠를 좋아요로 저장할 수 있습니다.')) return;
+      if (this.pendingContentLikes.includes(contentId)) return;
+      this.pendingContentLikes = [...this.pendingContentLikes, contentId];
       const liked = this.likedContent.includes(contentId);
       try {
         if (liked) await unlikeContent(contentId);
@@ -661,6 +699,8 @@ export const useUiStore = defineStore('ui', {
         this.persist();
       } catch (error) {
         this.notify(apiErrorMessage(error, '콘텐츠 좋아요를 저장하지 못했습니다.'));
+      } finally {
+        this.pendingContentLikes = this.pendingContentLikes.filter((id) => id !== contentId);
       }
     },
     toggleSelectedContent(contentId) {
@@ -680,6 +720,8 @@ export const useUiStore = defineStore('ui', {
     },
     async togglePlaceLike(placeId) {
       if (!this.requireAuth('로그인하면 장소를 좋아요로 저장할 수 있습니다.')) return;
+      if (this.pendingPlaceLikes.includes(placeId)) return;
+      this.pendingPlaceLikes = [...this.pendingPlaceLikes, placeId];
       const liked = this.likedPlaces.includes(placeId);
       try {
         if (liked) await unlikePlace(placeId);
@@ -696,6 +738,8 @@ export const useUiStore = defineStore('ui', {
         this.persist();
       } catch (error) {
         this.notify(apiErrorMessage(error, '장소 좋아요를 저장하지 못했습니다.'));
+      } finally {
+        this.pendingPlaceLikes = this.pendingPlaceLikes.filter((id) => id !== placeId);
       }
     },
     async setVisit(placeId, status) {
@@ -881,8 +925,13 @@ export const useUiStore = defineStore('ui', {
     },
     async togglePostLike(postId) {
       if (!this.requireAuth('로그인하면 게시글에 좋아요를 누를 수 있습니다.')) return;
+      if (this.pendingPostLikes.some((id) => sameId(id, postId))) return;
+      this.pendingPostLikes = [...this.pendingPostLikes, postId];
       const current = this.communityPosts.find((post) => sameId(post.id, postId) || sameId(post.postId, postId));
-      if (!current) return;
+      if (!current) {
+        this.pendingPostLikes = this.pendingPostLikes.filter((id) => !sameId(id, postId));
+        return;
+      }
       const likedBy = current.likedBy ?? [];
       const liked = current.isLiked || likedBy.includes(this.currentUser.userId);
       try {
@@ -899,6 +948,8 @@ export const useUiStore = defineStore('ui', {
         this.communityError = apiErrorMessage(error, '게시글 좋아요를 변경하지 못했습니다.');
         this.notify(this.communityError);
         return;
+      } finally {
+        this.pendingPostLikes = this.pendingPostLikes.filter((id) => !sameId(id, postId));
       }
     },
     togglePostScrap(postId) {
@@ -922,14 +973,14 @@ export const useUiStore = defineStore('ui', {
       this.persist();
       this.notify(scrappedPost ? '게시글을 스크랩했습니다.' : '게시글 스크랩을 해제했습니다.');
     },
-    async addComment(postId, text) {
+    async addComment(postId, text, parentCommentId = null) {
       if (!this.requireAuth('로그인하면 댓글을 작성할 수 있습니다.')) return null;
       if (!text?.trim()) {
         this.notify('댓글 내용을 입력해 주세요.');
         return null;
       }
       try {
-        const comment = await createCommunityComment(postId, { text: text.trim() });
+        const comment = await createCommunityComment(postId, { text: text.trim(), parentCommentId });
         this.communityPosts = this.communityPosts.map((post) => (sameId(post.id, postId) || sameId(post.postId, postId))
           ? {
               ...post,
@@ -987,6 +1038,80 @@ export const useUiStore = defineStore('ui', {
         this.communityError = apiErrorMessage(error, '댓글을 삭제하지 못했습니다.');
         this.notify(this.communityError);
         return false;
+      }
+    },
+    async loadMyReviews() {
+      if (!this.currentUser || !readAccessToken()) return [];
+      this.myReviewsLoading = true;
+      this.myReviewsError = '';
+      try {
+        this.myReviews = await fetchMyReviews();
+        return this.myReviews;
+      } catch (error) {
+        this.myReviews = [];
+        this.myReviewsError = apiErrorMessage(error, '내 리뷰를 불러오지 못했습니다.');
+        return [];
+      } finally {
+        this.myReviewsLoading = false;
+      }
+    },
+    async loadFollowState() {
+      if (!this.currentUser || !readAccessToken()) return [];
+      this.followLoading = true;
+      this.followError = '';
+      try {
+        const [following, followers] = await Promise.all([
+          fetchMyFollowing(),
+          fetchFollowers(this.currentUser.userId),
+        ]);
+        this.followingUsers = following;
+        this.followerUsers = followers;
+        return following;
+      } catch (error) {
+        this.followingUsers = [];
+        this.followerUsers = [];
+        this.followError = apiErrorMessage(error, '팔로우 정보를 불러오지 못했습니다.');
+        return [];
+      } finally {
+        this.followLoading = false;
+      }
+    },
+    async followUser(userId) {
+      if (!this.requireAuth('로그인하면 작성자를 팔로우할 수 있습니다.')) return false;
+      if (sameId(userId, this.currentUser.userId)) {
+        this.notify('자기 자신은 팔로우할 수 없습니다.');
+        return false;
+      }
+      if (this.followActionLoadingIds.some((id) => sameId(id, userId))) return false;
+      this.followActionLoadingIds = [...this.followActionLoadingIds, userId];
+      try {
+        await followUserRequest(userId);
+        await this.loadFollowState();
+        this.notify('작성자를 팔로우했습니다.');
+        return true;
+      } catch (error) {
+        const message = apiErrorMessage(error, '팔로우하지 못했습니다.');
+        if (message.includes('이미 팔로우')) await this.loadFollowState();
+        this.notify(message);
+        return false;
+      } finally {
+        this.followActionLoadingIds = this.followActionLoadingIds.filter((id) => !sameId(id, userId));
+      }
+    },
+    async unfollowUser(userId) {
+      if (!this.requireAuth('로그인하면 팔로우를 해제할 수 있습니다.')) return false;
+      if (this.followActionLoadingIds.some((id) => sameId(id, userId))) return false;
+      this.followActionLoadingIds = [...this.followActionLoadingIds, userId];
+      try {
+        await unfollowUserRequest(userId);
+        this.followingUsers = this.followingUsers.filter((user) => !sameId(user.userId, userId));
+        this.notify('팔로우를 해제했습니다.');
+        return true;
+      } catch (error) {
+        this.notify(apiErrorMessage(error, '팔로우를 해제하지 못했습니다.'));
+        return false;
+      } finally {
+        this.followActionLoadingIds = this.followActionLoadingIds.filter((id) => !sameId(id, userId));
       }
     },
   },

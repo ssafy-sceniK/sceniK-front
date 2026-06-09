@@ -106,6 +106,13 @@ const selectedSummaryTitle = computed(() => {
   if (selectedContentIds.value.length) return `${selectedContentIds.value.length}개 콘텐츠 선택됨`;
   return '선택된 콘텐츠가 없습니다';
 });
+const aiContextRows = computed(() => [
+  { label: '선택 콘텐츠', value: selectedSummaryTitle.value },
+  { label: '지역', value: uiStore.courseConditions.region },
+  { label: '여행 기간', value: `${tripDateRangeLabel.value} · ${tripDurationDays.value}일` },
+  { label: '이동 수단', value: uiStore.courseConditions.transport },
+  { label: '예산/테마', value: `${budgetRangeLabel.value} · ${uiStore.courseConditions.style}` },
+]);
 
 function formatWon(value) {
   const amount = Number(value) || 0;
@@ -151,6 +158,19 @@ watchEffect(() => {
         <span class="badge ai">선택 콘텐츠</span>
         <strong>{{ selectedSummaryTitle }}</strong>
         <p>{{ selectedContentIds.length }}개 콘텐츠 · 실제 장소 데이터 기반</p>
+      </div>
+
+      <div class="ai-context-panel">
+        <div>
+          <strong>AI가 참고하는 조건</strong>
+          <small>선택한 K-content와 검증 장소 데이터만 사용합니다.</small>
+        </div>
+        <dl>
+          <template v-for="row in aiContextRows" :key="row.label">
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </template>
+        </dl>
       </div>
 
       <div class="condition-block">

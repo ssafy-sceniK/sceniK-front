@@ -16,6 +16,8 @@ onMounted(async () => {
     uiStore.loadSavedCourses(),
     uiStore.loadEngagementState(),
     uiStore.loadCommunityPosts(),
+    uiStore.loadMyReviews(),
+    uiStore.loadFollowState(),
   ]);
 });
 
@@ -44,6 +46,7 @@ const plannedCount = computed(() => uiStore.plannedVisitItems.length);
 const completedCount = computed(() => uiStore.completedVisitItems.length);
 const totalVisitCount = computed(() => plannedCount.value + completedCount.value);
 const visitProgress = computed(() => totalVisitCount.value ? Math.round((completedCount.value / totalVisitCount.value) * 100) : 0);
+const myReviewCount = computed(() => uiStore.myReviews.length);
 const tabs = computed(() => [
   {
     id: 'activity',
@@ -85,7 +88,10 @@ const tabs = computed(() => [
           <p>{{ profileBio }}</p>
           <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
         </div>
-        <RouterLink class="profile-edit-button" to="/my/profile-edit">프로필 편집</RouterLink>
+        <div class="profile-actions">
+          <RouterLink class="profile-edit-button" to="/my/profile-edit">프로필 편집</RouterLink>
+          <button type="button" class="profile-edit-button profile-logout" @click="uiStore.logout()">로그아웃</button>
+        </div>
       </div>
 
       <div class="stats-grid">
@@ -97,6 +103,9 @@ const tabs = computed(() => [
         </button>
         <button type="button" @click="router.push('/my/visit-completed')">
           <b>{{ completedCount }}</b><span>방문 완료</span>
+        </button>
+        <button type="button" @click="router.push('/my/activity/reviews')">
+          <b>{{ myReviewCount }}</b><span>리뷰</span>
         </button>
       </div>
 
@@ -133,6 +142,27 @@ const tabs = computed(() => [
               <svg viewBox="0 0 24 24"><path d="M6 4.5h12v15l-6-3.4-6 3.4v-15Z" /><path d="M9 9h6" /><path d="M9 12h4" /></svg>
             </span>
             <span><strong>저장한 AI 코스</strong><small>코스 {{ uiStore.savedCourses.length }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/activity/reviews">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 5h14v10H8l-3 3V5Z" /><path d="M8 9h8" /><path d="M8 12h5" /></svg>
+            </span>
+            <span><strong>내 리뷰</strong><small>작성 리뷰 {{ myReviewCount }}개</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/following">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M2.5 20a5.5 5.5 0 0 1 11 0" /><path d="M16 8h5" /><path d="M18.5 5.5v5" /></svg>
+            </span>
+            <span><strong>팔로잉</strong><small>사용자 {{ uiStore.followingUsers.length }}명</small></span>
+            <em>›</em>
+          </RouterLink>
+          <RouterLink class="my-menu-row" to="/my/followers">
+            <span class="my-menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M18 9a3 3 0 1 0 0-6" /><path d="M17 14c2.3.4 4 2.1 4 4" /></svg>
+            </span>
+            <span><strong>팔로워</strong><small>사용자 {{ uiStore.followerUsers.length }}명</small></span>
             <em>›</em>
           </RouterLink>
         </div>

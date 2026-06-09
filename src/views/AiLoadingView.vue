@@ -59,6 +59,13 @@ const loadingSummary = computed(() => {
 });
 
 const loadingStatusText = computed(() => loadingSteps[activeStepIndex.value].detail);
+const loadingContextRows = computed(() => [
+  { label: '지역', value: uiStore.courseConditions.region || '선택 지역' },
+  { label: '일수', value: `${getTripDurationDays(uiStore.courseConditions)}일` },
+  { label: '이동', value: uiStore.courseConditions.transport },
+  { label: '테마', value: uiStore.courseConditions.style },
+  { label: '예산', value: uiStore.courseConditions.budget },
+]);
 
 function loadingStepState(index, step) {
   if (loadingProgress.value >= step.doneAt) return 'done';
@@ -316,6 +323,16 @@ onBeforeUnmount(() => {
         <span>{{ loadingSummary }}</span>
         <h1>AI가 코스를 생성하고 있어요</h1>
         <p>{{ loadingStatusText }}</p>
+      </div>
+
+      <div class="ai-context-panel compact">
+        <strong>AI 참고 조건</strong>
+        <dl>
+          <template v-for="row in loadingContextRows" :key="row.label">
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </template>
+        </dl>
       </div>
 
       <ol class="loading-steps" aria-label="AI 코스 생성 단계">

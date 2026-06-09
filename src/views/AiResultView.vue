@@ -36,6 +36,15 @@ const shareSummary = computed(() => {
   return `장소 ${placeCount.value}곳 · Day 1~${route.value.durationDays}`;
 });
 const shareText = computed(() => route.value ? `${route.value.title}\n${route.value.summary}` : 'sceniK AI Course');
+const resultEvidenceRows = computed(() => {
+  if (!route.value) return [];
+  return [
+    { label: '추천 기준', value: '검증된 장소 데이터 기반 추천' },
+    { label: '추천 이유', value: route.value.trustMessage ?? '선택한 K-content와 지역 조건에 맞는 실제 촬영지를 연결했습니다.' },
+    { label: '예상 체류 시간', value: route.value.days?.map((day) => `Day ${day.dayNumber}: ${day.estimatedTravelTime ?? '이동 시간 확인 필요'}`).join(' · ') },
+    { label: '이동 팁', value: route.value.transport ?? uiStore.courseConditions.transport },
+  ];
+});
 
 watch(route, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
@@ -170,6 +179,16 @@ function postFromShareSheet() {
         <p class="ai-result-meta">{{ resultMeta }}</p>
         <p v-if="savingRoute" class="form-help">코스를 저장하는 중입니다...</p>
         <p v-if="saveError" class="form-error">{{ saveError }}</p>
+
+        <div class="ai-context-panel result">
+          <strong>검증된 장소 데이터 기반 추천</strong>
+          <dl>
+            <template v-for="row in resultEvidenceRows" :key="row.label">
+              <dt>{{ row.label }}</dt>
+              <dd>{{ row.value }}</dd>
+            </template>
+          </dl>
+        </div>
 
         <div class="ai-result-map-card">
           <span>지도 기반 동선</span>

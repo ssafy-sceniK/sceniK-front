@@ -11,11 +11,15 @@ const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
 const query = ref('');
+const sort = ref('latest');
+const visibleLimit = ref(8);
 const title = ref('');
 const body = ref('');
 const commentText = ref('');
 const editingCommentId = ref('');
 const editingCommentText = ref('');
+const replyTargetId = ref('');
+const replyText = ref('');
 const commentActionLoading = ref(false);
 const shareTarget = ref(null);
 
@@ -35,15 +39,29 @@ const activeBoard = computed(() => boards.find((board) => board.id === route.que
 const activeMode = computed(() => (isBoardList.value || isBoardFeed.value ? 'boards' : 'all'));
 
 async function loadCommunity() {
-  const params = isBoardFeed.value ? { board: activeBoard.value.id } : {};
+  const params = {
+    sort: sort.value,
+    size: 50,
+    ...(isBoardFeed.value ? { board: activeBoard.value.id } : {}),
+  };
   await uiStore.loadCommunityPosts(params);
   if (isPostDetail.value && route.params.id) {
     await uiStore.loadCommunityPost(route.params.id);
+  }
+  if (uiStore.currentUser) {
+    await uiStore.loadFollowState();
   }
 }
 
 onMounted(loadCommunity);
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
+watch(sort, () => {
+  visibleLimit.value = 8;
+  void loadCommunity();
+});
+watch(query, () => {
+  visibleLimit.value = 8;
+});
 
 const filteredPosts = computed(() => {
   const normalizedQuery = query.value.trim().toLowerCase();
@@ -54,6 +72,12 @@ const filteredPosts = computed(() => {
     return matchesQuery && matchesBoard;
   });
 });
+const sortedPosts = computed(() => [...filteredPosts.value].sort((a, b) => {
+  if (sort.value === 'popular') return Number(b.likes ?? b.likeCount ?? 0) - Number(a.likes ?? a.likeCount ?? 0);
+  return String(b.date ?? b.createdAt ?? '').localeCompare(String(a.date ?? a.createdAt ?? ''), 'ko');
+}));
+const visiblePosts = computed(() => sortedPosts.value.slice(0, visibleLimit.value));
+const hasMorePosts = computed(() => visiblePosts.value.length < sortedPosts.value.length);
 const feedEmptyState = computed(() => {
   if (query.value.trim()) {
     return {
@@ -109,6 +133,11 @@ function isPostScrapped(post) {
   return Boolean(uiStore.currentUser?.userId && (post.scrappedBy ?? []).includes(uiStore.currentUser.userId));
 }
 
+function isPostLikePending(post) {
+  const key = postKey(post);
+  return uiStore.pendingPostLikes.some((id) => String(id) === String(key));
+}
+
 function isCommentOwner(comment) {
   return Boolean(uiStore.currentUser?.userId)
     && String(comment?.userId ?? '') === String(uiStore.currentUser.userId);
@@ -142,6 +171,29 @@ async function addComment(postId) {
   if (created) {
     commentText.value = '';
   }
+}
+
+function startReply(comment) {
+  replyTargetId.value = commentKey(comment);
+  replyText.value = '';
+}
+
+function cancelReply() {
+  replyTargetId.value = '';
+  replyText.value = '';
+}
+
+async function addReply(postId, comment) {
+  const parentId = commentKey(comment);
+  if (!parentId || commentActionLoading.value) return;
+  if (!replyText.value.trim()) {
+    uiStore.notify('댓글 내용을 입력해 주세요.');
+    return;
+  }
+  commentActionLoading.value = true;
+  const created = await uiStore.addComment(postId, replyText.value, parentId);
+  commentActionLoading.value = false;
+  if (created) cancelReply();
 }
 
 function startEditComment(comment) {
@@ -178,6 +230,30 @@ async function deleteComment(postId, comment) {
 
 function clearQuery() {
   query.value = '';
+}
+
+function loadMorePosts() {
+  visibleLimit.value += 8;
+}
+
+const canFollowSelectedAuthor = computed(() => Boolean(
+  selectedPost.value?.userId
+  && uiStore.currentUser?.userId
+  && String(selectedPost.value.userId) !== String(uiStore.currentUser.userId),
+));
+const selectedAuthorFollowed = computed(() => Boolean(
+  selectedPost.value?.userId
+  && uiStore.followingIds.some((id) => String(id) === String(selectedPost.value.userId)),
+));
+const selectedAuthorFollowLoading = computed(() => Boolean(
+  selectedPost.value?.userId
+  && uiStore.followActionLoadingIds.some((id) => String(id) === String(selectedPost.value.userId)),
+));
+
+async function toggleSelectedAuthorFollow() {
+  if (!selectedPost.value?.userId) return;
+  if (selectedAuthorFollowed.value) await uiStore.unfollowUser(selectedPost.value.userId);
+  else await uiStore.followUser(selectedPost.value.userId);
 }
 
 function openShareSheet(post) {
@@ -264,8 +340,19 @@ async function nativeShare() {
         <template v-if="selectedPost">
           <article class="post-detail-card">
             <div class="user-row">
-              <b>{{ selectedPost.user }}</b>
-              <span>{{ selectedPost.date }} · {{ selectedPost.region }}</span>
+              <div>
+                <b>{{ selectedPost.user }}</b>
+                <span>{{ selectedPost.date }} · {{ selectedPost.region }}</span>
+              </div>
+              <button
+                v-if="canFollowSelectedAuthor"
+                type="button"
+                class="author-follow-button"
+                :disabled="selectedAuthorFollowLoading"
+                @click="toggleSelectedAuthorFollow"
+              >
+                {{ selectedAuthorFollowed ? '팔로잉' : '팔로우' }}
+              </button>
             </div>
             <h1>{{ selectedPost.title }}</h1>
             <p>{{ selectedPost.body }}</p>
@@ -293,6 +380,8 @@ async function nativeShare() {
               <button
                 type="button"
                 :class="{ 'is-active': isPostLiked(selectedPost) }"
+                :aria-pressed="isPostLiked(selectedPost)"
+                :disabled="isPostLikePending(selectedPost)"
                 @click="uiStore.togglePostLike(postKey(selectedPost))"
               >
                 <span class="action-icon">{{ isPostLiked(selectedPost) ? '♥' : '♡' }}</span>
@@ -317,7 +406,7 @@ async function nativeShare() {
               <div>
                 <div class="comment-meta">
                   <b>{{ comment.user }}</b>
-                  <small>방금 전</small>
+                  <small>{{ comment.parentCommentId ? '답글' : '방금 전' }}</small>
                 </div>
                 <template v-if="editingCommentId === commentKey(comment)">
                   <textarea
@@ -339,9 +428,21 @@ async function nativeShare() {
                 </template>
                 <template v-else>
                   <p>{{ comment.text }}</p>
-                  <div v-if="isCommentOwner(comment)" class="comment-row-actions">
-                    <button type="button" @click="startEditComment(comment)">수정</button>
-                    <button type="button" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
+                  <div class="comment-row-actions">
+                    <button v-if="!comment.parentCommentId" type="button" @click="startReply(comment)">답글</button>
+                    <button v-if="isCommentOwner(comment)" type="button" @click="startEditComment(comment)">수정</button>
+                    <button v-if="isCommentOwner(comment)" type="button" @click="deleteComment(postKey(selectedPost), comment)">삭제</button>
+                  </div>
+                  <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
+                    <input v-model="replyText" placeholder="답글을 입력하세요" @keyup.enter="addReply(postKey(selectedPost), comment)" />
+                    <button
+                      type="button"
+                      :disabled="commentActionLoading || !replyText.trim()"
+                      @click="addReply(postKey(selectedPost), comment)"
+                    >
+                      답글 등록
+                    </button>
+                    <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
                   </div>
                 </template>
               </div>
@@ -380,6 +481,16 @@ async function nativeShare() {
 
       <template v-else>
         <SearchBar v-model="query" placeholder="게시글 / 태그 검색" />
+        <div class="list-control-row" aria-label="커뮤니티 정렬과 결과 수">
+          <label>
+            정렬
+            <select v-model="sort" class="sort-select">
+              <option value="latest">최신순</option>
+              <option value="popular">인기순</option>
+            </select>
+          </label>
+          <span>{{ sortedPosts.length }}개 결과</span>
+        </div>
         <div class="mode-toggle community-tabs" aria-label="Community sections">
           <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
           <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
@@ -402,7 +513,7 @@ async function nativeShare() {
         </div>
 
         <div class="feed-summary">
-          <strong>{{ filteredPosts.length }}개의 이야기</strong>
+          <strong>{{ sortedPosts.length }}개의 이야기</strong>
         </div>
 
         <EmptyState
@@ -424,7 +535,7 @@ async function nativeShare() {
         />
 
         <div v-else class="feed-list compact-feed-list">
-          <article v-for="post in filteredPosts" :key="postKey(post)" class="feed-card route-story-card">
+          <article v-for="post in visiblePosts" :key="postKey(post)" class="feed-card route-story-card">
             <RouterLink class="feed-card-main" :to="`/community/post/${postKey(post)}`">
               <div class="feed-thumb">
                 <span>{{ post.region?.slice(0, 2) || 'KR' }}</span>
@@ -440,6 +551,8 @@ async function nativeShare() {
               <button
                 type="button"
                 :class="{ 'is-active': isPostLiked(post) }"
+                :aria-pressed="isPostLiked(post)"
+                :disabled="isPostLikePending(post)"
                 @click="uiStore.togglePostLike(postKey(post))"
               >
                 <span class="action-icon">{{ isPostLiked(post) ? '♥' : '♡' }}</span>
@@ -456,8 +569,11 @@ async function nativeShare() {
             </div>
           </article>
         </div>
+        <div v-if="hasMorePosts" class="load-more-row">
+          <button type="button" @click="loadMorePosts">더 보기</button>
+        </div>
         <EmptyState
-          v-if="!uiStore.communityLoading && !uiStore.communityError && !filteredPosts.length"
+          v-if="!uiStore.communityLoading && !uiStore.communityError && !sortedPosts.length"
           icon="C"
           tone="community"
           :title="feedEmptyState.title"

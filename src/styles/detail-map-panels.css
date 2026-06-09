@@ -140,6 +140,39 @@
   box-shadow: var(--shadow-sm);
 }
 
+.review-summary-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+  margin: -2px 0 12px;
+  padding: 13px 14px;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(0, 82, 255, 0.07), rgba(255, 255, 255, 0.92));
+  border: 1px solid rgba(0, 82, 255, 0.12);
+  border-radius: var(--radius-lg);
+}
+
+.review-summary-panel strong {
+  grid-row: span 2;
+  color: var(--color-primary);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.review-summary-panel span {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.review-summary-panel small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
 .review-row-head {
   display: flex;
   align-items: center;

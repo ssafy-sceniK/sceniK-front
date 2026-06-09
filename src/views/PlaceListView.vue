@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
@@ -10,14 +10,38 @@ import { usePlaceStore } from '../stores/placeStore.js';
 const placeStore = usePlaceStore();
 const query = ref('');
 const region = ref('전체');
+const category = ref('전체');
+const sort = ref('latest');
+const visibleLimit = ref(12);
 
-onMounted(() => placeStore.load());
+onMounted(() => placeStore.load({ sort: sort.value, size: 50 }));
 
-const filteredPlaces = computed(() => placeStore.search({ region: region.value, keyword: query.value }));
+const filteredPlaces = computed(() => placeStore.search({
+  region: region.value,
+  category: category.value,
+  keyword: query.value,
+}));
+const sortedPlaces = computed(() => [...filteredPlaces.value].sort((a, b) => {
+  if (sort.value === 'name') return String(a.placeName ?? '').localeCompare(String(b.placeName ?? ''), 'ko');
+  if (sort.value === 'popular') return Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0);
+  return String(b.placeId ?? '').localeCompare(String(a.placeId ?? ''), 'ko');
+}));
+const visiblePlaces = computed(() => sortedPlaces.value.slice(0, visibleLimit.value));
+const hasMorePlaces = computed(() => visiblePlaces.value.length < sortedPlaces.value.length);
+
+watch([query, region, category, sort], () => {
+  visibleLimit.value = 12;
+});
 
 function resetFilters() {
   query.value = '';
   region.value = '전체';
+  category.value = '전체';
+  sort.value = 'latest';
+}
+
+function loadMore() {
+  visibleLimit.value += 12;
 }
 </script>
 
@@ -25,7 +49,21 @@ function resetFilters() {
   <AppLayout title="장소 탐색" back>
     <section class="list-screen">
       <SearchBar v-model="query" placeholder="장소명, 지역, 카테고리 검색" />
+      <h3 class="subsection-title">지역</h3>
       <ChipGroup v-model="region" :items="placeStore.regions" />
+      <h3 class="subsection-title">카테고리</h3>
+      <ChipGroup v-model="category" :items="placeStore.categories" />
+      <div class="list-control-row" aria-label="장소 정렬과 결과 수">
+        <label>
+          정렬
+          <select v-model="sort" class="sort-select">
+            <option value="latest">최신순</option>
+            <option value="popular">인기순</option>
+            <option value="name">이름순</option>
+          </select>
+        </label>
+        <span>{{ sortedPlaces.length }}개 결과</span>
+      </div>
       <EmptyState
         v-if="placeStore.loading"
         tone="loading"
@@ -44,12 +82,15 @@ function resetFilters() {
         @action="placeStore.load"
       />
       <div v-else class="stack-list">
-        <RouterLink v-for="place in filteredPlaces" :key="place.placeId" :to="`/places/${place.placeId}`">
+        <RouterLink v-for="place in visiblePlaces" :key="place.placeId" :to="`/places/${place.placeId}`">
           <PlaceCard :place="place" compact />
         </RouterLink>
       </div>
+      <div v-if="hasMorePlaces" class="load-more-row">
+        <button type="button" @click="loadMore">더 보기</button>
+      </div>
       <EmptyState
-        v-if="!placeStore.loading && !placeStore.error && !filteredPlaces.length"
+        v-if="!placeStore.loading && !placeStore.error && !sortedPlaces.length"
         icon="P"
         tone="search"
         title="조건에 맞는 장소가 없습니다"

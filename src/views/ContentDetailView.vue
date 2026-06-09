@@ -19,6 +19,8 @@ const errorMessage = ref('');
 
 const contentId = computed(() => route.params.id || '');
 const liked = computed(() => content.value && uiStore.likedContent.includes(content.value.contentId));
+const likePending = computed(() => Boolean(content.value)
+  && uiStore.pendingContentLikes.some((id) => String(id) === String(content.value.contentId)));
 
 async function loadContentDetail() {
   if (!contentId.value) {
@@ -61,6 +63,8 @@ function useFallbackImage(event) {
         :class="{ active: liked }"
         type="button"
         aria-label="좋아요"
+        :aria-pressed="liked"
+        :disabled="likePending"
         @click="content && uiStore.toggleContentLike(content.contentId)"
       >
         ♥
