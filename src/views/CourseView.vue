@@ -27,14 +27,14 @@ const selectedCount = computed(() => uiStore.selectedContentIds?.length ?? 0);
 
 <template>
   <AppLayout>
-    <section class="course-step">
+    <section class="course-step course-selection-screen">
       <div class="progress-line"><b></b><span>1/4</span></div>
-      <div class="page-intro">
+      <div class="page-intro course-selection-intro">
         <h1>어떤 콘텐츠로 여행할까요?</h1>
         <p>드라마·영화·예능을 두 개 이상 함께 선택할 수 있어요.</p>
       </div>
-      <SearchBar v-model="query" placeholder="콘텐츠 검색" />
-      <ChipGroup v-model="category" :items="contentStore.categories" />
+      <SearchBar v-model="query" class="course-selection-search" placeholder="콘텐츠 검색" />
+      <ChipGroup v-model="category" class="course-selection-categories" :items="contentStore.categories" />
       <EmptyState
         v-if="contentStore.loading"
         tone="loading"
@@ -52,7 +52,7 @@ const selectedCount = computed(() => uiStore.selectedContentIds?.length ?? 0);
         action-label="다시 시도"
         @action="contentStore.load"
       />
-      <div v-else class="content-grid">
+      <div v-else class="content-grid course-selection-grid">
         <button
           v-for="content in filteredContents"
           :key="content.contentId"
@@ -70,7 +70,7 @@ const selectedCount = computed(() => uiStore.selectedContentIds?.length ?? 0);
         title="선택할 콘텐츠가 없습니다"
         text="검색어를 줄이거나 다른 카테고리에서 여행의 시작점을 찾아보세요."
       />
-      <div class="sticky-actions">
+      <div class="sticky-actions course-selection-actions">
         <div v-if="selectedCount" class="selection-summary">
           {{ selectedCount }}개 콘텐츠 선택됨
         </div>
