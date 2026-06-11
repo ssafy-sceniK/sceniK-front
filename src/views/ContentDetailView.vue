@@ -10,6 +10,7 @@ import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { applyNeutralContentImageFallback, getContentImageUrl } from '../utils/contentImages.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -38,6 +39,7 @@ const relatedAverageRating = computed(() => {
   const totalScore = ratedPlaces.reduce((sum, item) => sum + (item.rating * item.count), 0);
   return (totalScore / totalCount).toFixed(1);
 });
+const contentImageUrl = computed(() => getContentImageUrl(content.value ?? {}));
 
 async function loadContentDetail() {
   if (!contentId.value) {
@@ -66,9 +68,7 @@ function startCourse() {
 }
 
 function useFallbackImage(event) {
-  if (event.currentTarget.dataset.fallbackApplied) return;
-  event.currentTarget.dataset.fallbackApplied = 'true';
-  event.currentTarget.src = '/images/kdrama-scene.jpg';
+  applyNeutralContentImageFallback(event);
 }
 </script>
 
@@ -105,7 +105,7 @@ function useFallbackImage(event) {
     />
     <section v-else-if="content" class="detail-screen">
       <div class="detail-hero">
-        <img :src="content.thumbnailUrl" :alt="content.title" @error="useFallbackImage" />
+        <img :key="contentImageUrl" :src="contentImageUrl" :alt="content.title" @error="useFallbackImage" />
         <div>
           <span class="badge dark">{{ content.category }}</span>
           <h1>{{ content.title }}</h1>

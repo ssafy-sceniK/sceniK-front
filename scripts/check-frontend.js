@@ -92,6 +92,8 @@ const homeView = readFileSync('src/views/HomeView.vue', 'utf8');
 const aiLoadingView = readFileSync('src/views/AiLoadingView.vue', 'utf8');
 const communityView = readFileSync('src/views/CommunityView.vue', 'utf8');
 const myPageView = readFileSync('src/views/MyPageView.vue', 'utf8');
+const contentCard = readFileSync('src/components/content/ContentCard.vue', 'utf8');
+const contentDetailView = readFileSync('src/views/ContentDetailView.vue', 'utf8');
 
 if (!topNav.includes('BrandLogo') || !splashView.includes('BrandLogo')) {
   console.error('TopNav and SplashView must render the shared BrandLogo component.');
@@ -206,6 +208,21 @@ if (!communityView.includes('SortSegmentedControl') || communityView.includes('<
 
 if (!myPageView.includes('<AppLayout>')) {
   console.error('My Page must use the same logo-led header as the other primary tabs.');
+  process.exit(1);
+}
+
+if ([contentCard, contentDetailView].some((file) => file.includes('/images/kdrama-scene.jpg'))) {
+  console.error('Content thumbnails must not fall back to a real drama still that makes cards look duplicated.');
+  process.exit(1);
+}
+
+if (
+  !contentCard.includes('getContentImageUrl')
+  || !contentCard.includes('applyNeutralContentImageFallback')
+  || !contentDetailView.includes('getContentImageUrl')
+  || !contentDetailView.includes('applyNeutralContentImageFallback')
+) {
+  console.error('Content card and detail thumbnails must use the neutral content image fallback helper.');
   process.exit(1);
 }
 

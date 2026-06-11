@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { applyNeutralContentImageFallback, getContentImageUrl } from '../../utils/contentImages.js';
 
 const props = defineProps({
   content: { type: Object, required: true },
@@ -9,18 +10,17 @@ const props = defineProps({
 const placeCount = computed(() => props.content.placeCount
   ?? props.content.relatedPlaceCount
   ?? 0);
+const imageUrl = computed(() => getContentImageUrl(props.content));
 
 function useFallbackImage(event) {
-  if (event.currentTarget.dataset.fallbackApplied) return;
-  event.currentTarget.dataset.fallbackApplied = 'true';
-  event.currentTarget.src = '/images/kdrama-scene.jpg';
+  applyNeutralContentImageFallback(event);
 }
 </script>
 
 <template>
   <article class="poster-card" :class="{ selected }">
     <div class="poster-image">
-      <img :src="content.thumbnailUrl" :alt="content.title" @error="useFallbackImage" />
+      <img :key="imageUrl" :src="imageUrl" :alt="content.title" @error="useFallbackImage" />
       <span class="badge dark">{{ content.category }}</span>
       <span v-if="selected" class="selected-check">✓</span>
     </div>
