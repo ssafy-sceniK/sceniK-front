@@ -646,7 +646,7 @@ export const useUiStore = defineStore('ui', {
         this.authLoading = false;
       }
     },
-    async completeOAuthLogin(code) {
+    async completeOAuthLogin(code, provider = 'oauth') {
       if (!code) throw new Error('OAuth 로그인 코드가 없습니다.');
       this.authLoading = true;
       try {
@@ -661,13 +661,15 @@ export const useUiStore = defineStore('ui', {
           this.loadFollowState(),
         ]);
         this.persist();
-        this.notify('Google 계정으로 로그인되었습니다.', 'success');
+        const providerName = ({ google: 'Google', kakao: '카카오' })[provider] ?? '소셜';
+        this.notify(`${providerName} 계정으로 로그인되었습니다.`, 'success');
         return this.currentUser;
       } catch (error) {
         clearAccessToken();
         this.currentUser = null;
         this.persist();
-        throw new Error(apiErrorMessage(error, 'Google 로그인에 실패했습니다.'));
+        const providerName = ({ google: 'Google', kakao: '카카오' })[provider] ?? '소셜';
+        throw new Error(apiErrorMessage(error, `${providerName} 로그인에 실패했습니다.`));
       } finally {
         this.authLoading = false;
       }

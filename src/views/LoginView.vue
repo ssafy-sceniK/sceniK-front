@@ -6,7 +6,7 @@ import { getUserMessage } from '../api/error.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
-import { GOOGLE_OAUTH_URL } from '../api/authApi.js';
+import { GOOGLE_OAUTH_URL, KAKAO_OAUTH_URL } from '../api/authApi.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -17,14 +17,19 @@ const error = ref('');
 const loading = ref(false);
 const socialMessage = ref('');
 
-function continueWithGoogle() {
+function continueWithOAuth(provider, url) {
   socialMessage.value = '';
   sessionStorage.setItem('scenik-oauth-return-to', '/home');
-  window.location.assign(GOOGLE_OAUTH_URL);
+  sessionStorage.setItem('scenik-oauth-provider', provider);
+  window.location.assign(url);
+}
+
+function continueWithGoogle() {
+  continueWithOAuth('google', GOOGLE_OAUTH_URL);
 }
 
 function continueWithKakao() {
-  socialMessage.value = '카카오 로그인은 아직 준비 중입니다.';
+  continueWithOAuth('kakao', KAKAO_OAUTH_URL);
 }
 
 function retryLogin() {

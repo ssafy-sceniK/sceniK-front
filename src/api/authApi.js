@@ -1,6 +1,7 @@
 import { API_BASE_URL, AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, http } from './http.js';
 
 export const GOOGLE_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/google`;
+export const KAKAO_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/kakao`;
 
 export function readAccessToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
