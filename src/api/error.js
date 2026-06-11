@@ -36,7 +36,8 @@ function isSafePlainMessage(message) {
 }
 
 export function getFieldErrors(error) {
-  const fieldErrors = error?.response?.data?.fieldErrors;
+  const responseData = error?.response?.data;
+  const fieldErrors = responseData?.fieldErrors ?? responseData?.data?.fieldErrors;
   if (!Array.isArray(fieldErrors)) return [];
   return fieldErrors
     .filter((fieldError) => fieldError?.message)
@@ -44,6 +45,18 @@ export function getFieldErrors(error) {
       field: fieldError.field ?? '',
       message: fieldError.message,
     }));
+}
+
+export function unwrapApiData(payload) {
+  if (
+    payload
+    && typeof payload === 'object'
+    && Object.prototype.hasOwnProperty.call(payload, 'success')
+    && Object.prototype.hasOwnProperty.call(payload, 'data')
+  ) {
+    return payload.data;
+  }
+  return payload;
 }
 
 export function getUserMessage(error, fallback = DEFAULT_ERROR_MESSAGE) {

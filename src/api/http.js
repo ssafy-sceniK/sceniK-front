@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { attachUserMessage } from './error.js';
+import { attachUserMessage, unwrapApiData } from './error.js';
 
 export const AUTH_TOKEN_KEY = 'scenik-access-token';
 export const REFRESH_TOKEN_KEY = 'scenik-refresh-token';
@@ -37,10 +37,11 @@ http.interceptors.response.use(
     original._retry = true;
     try {
       const { data } = await axios.post(`${API_BASE_URL}/auth/token/refresh`, { refreshToken });
-      if (data.accessToken) localStorage.setItem(AUTH_TOKEN_KEY, data.accessToken);
-      localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken ?? data.accessToken ?? refreshToken);
+      const tokenPayload = unwrapApiData(data) ?? {};
+      if (tokenPayload.accessToken) localStorage.setItem(AUTH_TOKEN_KEY, tokenPayload.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, tokenPayload.refreshToken ?? tokenPayload.accessToken ?? refreshToken);
       original.headers = original.headers ?? {};
-      original.headers.Authorization = `Bearer ${data.accessToken}`;
+      original.headers.Authorization = `Bearer ${tokenPayload.accessToken}`;
       return http(original);
     } catch (refreshError) {
       localStorage.removeItem(AUTH_TOKEN_KEY);

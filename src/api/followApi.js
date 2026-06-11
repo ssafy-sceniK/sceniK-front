@@ -1,3 +1,4 @@
+import { unwrapApiData } from './error.js';
 import { http } from './http.js';
 
 function normalizeFollowUser(user = {}) {
@@ -24,17 +25,18 @@ function normalizeFollowStatus(status = {}) {
 }
 
 function listFrom(data) {
-  return Array.isArray(data) ? data : data.items ?? data.users ?? [];
+  const payload = unwrapApiData(data);
+  return Array.isArray(payload) ? payload : payload?.items ?? payload?.users ?? [];
 }
 
 export async function followUser(userId) {
   const { data } = await http.post(`/users/${userId}/follow`);
-  return normalizeFollowStatus(data);
+  return normalizeFollowStatus(unwrapApiData(data));
 }
 
 export async function unfollowUser(userId) {
   const { data } = await http.delete(`/users/${userId}/follow`);
-  return normalizeFollowStatus(data);
+  return normalizeFollowStatus(unwrapApiData(data));
 }
 
 export async function fetchFollowers(userId) {

@@ -1,3 +1,4 @@
+import { unwrapApiData } from './error.js';
 import { http } from './http.js';
 
 function toApiVisitStatus(status) {
@@ -12,6 +13,11 @@ function fromApiVisitStatus(status) {
   return status;
 }
 
+function listFrom(payload) {
+  const data = unwrapApiData(payload);
+  return Array.isArray(data) ? data : data?.items ?? [];
+}
+
 export async function fetchMyLikes() {
   try {
     const [{ data: contentIds }, { data: placeIds }] = await Promise.all([
@@ -19,14 +25,15 @@ export async function fetchMyLikes() {
       http.get('/users/me/liked-places'),
     ]);
     return {
-      contentIds: Array.isArray(contentIds) ? contentIds : contentIds.items ?? [],
-      placeIds: Array.isArray(placeIds) ? placeIds : placeIds.items ?? [],
+      contentIds: listFrom(contentIds),
+      placeIds: listFrom(placeIds),
     };
   } catch {
     const { data } = await http.get('/users/me/likes');
+    const likes = unwrapApiData(data) ?? {};
     return {
-      contentIds: data.contentIds ?? data.likedContentIds ?? [],
-      placeIds: data.placeIds ?? data.likedPlaceIds ?? [],
+      contentIds: likes.contentIds ?? likes.likedContentIds ?? [],
+      placeIds: likes.placeIds ?? likes.likedPlaceIds ?? [],
     };
   }
 }
@@ -49,7 +56,7 @@ export async function unlikePlace(placeId) {
 
 export async function fetchMyVisitStatus() {
   const { data } = await http.get('/users/me/visit-status');
-  const list = Array.isArray(data) ? data : data.items ?? [];
+  const list = listFrom(data);
   return list.map((item) => ({
     ...item,
     status: fromApiVisitStatus(item.status),
@@ -58,9 +65,10 @@ export async function fetchMyVisitStatus() {
 
 export async function setPlaceVisitStatus(placeId, status) {
   const { data } = await http.put(`/places/${placeId}/visit-status`, { status: toApiVisitStatus(status) });
+  const visitStatus = unwrapApiData(data) ?? {};
   return {
-    ...data,
-    status: fromApiVisitStatus(data.status),
+    ...visitStatus,
+    status: fromApiVisitStatus(visitStatus.status),
   };
 }
 
