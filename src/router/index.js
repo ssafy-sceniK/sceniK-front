@@ -24,6 +24,7 @@ import NoticeListView from '../views/NoticeListView.vue';
 import SimpleListView from '../views/SimpleListView.vue';
 import NotificationsView from '../views/NotificationsView.vue';
 import SettingsView from '../views/SettingsView.vue';
+import AdminView from '../views/AdminView.vue';
 
 const routes = [
   { path: '/', name: 'splash', component: SplashView },
@@ -86,6 +87,9 @@ const routes = [
   { path: '/settings', name: 'settings', component: SettingsView },
   { path: '/notice', name: 'notice', component: NoticeListView },
   { path: '/notice/:id', name: 'notice-detail', component: NoticeListView },
+  { path: '/admin', redirect: '/admin/contents' },
+  { path: '/admin/contents', name: 'admin-contents', component: AdminView },
+  { path: '/admin/places', name: 'admin-places', component: AdminView },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ];
 
