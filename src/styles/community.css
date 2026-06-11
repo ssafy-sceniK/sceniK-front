@@ -276,6 +276,22 @@
   margin-top: 10px;
 }
 
+.post-owner-actions--compact {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.post-owner-actions--compact .post-owner-button {
+  min-height: 34px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
 .linked-course div {
   flex: 1;
 }

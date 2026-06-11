@@ -219,6 +219,10 @@ function postCommentPreview(post) {
   return (post.comments ?? []).find((comment) => comment.user === uiStore.currentUser.nickname)?.text ?? '';
 }
 
+function postCommentCount(post) {
+  return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
+}
+
 function postMeta(post) {
   return [post.date, post.region].filter(Boolean).join(' · ');
 }
@@ -364,7 +368,7 @@ async function toggleFollowFromList(user) {
           </div>
           <div class="my-post-meta">
             <span>♡ {{ post.likes ?? 0 }}</span>
-            <span>댓글 {{ post.comments?.length ?? 0 }}</span>
+            <span>댓글 {{ postCommentCount(post) }}</span>
             <span>{{ post.routeId ? 'AI 코스 연결됨' : '일반 후기' }}</span>
           </div>
         </RouterLink>

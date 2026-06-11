@@ -178,10 +178,32 @@ const selectedPost = computed(() => {
     || String(post.postId) === String(route.params.id)) ?? null;
 });
 const selectedComments = computed(() => selectedPost.value?.comments ?? []);
-const topLevelComments = computed(() => selectedComments.value.filter((comment) => !comment.parentCommentId));
+const selectedCommentIds = computed(() => new Set(selectedComments.value.map((comment) => String(commentKey(comment)))));
+const selectedCommentCount = computed(() => selectedComments.value.length);
+const topLevelComments = computed(() => selectedComments.value.filter((comment) => {
+  const parentId = comment.parentCommentId;
+  return !parentId || !selectedCommentIds.value.has(String(parentId));
+}));
 
 function postKey(post) {
   return post?.postId ?? post?.id;
+}
+
+function postCommentCount(post) {
+  return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
+}
+
+function focusCommentSection() {
+  requestAnimationFrame(() => {
+    const section = document.getElementById('community-comments');
+    const input = section?.querySelector?.('.comment-box input');
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (uiStore.currentUser && input instanceof HTMLInputElement) {
+      input.focus({ preventScroll: true });
+    } else {
+      section?.focus({ preventScroll: true });
+    }
+  });
 }
 
 function boardPostCount(board) {
@@ -713,9 +735,9 @@ async function nativeShare() {
             <template v-else>
               <h1>{{ selectedPost.title }}</h1>
               <p>{{ selectedPost.body }}</p>
-              <div v-if="isPostOwner(selectedPost)" class="post-owner-actions">
-                <BaseButton variant="secondary" @click="startPostEdit">게시글 수정</BaseButton>
-                <BaseButton variant="danger" @click="showPostDeleteSheet = true">게시글 삭제</BaseButton>
+              <div v-if="isPostOwner(selectedPost)" class="post-owner-actions post-owner-actions--compact">
+                <BaseButton class="post-owner-button" variant="secondary" @click="startPostEdit">게시글 수정</BaseButton>
+                <BaseButton class="post-owner-button" variant="danger" @click="showPostDeleteSheet = true">게시글 삭제</BaseButton>
               </div>
             </template>
             <div class="post-gallery" aria-label="Route image previews">
@@ -749,7 +771,7 @@ async function nativeShare() {
                 <span class="action-icon">{{ isPostLiked(selectedPost) ? '♥' : '♡' }}</span>
                 {{ selectedPost.likes }}
               </button>
-              <a href="#community-comments">댓글 {{ selectedPost.comments?.length ?? 0 }}</a>
+              <a href="#community-comments" @click="focusCommentSection">댓글 {{ selectedCommentCount }}</a>
               <button
                 type="button"
                 :class="{ 'is-active': isPostScrapped(selectedPost) }"
@@ -774,7 +796,7 @@ async function nativeShare() {
             </div>
           </article>
 
-          <CommentThread :count="selectedComments.length">
+          <CommentThread :count="selectedCommentCount">
             <FormStatusNotice
               v-if="commentNotice"
               compact
@@ -963,10 +985,20 @@ async function nativeShare() {
               title="첫 댓글을 기다리고 있어요"
               text="이 코스를 참고했다면 짧은 후기를 남겨보세요."
             />
-            <div class="comment-box">
+            <div v-if="uiStore.currentUser" class="comment-box">
               <input v-model="commentText" placeholder="댓글을 입력하세요" @keyup.enter="addComment(postKey(selectedPost))" />
               <button type="button" :disabled="!commentText.trim()" @click="addComment(postKey(selectedPost))">등록</button>
             </div>
+            <EmptyState
+              v-else
+              icon="L"
+              tone="login"
+              compact
+              title="로그인하면 댓글을 남길 수 있어요"
+              text="여행 후기와 촬영지 이야기에 댓글로 함께 참여해 보세요."
+              action-label="로그인하기"
+              action-to="/login"
+            />
             <CommentActionSheet
               v-if="commentActionTarget"
               :loading="commentActionLoading"
@@ -1087,7 +1119,7 @@ async function nativeShare() {
                 <span class="action-icon">{{ isPostLiked(post) ? '♥' : '♡' }}</span>
                 {{ post.likes }}
               </button>
-              <RouterLink :to="`/community/post/${postKey(post)}`">댓글 {{ post.comments?.length ?? 0 }}</RouterLink>
+              <RouterLink :to="`/community/post/${postKey(post)}`">댓글 {{ postCommentCount(post) }}</RouterLink>
               <button
                 type="button"
                 :class="{ 'is-active': isPostScrapped(post) }"

@@ -371,6 +371,16 @@ function mergeCommunityPost(posts, post) {
   return posts.map((item, index) => (index === existingIndex ? normalized : item));
 }
 
+function withCommunityCommentCount(post, comments) {
+  const nextCount = comments.length;
+  return {
+    ...post,
+    comments,
+    commentCount: nextCount,
+    commentsCount: nextCount,
+  };
+}
+
 function mergeCommunityComment(posts, comment) {
   const key = comment?.commentId ?? comment?.id;
   if (!key) return posts;
@@ -378,9 +388,9 @@ function mergeCommunityComment(posts, comment) {
     const comments = post.comments ?? [];
     const hasComment = comments.some((item) => sameId(item.commentId ?? item.id, key));
     if (!hasComment) return post;
-    return {
-      ...post,
-      comments: comments.map((item) => (
+    return withCommunityCommentCount(
+      post,
+      comments.map((item) => (
         sameId(item.commentId ?? item.id, key)
           ? {
               ...item,
@@ -389,8 +399,8 @@ function mergeCommunityComment(posts, comment) {
               commentId: comment.commentId ?? key,
             }
           : item
-      )),
-    };
+      ))
+    );
   });
 }
 
@@ -1104,10 +1114,7 @@ export const useUiStore = defineStore('ui', {
       try {
         const comment = await createCommunityComment(postId, { text: text.trim(), parentCommentId });
         this.communityPosts = this.communityPosts.map((post) => (sameId(post.id, postId) || sameId(post.postId, postId))
-          ? {
-              ...post,
-              comments: [...(post.comments ?? []), comment],
-            }
+          ? withCommunityCommentCount(post, [...(post.comments ?? []), comment])
           : post);
         return comment;
       } catch (error) {
@@ -1126,12 +1133,12 @@ export const useUiStore = defineStore('ui', {
         const updated = await updateCommunityComment(postId, commentId, { text: text.trim() });
         this.communityPosts = this.communityPosts.map((post) => {
           if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
-          return {
-            ...post,
-            comments: (post.comments ?? []).map((comment) => (
+          return withCommunityCommentCount(
+            post,
+            (post.comments ?? []).map((comment) => (
               sameId(comment.id, commentId) || sameId(comment.commentId, commentId) ? updated : comment
-            )),
-          };
+            ))
+          );
         });
         this.notify('댓글을 수정했습니다.');
         return updated;
@@ -1147,12 +1154,12 @@ export const useUiStore = defineStore('ui', {
         await deleteCommunityComment(postId, commentId);
         this.communityPosts = this.communityPosts.map((post) => {
           if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
-          return {
-            ...post,
-            comments: (post.comments ?? []).filter((comment) => (
-              !sameId(comment.id, commentId) && !sameId(comment.commentId, commentId)
-            )),
-          };
+          const comments = (post.comments ?? []).filter((comment) => (
+            !sameId(comment.id, commentId)
+              && !sameId(comment.commentId, commentId)
+              && !sameId(comment.parentCommentId, commentId)
+          ));
+          return withCommunityCommentCount(post, comments);
         });
         this.notify('댓글을 삭제했습니다.');
         return true;

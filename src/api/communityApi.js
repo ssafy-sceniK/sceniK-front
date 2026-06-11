@@ -1,3 +1,4 @@
+import { unwrapApiData } from './error.js';
 import { http } from './http.js';
 
 function firstDefined(...values) {
@@ -27,6 +28,7 @@ function normalizeComment(comment = {}) {
 export function normalizePost(post = {}) {
   const postId = firstDefined(post.postId, post.id);
   const comments = (post.comments ?? post.commentItems ?? []).map(normalizeComment);
+  const commentCount = Number(firstDefined(post.commentCount, post.commentsCount, post.comment_count, comments.length));
   return {
     ...post,
     id: post.id ?? postId,
@@ -45,13 +47,16 @@ export function normalizePost(post = {}) {
     isLiked: Boolean(firstDefined(post.isLiked, post.liked, false)),
     likedBy: post.likedBy ?? [],
     scrappedBy: post.scrappedBy ?? [],
+    commentCount,
+    commentsCount: commentCount,
     comments,
   };
 }
 
 function listFrom(data, key) {
-  if (Array.isArray(data)) return data;
-  return data?.[key] ?? data?.items ?? data?.data ?? [];
+  const payload = unwrapApiData(data);
+  if (Array.isArray(payload)) return payload;
+  return payload?.[key] ?? payload?.items ?? payload?.data ?? [];
 }
 
 export async function getPosts(params = {}) {
@@ -61,7 +66,14 @@ export async function getPosts(params = {}) {
 
 export async function getPost(postId) {
   const { data } = await http.get(`/posts/${postId}`);
-  return normalizePost(data.post ?? data);
+  const payload = unwrapApiData(data);
+  const post = normalizePost(payload?.post ?? payload);
+  if (post.postId) {
+    post.comments = await getComments(post.postId);
+    post.commentCount = post.comments.length;
+    post.commentsCount = post.comments.length;
+  }
+  return post;
 }
 
 export async function createPost(payload) {
@@ -69,7 +81,8 @@ export async function createPost(payload) {
     ...payload,
     content: payload.content ?? payload.body,
   });
-  return normalizePost(data.post ?? data);
+  const response = unwrapApiData(data);
+  return normalizePost(response?.post ?? response);
 }
 
 export async function updatePost(postId, payload) {
@@ -77,7 +90,8 @@ export async function updatePost(postId, payload) {
     ...payload,
     content: payload.content ?? payload.body,
   });
-  return normalizePost(data.post ?? data);
+  const response = unwrapApiData(data);
+  return normalizePost(response?.post ?? response);
 }
 
 export async function deletePost(postId) {
@@ -95,7 +109,8 @@ export async function createComment(postId, payload) {
     ...payload,
     content: payload.content ?? payload.text,
   });
-  return normalizeComment(data.comment ?? data);
+  const response = unwrapApiData(data);
+  return normalizeComment(response?.comment ?? response);
 }
 
 export async function updateComment(postId, commentId, payload) {
@@ -103,7 +118,8 @@ export async function updateComment(postId, commentId, payload) {
     ...payload,
     content: payload.content ?? payload.text,
   });
-  return normalizeComment(data.comment ?? data);
+  const response = unwrapApiData(data);
+  return normalizeComment(response?.comment ?? response);
 }
 
 export async function deleteComment(postId, commentId) {
@@ -113,32 +129,37 @@ export async function deleteComment(postId, commentId) {
 
 export async function likeComment(commentId) {
   const { data } = await http.post(`/posts/comments/${commentId}/likes`);
-  return data ? normalizeComment(data.comment ?? data) : null;
+  const response = unwrapApiData(data);
+  return response ? normalizeComment(response?.comment ?? response) : null;
 }
 
 export async function unlikeComment(commentId) {
   const { data } = await http.delete(`/posts/comments/${commentId}/likes`);
-  return data ? normalizeComment(data.comment ?? data) : null;
+  const response = unwrapApiData(data);
+  return response ? normalizeComment(response?.comment ?? response) : null;
 }
 
 export async function likePost(postId) {
   const { data } = await http.post(`/posts/${postId}/likes`);
-  return data ? normalizePost(data.post ?? data) : null;
+  const response = unwrapApiData(data);
+  return response ? normalizePost(response?.post ?? response) : null;
 }
 
 export async function unlikePost(postId) {
   const { data } = await http.delete(`/posts/${postId}/likes`);
-  return data ? normalizePost(data.post ?? data) : null;
+  const response = unwrapApiData(data);
+  return response ? normalizePost(response?.post ?? response) : null;
 }
 
 export async function reportPost(postId, payload = {}) {
   const { data } = await http.post(`/posts/${postId}/reports`, payload);
-  return data;
+  return unwrapApiData(data);
 }
 
 export async function getNotifications() {
   const { data } = await http.get('/notifications');
-  const list = Array.isArray(data) ? data : data.items ?? data.notifications ?? [];
+  const payload = unwrapApiData(data);
+  const list = Array.isArray(payload) ? payload : payload?.items ?? payload?.notifications ?? [];
   return list.map((item) => ({
     ...item,
     id: item.notificationId ?? item.id,

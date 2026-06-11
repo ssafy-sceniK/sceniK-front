@@ -12,7 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <section id="community-comments" class="comments-panel comment-thread-panel" aria-labelledby="comment-thread-title">
+  <section id="community-comments" class="comments-panel comment-thread-panel" tabindex="-1" aria-labelledby="comment-thread-title">
     <h2 id="comment-thread-title">댓글 {{ props.count }}</h2>
     <slot></slot>
   </section>
