@@ -25,10 +25,12 @@ import SimpleListView from '../views/SimpleListView.vue';
 import NotificationsView from '../views/NotificationsView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import AdminView from '../views/AdminView.vue';
+import OAuthCallbackView from '../views/OAuthCallbackView.vue';
 
 const routes = [
   { path: '/', name: 'splash', component: SplashView },
   { path: '/login', name: 'login', component: LoginView },
+  { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
   { path: '/signup', name: 'signup', component: SignupView },
   { path: '/preferences', name: 'preferences', component: PreferencesView },
   { path: '/home', name: 'home', component: HomeView },
