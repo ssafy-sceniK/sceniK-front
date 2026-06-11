@@ -40,7 +40,12 @@ function chooseByOffset(offset) {
 </script>
 
 <template>
-  <div class="segmented-sort" role="radiogroup" :aria-label="props.ariaLabel">
+  <div
+    class="segmented-sort"
+    role="radiogroup"
+    :aria-label="props.ariaLabel"
+    :style="{ '--segmented-option-count': props.options.length }"
+  >
     <button
       v-for="option in props.options"
       :key="option.value"

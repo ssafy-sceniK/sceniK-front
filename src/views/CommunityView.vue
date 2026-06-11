@@ -650,7 +650,7 @@ async function nativeShare() {
   <AppLayout :title="isPostDetail ? '게시글' : composeMode ? '커뮤니티' : ''" :back="isPostDetail || composeMode">
     <section class="community-screen">
       <template v-if="isBoardList">
-        <SearchBar v-model="query" placeholder="게시글 / 태그 검색" @focus="router.push('/community/search')" />
+        <SearchBar v-model="query" placeholder="게시글, 태그 검색" @focus="router.push('/community/search')" />
         <div class="mode-toggle community-tabs" aria-label="Community sections">
           <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
           <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
@@ -994,7 +994,7 @@ async function nativeShare() {
       </template>
 
       <template v-else>
-        <SearchBar v-model="query" placeholder="게시글 / 태그 검색" />
+        <SearchBar v-model="query" placeholder="게시글, 태그 검색" />
         <div class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
           <span class="list-control-label">정렬</span>
           <SortSegmentedControl

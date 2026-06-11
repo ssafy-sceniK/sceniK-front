@@ -6,6 +6,7 @@ import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
 import ContentCard from '../components/content/ContentCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import { useContentStore } from '../stores/contentStore.js';
 
 const router = useRouter();
@@ -18,6 +19,10 @@ const sort = ref('popular');
 const visibleLimit = ref(12);
 const restoringQuery = ref(false);
 const exploreCategories = computed(() => contentStore.categories);
+const sortOptions = [
+  { value: 'popular', label: '인기순' },
+  { value: 'latest', label: '최신순' },
+];
 
 onMounted(() => {
   restoreQueryState();
@@ -100,15 +105,14 @@ function loadMore() {
       </div>
       <h3 class="subsection-title">카테고리</h3>
       <ChipGroup v-model="category" :items="exploreCategories" />
-      <div class="list-control-row" aria-label="콘텐츠 정렬과 결과 수">
-        <label>
-          정렬
-          <select v-model="sort" class="sort-select">
-            <option value="popular">인기순</option>
-            <option value="latest">최신순</option>
-          </select>
-        </label>
-        <span>{{ sortedContents.length }}개 결과</span>
+      <div class="list-control-row explore-sort-row" aria-label="콘텐츠 정렬과 결과 수">
+        <span class="list-control-label">정렬</span>
+        <SortSegmentedControl
+          v-model="sort"
+          :options="sortOptions"
+          aria-label="콘텐츠 정렬"
+        />
+        <span class="list-result-count">{{ sortedContents.length }}개 결과</span>
       </div>
 
       <div class="section-header"><h2>인기 콘텐츠</h2></div>

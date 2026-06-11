@@ -6,6 +6,7 @@ import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
@@ -17,6 +18,11 @@ const category = ref('전체');
 const sort = ref('latest');
 const visibleLimit = ref(12);
 const restoringQuery = ref(false);
+const sortOptions = [
+  { value: 'latest', label: '최신순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'name', label: '이름순' },
+];
 
 onMounted(() => {
   restoreQueryState();
@@ -102,16 +108,14 @@ function loadMore() {
       <ChipGroup v-model="region" :items="placeStore.regions" />
       <h3 class="subsection-title">카테고리</h3>
       <ChipGroup v-model="category" :items="placeStore.categories" />
-      <div class="list-control-row" aria-label="장소 정렬과 결과 수">
-        <label>
-          정렬
-          <select v-model="sort" class="sort-select">
-            <option value="latest">최신순</option>
-            <option value="popular">인기순</option>
-            <option value="name">이름순</option>
-          </select>
-        </label>
-        <span>{{ sortedPlaces.length }}개 결과</span>
+      <div class="list-control-row explore-sort-row" aria-label="장소 정렬과 결과 수">
+        <span class="list-control-label">정렬</span>
+        <SortSegmentedControl
+          v-model="sort"
+          :options="sortOptions"
+          aria-label="장소 정렬"
+        />
+        <span class="list-result-count">{{ sortedPlaces.length }}개 결과</span>
       </div>
       <EmptyState
         v-if="placeStore.loading"
