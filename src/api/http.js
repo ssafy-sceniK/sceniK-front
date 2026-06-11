@@ -27,6 +27,7 @@ http.interceptors.response.use(
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     const isAuthRequest = original?.url?.includes('/auth/login')
       || original?.url?.includes('/auth/signup')
+      || original?.url?.includes('/auth/oauth/exchange')
       || original?.url?.includes('/auth/token/refresh');
 
     if (status !== 401 || !refreshToken || original?._retry || isAuthRequest) {

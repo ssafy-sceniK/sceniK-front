@@ -1,6 +1,7 @@
 ﻿import { defineStore } from 'pinia';
 import {
   clearAccessToken,
+  exchangeOAuthCode,
   fetchMe,
   login as loginRequest,
   logout as logoutRequest,
@@ -641,6 +642,32 @@ export const useUiStore = defineStore('ui', {
         return this.currentUser;
       } catch (error) {
         throw new Error(apiErrorMessage(error, '로그인에 실패했습니다.'));
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async completeOAuthLogin(code) {
+      if (!code) throw new Error('OAuth 로그인 코드가 없습니다.');
+      this.authLoading = true;
+      try {
+        const session = await exchangeOAuthCode(code);
+        if (!session.accessToken) throw new Error('로그인 토큰을 받지 못했습니다.');
+        saveAccessToken(session.accessToken, session.refreshToken);
+        this.currentUser = session.user;
+        this.onboardingSeen = true;
+        await Promise.all([
+          this.loadSavedCourses(),
+          this.loadEngagementState(),
+          this.loadFollowState(),
+        ]);
+        this.persist();
+        this.notify('Google 계정으로 로그인되었습니다.', 'success');
+        return this.currentUser;
+      } catch (error) {
+        clearAccessToken();
+        this.currentUser = null;
+        this.persist();
+        throw new Error(apiErrorMessage(error, 'Google 로그인에 실패했습니다.'));
       } finally {
         this.authLoading = false;
       }

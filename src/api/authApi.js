@@ -1,4 +1,6 @@
-import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, http } from './http.js';
+import { API_BASE_URL, AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, http } from './http.js';
+
+export const GOOGLE_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/google`;
 
 export function readAccessToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -39,6 +41,15 @@ export async function signup(payload) {
 
 export async function login(payload) {
   const { data } = await http.post('/auth/login', payload);
+  return {
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken ?? data.accessToken,
+    user: normalizeUser(data.user),
+  };
+}
+
+export async function exchangeOAuthCode(code) {
+  const { data } = await http.post('/auth/oauth/exchange', { code });
   return {
     accessToken: data.accessToken,
     refreshToken: data.refreshToken ?? data.accessToken,
