@@ -205,6 +205,29 @@
   background: var(--placeholder);
 }
 
+.place-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0, 82, 255, 0.13), transparent 34%),
+    linear-gradient(180deg, rgba(245, 248, 255, 0.96), rgba(230, 236, 246, 0.88));
+}
+
+.place-thumb-placeholder span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--color-primary);
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .place-card.compact .place-thumb {
   width: 52px;
   height: 52px;
@@ -599,6 +622,40 @@
   color: var(--color-teal-deep);
   background: #ffffff;
   box-shadow: var(--shadow-sm);
+}
+
+.map-filter-scroll {
+  margin: 0 -16px 12px;
+  padding: 0 16px 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.map-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.map-filter-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.map-filter-scroll.is-dragging .chip {
+  pointer-events: none;
+}
+
+.map-filter-scroll .chip-row {
+  width: max-content;
+  min-width: 100%;
+  margin-bottom: 0;
+}
+
+.map-explore-preview.map-preview {
+  height: clamp(320px, calc(100dvh - var(--top-nav-height) - var(--bottom-nav-height) - 190px), 520px);
+  min-height: 320px;
+  margin-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .explore-screen > .mode-toggle,

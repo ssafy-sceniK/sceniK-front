@@ -44,6 +44,16 @@ const courseUpdatedLabel = computed(() => (
   ?? course.value?.dateRangeLabel
   ?? (isSavedCourse.value ? '저장한 코스' : '저장 전 템플릿')
 ));
+const courseSummaryText = computed(() => {
+  const summary = course.value?.summary?.trim?.() ?? '';
+  if (/verified places connected into a sceniK travel course/i.test(summary)) return '';
+  return summary;
+});
+const courseTrustMessage = computed(() => {
+  const message = course.value?.trustMessage?.trim?.() ?? '';
+  if (/This course uses only verified sceniK places/i.test(message)) return '';
+  return message;
+});
 const deleteLoading = computed(() => uiStore.routeActionLoading && showDeleteSheet.value);
 
 async function loadDetail() {
@@ -173,7 +183,7 @@ async function deleteCourse() {
       <div class="course-manage-header result-hero">
         <span class="badge ai">{{ isSavedCourse ? 'Saved Course' : 'Popular Course' }}</span>
         <h1>{{ course.title }}</h1>
-        <p>{{ course.summary }}</p>
+        <p v-if="courseSummaryText">{{ courseSummaryText }}</p>
         <div v-if="course.dateRangeLabel" class="result-date">{{ course.dateRangeLabel }}</div>
         <div class="result-stats">
           <span>{{ course.region }}</span>
@@ -185,8 +195,8 @@ async function deleteCourse() {
       <div v-if="validationErrors.length" class="trust-panel course-warning">
         {{ validationErrors[0] }}
       </div>
-      <div v-else class="trust-panel">
-        {{ course.trustMessage }}
+      <div v-else-if="courseTrustMessage" class="trust-panel">
+        {{ courseTrustMessage }}
       </div>
 
       <FormStatusNotice

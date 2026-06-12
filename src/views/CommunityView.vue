@@ -706,14 +706,21 @@ async function nativeShare() {
       <template v-else-if="isPostDetail">
         <CommunityPostDetailPanel v-if="selectedPost">
           <article class="post-detail-card">
-            <AuthorFollowCard
-              :author-name="selectedPost.user"
-              :meta="`${selectedPost.date} · ${selectedPost.region}`"
-              :can-follow="canFollowSelectedAuthor"
-              :following="selectedAuthorFollowed"
-              :loading="selectedAuthorFollowLoading"
-              @toggle="toggleSelectedAuthorFollow"
-            />
+            <div class="post-detail-topline">
+              <AuthorFollowCard
+                class="post-detail-author"
+                :author-name="selectedPost.user"
+                :meta="`${selectedPost.date} · ${selectedPost.region}`"
+                :can-follow="canFollowSelectedAuthor"
+                :following="selectedAuthorFollowed"
+                :loading="selectedAuthorFollowLoading"
+                @toggle="toggleSelectedAuthorFollow"
+              />
+              <div v-if="isPostOwner(selectedPost) && !editingPost" class="post-owner-actions post-owner-actions--compact">
+                <BaseButton class="post-owner-button" variant="secondary" @click="startPostEdit">수정</BaseButton>
+                <BaseButton class="post-owner-button" variant="danger" @click="showPostDeleteSheet = true">삭제</BaseButton>
+              </div>
+            </div>
             <FormStatusNotice
               v-if="postNotice"
               compact
@@ -740,10 +747,6 @@ async function nativeShare() {
             <template v-else>
               <h1>{{ selectedPost.title }}</h1>
               <p>{{ selectedPost.body }}</p>
-              <div v-if="isPostOwner(selectedPost)" class="post-owner-actions post-owner-actions--compact">
-                <BaseButton class="post-owner-button" variant="secondary" @click="startPostEdit">게시글 수정</BaseButton>
-                <BaseButton class="post-owner-button" variant="danger" @click="showPostDeleteSheet = true">게시글 삭제</BaseButton>
-              </div>
             </template>
             <div class="post-gallery" aria-label="Route image previews">
               <span></span>

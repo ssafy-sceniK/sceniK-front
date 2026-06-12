@@ -36,12 +36,16 @@ const reviewForm = ref({
   rating: 5,
   content: '',
 });
+const placeImageFailed = ref(false);
 const editingReviewId = ref(null);
 const editReviewForm = ref({
   rating: 5,
   content: '',
 });
 const placeId = computed(() => route.params.id || '');
+const placeImageUrl = computed(() => place.value?.imageUrl || '');
+const showPlaceImage = computed(() => Boolean(placeImageUrl.value) && !placeImageFailed.value);
+const placeInitial = computed(() => place.value?.placeName?.trim?.().slice(0, 1) || 'P');
 const relatedContents = computed(() => place.value?.relatedContents ?? []);
 const liked = computed(() => place.value && uiStore.likedPlaces.includes(place.value.placeId));
 const likePending = computed(() => Boolean(place.value)
@@ -112,6 +116,7 @@ async function loadPlaceDetail() {
     loading.value = false;
     return;
   }
+  placeImageFailed.value = false;
   uiStore.markViewedPlace(place.value.placeId, place.value);
   await loadReviews();
   loading.value = false;
@@ -303,10 +308,8 @@ function startCourse() {
   router.push('/ai/conditions');
 }
 
-function useFallbackImage(event) {
-  if (event.currentTarget.dataset.fallbackApplied) return;
-  event.currentTarget.dataset.fallbackApplied = 'true';
-  event.currentTarget.src = '/images/seoul-street.jpg';
+function markPlaceImageFailed() {
+  placeImageFailed.value = true;
 }
 </script>
 
@@ -343,9 +346,16 @@ function useFallbackImage(event) {
     />
     <section v-else-if="place" class="detail-screen">
       <div class="detail-hero place">
-        <img :src="place.imageUrl" :alt="place.placeName" @error="useFallbackImage" />
+        <img
+          v-if="showPlaceImage"
+          :src="placeImageUrl"
+          :alt="`${place.placeName} 장소 이미지`"
+          @error="markPlaceImageFailed"
+        />
+        <div v-else class="detail-hero-placeholder" aria-hidden="true">
+          <span>{{ placeInitial }}</span>
+        </div>
         <div>
-          <span class="badge verified">검증된 장소</span>
           <h1>{{ place.placeName }}</h1>
           <p>{{ place.region }} · {{ place.district }} · {{ place.category }}</p>
         </div>

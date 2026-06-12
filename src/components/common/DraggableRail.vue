@@ -21,7 +21,6 @@ function startDrag(event) {
     startX: event.clientX,
     suppressClick: false,
   };
-  rail.setPointerCapture?.(event.pointerId);
 }
 
 function moveDrag(event) {
@@ -32,6 +31,9 @@ function moveDrag(event) {
   const deltaX = event.clientX - state.startX;
   if (Math.abs(deltaX) > 5) {
     state.moved = true;
+    if (!rail.hasPointerCapture?.(event.pointerId)) {
+      rail.setPointerCapture?.(event.pointerId);
+    }
     rail.scrollLeft = state.scrollLeft - deltaX;
     event.preventDefault();
   }
@@ -41,7 +43,9 @@ function endDrag(event) {
   const state = dragState.value;
   if (!state.active) return;
 
-  event.currentTarget.releasePointerCapture?.(state.pointerId);
+  if (event.currentTarget.hasPointerCapture?.(state.pointerId)) {
+    event.currentTarget.releasePointerCapture(state.pointerId);
+  }
   dragState.value = {
     ...state,
     active: false,
@@ -51,7 +55,7 @@ function endDrag(event) {
   if (state.moved) {
     window.setTimeout(() => {
       dragState.value = { ...dragState.value, suppressClick: false };
-    }, 0);
+    }, 120);
   }
 }
 
@@ -66,7 +70,7 @@ function preventDraggedClick(event) {
 <template>
   <div
     class="rail draggable-rail"
-    :class="{ 'is-dragging': dragState.active }"
+    :class="{ 'is-dragging': dragState.moved }"
     @click.capture="preventDraggedClick"
     @pointerdown="startDrag"
     @pointermove="moveDrag"
