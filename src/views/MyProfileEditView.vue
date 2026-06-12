@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const router = useRouter();
@@ -121,11 +122,12 @@ onBeforeUnmount(() => {
     <section v-else class="profile-edit-screen">
       <section class="profile-preview-panel" aria-labelledby="profile-preview-title">
         <div class="profile-edit-avatar">
-          <div class="avatar large profile-preview-avatar">
-            <img v-if="profilePreviewUrl" :src="profilePreviewUrl" alt="프로필 이미지 미리보기" />
-            <span v-else>{{ profileInitial }}</span>
-            <span class="avatar-edit-badge large">✎</span>
-          </div>
+          <ProfileAvatar
+            :image-url="profilePreviewUrl"
+            :initial="profileInitial"
+            alt="프로필 이미지 미리보기"
+            preview
+          />
           <div>
             <h2 id="profile-preview-title">프로필 이미지 미리보기</h2>
             <p>선택한 이미지는 이 화면에서만 미리보기로 표시됩니다.</p>

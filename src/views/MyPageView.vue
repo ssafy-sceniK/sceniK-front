@@ -5,6 +5,7 @@ import { useUiStore } from '../stores/uiStore.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -86,11 +87,14 @@ const tabs = computed(() => [
 
     <section v-else class="my-page">
       <div class="profile-card my-profile-card">
-        <button class="avatar profile-avatar-button" type="button" aria-label="프로필 편집" @click="router.push('/my/profile-edit')">
-          <img v-if="profileImageUrl" :src="profileImageUrl" alt="내 프로필 이미지" />
-          <span v-else>{{ profileInitial }}</span>
-          <span class="avatar-edit-badge">✎</span>
-        </button>
+        <ProfileAvatar
+          :image-url="profileImageUrl"
+          :initial="profileInitial"
+          alt="내 프로필 이미지"
+          interactive
+          aria-label="프로필 편집"
+          @click="router.push('/my/profile-edit')"
+        />
         <div class="profile-copy">
           <div class="profile-name-row">
             <h1>{{ uiStore.currentUser.nickname }}</h1>

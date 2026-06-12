@@ -322,7 +322,9 @@
 }
 
 .profile-avatar-button {
+  padding: 0;
   border: 0;
+  appearance: none;
 }
 
 .avatar-edit-badge {
@@ -756,6 +758,7 @@
   line-height: 1.45;
 }
 
+.profile-photo-avatar,
 .profile-preview-avatar {
   overflow: visible;
 }
