@@ -56,10 +56,14 @@
   right: 12px;
   bottom: 12px;
   z-index: 3;
-  display: grid;
-  gap: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: auto;
   padding: 12px 14px;
   color: var(--text);
+  text-align: left;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(0, 82, 255, 0.14);
   border-radius: var(--radius-lg);
@@ -67,21 +71,123 @@
   backdrop-filter: blur(10px);
 }
 
-.map-place-popover span,
+.map-place-popover__summary {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.map-place-popover__summary > span,
 .map-place-popover small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.map-place-popover span {
+.map-place-popover__summary > span {
   color: var(--muted);
   font-size: var(--text-xs);
 }
 
 .map-place-popover small {
+  flex: 0 0 auto;
   color: var(--color-primary);
   font-weight: 800;
+}
+
+.map-place-popover:focus-visible {
+  outline: 3px solid rgba(0, 82, 255, 0.3);
+  outline-offset: 2px;
+}
+
+.kakao-place-info {
+  position: relative;
+  display: grid;
+  width: min(310px, calc(100vw - 56px));
+  padding: 16px;
+  color: var(--text);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+  font-family: inherit;
+}
+
+.kakao-place-info__close {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.kakao-place-info__body {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: 5px;
+  padding-right: 12px;
+}
+
+.kakao-place-info__name,
+.kakao-place-info__address,
+.kakao-place-info__category {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kakao-place-info__name {
+  padding-right: 18px;
+  font-size: 15px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.kakao-place-info__address {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.kakao-place-info__category {
+  justify-self: start;
+  padding: 3px 7px;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.kakao-place-info__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.kakao-place-info__link {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.kakao-place-info__link:hover,
+.kakao-place-info__link:focus-visible {
+  text-decoration: underline;
+}
+
+.kakao-place-info__link--related {
+  flex-basis: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .map-preview--missing-key::before,

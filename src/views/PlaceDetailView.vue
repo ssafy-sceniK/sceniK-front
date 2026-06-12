@@ -364,7 +364,7 @@ function markPlaceImageFailed() {
         <p>{{ place.description }}</p>
         <p class="meta-line">{{ place.address }}</p>
         <p class="meta-line">운영 시간: {{ place.openingHours }}</p>
-        <MapPreview :route-places="[place]" />
+        <MapPreview :route-places="[place]" :show-detail-link="false" />
         <div class="action-grid two">
           <BaseButton
             :variant="uiStore.plannedVisits.includes(place.placeId) ? 'primary' : 'secondary'"

@@ -528,7 +528,7 @@ export const places = [
     "placeName": "킨텍스",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산서구 킨텍스로 217-60",
+    "address": "경기 고양시 일산서구 킨텍스로 217-60",
     "category": "촬영지",
     "description": "[오징어게임] 마지막 9화에서 로스앤젤레스로 가는 장면에서 공항으로 나온다.",
     "openingHours": "전시일정 별 상이",
@@ -556,8 +556,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2052,
-    "longitude": 126.9718
+    "latitude": 37.6689333,
+    "longitude": 126.7458026
   },
   {
     "placeId": "P_0002",
@@ -599,8 +599,8 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2065,
-    "longitude": 126.9778
+    "latitude": 37.4339028,
+    "longitude": 127.0187021
   },
   {
     "placeId": "P_0003",
@@ -639,15 +639,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5107,
-    "longitude": 126.9332
+    "latitude": 37.5625391,
+    "longitude": 126.9945989
   },
   {
     "placeId": "P_0004",
     "placeName": "팔도건어물",
     "region": "서울",
     "district": "도봉구",
-    "address": "서울특별시 도봉구 삼양로154길 36",
+    "address": "서울 도봉구 삼양로154길 36",
     "category": "촬영지",
     "description": "[오징어게임] 상우 어머니가 운영하던 생선 가게",
     "openingHours": "정보없음",
@@ -675,15 +675,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.512,
-    "longitude": 126.9392
+    "latitude": 37.6555996,
+    "longitude": 127.0152309
   },
   {
     "placeId": "P_0005",
     "placeName": "백운시장",
     "region": "서울",
     "district": "도봉구",
-    "address": "서울특별시 도봉구 우이천로 481 1층 백운시장 상인회 사무실",
+    "address": "서울 도봉구 삼양로154길 42",
     "category": "시장",
     "description": "[오징어게임] 1-2화에서 조상우의 어머니(박혜진)는 '쌍문의 자존심'인 성공한 아들의 사진을 자랑스럽게 걸어둔  '상우의 생선가게'라는 생선가게를 이 시장에서 운영하고 있다.",
     "openingHours": "매일 09시 - 18시 (상인회 사무실 기준)",
@@ -718,15 +718,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.5133,
-    "longitude": 126.9452
+    "latitude": 37.6557113,
+    "longitude": 127.0155981
   },
   {
     "placeId": "P_0006",
     "placeName": "양재시민의숲역",
     "region": "서울",
     "district": "서초구",
-    "address": "서울특별시 서초구 매헌로 116",
+    "address": "서울 서초구 매헌로 지하 116",
     "category": "공원",
     "description": "[오징어게임] 선생님, 저랑 게임 한 번 하시겠습니까'라며 오징어게임 시작을 알린 딱치지기 장면",
     "openingHours": "매일 05시 - (익일) 01시",
@@ -759,15 +759,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5146,
-    "longitude": 126.9512
+    "latitude": 37.4701332,
+    "longitude": 127.0384713
   },
   {
     "placeId": "P_0007",
     "placeName": "남산 산책로",
     "region": "서울",
     "district": "중구",
-    "address": "서울특별시 중구 예장동 산5-6",
+    "address": "서울 중구 남산공원길 125-54",
     "category": "공원",
     "description": "[오징어게임] 투표로 오징어 게임이 중단되고 헤어지는 곳",
     "openingHours": "매일 00시 - 24시",
@@ -799,15 +799,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5159,
-    "longitude": 126.9572
+    "latitude": 37.5519464,
+    "longitude": 126.988092
   },
   {
     "placeId": "P_0008",
     "placeName": "선갑도",
     "region": "인천",
     "district": "옹진군",
-    "address": "인천광역시 옹진군 자월면 승봉리 산240",
+    "address": "인천 옹진군 자월면 승봉리 산 240",
     "category": "섬",
     "description": "[오징어게임] 8회에서 오징어게임의 최전선(이병헌)과 그의 부하들이 해변에서 서쪽 바다가 내려다보이는 절벽 끝까지 서울경찰과 게임 잠입자 황준호(위하준)를 쫓는다.",
     "openingHours": "매일 00시 - 24시",
@@ -843,15 +843,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.407,
-    "longitude": 126.6904
+    "latitude": 37.0922404,
+    "longitude": 126.0792113
   },
   {
     "placeId": "P_0009",
     "placeName": "마이랜드",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 월미로234번길 7",
+    "address": "인천 중구 월미로234번길 1",
     "category": "테마파크",
     "description": "[오징어게임] 경기가 중단된 후, 조폭 장덕수(허성태)는 이 놀이동산 밖에서 지인을 만난다. 2화에서 상금을 훔치기 위해 갱단과 함께 섬으로 돌아갈 것을 제안한다.",
     "openingHours": "평일 10시 - 22시, 주말 10시 - (익일) 01시",
@@ -887,15 +887,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.4083,
-    "longitude": 126.6964
+    "latitude": 37.4749822,
+    "longitude": 126.5989888
   },
   {
     "placeId": "P_0010",
     "placeName": "도비도항",
     "region": "충남",
     "district": "당진시",
-    "address": "충청남도 당진시 석문면 난지도리 568",
+    "address": "충남 당진시 석문면 난지도리",
     "category": "해변",
     "description": "[오징어게임] 성기훈(이정재)이 자신을 실종된 형에게로 인도할 수 있다고 의심한 경찰 황준호(위하준)는 2화에서 그를 태운 밴을 따라 이 항구로 등장한다.",
     "openingHours": "매일 00시 - 24시",
@@ -927,15 +927,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 36.6121,
-    "longitude": 126.67
+    "latitude": 37.0179734,
+    "longitude": 126.4614831
   },
   {
     "placeId": "P_0011",
     "placeName": "라라무리",
     "region": "강원",
     "district": "강릉시",
-    "address": "강원도 강릉시 연곡면 진고개로 2551-18",
+    "address": "강원특별자치도 강릉시 연곡면 진고개로 2551-18",
     "category": "카페",
     "description": "[도깨비] 1회에서 이곳은 지은탁(김고은)이 도깨비에서 어린 소녀였을 때 사는 곳이기도 하다.",
     "openingHours": "월-목 13시 - 20시, 금-토 11시 - 20시",
@@ -977,15 +977,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.7774,
-    "longitude": 128.1587
+    "latitude": 37.8567951,
+    "longitude": 128.8181736
   },
   {
     "placeId": "P_0012",
     "placeName": "영진해변",
     "region": "강원",
     "district": "강릉시",
-    "address": "강원 강릉시 연곡면 영진해변",
+    "address": "강원특별자치도 강릉시 연곡면 영진리 357-155",
     "category": "해변",
     "description": "[도깨비] SNS에서 유명한 도깨비 방파제 촬영지",
     "openingHours": "매일 00시 - 24시",
@@ -1023,15 +1023,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.7787,
-    "longitude": 128.1647
+    "latitude": 37.868762,
+    "longitude": 128.8457109
   },
   {
     "placeId": "P_0013",
     "placeName": "대관령 삼양라운드힐",
     "region": "강원",
     "district": "평창군",
-    "address": "강원도 평창군 대관령면 꽃밭양지길 708-9",
+    "address": "강원특별자치도 평창군 대관령면 꽃밭양지길 708-9",
     "category": "관광지",
     "description": "[도깨비] 공유가 중천의 허무를 걷는 장면 촬영지",
     "openingHours": "매일 09시 - 17시 30분",
@@ -1066,15 +1066,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.78,
-    "longitude": 128.1707
+    "latitude": 37.7242868,
+    "longitude": 128.7197339
   },
   {
     "placeId": "P_0014",
     "placeName": "발왕산 관광케이블카",
     "region": "강원",
     "district": "평창군",
-    "address": "강원 평창군 대관령면 올림픽로 715 드래곤프라자 2층 케이블카",
+    "address": "강원특별자치도 평창군 대관령면 올림픽로 715",
     "category": "케이블카",
     "description": "[도깨비] 김고은이 집 나와서 일하러 간 스키장",
     "openingHours": "화-금 10시 - 18시, 주말 09시 - 18시",
@@ -1112,15 +1112,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.7813,
-    "longitude": 128.1767
+    "latitude": 37.6440574,
+    "longitude": 128.6789199
   },
   {
     "placeId": "P_0015",
     "placeName": "월정사 전나무 숲길",
     "region": "강원",
     "district": "평창군",
-    "address": "강원도 평창군 진부면 오대산로 350-1",
+    "address": "강원특별자치도 평창군 진부면 동산리",
     "category": "거리",
     "description": "[도깨비] 공유가 집 나온 김고은을 따라가던 촬영지",
     "openingHours": "매일 일출 2시간전 - 일몰 전",
@@ -1158,15 +1158,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.7826,
-    "longitude": 128.1827
+    "latitude": 37.7284397,
+    "longitude": 128.5958847
   },
   {
     "placeId": "P_0016",
     "placeName": "월정사",
     "region": "강원",
     "district": "평창군",
-    "address": "강원도 평창군 진부면 오대산로 374-8",
+    "address": "강원특별자치도 평창군 진부면 오대산로 374-8",
     "category": "절",
     "description": "[도깨비] 9화에서 이 사찰로 가는 길과 전나무길은 지은탁(김고은)의 아르바이트 마치고 집으로 가는 길로 등장한다.",
     "openingHours": "매일 일출 2시간전 - 일몰 전",
@@ -1203,15 +1203,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.7839,
-    "longitude": 128.1887
+    "latitude": 37.7317508,
+    "longitude": 128.592123
   },
   {
     "placeId": "P_0017",
     "placeName": "석남사",
     "region": "경기",
     "district": "안성시",
-    "address": "경기도 안성시 금광면 상촌새말길 3-120",
+    "address": "경기 안성시 금광면 상촌새말길 3-120",
     "category": "절",
     "description": "[도깨비] 공유가 풍등을 날리던 그 절",
     "openingHours": "매일 00시 - 24시",
@@ -1245,8 +1245,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.226,
-    "longitude": 127.0678
+    "latitude": 36.9395856,
+    "longitude": 127.3070738
   },
   {
     "placeId": "P_0018",
@@ -1295,15 +1295,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2112,
-    "longitude": 126.9729
+    "latitude": 37.800908,
+    "longitude": 126.6867144
   },
   {
     "placeId": "P_0019",
     "placeName": "건국대학교",
     "region": "서울",
     "district": "광진구",
-    "address": "서울특별시 광진구 능동로 120",
+    "address": "서울 광진구 능동로 120",
     "category": "학교",
     "description": "[도깨비] 지은탁(김고은)이 7화에서 여기서 통신전공 논술전형을 치른다. 일이 끝났을 때, 그녀는 우연히 대학 야구팀의 일원인 그녀의 짝사랑하는 태희(정해인)와 마주친다. 은탁을 데리러 이곳에 와서 건국대학교 박물관 앞에서 기다리는 김신(공유)은 그들의 재회를 마지못해 목격하게 된다. 12화 후반부에서, 우리는 그녀가 학생일 때 캠퍼스를 걷는 것을 본다. 13화에서 저승사자(이동욱)는 은탁(학생회 건물 옥상 카페일 가능성이 높다)을 만나기 위해 이곳에 와서 신정아가 가슴에 품고 있는 칼을 뽑아준다. 조금 후, 그리고 그들의 여행이 끝난 후, 신씨는 깜짝 방문을 위해 이곳에 온다.",
     "openingHours": "매일 00시 - 24시",
@@ -1346,15 +1346,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5154,
-    "longitude": 126.9283
+    "latitude": 37.5435361,
+    "longitude": 127.0774164
   },
   {
     "placeId": "P_0020",
     "placeName": "그랜드 워커힐 서울",
     "region": "서울",
     "district": "광진구",
-    "address": "서울특별시 광진구 워커힐로 177",
+    "address": "서울 광진구 워커힐로 177",
     "category": "호텔",
     "description": "[도깨비] 4회에서 지은탁(김고은)이 이 호텔에 묵는다.",
     "openingHours": "매일 입실 15시, 퇴실 11시",
@@ -1389,15 +1389,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.5167,
-    "longitude": 126.9343
+    "latitude": 37.5552278,
+    "longitude": 127.1108926
   },
   {
     "placeId": "P_0021",
     "placeName": "덕성여자대학교",
     "region": "서울",
     "district": "도봉구",
-    "address": "서울특별시 도봉구 삼양로144길 39",
+    "address": "서울 도봉구 삼양로144길 33",
     "category": "학교",
     "description": "[도깨비] 1화에서 지은탁(김고은)은 이곳에서 촛불을 불어주는 앱으로 김신(공유)을 부를 수 있다는 자신의 이론을 시도한다.",
     "openingHours": "매일 00시 - 24시",
@@ -1430,8 +1430,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.518,
-    "longitude": 126.9403
+    "latitude": 37.6515749,
+    "longitude": 127.0150601
   },
   {
     "placeId": "P_0022",
@@ -1470,15 +1470,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5193,
-    "longitude": 126.9463
+    "latitude": null,
+    "longitude": null
   },
   {
     "placeId": "P_0023",
     "placeName": "세빛섬",
     "region": "서울",
     "district": "서초구",
-    "address": "서울 서초구 올림픽대로 2085-14 세빛섬",
+    "address": "서울 서초구 올림픽대로 2085-14",
     "category": "섬",
     "description": "[도깨비] 12회에서 혼란스러운 저승사자(이동욱)가 동료 저승사자를 이곳에서 만난다.",
     "openingHours": "매일 00시 - 24시",
@@ -1515,15 +1515,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5206,
-    "longitude": 126.9523
+    "latitude": 37.5123318,
+    "longitude": 126.9958885
   },
   {
     "placeId": "P_0024",
     "placeName": "사근용답간인도교",
     "region": "서울",
     "district": "성동구",
-    "address": "서울특별시 성동구 사근동 235-1",
+    "address": "서울 성동구 사근동 235-1",
     "category": "촬영지",
     "description": "[도깨비] 3회에서 저승사자(이동욱 분)와 써니(유인나 분)의 첫 만남이 이 육교에서 벌어졌다.",
     "openingHours": "매일 00시 - 24시",
@@ -1555,15 +1555,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5219,
-    "longitude": 126.9583
+    "latitude": 37.5624925,
+    "longitude": 127.0500364
   },
   {
     "placeId": "P_0025",
     "placeName": "이화벽화마을",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 낙산성곽서1길 28",
+    "address": "서울 종로구 낙산성곽서1길 28",
     "category": "거리",
     "description": "[도깨비] 2화에서 지은탁(김고은)이 귀신들과 대화하고 김신(공유)에게 감시당하는 곳도 바로 이 곳이다.",
     "openingHours": "매일 00시 - 24시",
@@ -1597,15 +1597,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5232,
-    "longitude": 126.9643
+    "latitude": 37.5782567,
+    "longitude": 127.0080096
   },
   {
     "placeId": "P_0026",
     "placeName": "경복궁",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 사직로 161",
+    "address": "서울 종로구 사직로 161",
     "category": "궁궐",
     "description": "[도깨비] 2화 퀘벡에서 돌아온 김신(공유)과 지은탁(김고은)이 이곳에 도착해 함께 광화문을 지나간다. / [케이팝 데몬 헌터스] 진우의 과거 회상과 조선 왕궁 이미지의 실제 배경.",
     "openingHours": "수-월 09시 - 17시 (11월-2월), 수-월 09시 - 18시 (3-5월, 9-10월), 수-월 09시 - 18시 30분 (6-8월)",
@@ -1640,15 +1640,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5245,
-    "longitude": 126.9703
+    "latitude": 37.5776133,
+    "longitude": 126.9768979
   },
   {
     "placeId": "P_0027",
     "placeName": "운현궁 양관",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 삼일대로 460",
+    "address": "서울 종로구 삼일대로 464",
     "category": "관광지",
     "description": "[도깨비] 김신(공유)가 사는 곳이다. 이후 저승사자(이동욱)와 지은탁(김고은)도 입주한다. 유덕화(육성재)가 이곳에 사는 것처럼 자주 드나든다.",
     "openingHours": "하절기 화-일 09시 - 19시, 동절기 화-일 09시 - 18시",
@@ -1682,15 +1682,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5258,
-    "longitude": 126.9763
+    "latitude": 37.5762264,
+    "longitude": 126.9870856
   },
   {
     "placeId": "P_0028",
     "placeName": "윤보선길",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 윤보선길",
+    "address": "서울 종로구 윤보선길",
     "category": "거리",
     "description": "[도깨비] 1, 2회에서 지은탁(김고은)이 1화에서 이 골목에서 하교하고 2화에서 율곡로3길에 들어서는 모습이 나온다. / [그 해 우리는] 3화에서 국연수(김다미)는 술에 취한 최웅(최우식)을 업고 이 골목으로 내려온다. 5화에서 최웅과 김지웅(김성철)이 이곳에서 자전거를 탄다. 또한 16화에서 이 골목은 최웅이 국연수에게 처음으로 사랑한다고 말하는 곳으로 이어진다.",
     "openingHours": "매일 00시 - 24시",
@@ -1726,15 +1726,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.5271,
-    "longitude": 126.9823
+    "latitude": 37.5778209,
+    "longitude": 126.9837129
   },
   {
     "placeId": "P_0029",
     "placeName": "자작나무이야기",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 율곡로1길 74-15",
+    "address": "서울 종로구 율곡로1길 74-15",
     "category": "카페",
     "description": "[도깨비] 11화에서 써니(유인나)와 지은탁(김고은)이 이곳에 온다.  써니는 은탁에게 전생을 믿느냐고 물었고, 그녀는 그렇다고 대답한다.",
     "openingHours": "매일 12시 - 22시",
@@ -1770,15 +1770,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5284,
-    "longitude": 126.9883
+    "latitude": 37.5786782,
+    "longitude": 126.9818436
   },
   {
     "placeId": "P_0030",
     "placeName": "감고당길",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 안국동 감고당길",
+    "address": "서울 종로구 송현동 34-2",
     "category": "거리",
     "description": "[도깨비] 공유와 김고은이 처음 우연히 마주친 돌담길",
     "openingHours": "매일 00시 - 24시",
@@ -1812,15 +1812,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5297,
-    "longitude": 126.9943
+    "latitude": 37.5779809,
+    "longitude": 126.982317
   },
   {
     "placeId": "P_0031",
     "placeName": "인사동길",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 인사동길 26-1",
+    "address": "서울 종로구 인사동길 26-1",
     "category": "거리",
     "description": "[도깨비] 12화에서 지은탁(김고은)이 이 거리를 걷는다.",
     "openingHours": "매일 00시 - 24시",
@@ -1854,15 +1854,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.531,
-    "longitude": 127.0003
+    "latitude": 37.5731315,
+    "longitude": 126.9862026
   },
   {
     "placeId": "P_0032",
     "placeName": "중앙고등학교",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 창덕궁길 164",
+    "address": "서울 종로구 창덕궁길 164",
     "category": "학교",
     "description": "[도깨비] 지은탁(김고은)이 다니던 학교이다. / [그 해 우리는] 1회에서 학교 일부가 최웅(최우식)과 국연수( 김다미)의 고등학교로 촬영되었다.",
     "openingHours": "매일 00시 - 24시",
@@ -1896,15 +1896,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5323,
-    "longitude": 127.0063
+    "latitude": 37.5840254,
+    "longitude": 126.9868442
   },
   {
     "placeId": "P_0033",
     "placeName": "광화문",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 효자로 12 국립고궁박물관",
+    "address": "서울 종로구 사직로 161",
     "category": "기념물",
     "description": "[도깨비] 공유와 김고은이 캐나다에서 돌아온 커다란 문",
     "openingHours": "1-2월,11-12월 매일 09시 - 17시, 3-5월,9-10월 매일 09시 - 18시, 6-8월 매일 09시 - 18시 30분",
@@ -1937,15 +1937,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5336,
-    "longitude": 127.0123
+    "latitude": 37.5759645,
+    "longitude": 126.9768531
   },
   {
     "placeId": "P_0034",
     "placeName": "덕수궁 돌담길",
     "region": "서울",
     "district": "중구",
-    "address": "서울 중구 세종대로19길 24 영국대사관",
+    "address": "서울 중구 세종대로 지하 101",
     "category": "거리",
     "description": "[도깨비] 저승사자(이동욱) 사무실은 이 곳 궁전 벽 안에 있습니다. 김신(공유)이 1편과 14편에서 이곳을 지나며 잡담을 나눈다.",
     "openingHours": "매일 00시 - 24시",
@@ -1981,15 +1981,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5349,
-    "longitude": 127.0183
+    "latitude": 37.5649766,
+    "longitude": 126.9756646
   },
   {
     "placeId": "P_0035",
     "placeName": "한미서점",
     "region": "인천",
     "district": "동구",
-    "address": "인천광역시 동구 금곡로9",
+    "address": "인천 동구 금곡로 9",
     "category": "서점",
     "description": "[도깨비] 14회에서 김신(공유)과 지은탁(김고은)이 한미 서점에서 만난 후, 김신은 돌아왔지만 은탁은 기억을 잃었다.",
     "openingHours": "매일 11시 - 21시",
@@ -2023,15 +2023,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4099,
-    "longitude": 126.6506
+    "latitude": 37.4726803,
+    "longitude": 126.6366516
   },
   {
     "placeId": "P_0036",
     "placeName": "송현근린공원",
     "region": "인천",
     "district": "동구",
-    "address": "인천광역시 동구 송현공원로 75-21",
+    "address": "인천 동구 솔빛로 51",
     "category": "공원",
     "description": "[도깨비] 김고은 집 앞 골목 촬영지",
     "openingHours": "매일 00시 - 24시",
@@ -2067,15 +2067,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4112,
-    "longitude": 126.6566
+    "latitude": 37.4788533,
+    "longitude": 126.6399614
   },
   {
     "placeId": "P_0037",
     "placeName": "드림파크",
     "region": "인천",
     "district": "서구",
-    "address": "인천 서구 거월로 64 61",
+    "address": "인천 서구 백석동 58",
     "category": "공원",
     "description": "[도깨비] 납치당한 김고은을 구하기 위해 공유가 걷던 거리",
     "openingHours": "4-11월 화-일 10시 - 17시",
@@ -2113,15 +2113,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4125,
-    "longitude": 126.6626
+    "latitude": 37.575423,
+    "longitude": 126.6534889
   },
   {
     "placeId": "P_0038",
     "placeName": "청라호수공원",
     "region": "인천",
     "district": "서구",
-    "address": "인천 서구 크리스탈로 59",
+    "address": "인천 서구 청라동 1-794",
     "category": "공원",
     "description": "[도깨비] 4회에서는 취한 신이 은탁에게 자신이 처음이자 마지막 신부라는 사실을 알리며 차분한 마음으로 했을 것 같은 자신에 대해 조금 더 이야기한다. 13회에서 은탁은 그를 보고 싶다고 그를 여기로 불렀다.",
     "openingHours": "매일 00시 - 24시",
@@ -2158,15 +2158,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4138,
-    "longitude": 126.6686
+    "latitude": 37.5324904,
+    "longitude": 126.6342799
   },
   {
     "placeId": "P_0039",
     "placeName": "경원재 바이 워커힐",
     "region": "인천",
     "district": "연수구",
-    "address": "인천광역시 연수구 테크노파크로 200",
+    "address": "인천 연수구 테크노파크로 200",
     "category": "호텔",
     "description": "[도깨비] 13회에서 지은탁(김고은)이 머무는 장소로 나온다. / [사랑의 불시착] 10화에서는 북한 스포츠팀이 이 호텔에 도착한다. 세리가 운영하는 호텔로 나온다",
     "openingHours": "매일 입실 15시, 퇴실 11시",
@@ -2202,15 +2202,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4151,
-    "longitude": 126.6746
+    "latitude": 37.3914753,
+    "longitude": 126.6376842
   },
   {
     "placeId": "P_0040",
     "placeName": "자유공원",
     "region": "인천",
     "district": "중구",
-    "address": "인천 중구 제물량로232번길 46",
+    "address": "인천 중구 자유공원남로 25",
     "category": "공원",
     "description": "[도깨비] 8화에서 김신(공유)과 지은탁(김고은)이 산책하러 왔다.",
     "openingHours": "매일 00시 - 24시",
@@ -2246,15 +2246,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4164,
-    "longitude": 126.6806
+    "latitude": 37.475503,
+    "longitude": 126.6219706
   },
   {
     "placeId": "P_0041",
     "placeName": "제물포구락부",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 자유공원남로 25",
+    "address": "인천 중구 자유공원남로 25",
     "category": "국가유산",
     "description": "[도깨비] 이동욱이 공유에게 사과를 한 장소",
     "openingHours": "화-일 09시 30분 - 17시 30분",
@@ -2286,15 +2286,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4177,
-    "longitude": 126.6866
+    "latitude": 37.4746362,
+    "longitude": 126.6225221
   },
   {
     "placeId": "P_0042",
     "placeName": "인천아트플랫폼",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 제물량로218번길 3",
+    "address": "인천 중구 제물량로218번길 3",
     "category": "문화공간",
     "description": "[도깨비] 14회에서 김신(공유)은 지은탁(김고은)은 한미서점에서 만난 후 이곳을 산책한다.",
     "openingHours": "화-일 09시 - 18시",
@@ -2331,15 +2331,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.419,
-    "longitude": 126.6926
+    "latitude": 37.4728975,
+    "longitude": 126.6197725
   },
   {
     "placeId": "P_0043",
     "placeName": "자유공원",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 제물량로232번길 46",
+    "address": "인천 중구 자유공원남로 25",
     "category": "공원",
     "description": "[도깨비] 김고은이 불을 꺼서 공유를 부르던 장소",
     "openingHours": "매일 00시 - 24시",
@@ -2374,15 +2374,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4203,
-    "longitude": 126.6986
+    "latitude": 37.475503,
+    "longitude": 126.6219706
   },
   {
     "placeId": "P_0044",
     "placeName": "넓은들 학원농장 /(구) 보리나라 학원농장",
     "region": "전북",
     "district": "고창군",
-    "address": "전북 고창군 공음면 학원농장길 150",
+    "address": "전북특별자치도 고창군 공음면 학원농장길 150",
     "category": "관광지",
     "description": "[도깨비] 공유와 김고은이 첫키스한 그 메밀밭",
     "openingHours": "매일 09시 - 18시 30분 (식당이용시간)",
@@ -2415,8 +2415,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.6828,
-    "longitude": 127.1524
+    "latitude": 35.375354,
+    "longitude": 126.5433006
   },
   {
     "placeId": "P_0045",
@@ -2456,15 +2456,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.2302,
-    "longitude": 127.034
+    "latitude": 37.732439,
+    "longitude": 126.9484564
   },
   {
     "placeId": "P_0046",
     "placeName": "서원밸리CC",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 광탄면 서원길 333",
+    "address": "경기 파주시 광탄면 서원길 333",
     "category": "관광지",
     "description": "[갯마을 차차차] 신민아와 김선호가 골프 데이트를 즐긴 골프장",
     "openingHours": "매일 09시 -17시",
@@ -2500,15 +2500,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2315,
-    "longitude": 127.04
+    "latitude": 37.8246552,
+    "longitude": 126.8932999
   },
   {
     "placeId": "P_0047",
     "placeName": "석병1리방파제",
     "region": "경북",
     "district": "포항시",
-    "address": "경북 포항시 남구 구룡포읍 석병리",
+    "address": "경북 포항시 남구 구룡포읍 석병리 745-1",
     "category": "해변",
     "description": "[갯마을 차차차] 신민아가 김선호에게 사랑 고백했던 방파제",
     "openingHours": "매일 00시 - 24시",
@@ -2545,15 +2545,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.4611,
-    "longitude": 128.9063
+    "latitude": 36.0127422,
+    "longitude": 129.5790845
   },
   {
     "placeId": "P_0048",
     "placeName": "청하5일장",
     "region": "경북",
     "district": "포항시",
-    "address": "경상북도 포항시 북구 청하면 청하로200번길 6",
+    "address": "경북 포항시 북구 청하면 청하로200번길 6",
     "category": "촬영지",
     "description": "[갯마을 차차차] 갯마을 차차차의 슈퍼, 철물점, 카페가 있는 5일장",
     "openingHours": "매달 2,6,12,16,22,26일 오픈",
@@ -2591,15 +2591,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.4624,
-    "longitude": 128.9123
+    "latitude": 36.1970563,
+    "longitude": 129.3398772
   },
   {
     "placeId": "P_0049",
     "placeName": "사방기념공원",
     "region": "경북",
     "district": "포항시",
-    "address": "경상북도 포항시 북구 흥해읍 해안로 1801",
+    "address": "경북 포항시 북구 흥해읍 해안로 1801",
     "category": "공원",
     "description": "[갯마을 차차차] 신민아와 김선호가 갔던 언덕 위에 배가 있는 공원",
     "openingHours": "매일 00시 - 24시",
@@ -2635,15 +2635,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.4637,
-    "longitude": 128.9183
+    "latitude": 36.164822,
+    "longitude": 129.3958588
   },
   {
     "placeId": "P_0050",
     "placeName": "동호대교",
     "region": "서울",
     "district": "성동구",
-    "address": "서울특별시 성동구 옥수동 동호대교",
+    "address": "서울 성동구 옥수동 487",
     "category": "거리",
     "description": "[갯마을 차차차] 3화에서 윤혜진(신민아)과 홍두식(김선호)이 서울을 떠나 이 다리를 건너는 장면이 나온다.",
     "openingHours": "매일 00시 - 24시",
@@ -2679,15 +2679,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.5396,
-    "longitude": 127.0134
+    "latitude": 37.5363236,
+    "longitude": 127.0211591
   },
   {
     "placeId": "P_0051",
     "placeName": "더리버",
     "region": "서울",
     "district": "용산구",
-    "address": "서울 용산구 올림픽대로 2085-96 THE RIVER",
+    "address": "서울 용산구 올림픽대로 2085-96",
     "category": "문화공간",
     "description": "[갯마을 차차차] 10회에서 서울 여행길에 오른 윤혜진(신민아)과 절친 표미선(공민정)이 이곳에서 저녁을 먹는다. 혜진은 공진 바다에서 살다 보니 한강이 예전보다 좁아진 것 같다고 말한다. 이들이 식당을 나서자 갑자기 비가 내리기 시작하자 혜진은 홍두식(김선호)과의 달콤한 순간을 떠올리고 미선을 뒤로 한 채 자신의 차로 달려간다.",
     "openingHours": "매일 12시 - 21시",
@@ -2729,15 +2729,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5409,
-    "longitude": 127.0194
+    "latitude": 37.5071384,
+    "longitude": 126.9846862
   },
   {
     "placeId": "P_0052",
     "placeName": "서울드래곤시티",
     "region": "서울",
     "district": "용산구",
-    "address": "서울특별시 용산구 청파로20길 95",
+    "address": "서울 용산구 청파로20길 95",
     "category": "호텔",
     "description": "[갯마을 차차차] 3화에서 서울로 당일치기 여행을 갔을 때 윤혜진(신민아)과 홍두식(김선호)이 이 건물을 지나가다 누군가 건물 안에서 몰래 사진을 찍는다.",
     "openingHours": "내부시설별 상이",
@@ -2772,8 +2772,8 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.5261,
-    "longitude": 126.9245
+    "latitude": 37.5318165,
+    "longitude": 126.9627641
   },
   {
     "placeId": "P_0053",
@@ -2819,15 +2819,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.2245,
-    "longitude": 126.9811
+    "latitude": 37.6704362,
+    "longitude": 126.777027
   },
   {
     "placeId": "P_0054",
     "placeName": "카페화홍",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 수원천로 369",
+    "address": "경기 수원시 팔달구 수원천로 369",
     "category": "카페",
     "description": "[그 해 우리는] 김다미가 아르바이트를 했던 카페",
     "openingHours": "수-월 12시 - 22시",
@@ -2860,15 +2860,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2258,
-    "longitude": 126.9871
+    "latitude": 37.2864625,
+    "longitude": 127.0173484
   },
   {
     "placeId": "P_0055",
     "placeName": "화성행궁",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 정조로 825",
+    "address": "경기 수원시 팔달구 정조로 825",
     "category": "궁궐",
     "description": "[그 해 우리는] 2회 웅이와 연수가 연애시절 다퉜던 장소",
     "openingHours": "하절기 매일 09시 - 18시, 동절기 매일 09시 - 17시",
@@ -2899,15 +2899,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2271,
-    "longitude": 126.9931
+    "latitude": 37.2819145,
+    "longitude": 127.0140412
   },
   {
     "placeId": "P_0056",
     "placeName": "지동시장 순대타운",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 창룡문로 3",
+    "address": "경기 수원시 팔달구 창룡문로 3",
     "category": "시장",
     "description": "[그 해 우리는] 최우식이 김다미 할머니의 짐을 들어준 시장",
     "openingHours": "매일 00시 - 24시",
@@ -2943,15 +2943,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2284,
-    "longitude": 126.9991
+    "latitude": 37.2779104,
+    "longitude": 127.0200572
   },
   {
     "placeId": "P_0057",
     "placeName": "행궁동벽화마을",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 화서문로72번길 9-7",
+    "address": "경기 수원시 팔달구 화서문로 82-6",
     "category": "거리",
     "description": "[그 해 우리는] 국연수(김다미)가 할머니 강자경(차미경)과 함께 사는 동네다. 하트 벽화 앞에서 말다툼을 벌인 최웅(최우식)은 국연수(김다미)에게 자기 집으로 와줄 의향이 있냐고 묻는다.",
     "openingHours": "매일 00시 - 24시",
@@ -2984,15 +2984,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2297,
-    "longitude": 127.0051
+    "latitude": 37.2858166,
+    "longitude": 127.0166198
   },
   {
     "placeId": "P_0058",
     "placeName": "고인돌공원",
     "region": "경기",
     "district": "오산시",
-    "address": "경기도 오산시 수목원로 449",
+    "address": "경기 오산시 금암동 174-1",
     "category": "공원",
     "description": "[그 해 우리는] 최우식과 김다미가 첫 키스한 공원",
     "openingHours": "매일 00시 - 24시",
@@ -3024,15 +3024,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.231,
-    "longitude": 127.0111
+    "latitude": 37.1731311,
+    "longitude": 127.0481841
   },
   {
     "placeId": "P_0059",
     "placeName": "의정부미술도서관",
     "region": "경기",
     "district": "의정부시",
-    "address": "경기도 의정부시 민락로 248",
+    "address": "경기 의정부시 민락로 248",
     "category": "도서관",
     "description": "[그 해 우리는] 15회에서 이 도서관은 크리에이티브 에이전시 RUN의 고객이며 첫 번째 아이디어를 위해  그녀의 팀과 함께 국연수 (김다미)가 여기에 옵니다.",
     "openingHours": "화-일 10시 - 21시",
@@ -3061,15 +3061,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2323,
-    "longitude": 127.0171
+    "latitude": 37.7451458,
+    "longitude": 127.1061274
   },
   {
     "placeId": "P_0060",
     "placeName": "의정부음악도서관",
     "region": "경기",
     "district": "의정부시",
-    "address": "경기도 의정부시 장곡로 280",
+    "address": "경기 의정부시 장곡로 280",
     "category": "도서관",
     "description": "[그 해 우리는] 최우식이 김다미에게 프러포즈한 도서관",
     "openingHours": "화-금 10시 - 21시, 주말 10시 - 18시",
@@ -3098,15 +3098,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2336,
-    "longitude": 127.0231
+    "latitude": 37.7285575,
+    "longitude": 127.0537733
   },
   {
     "placeId": "P_0061",
     "placeName": "궁평항",
     "region": "경기",
     "district": "화성시",
-    "address": "경기도 화성시 서신면 궁평항로 1049-24",
+    "address": "경기 화성시 만세구 서신면 궁평항로 1049-24",
     "category": "해변",
     "description": "[그 해 우리는] 8화에서 웅과 연수가 여행간 곳을 회상한 장면",
     "openingHours": "매일 00시 - 24시",
@@ -3140,15 +3140,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2349,
-    "longitude": 127.0291
+    "latitude": 37.1160096,
+    "longitude": 126.6812809
   },
   {
     "placeId": "P_0062",
     "placeName": "소다미술관",
     "region": "경기",
     "district": "화성시",
-    "address": "경기도 화성시 효행로707번길 30",
+    "address": "경기 화성시 병점구 효행로707번길 30",
     "category": "미술관",
     "description": "[그 해 우리는] 최우식이 전시회를 연 미술관",
     "openingHours": "수-일 10시 - 18시 (시기별 상이)",
@@ -3179,15 +3179,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2362,
-    "longitude": 127.0351
+    "latitude": 37.201596,
+    "longitude": 127.0061503
   },
   {
     "placeId": "P_0063",
     "placeName": "더콘란샵코리아",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 도곡로 401",
+    "address": "서울 강남구 도곡로 401",
     "category": "가구",
     "description": "[그 해 우리는] 김다미와 이준혁이 함께 둘러본 생활용품숍",
     "openingHours": "월-목 10시 30분 - 20시, 금-일 10시 30분 - 20시 30분",
@@ -3220,15 +3220,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5404,
-    "longitude": 126.9905
+    "latitude": 37.4969793,
+    "longitude": 127.0532547
   },
   {
     "placeId": "P_0064",
     "placeName": "롯데백화점 강남점",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 도곡로 401",
+    "address": "서울 강남구 도곡로 401",
     "category": "굿즈샵",
     "description": "[그 해 우리는] 초대받은 만찬에 무엇을 입어야 할지 고민하던 최웅(최우식)은 아이돌 NJ(노정의)에게 신발을 사러 이 쇼핑몰에 들르다가 결국 1층 화장품 코너를 빠져나온다.",
     "openingHours": "매일 10시 30분 - 20시",
@@ -3261,8 +3261,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5417,
-    "longitude": 126.9965
+    "latitude": 37.4969595,
+    "longitude": 127.0532811
   },
   {
     "placeId": "P_0065",
@@ -3301,15 +3301,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.543,
-    "longitude": 127.0025
+    "latitude": 37.5476185,
+    "longitude": 126.9430605
   },
   {
     "placeId": "P_0066",
     "placeName": "가온문화공원",
     "region": "서울",
     "district": "마포구",
-    "address": "서울특별시 마포구 상암동 1594",
+    "address": "서울 마포구 상암동 1594",
     "category": "공원",
     "description": "[그 해 우리는] 질투심 많은 국연수(김다미)는 11화에서 이 공원 서쪽 끝에 빨간불에 멈춰 서던 중 아이돌 NJ(노정의)와 함께하는 광고를 보고 자산이 있다는 사실을 인정해야 한다.",
     "openingHours": "매일 00시 - 24시",
@@ -3342,15 +3342,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5443,
-    "longitude": 127.0085
+    "latitude": 37.5819148,
+    "longitude": 126.8876787
   },
   {
     "placeId": "P_0067",
     "placeName": "히게쯔라",
     "region": "서울",
     "district": "마포구",
-    "address": "서울특별시 마포구 양화로1길 42",
+    "address": "서울 마포구 양화로1길 42",
     "category": "맛집",
     "description": "[그 해 우리는] 박진주가 운영하는 이자카야 외관으로 나온 술집",
     "openingHours": "매일 16시 - 24시",
@@ -3382,15 +3382,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.5456,
-    "longitude": 127.0145
+    "latitude": 37.5505588,
+    "longitude": 126.9103409
   },
   {
     "placeId": "P_0068",
     "placeName": "판자집",
     "region": "서울",
     "district": "서대문구",
-    "address": "서울특별시 서대문구 연세로2길 29",
+    "address": "서울 서대문구 연세로2길 29",
     "category": "맛집",
     "description": "[그 해 우리는] 12회에서 톱 아이돌 NJ(노정의)와 PD 김지웅(김성철)이 이곳에서 첫사랑의 아픔을 달래며 술잔을 기울였다.",
     "openingHours": "매일 17시 - (익일) 05시",
@@ -3424,15 +3424,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5469,
-    "longitude": 127.0205
+    "latitude": 37.5563315,
+    "longitude": 126.9384918
   },
   {
     "placeId": "P_0069",
     "placeName": "롯데월드",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 올림픽로 240",
+    "address": "서울 송파구 올림픽로 240",
     "category": "촬영지",
     "description": "[그 해 우리는] 1회 회상장면에서 본 최웅(최우식)과 국연수(김다미)는 이 놀이공원에서 다섯 번째 이별을 한다.",
     "openingHours": "매일 10시 - 21시",
@@ -3465,15 +3465,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5321,
-    "longitude": 126.9256
+    "latitude": 37.5111306,
+    "longitude": 127.0981198
   },
   {
     "placeId": "P_0070",
     "placeName": "서강대교",
     "region": "서울",
     "district": "영등포구",
-    "address": "서울특별시 영등포구 여의도동 서강대교",
+    "address": "서울 영등포구 여의도동 83-1",
     "category": "거리",
     "description": "[그 해 우리는] 13화에서 최웅(최우식)과 국연수(김다미)가 데이트를 하며 이 다리를 건넌다.",
     "openingHours": "매일 00시 - 24시",
@@ -3510,15 +3510,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5334,
-    "longitude": 126.9316
+    "latitude": 37.537311,
+    "longitude": 126.9252071
   },
   {
     "placeId": "P_0071",
     "placeName": "오산고등학교",
     "region": "서울",
     "district": "용산구",
-    "address": "서울특별시 용산구 보광로7길 17",
+    "address": "서울 용산구 보광로7길 17",
     "category": "공원",
     "description": "[그 해 우리는] 1회에서 최웅(최우식)과 국연수(김다미)가 다니던 고등학교로 이 학교의 일부가 등장한다.",
     "openingHours": "매일 00시 - 24시",
@@ -3550,15 +3550,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5347,
-    "longitude": 126.9376
+    "latitude": 37.5235115,
+    "longitude": 126.9996063
   },
   {
     "placeId": "P_0072",
     "placeName": "생활맥주 연신내점",
     "region": "서울",
     "district": "은평구",
-    "address": "서울특별시 은평구 연서로27길 19 1,2층",
+    "address": "서울 은평구 연서로27길 19",
     "category": "맛집",
     "description": "[그 해 우리는] 박진주가 방문했던 최우식 아빠가 운영하는 호프집",
     "openingHours": "매일 17시 - (익일) 02시",
@@ -3590,15 +3590,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.536,
-    "longitude": 126.9436
+    "latitude": 37.618169,
+    "longitude": 126.9172314
   },
   {
     "placeId": "P_0073",
     "placeName": "JCC크리에이티브센터",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 창경궁로35길 45",
+    "address": "서울 종로구 창경궁로35길 45",
     "category": "공연장",
     "description": "[그 해 우리는] 3화에서 크리에이티브 에이전시 런(RUN)이 사무실을 두고 있는 '슈퍼 크리에이티브 센터'로 등장한다.",
     "openingHours": "평일 09시 30분 - 18시 30분",
@@ -3629,15 +3629,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5373,
-    "longitude": 126.9496
+    "latitude": 37.5878283,
+    "longitude": 127.0023188
   },
   {
     "placeId": "P_0074",
     "placeName": "트리플 스트리트",
     "region": "인천",
     "district": "연수구",
-    "address": "인천광역시 연수구 송도과학로16번길 33-1",
+    "address": "인천 연수구 송도과학로16번길 33-3",
     "category": "쇼핑센터",
     "description": "[그 해 우리는] 최웅(최우식)과 국연수(김다미)는 이 곳에서 저녁 데이트를 한다.",
     "openingHours": "매일 10시 30분 - 22시",
@@ -3669,15 +3669,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4284,
-    "longitude": 126.6828
+    "latitude": 37.3799951,
+    "longitude": 126.6609975
   },
   {
     "placeId": "P_0075",
     "placeName": "매당",
     "region": "전북",
     "district": "전주시",
-    "address": "전북 전주시 완산구 은행로 20-4 풍남동1가",
+    "address": "전북특별자치도 전주시 완산구 은행로 20-4",
     "category": "맛집",
     "description": "[그 해 우리는] 1화에서 최웅(최우식)의 부모님이 운영하는 식당으로 나온다.",
     "openingHours": "매일 11시 30분 - 22시",
@@ -3709,15 +3709,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.6909,
-    "longitude": 127.1366
+    "latitude": 35.818399,
+    "longitude": 127.1515824
   },
   {
     "placeId": "P_0076",
     "placeName": "전주대학교",
     "region": "전북",
     "district": "전주시",
-    "address": "전라북도 전주시 완산구 천잠로 303",
+    "address": "전북특별자치도 전주시 완산구 천잠로 303",
     "category": "학교",
     "description": "[그 해 우리는] 최우식과 김다미가 캠퍼스 데이트를 즐긴 대학교",
     "openingHours": "매일 00시 - 24시",
@@ -3750,15 +3750,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.6922,
-    "longitude": 127.1426
+    "latitude": 35.8141142,
+    "longitude": 127.0898812
   },
   {
     "placeId": "P_0077",
     "placeName": "온빛자연휴양림",
     "region": "충남",
     "district": "논산시",
-    "address": "충청남도 논산시 벌곡면 황룡재로 480-113",
+    "address": "충남 논산시 벌곡면 황룡재로 480-113",
     "category": "산",
     "description": "[그 해 우리는] <그해 우리는> 8회 촬영지",
     "openingHours": "매일 00시 - 24시",
@@ -3788,15 +3788,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.6348,
-    "longitude": 126.6684
+    "latitude": 36.2028372,
+    "longitude": 127.2525054
   },
   {
     "placeId": "P_0078",
     "placeName": "보령 청보리밭",
     "region": "충남",
     "district": "보령시",
-    "address": "충남 보령시 천북면 천광로 73-1 청보리밭 주차장",
+    "address": "충남 보령시 천북면 천광로 73-1",
     "category": "촬영지",
     "description": "[그 해 우리는] 8회에서 이 밭의 버려진 농장 옆에서 국연수(김다미)와 함께 다큐멘터리의 일부를 촬영",
     "openingHours": "매일 00시 - 24시",
@@ -3825,15 +3825,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 36.6361,
-    "longitude": 126.6744
+    "latitude": 36.4799404,
+    "longitude": 126.5310477
   },
   {
     "placeId": "P_0079",
     "placeName": "별마로천문대",
     "region": "강원",
     "district": "영월군",
-    "address": "강원도 영월군 영월읍 천문대길 397",
+    "address": "강원특별자치도 영월군 영월읍 영흥리 154-3",
     "category": "전망대",
     "description": "[사랑의 불시착] 둘리커플 만남의 시작이 된 패러글라이딩 장소",
     "openingHours": "화-일 15시 - 23시 (4월-9월),  화-일 14시 - 22시 (10월-3월)",
@@ -3874,8 +3874,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8014,
-    "longitude": 128.1631
+    "latitude": 37.1983292,
+    "longitude": 128.4867825
   },
   {
     "placeId": "P_0080",
@@ -3918,15 +3918,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2435,
-    "longitude": 127.0422
+    "latitude": 37.7738476,
+    "longitude": 126.7172866
   },
   {
     "placeId": "P_0081",
     "placeName": "포천한탄강 하늘다리",
     "region": "경기",
     "district": "포천시",
-    "address": "경기도 포천시 영북면 비둘기낭길 207",
+    "address": "경기 포천시 영북면 대회산리 산 42-1",
     "category": "거리",
     "description": "[사랑의 불시착] 둘리커플이 대화를 나눈 아찔한 높이의 하늘다리",
     "openingHours": "매일 09시 - 18시",
@@ -3962,15 +3962,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2448,
-    "longitude": 127.0482
+    "latitude": 38.084263,
+    "longitude": 127.2179914
   },
   {
     "placeId": "P_0082",
     "placeName": "코모도호텔 부산",
     "region": "부산",
     "district": "중구",
-    "address": "부산광역시 중구 중구로 151",
+    "address": "부산 중구 중구로 151",
     "category": "호텔",
     "description": "[사랑의 불시착] 둘리커플이 함께 다녀간 평양의 고급 호텔",
     "openingHours": "매일 입실 15시, 퇴실 11시",
@@ -4006,15 +4006,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.1621,
-    "longitude": 129.1012
+    "latitude": 35.109086,
+    "longitude": 129.0354018
   },
   {
     "placeId": "P_0083",
     "placeName": "울프강 스테이크 하우스",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 선릉로152길 21",
+    "address": "서울 강남구 선릉로152길 21",
     "category": "맛집",
     "description": "[사랑의 불시착] 이 식당의 외관은 1화에서 윤세리(손예진)가 남자친구인 차상우(정경호)와 저녁을 먹으러 가는 곳으로 등장한다. 세리-상우 데이트 파파라치가 찍힌 곳이기도 하다.",
     "openingHours": "매일 11시 - 22시",
@@ -4053,15 +4053,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.5503,
-    "longitude": 127.0096
+    "latitude": 37.5243998,
+    "longitude": 127.0414156
   },
   {
     "placeId": "P_0084",
     "placeName": "BBQ 헬리오시티점",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 송파대로37길 78",
+    "address": "서울 송파구 송파대로37길 78",
     "category": "맛집",
     "description": "[사랑의 불시착] 세리 회사 홍보팀장님 닭 다리 뜯던 단골 치킨집",
     "openingHours": "매일 08시 - 24시",
@@ -4100,15 +4100,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5516,
-    "longitude": 127.0156
+    "latitude": 37.4993982,
+    "longitude": 127.1038968
   },
   {
     "placeId": "P_0085",
     "placeName": "운산",
     "region": "서울",
     "district": "영등포구",
-    "address": "서울 영등포구 여의공원로 101 C.C.M.M빌딩 지하1층",
+    "address": "서울 영등포구 여의공원로 101",
     "category": "맛집",
     "description": "[사랑의 불시착] 12회에서 오매니저(윤상훈)는 같은 목표를 공유하는 조철강(오만석)과 윤세형(박형수), 고상아(윤지민) 부부를 이 식당으로 데려오려 한다.",
     "openingHours": "매일 11시 30분 - 22시",
@@ -4147,15 +4147,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.5529,
-    "longitude": 127.0216
+    "latitude": 37.529272,
+    "longitude": 126.9248927
   },
   {
     "placeId": "P_0086",
     "placeName": "신제물포구락부",
     "region": "인천",
     "district": "미추홀구",
-    "address": "인천광역시 미추홀구 석정로 200 지하1층",
+    "address": "인천 미추홀구 석정로 200",
     "category": "스튜디오",
     "description": "[사랑의 불시착] 북한의 고위층 여성만 가는 비밀스러운 양장점",
     "openingHours": "월-토 10시 - 19시",
@@ -4187,15 +4187,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4279,
-    "longitude": 126.6539
+    "latitude": 37.4676256,
+    "longitude": 126.6574711
   },
   {
     "placeId": "P_0087",
     "placeName": "공원장",
     "region": "인천",
     "district": "미추홀구",
-    "address": "인천광역시 미추홀구 인주대로211번길 49-26",
+    "address": "인천 미추홀구 인주대로211번길 49-26",
     "category": "맛집",
     "description": "[사랑의 불시착] 10회에서 이 식당 앞에는 표치수(양경원), 박광범(이신영), 김주먹(유수빈)의 네 명의 부하 리정혁(현빈)이 있다. 그리고 금은동(당준상)과 정만복(김영민)은 영화에서 북한 첩보원으로 카메오로 등장한 북한의 비밀요원 동구(김수현)를 만난다.",
     "openingHours": "화-일 10시 30분 - 20시",
@@ -4236,8 +4236,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4292,
-    "longitude": 126.6599
+    "latitude": 37.4572894,
+    "longitude": 126.6615667
   },
   {
     "placeId": "P_0088",
@@ -4280,15 +4280,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4305,
-    "longitude": 126.6659
+    "latitude": 37.4394759,
+    "longitude": 126.3787082
   },
   {
     "placeId": "P_0089",
     "placeName": "담양레이나CC",
     "region": "전남",
     "district": "담양군",
-    "address": "전라남도 담양군 담양읍 깊은실길 169",
+    "address": "전남 담양군 담양읍 깊은실길 169",
     "category": "골프장",
     "description": "[사랑의 불시착] 이 곳은 등장인물 윤세리(손예진)의 할아버지의 저택으로 나오는 장소이다. 1화에서 윤회장(남경업)이 자녀들을 모두 이곳에 불러 가족 만찬을 하는 장면의 저택으로 등장한다.",
     "openingHours": "매일 00시 - 24시",
@@ -4323,15 +4323,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 34.8434,
-    "longitude": 126.9577
+    "latitude": 35.3103157,
+    "longitude": 127.0172945
   },
   {
     "placeId": "P_0090",
     "placeName": "빈해원",
     "region": "전북",
     "district": "군산시",
-    "address": "전라북도 군산시 동령길 57",
+    "address": "전북특별자치도 군산시 동령길 57",
     "category": "맛집",
     "description": "[사랑의 불시착] 저세상 멋짐 리정혁 동무 수트 입고 액션하던 곳",
     "openingHours": "매일 10시 - 21시",
@@ -4366,15 +4366,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.6943,
-    "longitude": 127.1257
+    "latitude": 35.9888348,
+    "longitude": 126.7139832
   },
   {
     "placeId": "P_0091",
     "placeName": "치유의 숲",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주 서귀포시 산록남로 2271 서귀포치유의숲",
+    "address": "제주특별자치도 서귀포시 산록남로 2271",
     "category": "공원",
     "description": "[사랑의 불시착] 세리가 하늘에서 불시착해 리정혁을 만난 숲",
     "openingHours": "하절기 매일 08시 - 17시, 동절기 매일 09시 - 16시",
@@ -4412,15 +4412,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.4777,
-    "longitude": 126.5099
+    "latitude": 33.2945654,
+    "longitude": 126.5252081
   },
   {
     "placeId": "P_0092",
     "placeName": "청산수목원",
     "region": "충남",
     "district": "태안군",
-    "address": "충청남도 태안군 연꽃길 70",
+    "address": "충남 태안군 남면 연꽃길 70",
     "category": "공원",
     "description": "[사랑의 불시착] 4회에서 윤세리(손예진)는 리정혁(현빈)처럼 대령의 아내의 생일파티를 떠나고 있다. 세리가 어둠 속에서 어떻게 안전하게 집에 갈 수 있을지 걱정하면서 두 번째, 세 번째로 자전거를 타고 지나간다.",
     "openingHours": "4-5월 매일 09시 - 18시, 6-10월 매일 08시 - 19시",
@@ -4455,15 +4455,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 36.6382,
-    "longitude": 126.6575
+    "latitude": 36.6887784,
+    "longitude": 126.2962802
   },
   {
     "placeId": "P_0093",
     "placeName": "비내섬",
     "region": "충북",
     "district": "충주시",
-    "address": "충북 충주시 앙성면 조천리 412",
+    "address": "충북 충주시 소태면 복탄리 908",
     "category": "촬영지",
     "description": "[사랑의 불시착] 세리가 '찬 바람이 불면~'을 열창했던 억새밭",
     "openingHours": "매일 00시 - 24시",
@@ -4499,8 +4499,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.6164,
-    "longitude": 127.482
+    "latitude": 37.1076325,
+    "longitude": 127.8177259
   },
   {
     "placeId": "P_0094",
@@ -4543,15 +4543,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.6177,
-    "longitude": 127.488
+    "latitude": 37.0171168,
+    "longitude": 127.8668591
   },
   {
     "placeId": "P_0095",
     "placeName": "탄금호 무지개길",
     "region": "충북",
     "district": "충주시",
-    "address": "충북 충주시 중앙탑면",
+    "address": "충북 충주시 중앙탑면 루암리 642",
     "category": "거리",
     "description": "[사랑의 불시착] 서단♥구승준 커플이 키스를 나눈 무지갯빛 다리",
     "openingHours": "매일 00시 - 24시",
@@ -4586,15 +4586,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.619,
-    "longitude": 127.494
+    "latitude": 37.0122945,
+    "longitude": 127.8695482
   },
   {
     "placeId": "P_0096",
     "placeName": "하조대 해수욕장",
     "region": "강원",
     "district": "양양군",
-    "address": "강원도 양양군 현북면 하광정리",
+    "address": "강원특별자치도 양양군 현북면 하광정리 80-2",
     "category": "해변",
     "description": "[부부의 세계] 이무생이 김희애을 구하러 뛰어든 바다",
     "openingHours": "매일 00시 - 24시",
@@ -4627,15 +4627,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8074,
-    "longitude": 128.1642
+    "latitude": 38.0264231,
+    "longitude": 128.7202832
   },
   {
     "placeId": "P_0097",
     "placeName": "대명비발디파크",
     "region": "강원",
     "district": "홍천군",
-    "address": "강원도 홍천군 서면 한치골길 262",
+    "address": "강원특별자치도 홍천군 서면 한치골길 262",
     "category": "리조트",
     "description": "[부부의 세계] 8회에서 배경의 한 장소로 나온다.",
     "openingHours": "매일 입실 15시, 퇴실 11시",
@@ -4670,15 +4670,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8087,
-    "longitude": 128.1702
+    "latitude": 37.6521032,
+    "longitude": 127.6871063
   },
   {
     "placeId": "P_0098",
     "placeName": "원당종마목장",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 덕양구 서삼릉길 233-112",
+    "address": "경기 고양시 덕양구 서삼릉길 233-112",
     "category": "공원",
     "description": "[부부의 세계] 15회에서 지선우(김희애)는 이 곳에서 망연자실한 이태오(박해준)를 발견하고 그와 말다툼 후에 떠난다.",
     "openingHours": "수-일 09시 - 17시",
@@ -4709,15 +4709,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2508,
-    "longitude": 127.0493
+    "latitude": 37.6614735,
+    "longitude": 126.8682491
   },
   {
     "placeId": "P_0099",
     "placeName": "벨라시타",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산동구 강송로 33",
+    "address": "경기 고양시 일산동구 강송로 33",
     "category": "쇼핑센터",
     "description": "[부부의 세계] 15회에서 벨라시타가 나온다.",
     "openingHours": "매일 10시 30분 - 21시",
@@ -4745,15 +4745,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2521,
-    "longitude": 127.0553
+    "latitude": 37.6421226,
+    "longitude": 126.7916611
   },
   {
     "placeId": "P_0100",
     "placeName": "아소산 일산본점",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산동구 정발산로 128",
+    "address": "경기 고양시 일산동구 정발산로 128",
     "category": "맛집",
     "description": "[부부의 세계] 9, 10회에서는 여병규 대표(이경영)와 김윤기 박사(이무생)를 이곳에서 만났습니다. 사위 태오(박해준)와 태오의 전 부인 선우(김희애) 사이에 어떤 감정이 남아 있을지 궁금증을 자아냅니다.",
     "openingHours": "매일 11시 30분 - 21시 30분",
@@ -4785,15 +4785,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2534,
-    "longitude": 127.0613
+    "latitude": 37.6592027,
+    "longitude": 126.7826418
   },
   {
     "placeId": "P_0101",
     "placeName": "헬싱키",
     "region": "경기",
     "district": "성남시",
-    "address": "경기도 성남시 분당구 정자일로213번길 10",
+    "address": "경기 성남시 분당구 정자일로213번길 10",
     "category": "카페",
     "description": "[부부의 세계] 김희애가 아들 전진서와 시간을 보내던 카페",
     "openingHours": "매일 11시 - (익일) 01시",
@@ -4825,15 +4825,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.2547,
-    "longitude": 127.0673
+    "latitude": 37.3696431,
+    "longitude": 127.1057407
   },
   {
     "placeId": "P_0102",
     "placeName": "봄파머스 가든",
     "region": "경기",
     "district": "양평군",
-    "address": "경기도 양평군 강상면 강남로 729-46",
+    "address": "경기 양평군 강상면 강남로 729-45",
     "category": "갤러리",
     "description": "[부부의 세계] 1, 2화에서 이태오(박해준)의 생일파티가 열렸던 곳",
     "openingHours": "매일 11시 30분 - 20시",
@@ -4861,15 +4861,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.256,
-    "longitude": 127.0733
+    "latitude": 37.498109,
+    "longitude": 127.4599
   },
   {
     "placeId": "P_0103",
     "placeName": "카레클린트 분당용인점",
     "region": "경기",
     "district": "용인시",
-    "address": "경기도 용인시 기흥구 죽전로15번길 15-15 지하1층",
+    "address": "경기 용인시 기흥구 죽전로15번길 15-15",
     "category": "맛집",
     "description": "[부부의 세계] 5회에서는 태오(박해준 분)가 아들 준영(전진서 분)을 데리고 카페로 가는 모습이 그려졌다. 그를 학교에서 데리러 온 후. 다경(한소희)이 들어오고 태오는 그녀를 멍하니 쳐다본다. 그녀는 짜증스럽게 뒤를 돌아보고 카페를 떠납니다.",
     "openingHours": "일-목 10시 - 23시, 금-토 11시 - 24시",
@@ -4905,15 +4905,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.2412,
-    "longitude": 126.9784
+    "latitude": 37.3218371,
+    "longitude": 127.1091898
   },
   {
     "placeId": "P_0104",
     "placeName": "지혜의 숲",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 회동길 145",
+    "address": "경기 파주시 회동길 145",
     "category": "문화공간",
     "description": "[부부의 세계] 선우(긴희애), 다경(한소희)은 책값을 치르면서 서로 부딪힌 후 이 건물 밖에서 만난다.",
     "openingHours": "매일 10시 - 20시",
@@ -4946,15 +4946,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2425,
-    "longitude": 126.9844
+    "latitude": 37.7084774,
+    "longitude": 126.6867853
   },
   {
     "placeId": "P_0105",
     "placeName": "머디머피스",
     "region": "경기",
     "district": "평택시",
-    "address": "경기도 평택시 쇼핑로 19-5",
+    "address": "경기 평택시 쇼핑로 19-5",
     "category": "맛집",
     "description": "[부부의 세계] 1,2회에서 이곳은 선우(김희애)의 환자 민현서(심은우)가 일하는 술집이다.",
     "openingHours": "매일 18시 - 24시",
@@ -4985,8 +4985,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2438,
-    "longitude": 126.9904
+    "latitude": 37.081488,
+    "longitude": 127.051401
   },
   {
     "placeId": "P_0106",
@@ -5031,15 +5031,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.548,
-    "longitude": 126.9458
+    "latitude": 37.6557267,
+    "longitude": 126.9998323
   },
   {
     "placeId": "P_0107",
     "placeName": "서울시립대학교",
     "region": "서울",
     "district": "동대문구",
-    "address": "서울특별시 동대문구 서울시립대로 163",
+    "address": "서울 동대문구 서울시립대로 163",
     "category": "학교",
     "description": "[부부의 세계] 창공관의 외관은 지선우(김희애 분)가 부원장으로 근무하는 '가족사랑병원'으로 등장한다.",
     "openingHours": "매일 00시 - 24시",
@@ -5072,15 +5072,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5493,
-    "longitude": 126.9518
+    "latitude": 37.5848283,
+    "longitude": 127.0577332
   },
   {
     "placeId": "P_0108",
     "placeName": "수연산방",
     "region": "서울",
     "district": "성북구",
-    "address": "서울특별시 성북구 성북로 26길 8",
+    "address": "서울 성북구 성북로26길 8",
     "category": "카페",
     "description": "[부부의 세계] 김희애가 남편의 생일에 떡을 주문한 곳 / [21세기 대군부인] 문인 한옥 찻집이자 여러 콘텐츠 촬영지.",
     "openingHours": "수-금 11시 30분 - 18시, 주말 11시 30분 - 22시",
@@ -5120,15 +5120,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5506,
-    "longitude": 126.9578
+    "latitude": 37.5950722,
+    "longitude": 126.9948366
   },
   {
     "placeId": "P_0109",
     "placeName": "함박웃음순대국",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 삼일대로 422",
+    "address": "서울 종로구 삼일대로 424",
     "category": "맛집",
     "description": "[부부의 세계] 7회에서 선우(김희애)는 퇴근 후 이 식당을 들르다 우연히 제혁(김영민)을 만난다. 그런 다음 그는 음식을 다 먹지 않고 떠납니다. 한편, 우연히 지나가던 윤기(이무생)는 혼자 술을 마시는 선우를 본다. 그는 그녀와 합류하고 2년 전 고산을 떠나 새 가족과 함께 돌아온 태오(박해준)에 대한 이야기를 나눕니다.",
     "openingHours": "정보없음",
@@ -5160,15 +5160,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5519,
-    "longitude": 126.9638
+    "latitude": 37.5723811,
+    "longitude": 126.9880145
   },
   {
     "placeId": "P_0110",
     "placeName": "라망시크레",
     "region": "서울",
     "district": "중구",
-    "address": "서울 중구 퇴계로 67 레스케이프 호텔 26층",
+    "address": "서울 중구 퇴계로 67",
     "category": "맛집",
     "description": "[부부의 세계] 김희애와 이무생이 데이트하던 레스토랑",
     "openingHours": "월-토 12시 - 22시",
@@ -5203,8 +5203,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5532,
-    "longitude": 126.9698
+    "latitude": 37.5596731,
+    "longitude": 126.9794715
   },
   {
     "placeId": "P_0111",
@@ -5246,15 +5246,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5545,
-    "longitude": 126.9758
+    "latitude": 37.5599885,
+    "longitude": 126.979511
   },
   {
     "placeId": "P_0112",
     "placeName": "용인 대장금 파크",
     "region": "경기",
     "district": "용인시",
-    "address": "경기도 용인시 처인구 백암면 용천드라마길 25",
+    "address": "경기 용인시 처인구 백암면 용천리 730",
     "category": "관광지",
     "description": "[철인왕후] 철인왕후 주요 궁전으로 나온다.",
     "openingHours": "하절기 매일 09시 - 18시, 동절기 매일 09시 - 17시",
@@ -5284,15 +5284,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2529,
-    "longitude": 127.0324
+    "latitude": 37.1216122,
+    "longitude": 127.3417807
   },
   {
     "placeId": "P_0113",
     "placeName": "병산서원",
     "region": "경북",
     "district": "안동시",
-    "address": "경상북도 안동시 풍천면 병산길 386",
+    "address": "경북 안동시 풍천면 병산길 386",
     "category": "유적지",
     "description": "[철인왕후] 김소용(신혜선)과 철종(김정현)은 이곳에서 차를 마시다 스핀킥으로 침입자로부터 자신을 보호하는 모습에 심장이 조금 뛴다.",
     "openingHours": "매일 09시 - 18시 하절기, 매일 09시 - 17시 동절기",
@@ -5323,15 +5323,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 36.4825,
-    "longitude": 128.8987
+    "latitude": 36.5405751,
+    "longitude": 128.5526253
   },
   {
     "placeId": "P_0114",
     "placeName": "오크우드프리미어 인천",
     "region": "인천",
     "district": "연수구",
-    "address": "인천광역시 연수구 컨벤시아대로 165",
+    "address": "인천 연수구 컨벤시아대로 165",
     "category": "호텔",
     "description": "[철인왕후] 1회에서 이 스위트룸에서 장봉환(최진혁)은 인터뷰를 한다.",
     "openingHours": "매일 입실 15시, 퇴실 11시",
@@ -5362,15 +5362,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.4482,
-    "longitude": 126.721
+    "latitude": 37.3891435,
+    "longitude": 126.6442167
   },
   {
     "placeId": "P_0115",
     "placeName": "궁남지",
     "region": "충남",
     "district": "부여군",
-    "address": "충남 부여군 부여읍 동남리",
+    "address": "충남 부여군 부여읍 궁남로 52",
     "category": "국가 유산",
     "description": "[철인왕후] 철인왕후에서 장봉환이 도착했을 때의 첫 번째 미션은 호수에 물을 채우는 것이었고, 그것이 현재로 돌아가는 방법의 관문이라고 생각한다. 5~6회에서 그는 호수로 뛰어들고 돌아오려 했지만 이원범(김정현)에게 구해진다. / [런닝맨] 런닝맨 405회 두 번째 미션 장소",
     "openingHours": "매일 00시 - 24시",
@@ -5407,15 +5407,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 36.652,
-    "longitude": 126.6946
+    "latitude": 36.2696303,
+    "longitude": 126.9123128
   },
   {
     "placeId": "P_0116",
     "placeName": "오션월드",
     "region": "강원",
     "district": "홍천군",
-    "address": "강원도 홍천군 서면 한치골길 262",
+    "address": "강원특별자치도 홍천군 서면 한치골길 262",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 409회 촬영 장소",
     "openingHours": "탄력적 운영",
@@ -5450,15 +5450,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.8173,
-    "longitude": 128.1833
+    "latitude": 37.6499535,
+    "longitude": 127.686912
   },
   {
     "placeId": "P_0117",
     "placeName": "쁘띠프랑스",
     "region": "경기",
     "district": "가평군",
-    "address": "경기도 가평군 청평면 호반로 1063",
+    "address": "경기 가평군 청평면 호반로 1063",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨402회 오프닝 장소",
     "openingHours": "매일 09시 - 18시",
@@ -5489,15 +5489,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2594,
-    "longitude": 127.0624
+    "latitude": 37.7149952,
+    "longitude": 127.4905368
   },
   {
     "placeId": "P_0118",
     "placeName": "풍동562 Cafe",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산동구 애니골길 18-13",
+    "address": "경기 고양시 일산동구 애니골길 18-13",
     "category": "카페",
     "description": "[런닝맨] 런닝맨 452회에서 티셔츠 디자인한 장소",
     "openingHours": "매일 10시 - 23시",
@@ -5532,15 +5532,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2607,
-    "longitude": 127.0684
+    "latitude": 37.6694095,
+    "longitude": 126.7909976
   },
   {
     "placeId": "P_0119",
     "placeName": "더 누룽지",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산서구 미래로 184-12",
+    "address": "경기 고양시 일산서구 미래로 184-12",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 432회 중식당 미션 장소",
     "openingHours": "매일 10시 30분 - 21시",
@@ -5574,15 +5574,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.262,
-    "longitude": 127.0744
+    "latitude": 37.6941908,
+    "longitude": 126.7472448
   },
   {
     "placeId": "P_0120",
     "placeName": "김포아트빌리지",
     "region": "경기",
     "district": "김포시",
-    "address": "경기도 김포시 모담공원로 170",
+    "address": "경기 김포시 모담공원로 170",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 453회에 나왔던 아트센터",
     "openingHours": "화-일 10시 - 22시",
@@ -5613,15 +5613,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2472,
-    "longitude": 126.9795
+    "latitude": 37.6465457,
+    "longitude": 126.6958895
   },
   {
     "placeId": "P_0121",
     "placeName": "시흥 오이도 선사유적공원",
     "region": "경기",
     "district": "시흥시",
-    "address": "경기도 시흥시 서해안로 113-27",
+    "address": "경기 시흥시 서해안로 113-27",
     "category": "공원",
     "description": "[런닝맨] 런닝맨 425회 8남매 컨셉의 촬영 장소",
     "openingHours": "매일 09시 - 18시",
@@ -5655,15 +5655,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2485,
-    "longitude": 126.9855
+    "latitude": 37.343037,
+    "longitude": 126.6961663
   },
   {
     "placeId": "P_0122",
     "placeName": "등대횟집",
     "region": "경기",
     "district": "시흥시",
-    "address": "경기도 시흥시 오이도로 161",
+    "address": "경기 시흥시 오이도로 161",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 425회 꽃게찜 먹은 장소",
     "openingHours": "평일 10시 - 22시, 주말 10시 - 23시",
@@ -5697,15 +5697,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2498,
-    "longitude": 126.9915
+    "latitude": 37.3464991,
+    "longitude": 126.6883155
   },
   {
     "placeId": "P_0123",
     "placeName": "청춘조개본점",
     "region": "경기",
     "district": "시흥시",
-    "address": "경기도 시흥시 오이도로 199-1",
+    "address": "경기 시흥시 오이도로 199-1",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 425회 새우구이 먹은 장소",
     "openingHours": "일-목 10시 - 23시 50분, 금-토 10시 - (익일) 02시",
@@ -5739,15 +5739,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2511,
-    "longitude": 126.9975
+    "latitude": 37.3430441,
+    "longitude": 126.6871143
   },
   {
     "placeId": "P_0124",
     "placeName": "시흥오이도박물관",
     "region": "경기",
     "district": "시흥시",
-    "address": "경기도 시흥시 오이도로 332",
+    "address": "경기 시흥시 정왕동 2202-6",
     "category": "관광지",
     "description": "[런닝맨] 런닝맨 425회 김병옥과 만난 장소",
     "openingHours": "화-일 10시 - 18시",
@@ -5781,15 +5781,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2524,
-    "longitude": 127.0035
+    "latitude": 37.3355386,
+    "longitude": 126.6909132
   },
   {
     "placeId": "P_0125",
     "placeName": "정성담 안양점",
     "region": "경기",
     "district": "안양시",
-    "address": "경기도 안양시 동안구 관악대로 249",
+    "address": "경기 안양시 동안구 관악대로 249",
     "category": "맛집",
     "description": "[런닝맨] 472회 안양 편에 김종국의 설렁탕 맛집",
     "openingHours": "매일 07시 - 22시",
@@ -5823,15 +5823,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2537,
-    "longitude": 127.0095
+    "latitude": 37.4023042,
+    "longitude": 126.9504859
   },
   {
     "placeId": "P_0126",
     "placeName": "명가돈까스",
     "region": "경기",
     "district": "안양시",
-    "address": "경기도 안양시 만안구 장내로139번길 30",
+    "address": "경기 안양시 만안구 장내로139번길 30",
     "category": "맛집",
     "description": "[런닝맨] 472회 안양 편에 김종국의 추억이 담긴 돈가스집",
     "openingHours": "매일 10시 - 21시 30분",
@@ -5865,15 +5865,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.255,
-    "longitude": 127.0155
+    "latitude": 37.3990346,
+    "longitude": 126.9222898
   },
   {
     "placeId": "P_0127",
     "placeName": "시몬스 테라스점",
     "region": "경기",
     "district": "이천시",
-    "address": "경기도 이천시 모가면 사실로 988",
+    "address": "경기 이천시 모가면 사실로 988",
     "category": "촬영지",
     "description": "[런닝맨] 423회 서열 전쟁으로 멤버들 모두 모여 있던 곳",
     "openingHours": "일-목 11시 - 20시, 금-토 11시 - 21시",
@@ -5904,15 +5904,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2563,
-    "longitude": 127.0215
+    "latitude": 37.1976524,
+    "longitude": 127.4462622
   },
   {
     "placeId": "P_0128",
     "placeName": "물빛하늘정원 본점",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 탄현면 새오리로 209-23",
+    "address": "경기 파주시 탄현면 새오리로 209-23",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 404회에서 국보탕 먹은 곳",
     "openingHours": "매일 11시 - 22시",
@@ -5950,15 +5950,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2576,
-    "longitude": 127.0275
+    "latitude": 37.8009327,
+    "longitude": 126.6877748
   },
   {
     "placeId": "P_0129",
     "placeName": "헤이리 예술마을",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 탄현면 헤이리마을길 70-21",
+    "address": "경기 파주시 탄현면 헤이리마을길 70-21",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 452회 촬영장소",
     "openingHours": "매일 00시 - 24시",
@@ -5988,15 +5988,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2589,
-    "longitude": 127.0335
+    "latitude": 37.7880409,
+    "longitude": 126.6993044
   },
   {
     "placeId": "P_0130",
     "placeName": "퍼스트가든",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 탑삭골길 260",
+    "address": "경기 파주시 탑삭골길 260",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 432회 촬영 장소",
     "openingHours": "매일 10시 - 22시",
@@ -6027,15 +6027,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2602,
-    "longitude": 127.0395
+    "latitude": 37.7320858,
+    "longitude": 126.794631
   },
   {
     "placeId": "P_0131",
     "placeName": "스피드파크",
     "region": "경기",
     "district": "파주시",
-    "address": "경기도 파주시 파평면 청송로652번길 42-191",
+    "address": "경기 파주시 파평면 덕천리 261-1",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 447회 세 번째 데이트장소",
     "openingHours": "하절기 매일 09시 - 20시, 동절기 매일 09시 - 18시",
@@ -6070,15 +6070,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2615,
-    "longitude": 127.0455
+    "latitude": 37.936632,
+    "longitude": 126.8731913
   },
   {
     "placeId": "P_0132",
     "placeName": "웃다리문화촌",
     "region": "경기",
     "district": "평택시",
-    "address": "경기도 평택시 서탄면 용소금각로 438-14",
+    "address": "경기 평택시 서탄면 용소금각로 438-14",
     "category": "거리",
     "description": "[런닝맨] 런닝맨 403회 고립레이스 촬영 장소",
     "openingHours": "매일 09시 - 18시",
@@ -6111,15 +6111,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2628,
-    "longitude": 127.0515
+    "latitude": 37.0687865,
+    "longitude": 127.0082176
   },
   {
     "placeId": "P_0133",
     "placeName": "평강랜드",
     "region": "경기",
     "district": "포천시",
-    "address": "경기도 포천시 영북면 우물목길 171-18",
+    "address": "경기 포천시 영북면 우물목길 171-18",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 422회 촬영 장소",
     "openingHours": "매일 09시 - 18시",
@@ -6153,15 +6153,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.2641,
-    "longitude": 127.0575
+    "latitude": 38.049972,
+    "longitude": 127.3061878
   },
   {
     "placeId": "P_0134",
     "placeName": "김해가야테마파크",
     "region": "경남",
     "district": "김해시",
-    "address": "경상남도 김해시 가야테마길 161",
+    "address": "경남 김해시 가야테마길 161",
     "category": "촬영지",
     "description": "[런닝맨] 351회 '위험한 관광'의 레이스 최종 미션지",
     "openingHours": "매일 09시 30분 - 18시",
@@ -6193,15 +6193,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.4624,
-    "longitude": 128.2481
+    "latitude": 35.25068,
+    "longitude": 128.8929629
   },
   {
     "placeId": "P_0135",
     "placeName": "코리아 짚와이어",
     "region": "경남",
     "district": "하동군",
-    "address": "경상남도 하동군 금남면 경충로 493-9",
+    "address": "경남 하동군 금남면 경충로 493-5",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 400회 짚라인 이용한 곳",
     "openingHours": "동절기 매일 08시 30분 - 16시 10분, 하절기 매일 08시 30분 - 18시 35분",
@@ -6232,15 +6232,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.4637,
-    "longitude": 128.2541
+    "latitude": 34.9824583,
+    "longitude": 127.8965169
   },
   {
     "placeId": "P_0136",
     "placeName": "청도 읍성",
     "region": "경북",
     "district": "청도군",
-    "address": "경북 청도군 화양읍 동상리 48-1",
+    "address": "경북 청도군 화양읍 동상리 54-3",
     "category": "촬영지",
     "description": "[런닝맨] 471회 청도 편에서 첫 번째 미션 한 곳",
     "openingHours": "매일 00시 - 24시",
@@ -6271,15 +6271,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 36.4963,
-    "longitude": 128.9358
+    "latitude": 35.6501424,
+    "longitude": 128.7064498
   },
   {
     "placeId": "P_0137",
     "placeName": "마비정 벽화마을",
     "region": "대구",
     "district": "달성군",
-    "address": "대구광역시 달성군 화원읍 마비정길 262-5",
+    "address": "대구 달성군 화원읍 마비정길 262-5",
     "category": "거리",
     "description": "[런닝맨] 146회에 송편 레이스를 하던 곳",
     "openingHours": "매일 00시 - 24시",
@@ -6311,15 +6311,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.861,
-    "longitude": 128.5534
+    "latitude": 35.7787685,
+    "longitude": 128.5416123
   },
   {
     "placeId": "P_0138",
     "placeName": "오륙도 스카이워크",
     "region": "부산",
     "district": "남구",
-    "address": "부산광역시 남구 오륙도로 137",
+    "address": "부산 남구 오륙도로 137",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 421회 유리바닥 닦기 아르바이트 한 곳 / [BTS] 부산 BTS 팬투어에서 V·지민 포즈를 따라 찍는 포토 스팟으로 소개되는 해안 전망 명소.",
     "openingHours": "10월-5월 09:00-18:00, 6월-9월 09:00-19:00",
@@ -6353,15 +6353,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.1705,
-    "longitude": 129.0336
+    "latitude": 35.1006496,
+    "longitude": 129.1244879
   },
   {
     "placeId": "P_0139",
     "placeName": "초량 이바구길",
     "region": "부산",
     "district": "동구",
-    "address": "부산광역시 동구 초량동 865-48",
+    "address": "부산 동구 초량동 994-12",
     "category": "거리",
     "description": "[런닝맨] 런닝맨 421회 이바구 자전거 아르바이트 한 곳",
     "openingHours": "매일 00시 - 24시",
@@ -6393,15 +6393,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.1718,
-    "longitude": 129.0396
+    "latitude": 35.1168207,
+    "longitude": 129.0366965
   },
   {
     "placeId": "P_0140",
     "placeName": "영진돼지국밥코스트코센텀점",
     "region": "부산",
     "district": "수영구",
-    "address": "부산광역시 수영구 구락로 86",
+    "address": "부산 수영구 구락로 86",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 328회 돼지국밥 먹은 장소",
     "openingHours": "매일 09시 - 22시",
@@ -6435,15 +6435,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.1731,
-    "longitude": 129.0456
+    "latitude": 35.174683,
+    "longitude": 129.1173783
   },
   {
     "placeId": "P_0141",
     "placeName": "국제시장",
     "region": "부산",
     "district": "중구",
-    "address": "부산 중구 신창동4가",
+    "address": "부산 중구 신창동4가 56-4",
     "category": "시장",
     "description": "[런닝맨] 런닝맨 421회 난데없이 펼쳐진 불꽃 추격전 장소",
     "openingHours": "매일 09시 - 20시",
@@ -6480,15 +6480,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.1744,
-    "longitude": 129.0516
+    "latitude": 35.1013191,
+    "longitude": 129.0281853
   },
   {
     "placeId": "P_0142",
     "placeName": "원조밀면",
     "region": "부산",
     "district": "중구",
-    "address": "부산광역시 중구 중구로 31-1",
+    "address": "부산 중구 중구로 31-1",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 328회에서 국제시장 밀면 먹은 곳",
     "openingHours": "매일 08시 - 19시",
@@ -6528,15 +6528,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.1757,
-    "longitude": 129.0576
+    "latitude": 35.1007389,
+    "longitude": 129.0275261
   },
   {
     "placeId": "P_0143",
     "placeName": "새아침식당",
     "region": "부산",
     "district": "해운대구",
-    "address": "부산광역시 해운대구 달맞이길62번길 28 새아침맛집",
+    "address": "부산 해운대구 달맞이길62번길 28",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 328회 해운대에서 조개구이 먹은 곳",
     "openingHours": "매일 07시 30분 - 21시",
@@ -6570,15 +6570,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.177,
-    "longitude": 129.0636
+    "latitude": 35.1588665,
+    "longitude": 129.1705914
   },
   {
     "placeId": "P_0144",
     "placeName": "알베르",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 강남대로102길 34",
+    "address": "서울 강남구 강남대로102길 34",
     "category": "카페",
     "description": "[런닝맨] 런닝맨 438회 능력자vs에이스 대결 장소",
     "openingHours": "매일 10시 - 23시",
@@ -6617,15 +6617,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5652,
-    "longitude": 126.972
+    "latitude": 37.5030563,
+    "longitude": 127.0281028
   },
   {
     "placeId": "P_0145",
     "placeName": "도산공원",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 도산대로45길 20 도산전시관",
+    "address": "서울 강남구 도산대로45길 20",
     "category": "공원",
     "description": "[런닝맨] 런닝맨 440회에서 팀원을 정한 장소",
     "openingHours": "매일 00시 - 24시",
@@ -6659,15 +6659,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5665,
-    "longitude": 126.978
+    "latitude": 37.5239206,
+    "longitude": 127.0355079
   },
   {
     "placeId": "P_0146",
     "placeName": "봉밀가 강남구청점",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 선릉로 664",
+    "address": "서울 강남구 선릉로 664",
     "category": "맛집",
     "description": "[런닝맨] 김종국팀이 평양냉면 먹은 장소",
     "openingHours": "월-토 11시 30분 - 21시 30분",
@@ -6705,15 +6705,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5678,
-    "longitude": 126.984
+    "latitude": 37.5159814,
+    "longitude": 127.0424052
   },
   {
     "placeId": "P_0147",
     "placeName": "늘푸른목장 상암점",
     "region": "서울",
     "district": "마포구",
-    "address": "서울특별시 마포구 매봉산로2길 15",
+    "address": "서울 마포구 매봉산로2길 15",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 451회 두 번째 미션 장소",
     "openingHours": "평일 11시 30분 - 24시, 주말 14시 - 23시",
@@ -6747,15 +6747,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5691,
-    "longitude": 126.99
+    "latitude": 37.5784635,
+    "longitude": 126.8949972
   },
   {
     "placeId": "P_0148",
     "placeName": "문화비축기지",
     "region": "서울",
     "district": "마포구",
-    "address": "서울특별시 마포구 증산로 87",
+    "address": "서울 마포구 증산로 87",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 457회 오프닝 장소",
     "openingHours": "T1-T5탱크 화-일 10시 - 18시, 야외공원 00시 - 24시",
@@ -6787,15 +6787,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5704,
-    "longitude": 126.996
+    "latitude": 37.5710756,
+    "longitude": 126.8942367
   },
   {
     "placeId": "P_0149",
     "placeName": "시골집청국장",
     "region": "서울",
     "district": "서초구",
-    "address": "서울특별시 서초구 양재천로 109-20 1층",
+    "address": "서울 서초구 양재천로 109-20",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 439회 유재석 팀이 청국장 먹은 장소",
     "openingHours": "평일 07시 - 21시, 토 07시 - 15시",
@@ -6829,15 +6829,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5717,
-    "longitude": 127.002
+    "latitude": 37.4776499,
+    "longitude": 127.0398782
   },
   {
     "placeId": "P_0150",
     "placeName": "우리옛돌박물관",
     "region": "서울",
     "district": "성북구",
-    "address": "서울특별시 성북구 대사관로13길 66",
+    "address": "서울 성북구 대사관로13길 66",
     "category": "관광지",
     "description": "[런닝맨] 런닝맨 448회 오프닝 장소 / [눈물의 여왕] 퀸즈그룹 대저택 장면으로 알려진 박물관.",
     "openingHours": "화-금 10시 - 17시, 주말 10시 - 18시",
@@ -6877,15 +6877,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.573,
-    "longitude": 127.008
+    "latitude": 37.6009013,
+    "longitude": 126.9900856
   },
   {
     "placeId": "P_0151",
     "placeName": "핏제리아오",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 동숭길 86 2, 3층",
+    "address": "서울 종로구 동숭길 86",
     "category": "맛집",
     "description": "[런닝맨] 런닝맨 404회 랍스타 피자 먹은 곳",
     "openingHours": "매일 11시 30분 - 22시",
@@ -6919,15 +6919,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5743,
-    "longitude": 127.014
+    "latitude": 37.5820979,
+    "longitude": 127.0043757
   },
   {
     "placeId": "P_0152",
     "placeName": "서울역사박물관",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 새문안로 55",
+    "address": "서울 종로구 새문안로 55",
     "category": "관광지",
     "description": "[런닝맨] 런닝맨441회 꿀벌레이스 장소",
     "openingHours": "화-일 09시 - 18시",
@@ -6962,15 +6962,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5756,
-    "longitude": 127.02
+    "latitude": 37.5705003,
+    "longitude": 126.9705464
   },
   {
     "placeId": "P_0153",
     "placeName": "용마랜드",
     "region": "서울",
     "district": "중랑구",
-    "address": "서울특별시 중랑구 망우로70길 118",
+    "address": "서울 중랑구 망우로70길 118",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 401회 연령고지 촬영 장소",
     "openingHours": "매일 10시 - 18시",
@@ -7001,15 +7001,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.5769,
-    "longitude": 127.026
+    "latitude": 37.5947774,
+    "longitude": 127.1054538
   },
   {
     "placeId": "P_0154",
     "placeName": "장생포 고래문화마을",
     "region": "울산",
     "district": "남구",
-    "address": "울산광역시 남구 장생포고래로 244",
+    "address": "울산 남구 장생포고래로 271-1",
     "category": "촬영지",
     "description": "[런닝맨] 350회 코끼리 코 돌고 신발 날리는 미션 한 곳",
     "openingHours": "화-일 09시 - 20시 (월별상이)",
@@ -7040,15 +7040,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.534,
-    "longitude": 129.2645
+    "latitude": 35.5059159,
+    "longitude": 129.3830965
   },
   {
     "placeId": "P_0155",
     "placeName": "삼목선착장",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 영종해안북로 847번길 55",
+    "address": "인천 중구 운서동 2508-30",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 399회 신시모도 가는 배를 탄 곳",
     "openingHours": "산목에서는 매시 10분마다, 신도에서는 매시 30분마다 출발",
@@ -7079,15 +7079,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.4532,
-    "longitude": 126.6643
+    "latitude": 37.4995137,
+    "longitude": 126.4524371
   },
   {
     "placeId": "P_0156",
     "placeName": "문차이나",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 차이나타운로 20",
+    "address": "인천 중구 차이나타운로 20",
     "category": "맛집",
     "description": "[런닝맨] 481회 인천 미식 로드 편 첫 번째 미션 한 곳",
     "openingHours": "화-일 10시 - 21시",
@@ -7121,15 +7121,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 37.4545,
-    "longitude": 126.6703
+    "latitude": 37.477494,
+    "longitude": 126.6190709
   },
   {
     "placeId": "P_0157",
     "placeName": "미륵사지",
     "region": "전북",
     "district": "익산시",
-    "address": "전라북도 익산시 금마면 기양리 32-7",
+    "address": "전북특별자치도 익산시 금마면 기양리 32-2",
     "category": "촬영지",
     "description": "[런닝맨] 런닝맨 405회 오프닝, 첫 번째 미션 장소",
     "openingHours": "매일 00시 - 24시",
@@ -7160,15 +7160,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 35.717,
-    "longitude": 127.1241
+    "latitude": 36.0124163,
+    "longitude": 127.0312769
   },
   {
     "placeId": "P_0158",
     "placeName": "전주한옥마을",
     "region": "전북",
     "district": "전주시",
-    "address": "전라북도 전주시 완산구 기린대로 99",
+    "address": "전북특별자치도 전주시 완산구 풍남동3가 63-1",
     "category": "전통마을",
     "description": "[런닝맨] 런닝맨 330회 촬영 장소",
     "openingHours": "매일 00시 - 24시",
@@ -7203,15 +7203,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.7183,
-    "longitude": 127.1301
+    "latitude": 35.8147774,
+    "longitude": 127.152557
   },
   {
     "placeId": "P_0159",
     "placeName": "공산성",
     "region": "충남",
     "district": "공주시",
-    "address": "충남 공주시 금성동 53-51",
+    "address": "충남 공주시 웅진로 280",
     "category": "공원",
     "description": "[런닝맨] 런닝맨 405회 마지막 미션 장소",
     "openingHours": "매일 09시 - 18시",
@@ -7246,15 +7246,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 36.6609,
-    "longitude": 126.6559
+    "latitude": 36.4632408,
+    "longitude": 127.1262966
   },
   {
     "placeId": "P_0160",
     "placeName": "의림지역사박물관",
     "region": "충북",
     "district": "제천시",
-    "address": "충청북도 제천시 의림대로47길 7",
+    "address": "충북 제천시 의림대로47길 7",
     "category": "관광지",
     "description": "[런닝맨] 런닝맨 450회 첫 번째 미션장소",
     "openingHours": "화-일  09시 - 18시",
@@ -7289,15 +7289,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 36.6391,
-    "longitude": 127.4804
+    "latitude": 37.1762104,
+    "longitude": 128.2095074
   },
   {
     "placeId": "P_0161",
     "placeName": "청풍호반케이블카",
     "region": "충북",
     "district": "제천시",
-    "address": "충청북도 제천시 청풍면 문화재길 166",
+    "address": "충북 제천시 청풍면 문화재길 166",
     "category": "전망대",
     "description": "[런닝맨] 런닝맨 450회 세번째 미션 장소",
     "openingHours": "매일 10시 - 17시 30분(시기별상이)",
@@ -7332,15 +7332,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 36.6404,
-    "longitude": 127.4864
+    "latitude": 37.0012576,
+    "longitude": 128.1667763
   },
   {
     "placeId": "P_0162",
     "placeName": "명암보트장",
     "region": "충북",
     "district": "청주시",
-    "address": "충청북도 청주시 상당구 명암로 98번길 38",
+    "address": "충북 청주시 상당구 명암로98번길 38",
     "category": "촬영지",
     "description": "[런닝맨] 162회 블록 드롭으로 높게 뜨는 미션을 했던 곳",
     "openingHours": "평일 전화 문의, 주말 10시 - 18시 30분",
@@ -7371,15 +7371,15 @@ export const places = [
       "미션"
     ],
     "verified": true,
-    "latitude": 36.6417,
-    "longitude": 127.4924
+    "latitude": 36.6425466,
+    "longitude": 127.5121926
   },
   {
     "placeId": "P_0163",
     "placeName": "행리단길",
     "region": "경기",
     "district": "수원시",
-    "address": "경기 수원시 팔달구 화서문로",
+    "address": "경기 수원시 팔달구 신풍동 27-2",
     "category": "거리",
     "description": "[선재 업고 튀어] 선재와 솔의 첫 데이트 장소로 소개된 행궁동 중심 거리.",
     "openingHours": "상시 개방",
@@ -7414,15 +7414,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2709,
-    "longitude": 127.0357
+    "latitude": 37.2854574,
+    "longitude": 127.0141275
   },
   {
     "placeId": "P_0164",
     "placeName": "카페 몽테드",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 화서문로48번길 14 1층",
+    "address": "경기 수원시 팔달구 화서문로48번길 14",
     "category": "카페",
     "description": "[선재 업고 튀어] 극 중 솔의 집으로 등장한 대표 촬영지 카페.",
     "openingHours": "12:00-22:00",
@@ -7458,15 +7458,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2722,
-    "longitude": 127.0417
+    "latitude": 37.2847708,
+    "longitude": 127.0136166
   },
   {
     "placeId": "P_0165",
     "placeName": "행궁동 왕의 골목",
     "region": "경기",
     "district": "수원시",
-    "address": "경기도 수원시 팔달구 신풍동 221-14",
+    "address": "경기 수원시 팔달구 신풍동 221-14",
     "category": "거리",
     "description": "[선재 업고 튀어] 선재와 솔의 등하굣길 장면과 연결되는 행궁동 골목 코스.",
     "openingHours": "상시 개방",
@@ -7502,15 +7502,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.2735,
-    "longitude": 127.0477
+    "latitude": 37.2832328,
+    "longitude": 127.0150347
   },
   {
     "placeId": "P_0166",
     "placeName": "방화수류정",
     "region": "경기",
     "district": "수원시",
-    "address": "경기 수원시 팔달구 수원천로392번길 44-6",
+    "address": "경기 수원시 팔달구 매향동 151",
     "category": "촬영지",
     "description": "[선재 업고 튀어] 선재가 솔에게 자전거를 가르쳐주던 장소로 소개된 수원화성 누각.",
     "openingHours": "상시 개방",
@@ -7541,15 +7541,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.2748,
-    "longitude": 127.0537
+    "latitude": 37.2875058,
+    "longitude": 127.0180738
   },
   {
     "placeId": "P_0167",
     "placeName": "문경 용두리 슈퍼 세트",
     "region": "경북",
     "district": "문경시",
-    "address": "경상북도 문경시 문경읍 용연리",
+    "address": "경북 문경시 문경읍 용연리",
     "category": "촬영지",
     "description": "[눈물의 여왕] 백현우의 고향 용두리와 용두리 슈퍼로 알려진 문경 촬영 세트 일대.",
     "openingHours": "정보없음",
@@ -7582,15 +7582,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 36.5044,
-    "longitude": 128.92
+    "latitude": 36.7699548,
+    "longitude": 128.1801537
   },
   {
     "placeId": "P_0168",
     "placeName": "문경 철로자전거 구랑리역",
     "region": "경북",
     "district": "문경시",
-    "address": "경북 문경시 마성면 구랑로 20 구랑리역",
+    "address": "경북 문경시 마성면 구랑로 20",
     "category": "관광지",
     "description": "[눈물의 여왕] 13~14회 백현우·홍해인 데이트 장소로 소개된 문경 철로자전거 코스.",
     "openingHours": "시설별 상이",
@@ -7623,8 +7623,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5057,
-    "longitude": 128.926
+    "latitude": 36.6609888,
+    "longitude": 128.0993204
   },
   {
     "placeId": "P_0169",
@@ -7669,15 +7669,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.507,
-    "longitude": 128.932
+    "latitude": 36.6541931,
+    "longitude": 128.0598267
   },
   {
     "placeId": "P_0170",
     "placeName": "그랜드 워커힐 서울 애스톤하우스",
-    "region": "서울",
-    "district": "광진구",
-    "address": "서울특별시 광진구 워커힐로 177",
+    "region": "경기",
+    "district": "구리시",
+    "address": "경기 구리시 아차산로 1",
     "category": "촬영지",
     "description": "[눈물의 여왕] 결혼식 장면 배경으로 알려진 워커힐 프라이빗 하우스.",
     "openingHours": "예약제/행사별 상이",
@@ -7709,15 +7709,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.5829,
-    "longitude": 127.0271
+    "latitude": 37.5599296,
+    "longitude": 127.1132842
   },
   {
     "placeId": "P_0171",
     "placeName": "아쿠아플라넷 일산",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산서구 한류월드로 282",
+    "address": "경기 고양시 일산서구 한류월드로 282",
     "category": "관광지",
     "description": "[눈물의 여왕] 프러포즈 장면 배경으로 알려진 실내 아쿠아리움.",
     "openingHours": "시설별 상이",
@@ -7750,8 +7750,8 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.2652,
-    "longitude": 126.9828
+    "latitude": 37.6637876,
+    "longitude": 126.7554856
   },
   {
     "placeId": "P_0172",
@@ -7794,8 +7794,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.8743,
-    "longitude": 128.5616
+    "latitude": 36.092153,
+    "longitude": 128.6811606
   },
   {
     "placeId": "P_0173",
@@ -7836,15 +7836,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 36.6399,
-    "longitude": 127.4575
+    "latitude": 37.0198064,
+    "longitude": 127.9781419
   },
   {
     "placeId": "P_0174",
     "placeName": "성산일출봉",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 성산읍 성산리 1",
+    "address": "제주특별자치도 서귀포시 성산읍 성산리 78",
     "category": "관광지",
     "description": "[폭싹 속았수다] 어린 시절 제주 장면에 등장하는 대표 배경.",
     "openingHours": "정보없음",
@@ -7878,15 +7878,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5051,
-    "longitude": 126.5034
+    "latitude": 33.459135,
+    "longitude": 126.9405375
   },
   {
     "placeId": "P_0175",
     "placeName": "섭지코지",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 성산읍 섭지코지로 262",
+    "address": "제주특별자치도 서귀포시 성산읍 섭지코지로 107",
     "category": "관광지",
     "description": "[폭싹 속았수다] 성산일출봉 주변 추천 관광지.",
     "openingHours": "정보없음",
@@ -7920,15 +7920,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5064,
-    "longitude": 126.5094
+    "latitude": 33.4239381,
+    "longitude": 126.9306092
   },
   {
     "placeId": "P_0176",
     "placeName": "광치기해변",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 성산읍 고성리 224-33",
+    "address": "제주특별자치도 서귀포시 성산읍 고성리 224-1",
     "category": "해변",
     "description": "[폭싹 속았수다] 성산일출봉 주변 추천 해변.",
     "openingHours": "정보없음",
@@ -7965,8 +7965,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5077,
-    "longitude": 126.5154
+    "latitude": 33.4525209,
+    "longitude": 126.9241933
   },
   {
     "placeId": "P_0177",
@@ -8010,15 +8010,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.509,
-    "longitude": 126.5214
+    "latitude": 33.5634108,
+    "longitude": 126.7684034
   },
   {
     "placeId": "P_0178",
     "placeName": "백약이오름",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 표선면 성읍리 산1",
+    "address": "제주특별자치도 서귀포시 표선면 성읍리 산 1",
     "category": "공원",
     "description": "[폭싹 속았수다] 해안가와 오름 장면 관련 추천 오름.",
     "openingHours": "정보없음",
@@ -8056,15 +8056,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5103,
-    "longitude": 126.5274
+    "latitude": 33.4368094,
+    "longitude": 126.7897582
   },
   {
     "placeId": "P_0179",
     "placeName": "안돌오름",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 구좌읍 송당리 산66-2",
+    "address": "제주특별자치도 제주시 구좌읍 송당리 산 66-2",
     "category": "공원",
     "description": "[폭싹 속았수다] 해안가와 오름 장면 관련 추천 오름.",
     "openingHours": "정보없음",
@@ -8102,8 +8102,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5116,
-    "longitude": 126.5334
+    "latitude": 33.4578305,
+    "longitude": 126.7558689
   },
   {
     "placeId": "P_0180",
@@ -8144,15 +8144,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5129,
-    "longitude": 126.5394
+    "latitude": 33.5142024,
+    "longitude": 126.5220035
   },
   {
     "placeId": "P_0181",
     "placeName": "제원아파트",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 신광로6길 38",
+    "address": "제주특별자치도 제주시 제원1길 23",
     "category": "촬영지",
     "description": "[폭싹 속았수다] 9화 금명의 유학 전 이사 장소로 소개된 아파트.",
     "openingHours": "정보없음",
@@ -8185,15 +8185,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5142,
-    "longitude": 126.5454
+    "latitude": 33.4891482,
+    "longitude": 126.4868769
   },
   {
     "placeId": "P_0182",
     "placeName": "누웨마루거리",
     "region": "제주",
     "district": "제주시",
-    "address": "제주 제주시 연동7길 31",
+    "address": "제주특별자치도 제주시 연동 273",
     "category": "거리",
     "description": "[폭싹 속았수다] 제원아파트 옆 쇼핑·먹거리 거리.",
     "openingHours": "정보없음",
@@ -8228,15 +8228,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5155,
-    "longitude": 126.5514
+    "latitude": 33.4860118,
+    "longitude": 126.490657
   },
   {
     "placeId": "P_0183",
     "placeName": "도구리알",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 대정읍 신도리 3135-1",
+    "address": "제주특별자치도 서귀포시 대정읍",
     "category": "해변",
     "description": "[폭싹 속았수다] 10화 해안 장면의 자연 웅덩이.",
     "openingHours": "정보없음",
@@ -8273,8 +8273,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5168,
-    "longitude": 126.5574
+    "latitude": 33.2729697,
+    "longitude": 126.172075
   },
   {
     "placeId": "P_0184",
@@ -8318,8 +8318,8 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 33.5181,
-    "longitude": 126.5634
+    "latitude": 33.4485624,
+    "longitude": 126.6602733
   },
   {
     "placeId": "P_0185",
@@ -8364,15 +8364,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5194,
-    "longitude": 126.5694
+    "latitude": 33.275362,
+    "longitude": 126.4018024
   },
   {
     "placeId": "P_0186",
     "placeName": "넙게오름",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 안덕면 서광리 936",
+    "address": "제주특별자치도 서귀포시 안덕면 서광리 943",
     "category": "공원",
     "description": "[폭싹 속았수다] 넙게오름 입구 주변 추천 오름.",
     "openingHours": "정보없음",
@@ -8410,15 +8410,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5207,
-    "longitude": 126.5754
+    "latitude": 33.2879247,
+    "longitude": 126.3173631
   },
   {
     "placeId": "P_0187",
     "placeName": "생이기정길",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 한경면 용수리 4290-1",
+    "address": "제주특별자치도 제주시 한경면 용수리 산 60",
     "category": "공원",
     "description": "[폭싹 속았수다] 12화 중년 애순과 관식의 대화 장면으로 소개된 올레길 절벽.",
     "openingHours": "정보없음",
@@ -8455,15 +8455,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.522,
-    "longitude": 126.5814
+    "latitude": 33.3156229,
+    "longitude": 126.1672885
   },
   {
     "placeId": "P_0188",
     "placeName": "한림항",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 한림읍 한림해안로 192",
+    "address": "제주특별자치도 제주시 한림읍 대림리",
     "category": "해변",
     "description": "[폭싹 속았수다] 14화 항구 장면 배경으로 소개된 항구.",
     "openingHours": "정보없음",
@@ -8500,8 +8500,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5072,
-    "longitude": 126.4865
+    "latitude": 33.4193064,
+    "longitude": 126.2620382
   },
   {
     "placeId": "P_0189",
@@ -8544,15 +8544,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5085,
-    "longitude": 126.4925
+    "latitude": 33.4161737,
+    "longitude": 126.2608444
   },
   {
     "placeId": "P_0190",
     "placeName": "금능포구",
     "region": "제주",
     "district": "제주시",
-    "address": "제주 제주시 한림읍 금능7길 22",
+    "address": "제주특별자치도 제주시 한림읍 금능리",
     "category": "해변",
     "description": "[폭싹 속았수다] 14화·16화 포구 장면으로 소개된 장소.",
     "openingHours": "정보없음",
@@ -8589,15 +8589,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5098,
-    "longitude": 126.4985
+    "latitude": 33.3900832,
+    "longitude": 126.2282321
   },
   {
     "placeId": "P_0191",
     "placeName": "송악산",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 대정읍 송악관광로 421-1",
+    "address": "제주특별자치도 서귀포시 대정읍 상모리 산 2",
     "category": "공원",
     "description": "[폭싹 속았수다] 15화 자전거 라이딩 장면의 송악산 둘레길.",
     "openingHours": "정보없음",
@@ -8633,15 +8633,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5111,
-    "longitude": 126.5045
+    "latitude": 33.1990829,
+    "longitude": 126.2897914
   },
   {
     "placeId": "P_0192",
     "placeName": "덕천리 드라이브 코스",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 구좌읍 덕천리 산42",
+    "address": "제주특별자치도 제주시 구좌읍 덕천리 산 42",
     "category": "거리",
     "description": "[폭싹 속았수다] 15화 관식이 달리던 한적한 도로.",
     "openingHours": "정보없음",
@@ -8676,15 +8676,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5124,
-    "longitude": 126.5105
+    "latitude": 33.4900793,
+    "longitude": 126.7646335
   },
   {
     "placeId": "P_0193",
     "placeName": "군산오름",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 안덕면 창천리 산3-1",
+    "address": "제주특별자치도 서귀포시 안덕면 창천리 산 3-1",
     "category": "공원",
     "description": "[폭싹 속았수다] 15화 점포 앞 동산 장면과 연결되는 오름.",
     "openingHours": "정보없음",
@@ -8722,8 +8722,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5137,
-    "longitude": 126.5165
+    "latitude": 33.2532396,
+    "longitude": 126.3699703
   },
   {
     "placeId": "P_0194",
@@ -8765,15 +8765,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.515,
-    "longitude": 126.5225
+    "latitude": 33.2436821,
+    "longitude": 126.2103472
   },
   {
     "placeId": "P_0195",
     "placeName": "하도바다",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 구좌읍 하도리 22-1",
+    "address": "제주특별자치도 제주시 구좌읍 면수길 38",
     "category": "해변",
     "description": "[폭싹 속았수다] 14화·15화 스쿠터 장면과 원담 풍경이 연결되는 바다.",
     "openingHours": "정보없음",
@@ -8810,8 +8810,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5163,
-    "longitude": 126.5285
+    "latitude": 33.5239603,
+    "longitude": 126.8664025
   },
   {
     "placeId": "P_0196",
@@ -8853,15 +8853,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5176,
-    "longitude": 126.5345
+    "latitude": 33.4942608,
+    "longitude": 126.9019122
   },
   {
     "placeId": "P_0197",
     "placeName": "중문면세점",
     "region": "제주",
     "district": "서귀포시",
-    "address": "제주특별자치도 서귀포시 중문관광로 224 1층",
+    "address": "제주특별자치도 서귀포시 중문관광로 224",
     "category": "굿즈샵",
     "description": "[폭싹 속았수다] 15화 면세점 관련 장면과 연결된 중문관광단지 쇼핑 장소.",
     "openingHours": "정보없음",
@@ -8894,8 +8894,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5189,
-    "longitude": 126.5405
+    "latitude": 33.2413407,
+    "longitude": 126.424429
   },
   {
     "placeId": "P_0198",
@@ -8941,15 +8941,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5202,
-    "longitude": 126.5465
+    "latitude": 33.2465027,
+    "longitude": 126.5817703
   },
   {
     "placeId": "P_0199",
     "placeName": "상여오름",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 연동 산60-2",
+    "address": "제주특별자치도 제주시 연동 1026-3",
     "category": "공원",
     "description": "[폭싹 속았수다] 16화 동명이 묘 장면과 연결된 제주 도심 오름.",
     "openingHours": "정보없음",
@@ -8987,8 +8987,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5215,
-    "longitude": 126.5525
+    "latitude": 33.4657167,
+    "longitude": 126.4916998
   },
   {
     "placeId": "P_0200",
@@ -9031,15 +9031,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 33.5228,
-    "longitude": 126.5585
+    "latitude": 33.5235784,
+    "longitude": 126.8634299
   },
   {
     "placeId": "P_0201",
     "placeName": "오라동메밀밭",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 오라이동 산76",
+    "address": "제주특별자치도 제주시 오라이동 산 76",
     "category": "공원",
     "description": "[폭싹 속았수다] 마지막 회 꿈을 이야기하며 달려가는 장면의 메밀밭.",
     "openingHours": "정보없음",
@@ -9075,15 +9075,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5241,
-    "longitude": 126.5645
+    "latitude": 33.4271589,
+    "longitude": 126.5057836
   },
   {
     "placeId": "P_0202",
     "placeName": "국립아시아문화전당",
     "region": "광주",
     "district": "동구",
-    "address": "광주광역시 동구 문화전당로 38",
+    "address": "광주 동구 문화전당로 38",
     "category": "관광지",
     "description": "[파묘] 미국 병원 세트 장면으로 알려진 광주 ACC 촬영지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9113,15 +9113,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.1853,
-    "longitude": 126.8919
+    "latitude": 35.1473337,
+    "longitude": 126.9213535
   },
   {
     "placeId": "P_0203",
     "placeName": "대문바위",
     "region": "전북",
     "district": "무주군",
-    "address": "전북 무주군 부남면 대소3길 2",
+    "address": "전북특별자치도 무주군 부남면 대소3길 2",
     "category": "촬영지",
     "description": "[파묘] 무주군이 소개한 영화 파묘 촬영지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9149,15 +9149,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.7446,
-    "longitude": 127.1983
+    "latitude": 35.972974,
+    "longitude": 127.5612192
   },
   {
     "placeId": "P_0204",
     "placeName": "향로봉",
     "region": "전북",
     "district": "무주군",
-    "address": "전북 무주군 적상면 사천리 산144",
+    "address": "전북특별자치도 무주군 무주읍 읍내리 산 9-1",
     "category": "촬영지",
     "description": "[파묘] 여우가 범의 허리를 끊었다고 말한 묘지가 있는 곳",
     "openingHours": "상시 개방/시설별 상이",
@@ -9185,15 +9185,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.7459,
-    "longitude": 127.2043
+    "latitude": 36.0187725,
+    "longitude": 127.6646699
   },
   {
     "placeId": "P_0205",
     "placeName": "경상리 느티나무",
     "region": "전남",
     "district": "담양군",
-    "address": "전라남도 담양군 가사문학면 경상리 400",
+    "address": "전남 담양군 가사문학면 경상리 400",
     "category": "거리",
     "description": "[파묘] 화림의 수호천사 나무 신",
     "openingHours": "상시 개방/시설별 상이",
@@ -9223,15 +9223,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 34.8815,
-    "longitude": 126.9474
+    "latitude": 35.1586974,
+    "longitude": 127.0443851
   },
   {
     "placeId": "P_0206",
     "placeName": "창신동 골목",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 종로46가길 21",
+    "address": "서울 종로구 종로46가길 21",
     "category": "거리",
     "description": "[범죄도시4] 서울 도시 액션 분위기와 연결되는 골목 촬영지로 팬들이 찾는 장소.",
     "openingHours": "상시 개방",
@@ -9262,15 +9262,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5814,
-    "longitude": 126.9404
+    "latitude": 37.5709599,
+    "longitude": 127.0117549
   },
   {
     "placeId": "P_0207",
     "placeName": "청령포",
     "region": "강원",
     "district": "영월군",
-    "address": "강원 영월군 남면 광천리 산67-1",
+    "address": "강원특별자치도 영월군 남면 광천리 산 68",
     "category": "관광지",
     "description": "[왕과 사는 남자] 단종 유배지로 영화의 핵심 역사 배경.",
     "openingHours": "시설별 상이",
@@ -9303,8 +9303,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.839,
-    "longitude": 128.1239
+    "latitude": 37.1750204,
+    "longitude": 128.444604
   },
   {
     "placeId": "P_0208",
@@ -9344,8 +9344,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8403,
-    "longitude": 128.1299
+    "latitude": 37.1973762,
+    "longitude": 128.4527855
   },
   {
     "placeId": "P_0209",
@@ -9387,8 +9387,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8416,
-    "longitude": 128.1359
+    "latitude": 37.1839168,
+    "longitude": 128.4705131
   },
   {
     "placeId": "P_0210",
@@ -9434,15 +9434,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8429,
-    "longitude": 128.1419
+    "latitude": 37.1955033,
+    "longitude": 128.4547498
   },
   {
     "placeId": "P_0211",
     "placeName": "북촌한옥마을",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 계동길 37",
+    "address": "서울 종로구 북촌로 53",
     "category": "전통마을",
     "description": "[케이팝 데몬 헌터스] 루미와 진우가 만나는 장면 등 실제 서울 배경으로 소개된 한옥마을.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9474,15 +9474,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5879,
-    "longitude": 126.9704
+    "latitude": 37.5817682,
+    "longitude": 126.9848125
   },
   {
     "placeId": "P_0212",
     "placeName": "청담대교",
     "region": "서울",
-    "district": "강남구",
-    "address": "서울특별시 강남구 청담동~광진구 자양동",
+    "district": "광진구",
+    "address": "서울 광진구 자양동 824",
     "category": "거리",
     "description": "[케이팝 데몬 헌터스] 한강을 가로지르는 전투 장면의 실제 배경으로 소개된 다리.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9515,15 +9515,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5892,
-    "longitude": 126.9764
+    "latitude": 37.5258944,
+    "longitude": 127.0641078
   },
   {
     "placeId": "P_0213",
     "placeName": "코엑스 K-POP Square",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 영동대로 511",
+    "address": "서울 강남구 영동대로 511",
     "category": "공연장",
     "description": "[케이팝 데몬 헌터스] 3D 전광판과 K-팝 영상이 등장하는 배경.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9556,15 +9556,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5905,
-    "longitude": 126.9824
+    "latitude": 37.5103568,
+    "longitude": 127.0610238
   },
   {
     "placeId": "P_0214",
     "placeName": "N서울타워",
     "region": "서울",
     "district": "용산구",
-    "address": "서울특별시 용산구 남산공원길 105",
+    "address": "서울 용산구 남산공원길 105",
     "category": "전망대",
     "description": "[케이팝 데몬 헌터스] 클라이맥스와 서울 야경의 상징적 배경으로 소개된 전망대.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9596,15 +9596,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5918,
-    "longitude": 126.9884
+    "latitude": 37.551305,
+    "longitude": 126.9882306
   },
   {
     "placeId": "P_0215",
     "placeName": "낙산공원",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 낙산길 41",
+    "address": "서울 종로구 낙산길 41",
     "category": "공원",
     "description": "[케이팝 데몬 헌터스] 서울 성곽과 야경 장면의 실제 배경지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9637,15 +9637,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5931,
-    "longitude": 126.9944
+    "latitude": 37.5805697,
+    "longitude": 127.0075218
   },
   {
     "placeId": "P_0216",
     "placeName": "명동거리",
     "region": "서울",
     "district": "중구",
-    "address": "서울특별시 중구 명동길 35",
+    "address": "서울 중구 명동2가",
     "category": "거리",
     "description": "[케이팝 데몬 헌터스] 영화 속 서울 쇼핑·거리 분위기와 연결되는 배경지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9675,15 +9675,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5944,
-    "longitude": 127.0004
+    "latitude": 37.5620769,
+    "longitude": 126.9849013
   },
   {
     "placeId": "P_0217",
     "placeName": "잠실한강공원",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 한가람로 65",
+    "address": "서울 송파구 잠실동 1-1",
     "category": "공원",
     "description": "[케이팝 데몬 헌터스] 한강 야경 배경으로 소개된 장소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9716,15 +9716,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5957,
-    "longitude": 127.0064
+    "latitude": 37.5177993,
+    "longitude": 127.0823578
   },
   {
     "placeId": "P_0218",
     "placeName": "서울올림픽주경기장",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 올림픽로 25",
+    "address": "서울 송파구 올림픽로 25",
     "category": "공연장",
     "description": "[케이팝 데몬 헌터스] 아이돌 어워즈/공연장 이미지와 연결되는 장소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9753,15 +9753,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.597,
-    "longitude": 127.0124
+    "latitude": 37.5161988,
+    "longitude": 127.0759406
   },
   {
     "placeId": "P_0219",
     "placeName": "롯데월드타워 서울스카이",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 올림픽로 300",
+    "address": "서울 송파구 올림픽로 300",
     "category": "전망대",
     "description": "[케이팝 데몬 헌터스] HUNTR/X 본부 이미지와 서울 스카이라인 배경으로 소개된 전망대.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9793,15 +9793,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.5983,
-    "longitude": 127.0184
+    "latitude": 37.5125073,
+    "longitude": 127.1024367
   },
   {
     "placeId": "P_0220",
     "placeName": "영랑호 범바위",
     "region": "강원",
     "district": "속초시",
-    "address": "강원특별자치도 속초시 영랑호반길 140",
+    "address": "강원특별자치도 속초시 금호동 610-21",
     "category": "공원",
     "description": "[헤어질 결심] 영화 초반 산/암벽 장면으로 알려진 촬영지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9834,15 +9834,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.8559,
-    "longitude": 128.2019
+    "latitude": 38.2146853,
+    "longitude": 128.5758679
   },
   {
     "placeId": "P_0221",
     "placeName": "송광사",
     "region": "전남",
     "district": "순천시",
-    "address": "전라남도 순천시 송광면 송광사안길 100",
+    "address": "전남 순천시 송광면 송광사안길 100",
     "category": "관광지",
     "description": "[헤어질 결심] 천왕문과 종고루 장면이 언급된 사찰 촬영지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9874,15 +9874,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 34.9023,
-    "longitude": 127.0434
+    "latitude": 35.0021802,
+    "longitude": 127.2761304
   },
   {
     "placeId": "P_0222",
     "placeName": "파크하얏트 부산",
     "region": "부산",
     "district": "해운대구",
-    "address": "부산광역시 해운대구 마린시티1로 51",
+    "address": "부산 해운대구 마린시티1로 51",
     "category": "관광지",
     "description": "[헤어질 결심] 부산 호텔 장면의 주요 촬영지.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9915,15 +9915,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.1992,
-    "longitude": 129.0331
+    "latitude": 35.1565811,
+    "longitude": 129.141953
   },
   {
     "placeId": "P_0223",
     "placeName": "아난티 남해",
     "region": "경남",
     "district": "남해군",
-    "address": "경상남도 남해군 남면 남서대로1179번길 40-109",
+    "address": "경남 남해군 남면 남서대로1179번길 40-109",
     "category": "관광지",
     "description": "[헤어질 결심] 영화 속 이포 사건 관련 장면으로 알려진 리조트.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9955,15 +9955,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 35.4815,
-    "longitude": 128.1767
+    "latitude": 34.7767365,
+    "longitude": 127.8518591
   },
   {
     "placeId": "P_0224",
     "placeName": "부남해변",
     "region": "강원",
     "district": "삼척시",
-    "address": "강원특별자치도 삼척시 근덕면 부남해변길 32-55",
+    "address": "강원특별자치도 삼척시 근덕면 부남리",
     "category": "해변",
     "description": "[헤어질 결심] 영화의 대표 바다 장면으로 알려진 해변.",
     "openingHours": "상시 개방/시설별 상이",
@@ -9997,15 +9997,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.845,
-    "longitude": 128.125
+    "latitude": 37.3621625,
+    "longitude": 129.2511284
   },
   {
     "placeId": "P_0225",
     "placeName": "마검포해수욕장",
     "region": "충남",
     "district": "태안군",
-    "address": "충남 태안군 남면 신온리 952-43",
+    "address": "충남 태안군 남면 신온리",
     "category": "해변",
     "description": "[헤어질 결심] 바닷가 노을과 마지막 장면 관련 촬영지로 알려진 해변.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10038,15 +10038,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 36.6823,
-    "longitude": 126.6483
+    "latitude": 36.607136,
+    "longitude": 126.2893742
   },
   {
     "placeId": "P_0226",
     "placeName": "마산어시장",
     "region": "경남",
     "district": "창원시",
-    "address": "경남 창원시 마산합포구 복요리로 7",
+    "address": "경남 창원시 마산합포구 남성동 223-1",
     "category": "시장",
     "description": "[헤어질 결심] 영화 속 시장 장면으로 언급된 장소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10080,15 +10080,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 35.4854,
-    "longitude": 128.1947
+    "latitude": 35.2029733,
+    "longitude": 128.5764929
   },
   {
     "placeId": "P_0227",
     "placeName": "대동화명대교",
     "region": "부산",
     "district": "북구",
-    "address": "부산광역시 북구 화명동~경상남도 김해시 대동면",
+    "address": "부산 북구 화명동 1718",
     "category": "거리",
     "description": "[헤어질 결심] 부산 다리 장면으로 알려진 장소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10121,15 +10121,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 35.2057,
-    "longitude": 129.0631
+    "latitude": 35.235388,
+    "longitude": 128.9986917
   },
   {
     "placeId": "P_0228",
     "placeName": "정선 몰운대",
     "region": "강원",
     "district": "정선군",
-    "address": "강원 정선군 화암면 몰운리 산43",
+    "address": "강원특별자치도 정선군 화암면 몰운리 산 43",
     "category": "공원",
     "description": "[헤어질 결심] 호미산 장면으로 언급된 절벽·전망 명소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10166,8 +10166,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8502,
-    "longitude": 128.149
+    "latitude": 37.3165232,
+    "longitude": 128.8096844
   },
   {
     "placeId": "P_0229",
@@ -10205,8 +10205,8 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 35.2083,
-    "longitude": 129.0751
+    "latitude": null,
+    "longitude": null
   },
   {
     "placeId": "P_0230",
@@ -10249,8 +10249,8 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 33.5296,
-    "longitude": 126.5367
+    "latitude": 33.5568845,
+    "longitude": 126.8018587
   },
   {
     "placeId": "P_0231",
@@ -10296,15 +10296,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5309,
-    "longitude": 126.5427
+    "latitude": 33.5564694,
+    "longitude": 126.7958051
   },
   {
     "placeId": "P_0232",
     "placeName": "플로웨이브",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 한림읍 장원길 63-12",
+    "address": "제주특별자치도 제주시 한림읍 장원길 63-10",
     "category": "카페",
     "description": "[환승연애] 환승연애3 데이트 장소로 알려진 제주 카페.",
     "openingHours": "15:00-22:00",
@@ -10342,15 +10342,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 33.5322,
-    "longitude": 126.5487
+    "latitude": 33.4135382,
+    "longitude": 126.2823476
   },
   {
     "placeId": "P_0233",
     "placeName": "용눈이오름",
     "region": "제주",
     "district": "제주시",
-    "address": "제주특별자치도 제주시 구좌읍 종달리 산28",
+    "address": "제주특별자치도 제주시 구좌읍 종달리 산 28",
     "category": "공원",
     "description": "[환승연애] 환승연애3 제주 촬영지 목록에 포함된 오름.",
     "openingHours": "상시 개방",
@@ -10390,8 +10390,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5335,
-    "longitude": 126.5547
+    "latitude": 33.4598802,
+    "longitude": 126.832683
   },
   {
     "placeId": "P_0234",
@@ -10435,8 +10435,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5348,
-    "longitude": 126.5607
+    "latitude": 33.5561296,
+    "longitude": 126.71876
   },
   {
     "placeId": "P_0235",
@@ -10480,15 +10480,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 33.5361,
-    "longitude": 126.5667
+    "latitude": 33.2494648,
+    "longitude": 126.297798
   },
   {
     "placeId": "P_0236",
     "placeName": "을왕리해수욕장",
     "region": "인천",
     "district": "중구",
-    "address": "인천 중구 용유서로302번길 16-15",
+    "address": "인천 중구 을왕동 717-12",
     "category": "해변",
     "description": "[환승연애] 환승연애 시즌1 데이트 코스와 연결되는 인천 해변.",
     "openingHours": "상시 개방",
@@ -10525,8 +10525,8 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4941,
-    "longitude": 126.7467
+    "latitude": 37.446292,
+    "longitude": 126.372737
   },
   {
     "placeId": "P_0237",
@@ -10572,15 +10572,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.8619,
-    "longitude": 128.203
+    "latitude": 37.7914407,
+    "longitude": 127.5252101
   },
   {
     "placeId": "P_0238",
     "placeName": "현포항",
     "region": "경북",
     "district": "울릉군",
-    "address": "경북 울릉군 북면 울릉순환로 2621",
+    "address": "경북 울릉군 북면 현포리 708-22",
     "category": "해변",
     "description": "[대환장 기안장] 바지선 형태의 기안장이 정박한 장소로 소개된 항구.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10614,15 +10614,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5323,
-    "longitude": 128.9424
+    "latitude": 37.5294921,
+    "longitude": 130.8236573
   },
   {
     "placeId": "P_0239",
     "placeName": "코스모스 울릉도",
     "region": "경북",
     "district": "울릉군",
-    "address": "경상북도 울릉군 북면 추산길 88-13",
+    "address": "경북 울릉군 북면 추산길 88-13",
     "category": "관광지",
     "description": "[대환장 기안장] 울릉도 고급 스테이·전망 명소로 소개된 장소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10656,15 +10656,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5175,
-    "longitude": 128.8475
+    "latitude": 37.533665,
+    "longitude": 130.8580169
   },
   {
     "placeId": "P_0240",
     "placeName": "죽도",
     "region": "경북",
     "district": "울릉군",
-    "address": "경상북도 울릉군 울릉읍 저동리 산1",
+    "address": "경북 울릉군 울릉읍 죽도길 52",
     "category": "해변",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 섬.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10698,15 +10698,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5188,
-    "longitude": 128.8535
+    "latitude": 37.5292811,
+    "longitude": 130.9378708
   },
   {
     "placeId": "P_0241",
     "placeName": "학포항",
     "region": "경북",
     "district": "울릉군",
-    "address": "경상북도 울릉군 서면 태하리 학포항",
+    "address": "경북 울릉군 서면 태하리 593",
     "category": "해변",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 항구.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10740,15 +10740,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5201,
-    "longitude": 128.8595
+    "latitude": 37.5041642,
+    "longitude": 130.8046943
   },
   {
     "placeId": "P_0242",
     "placeName": "저동항",
     "region": "경북",
     "district": "울릉군",
-    "address": "경북 울릉군 울릉읍 저동리 48-11",
+    "address": "경북 울릉군 울릉읍 저동리 48-8",
     "category": "해변",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 항구.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10782,15 +10782,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5214,
-    "longitude": 128.8655
+    "latitude": 37.4962182,
+    "longitude": 130.9099695
   },
   {
     "placeId": "P_0243",
     "placeName": "태하향목 모노레일",
     "region": "경북",
     "district": "울릉군",
-    "address": "경상북도 울릉군 서면 태하길 236",
+    "address": "경북 울릉군 서면 태하길 236",
     "category": "전망대",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 전망형 모노레일.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10824,15 +10824,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5227,
-    "longitude": 128.8715
+    "latitude": 37.5132224,
+    "longitude": 130.7975011
   },
   {
     "placeId": "P_0244",
     "placeName": "독도전망대",
     "region": "경북",
     "district": "울릉군",
-    "address": "경상북도 울릉군 울릉읍 약수터길 99",
+    "address": "경북 울릉군 울릉읍 약수터길 93",
     "category": "전망대",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 전망 명소.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10866,15 +10866,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.524,
-    "longitude": 128.8775
+    "latitude": 37.4808331,
+    "longitude": 130.9042818
   },
   {
     "placeId": "P_0245",
     "placeName": "독도",
     "region": "경북",
     "district": "울릉군",
-    "address": "경북 울릉군 울릉읍 독도안용복길 3",
+    "address": "경북 울릉군 울릉읍 독도리",
     "category": "관광지",
     "description": "[대환장 기안장] 대환장 기안장 울릉도 여행 코스에 포함된 섬.",
     "openingHours": "상시 개방/시설별 상이",
@@ -10908,15 +10908,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5253,
-    "longitude": 128.8835
+    "latitude": 37.2410536,
+    "longitude": 131.8671311
   },
   {
     "placeId": "P_0246",
     "placeName": "커피기업 압구정점",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 압구정로 228 1층",
+    "address": "서울 강남구 압구정로 228",
     "category": "카페",
     "description": "[핑계고] 조인성·한효주·차태현 편 등 여러 편 촬영지로 소개된 카페.",
     "openingHours": "정보없음",
@@ -10954,15 +10954,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.6012,
-    "longitude": 126.9786
+    "latitude": 37.5287003,
+    "longitude": 127.0328153
   },
   {
     "placeId": "P_0247",
     "placeName": "천장지구 카페",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 언주로150길 51 2층",
+    "address": "서울 강남구 언주로150길 51",
     "category": "카페",
     "description": "[핑계고] 차승원 편 촬영지로 소개된 카페.",
     "openingHours": "정보없음",
@@ -11000,15 +11000,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.6025,
-    "longitude": 126.9846
+    "latitude": 37.5221663,
+    "longitude": 127.0383505
   },
   {
     "placeId": "P_0248",
     "placeName": "미미미가든카페",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 도산대로 417 1층",
+    "address": "서울 강남구 도산대로 417",
     "category": "카페",
     "description": "[핑계고] 데프콘·김종민 편 촬영지로 소개된 카페.",
     "openingHours": "정보없음",
@@ -11047,15 +11047,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.6038,
-    "longitude": 126.9906
+    "latitude": 37.5238116,
+    "longitude": 127.0411177
   },
   {
     "placeId": "P_0249",
     "placeName": "사승봉도",
     "region": "인천",
     "district": "옹진군",
-    "address": "인천 옹진군 자월면 승봉로 1010",
+    "address": "인천 옹진군 자월면 승봉리",
     "category": "해변",
     "description": "[솔로지옥] 솔로지옥 지옥도로 알려진 무인도.",
     "openingHours": "선박/기상에 따라 상이",
@@ -11092,15 +11092,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.4949,
-    "longitude": 126.7238
+    "latitude": 37.145955,
+    "longitude": 126.27468
   },
   {
     "placeId": "P_0250",
     "placeName": "파라다이스시티",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 영종해안남로321번길 186",
+    "address": "인천 중구 영종해안남로321번길 186",
     "category": "관광지",
     "description": "[솔로지옥] 솔로지옥 천국도 촬영지로 소개된 파라다이스시티 풀 빌라.",
     "openingHours": "예약제/시설별 상이",
@@ -11135,15 +11135,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4962,
-    "longitude": 126.7298
+    "latitude": 37.4372457,
+    "longitude": 126.4557815
   },
   {
     "placeId": "P_0251",
     "placeName": "인스파이어 엔터테인먼트 리조트",
     "region": "인천",
     "district": "중구",
-    "address": "인천광역시 중구 공항문화로 127",
+    "address": "인천 중구 공항문화로 127",
     "category": "관광지",
     "description": "[솔로지옥] 솔로지옥 시즌 촬영지로 언급된 인천 리조트.",
     "openingHours": "예약제/시설별 상이",
@@ -11179,15 +11179,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 37.4975,
-    "longitude": 126.7358
+    "latitude": 37.4655055,
+    "longitude": 126.3886616
   },
   {
     "placeId": "P_0252",
     "placeName": "운현궁 양관",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 삼일대로 464",
+    "address": "서울 종로구 삼일대로 464",
     "category": "관광지",
     "description": "[21세기 대군부인] 최근 촬영지로 알려진 운현궁 인근 서양식 건물.",
     "openingHours": "시설별 상이",
@@ -11221,15 +11221,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.609,
-    "longitude": 127.0146
+    "latitude": 37.5762264,
+    "longitude": 126.9870856
   },
   {
     "placeId": "P_0253",
     "placeName": "선운각",
     "region": "서울",
     "district": "강북구",
-    "address": "서울 강북구 삼양로173길 223 선운각",
+    "address": "서울 강북구 삼양로173길 223",
     "category": "전통마을",
     "description": "[21세기 대군부인] 서울 한옥 촬영지 기사에서 소개된 북한산 자락 한옥 공간.",
     "openingHours": "시설별 상이",
@@ -11269,8 +11269,8 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6103,
-    "longitude": 127.0206
+    "latitude": 37.6557267,
+    "longitude": 126.9998323
   },
   {
     "placeId": "P_0254",
@@ -11317,15 +11317,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6116,
-    "longitude": 127.0266
+    "latitude": 37.660336,
+    "longitude": 127.0062015
   },
   {
     "placeId": "P_0255",
     "placeName": "백인제 가옥",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 북촌로7길 16",
+    "address": "서울 종로구 북촌로7길 16",
     "category": "전통마을",
     "description": "[21세기 대군부인] 북촌 대표 근대 한옥이자 K-콘텐츠 촬영지.",
     "openingHours": "시설별 상이",
@@ -11362,15 +11362,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6129,
-    "longitude": 127.0326
+    "latitude": 37.5808175,
+    "longitude": 126.984173
   },
   {
     "placeId": "P_0256",
     "placeName": "북촌동양문화박물관",
     "region": "서울",
     "district": "종로구",
-    "address": "서울특별시 종로구 북촌로11길 76",
+    "address": "서울 종로구 북촌로11길 76",
     "category": "관광지",
     "description": "[21세기 대군부인] 북촌 한옥 지붕과 경복궁 조망이 가능한 전통문화 공간.",
     "openingHours": "시설별 상이",
@@ -11408,15 +11408,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5981,
-    "longitude": 126.9377
+    "latitude": 37.5839979,
+    "longitude": 126.9833572
   },
   {
     "placeId": "P_0257",
     "placeName": "최순우 옛집",
     "region": "서울",
     "district": "성북구",
-    "address": "서울특별시 성북구 성북로15길 9",
+    "address": "서울 성북구 성북로15길 9",
     "category": "전통마을",
     "description": "[21세기 대군부인] 1930년대 한옥 미감이 남아 있는 성북동 문화 공간.",
     "openingHours": "시설별 상이",
@@ -11453,15 +11453,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.5994,
-    "longitude": 126.9437
+    "latitude": 37.5929009,
+    "longitude": 127.000351
   },
   {
     "placeId": "P_0258",
     "placeName": "무진정",
     "region": "경남",
     "district": "함안군",
-    "address": "경상남도 함안군 함안면 괴산4길 25",
+    "address": "경남 함안군 함안면 괴산4길 25",
     "category": "관광지",
     "description": "[21세기 대군부인] 21세기 대군부인 촬영지로 정리된 전통 정자 명소.",
     "openingHours": "시설별 상이",
@@ -11495,15 +11495,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.4948,
-    "longitude": 128.1849
+    "latitude": 35.2554702,
+    "longitude": 128.4230933
   },
   {
     "placeId": "P_0259",
     "placeName": "만휴정",
     "region": "경북",
     "district": "안동시",
-    "address": "경상북도 안동시 길안면 묵계하리길 42",
+    "address": "경북 안동시 길안면 묵계하리길 42",
     "category": "관광지",
     "description": "[21세기 대군부인] 21세기 대군부인 촬영지로 정리된 계곡 정자 명소.",
     "openingHours": "시설별 상이",
@@ -11535,15 +11535,15 @@ export const places = [
       "성지순례"
     ],
     "verified": true,
-    "latitude": 36.5274,
-    "longitude": 128.8666
+    "latitude": 36.410446,
+    "longitude": 128.9098517
   },
   {
     "placeId": "P_0260",
     "placeName": "백제문화단지",
     "region": "충남",
     "district": "부여군",
-    "address": "충청남도 부여군 규암면 백제문로 455",
+    "address": "충남 부여군 규암면 백제문로 455",
     "category": "관광지",
     "description": "[21세기 대군부인] 왕실·사극 콘셉트 여행지로 활용 가능한 대형 역사 테마단지.",
     "openingHours": "시설별 상이",
@@ -11578,15 +11578,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 36.6956,
-    "longitude": 126.6565
+    "latitude": 36.3063153,
+    "longitude": 126.9066735
   },
   {
     "placeId": "P_0261",
     "placeName": "경남대학교",
     "region": "경남",
     "district": "창원시",
-    "address": "경상남도 창원시 마산합포구 경남대학로 7",
+    "address": "경남 창원시 마산합포구 경남대학로 7",
     "category": "촬영지",
     "description": "[이 사랑 통역 되나요?] 창원 촬영지로 알려진 캠퍼스.",
     "openingHours": "시설별 상이",
@@ -11618,15 +11618,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 35.4987,
-    "longitude": 128.2029
+    "latitude": 35.1808337,
+    "longitude": 128.5543085
   },
   {
     "placeId": "P_0262",
     "placeName": "BTS 버스정류장",
     "region": "강원",
     "district": "강릉시",
-    "address": "강원 강릉시 주문진읍 향호리 8-39",
+    "address": "강원특별자치도 강릉시 주문진읍 향호리 8-39",
     "category": "촬영지",
     "description": "[BTS] 「You Never Walk Alone」 앨범 재킷 촬영을 위해 설치되었던 버스정류장을 팬 방문 명소로 재현한 포토 스팟. 바로 옆 향호해변 도 「Spring Day」/「You Never Walk Alone」 앨범 재킷 촬영지로 알려진 강릉 해변. BTS 버스정류장과 함께 방문하기 좋다.",
     "openingHours": "00:00-24:00",
@@ -11658,15 +11658,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.8622,
-    "longitude": 128.1512
+    "latitude": 37.9124066,
+    "longitude": 128.8171018
   },
   {
     "placeId": "P_0263",
     "placeName": "하맹방해수욕장",
     "region": "강원",
     "district": "삼척시",
-    "address": "강원 삼척시 근덕면 하맹방리 221-14",
+    "address": "강원특별자치도 삼척시 근덕면 하맹방리 221-59",
     "category": "해변",
     "description": "[BTS] 「Butter」 앨범 재킷 촬영지. 선베드·파라솔 등 촬영 콘셉트를 재현한 포토존으로 유명하다.",
     "openingHours": "00:00-24:00",
@@ -11696,15 +11696,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.8635,
-    "longitude": 128.1572
+    "latitude": 37.3941585,
+    "longitude": 129.2251592
   },
   {
     "placeId": "P_0264",
     "placeName": "고양관광정보센터",
     "region": "경기",
     "district": "고양시",
-    "address": "경기도 고양시 일산동구 중앙로 1271-1",
+    "address": "경기 고양시 일산동구 중앙로 1271-1",
     "category": "관광지",
     "description": "[BTS] RM의 고향 일산을 상징하는 대형 RM 벽화가 있는 관광정보센터. BTS 팬 인증샷 장소로 알려져 있다.",
     "openingHours": "화-일 09:00-19:00",
@@ -11730,15 +11730,15 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 37.3056,
-    "longitude": 127.0363
+    "latitude": 37.659481,
+    "longitude": 126.772692
   },
   {
     "placeId": "P_0265",
     "placeName": "서후리숲",
     "region": "경기",
     "district": "양평군",
-    "address": "경기도 양평군 서종면 거북바위1길 200",
+    "address": "경기 양평군 서종면 거북바위1길 200",
     "category": "공원",
     "description": "[BTS] 2019 BTS 시즌그리팅 화보 촬영 후 ‘방탄숲’으로 불리는 수목원. 멤버 사진 위치를 따라 찍기 좋은 숲 코스.",
     "openingHours": "09:00-18:00",
@@ -11768,15 +11768,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 37.3069,
-    "longitude": 127.0423
+    "latitude": 37.5663191,
+    "longitude": 127.430161
   },
   {
     "placeId": "P_0266",
     "placeName": "에버랜드 락스빌",
     "region": "경기",
     "district": "용인시",
-    "address": "경기도 용인시 처인구 포곡읍 에버랜드로 199",
+    "address": "경기 용인시 처인구 포곡읍 에버랜드로 199",
     "category": "관광지",
     "description": "[BTS] 「Dynamite」 미국 NBC 「America’s Got Talent」 무대 사전 촬영지. 스타라이트 레스토랑 앞 포토 스팟이 유명하다.",
     "openingHours": "월별 상이",
@@ -11804,15 +11804,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.3082,
-    "longitude": 127.0483
+    "latitude": 37.2928552,
+    "longitude": 127.2016168
   },
   {
     "placeId": "P_0267",
     "placeName": "한국가구박물관",
     "region": "서울",
     "district": "성북구",
-    "address": "서울특별시 성북구 대사관로 121",
+    "address": "서울 성북구 대사관로 121",
     "category": "관광지",
     "description": "[BTS] 「유 퀴즈 온 더 블럭」 BTS 편 촬영지로 알려진 전통 목가구 박물관. 예약제 관람 장소.",
     "openingHours": "리모델링 휴관 여부 확인 필요; 기존 화-금 10:00-19:00, 토 10:00-18:00",
@@ -11840,8 +11840,8 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6124,
-    "longitude": 127.0037
+    "latitude": 37.6000176,
+    "longitude": 126.9932214
   },
   {
     "placeId": "P_0268",
@@ -11882,15 +11882,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.7647,
-    "longitude": 127.1847
+    "latitude": 35.9035177,
+    "longitude": 127.2446211
   },
   {
     "placeId": "P_0269",
     "placeName": "오성제 저수지",
     "region": "전북",
     "district": "완주군",
-    "address": "전북 완주군 소양면 대흥리 1002",
+    "address": "전북특별자치도 완주군 소양면 대흥리 412",
     "category": "관광지",
     "description": "[BTS] 2019 BTS Summer Package in Korea에 등장한 저수지. ‘BTS 소나무’ 포토존과 산책로로 유명하다.",
     "openingHours": "00:00-24:00",
@@ -11919,15 +11919,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 35.766,
-    "longitude": 127.1907
+    "latitude": 35.9045269,
+    "longitude": 127.2388839
   },
   {
     "placeId": "P_0270",
     "placeName": "위봉산성",
     "region": "전북",
     "district": "완주군",
-    "address": "전북 완주군 소양면 송광수만로 750",
+    "address": "전북특별자치도 완주군 소양면 대흥리 1-32",
     "category": "관광지",
     "description": "[BTS] 완주 BTS 힐링 성지 코스에 포함되는 산성. 성문과 숲길을 배경으로 사진 촬영하기 좋은 역사 산책지.",
     "openingHours": "00:00-24:00",
@@ -11957,15 +11957,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 35.7673,
-    "longitude": 127.1967
+    "latitude": 35.905272,
+    "longitude": 127.2522081
   },
   {
     "placeId": "P_0271",
     "placeName": "한국의집",
     "region": "서울",
     "district": "중구",
-    "address": "서울특별시 중구 퇴계로36길 10",
+    "address": "서울 중구 퇴계로36길 10",
     "category": "관광지",
     "description": "[BTS] 2018년 Billboard BTS 에디션 커버·개인 화보를 촬영한 전통문화 복합공간. 한식, 공연, 전통문화 체험과 연결 가능.",
     "openingHours": "점심 12:00-15:00, 저녁 18:00-22:00",
@@ -11994,15 +11994,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6176,
-    "longitude": 127.0277
+    "latitude": 37.5602235,
+    "longitude": 126.9944983
   },
   {
     "placeId": "P_0272",
     "placeName": "노들섬",
     "region": "서울",
     "district": "용산구",
-    "address": "서울특별시 용산구 양녕로 445",
+    "address": "서울 용산구 양녕로 445",
     "category": "공연장",
     "description": "[BTS] 「Run」 뮤직비디오와 2021 시즌그리팅 촬영지로 소개되는 한강 복합문화공간.",
     "openingHours": "3월-10월 화-금 10:00-21:00, 주말·공휴일 10:00-22:00; 11월-2월 화-일 10:00-20:00",
@@ -12034,15 +12034,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 37.6189,
-    "longitude": 127.0337
+    "latitude": 37.5176601,
+    "longitude": 126.9580339
   },
   {
     "placeId": "P_0273",
     "placeName": "송파나루공원 석촌호수",
     "region": "서울",
     "district": "송파구",
-    "address": "서울특별시 송파구 삼학사로 136",
+    "address": "서울 송파구 삼학사로 136",
     "category": "공원",
     "description": "[BTS] RM이 호숫가 사진을 올린 장소로 소개된 서울 도심 산책 명소. 롯데월드타워·롯데월드와 연계하기 좋다.",
     "openingHours": "00:00-24:00",
@@ -12074,15 +12074,15 @@ export const places = [
       "전망"
     ],
     "verified": true,
-    "latitude": 37.6041,
-    "longitude": 126.9388
+    "latitude": 37.5090627,
+    "longitude": 127.0978678
   },
   {
     "placeId": "P_0274",
     "placeName": "유정식당",
     "region": "서울",
     "district": "강남구",
-    "address": "서울특별시 강남구 도산대로28길 14",
+    "address": "서울 강남구 도산대로28길 14",
     "category": "맛집",
     "description": "[BTS] 멤버들이 연습생 시절 자주 방문한 식당으로 유명한 팬 성지. 내부에 BTS 사진과 포스터가 많다.",
     "openingHours": "월-금 10:00-21:30, 토-일 10:00-20:00",
@@ -12115,15 +12115,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 37.6054,
-    "longitude": 126.9448
+    "latitude": 37.5183364,
+    "longitude": 127.0280938
   },
   {
     "placeId": "P_0275",
     "placeName": "이호테우해변",
     "region": "제주",
     "district": "제주시",
-    "address": "제주 제주시 이호일동 1665-11",
+    "address": "제주특별자치도 제주시 이호이동",
     "category": "해변",
     "description": "[BTS] 진이 SNS에 사진을 올린 장소로 소개되는 제주 해변. 빨간·흰 말등대와 석양 포토 스팟으로 유명하다.",
     "openingHours": "00:00-24:00",
@@ -12153,8 +12153,8 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 33.5398,
-    "longitude": 126.504
+    "latitude": 33.4953082,
+    "longitude": 126.4546623
   },
   {
     "placeId": "P_0276",
@@ -12187,8 +12187,8 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 33.5411,
-    "longitude": 126.51
+    "latitude": 33.2390338,
+    "longitude": 126.5448623
   },
   {
     "placeId": "P_0277",
@@ -12222,8 +12222,8 @@ export const places = [
       "사진"
     ],
     "verified": true,
-    "latitude": 33.5424,
-    "longitude": 126.516
+    "latitude": 33.4538387,
+    "longitude": 126.6577143
   },
   {
     "placeId": "P_0278",
@@ -12260,15 +12260,15 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 33.5437,
-    "longitude": 126.522
+    "latitude": 33.444131,
+    "longitude": 126.7781674
   },
   {
     "placeId": "P_0279",
     "placeName": "감천문화마을",
     "region": "부산",
     "district": "사하구",
-    "address": "부산광역시 사하구 감내2로 203",
+    "address": "부산 사하구 감천동 1-17",
     "category": "거리",
     "description": "[BTS] 부산 출신 멤버 지민·정국 벽화가 있는 감천문화마을 포토 스팟. 부산 BTS 팬투어 코스로 활용하기 좋다.",
     "openingHours": "시설별 상이",
@@ -12296,15 +12296,15 @@ export const places = [
       "문화체험"
     ],
     "verified": true,
-    "latitude": 35.225,
-    "longitude": 129.0724
+    "latitude": 35.0974087,
+    "longitude": 129.0105608
   },
   {
     "placeId": "P_0280",
     "placeName": "서동미로시장 맛나분식",
     "region": "부산",
     "district": "금정구",
-    "address": "부산광역시 금정구 서동시장길 42-4",
+    "address": "부산 금정구 서동시장길 42-4",
     "category": "맛집",
     "description": "[BTS] 지민이 어린 시절 즐겨 먹었다고 소개되는 계란만두 코스. 서동미로시장 내 맛나분식 방문 동선과 연결된다.",
     "openingHours": "시설별 상이",
@@ -12340,15 +12340,15 @@ export const places = [
       "식사"
     ],
     "verified": true,
-    "latitude": 35.2263,
-    "longitude": 129.0784
+    "latitude": 35.2164308,
+    "longitude": 129.1006545
   },
   {
     "placeId": "P_0281",
     "placeName": "부산시민공원",
     "region": "부산",
     "district": "부산진구",
-    "address": "부산광역시 부산진구 시민공원로 73",
+    "address": "부산 부산진구 시민공원로 73",
     "category": "공원",
     "description": "[BTS] 부산 BTS 팬투어에서 V·지민 포즈를 따라 찍는 장소로 소개되는 도심 공원.",
     "openingHours": "05:00-24:00",
@@ -12376,8 +12376,8 @@ export const places = [
       "산책"
     ],
     "verified": true,
-    "latitude": 35.2276,
-    "longitude": 129.0844
+    "latitude": 35.1683563,
+    "longitude": 129.0574038
   }
 ];
 
