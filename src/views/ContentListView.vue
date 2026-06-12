@@ -16,7 +16,7 @@ const query = ref('');
 const category = ref('전체');
 const mode = ref('콘텐츠 탐색');
 const sort = ref('popular');
-const visibleLimit = ref(12);
+const visibleLimit = ref(24);
 const restoringQuery = ref(false);
 const exploreCategories = computed(() => contentStore.categories);
 const sortOptions = [
@@ -26,7 +26,7 @@ const sortOptions = [
 
 onMounted(() => {
   restoreQueryState();
-  contentStore.load({ sort: sort.value, size: 50 });
+  contentStore.load({ size: 50 });
 });
 
 const filteredContents = computed(() => {
@@ -46,7 +46,7 @@ function queryValue(value, fallback = '') {
   return value ?? fallback;
 }
 
-function positiveSize(value, fallback = 12) {
+function positiveSize(value, fallback = 24) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 12 ? Math.min(60, parsed) : fallback;
 }
@@ -70,14 +70,14 @@ function syncQueryState() {
     keyword: query.value.trim() || undefined,
     category: category.value !== '전체' ? category.value : undefined,
     sort: sort.value !== 'popular' ? sort.value : undefined,
-    size: visibleLimit.value !== 12 ? String(visibleLimit.value) : undefined,
+    size: visibleLimit.value !== 24 ? String(visibleLimit.value) : undefined,
   };
   router.replace({ query: nextQuery });
 }
 
 watch([query, category, sort], () => {
   if (restoringQuery.value) return;
-  visibleLimit.value = 12;
+  visibleLimit.value = 24;
   syncQueryState();
 });
 
@@ -115,7 +115,6 @@ function loadMore() {
         <span class="list-result-count">{{ sortedContents.length }}개 결과</span>
       </div>
 
-      <div class="section-header"><h2>인기 콘텐츠</h2></div>
       <EmptyState
         v-if="contentStore.loading"
         tone="loading"

@@ -998,6 +998,7 @@ export const useUiStore = defineStore('ui', {
           region: payload.region || this.courseConditions.region,
           duration: payload.duration || `${this.courseConditions.duration} days`,
           routeId: payload.routeId ?? null,
+          imageUrl: payload.imageUrl ?? null,
           prefix: payload.prefix ?? '',
           attachments: payload.attachments ?? [],
           tags: payload.tags || ['AI 코스', this.courseConditions.region],

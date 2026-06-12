@@ -1,6 +1,8 @@
 <script setup>
 const props = defineProps({
   course: { type: Object, required: true },
+  variant: { type: String, default: 'visual' },
+  rank: { type: Number, default: 0 },
 });
 
 function routePlaceIds(course) {
@@ -30,8 +32,12 @@ function regionLabel(course) {
 </script>
 
 <template>
-  <article class="course-card">
-    <div class="course-visual" aria-hidden="true">
+  <article class="course-card" :class="{ 'course-card--text': props.variant === 'text' }">
+    <div v-if="props.variant === 'text'" class="course-rank-badge" aria-hidden="true">
+      <span>{{ props.rank ? `#${props.rank}` : regionLabel(course) }}</span>
+      <small>AI</small>
+    </div>
+    <div v-else class="course-visual" aria-hidden="true">
       <svg class="course-mini-route" viewBox="0 0 64 64">
         <path d="M10 44 C20 32, 22 26, 33 30 S44 43, 54 20" />
       </svg>

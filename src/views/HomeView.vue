@@ -69,8 +69,8 @@ function openCourse(course) {
       <SectionHeader title="인기 여행 코스" to="/home/routes-all" />
       <ChipGroup v-model="routeTab" :items="['실시간', '지역별', '테마별']" />
       <div class="stack-list">
-        <button v-for="course in visibleRouteItems" :key="course.routeId" type="button" class="course-link-card" @click="openCourse(course)">
-          <CourseCard :course="course" />
+        <button v-for="(course, index) in visibleRouteItems" :key="course.routeId" type="button" class="course-link-card" @click="openCourse(course)">
+          <CourseCard :course="course" variant="text" :rank="index + 1" />
         </button>
       </div>
 

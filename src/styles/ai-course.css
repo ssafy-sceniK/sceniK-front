@@ -75,11 +75,20 @@
 }
 
 .course-selection-grid.content-grid {
-  gap: 12px 10px;
+  gap: 18px 10px;
 }
 
 .course-selection-grid .unstyled {
   min-width: 0;
+}
+
+.course-selection-grid .poster-card strong {
+  min-height: auto;
+  margin-bottom: 3px;
+}
+
+.course-selection-grid .poster-card p {
+  margin-bottom: 2px;
 }
 
 .course-selection-actions.sticky-actions {

@@ -1,10 +1,12 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import { uploadPostImage } from '../api/communityApi.js';
+import { getUserMessage } from '../api/error.js';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -27,14 +29,22 @@ const selectedPrefix = ref('');
 const title = ref('');
 const body = ref('');
 const attachments = ref([]);
+const imageUrl = ref('');
+const selectedImageFile = ref(null);
+const imagePreviewUrl = ref('');
+const selectedRouteId = ref('');
 const posting = ref(false);
 const statusNotice = ref(null);
 const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
 const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5);
+const courseOptions = computed(() => uiStore.savedCourses.filter((course) => course?.routeId));
+const selectedCourse = computed(() => courseOptions.value.find((course) => course.routeId === selectedRouteId.value) ?? null);
+const imagePreviewSource = computed(() => imagePreviewUrl.value || imageUrl.value.trim());
 
 onMounted(() => {
   if (!contentStore.items.length) contentStore.load();
   if (!placeStore.items.length) placeStore.load();
+  if (uiStore.currentUser) void uiStore.loadSavedCourses();
 });
 
 const prefixOptions = computed(() => {
@@ -66,21 +76,45 @@ watch(selectedBoard, () => {
   selectedPrefix.value = '';
 });
 
+onBeforeUnmount(() => {
+  revokeImagePreview();
+});
+
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
 }
 
 function handleAttachments(event) {
   const files = [...(event.target.files ?? [])]
-    .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
-    .slice(0, 6);
+    .filter((file) => file.type.startsWith('image/'));
+  const file = files[0] ?? null;
 
-  attachments.value = files.map((file) => ({
+  revokeImagePreview();
+  selectedImageFile.value = file;
+  attachments.value = file ? [{
     id: `${file.name}-${file.size}-${file.lastModified}`,
     name: file.name,
-    type: file.type.startsWith('video/') ? 'video' : 'image',
+    type: 'image',
     sizeLabel: `${Math.max(1, Math.round(file.size / 1024))}KB`,
-  }));
+  }] : [];
+  imagePreviewUrl.value = file ? URL.createObjectURL(file) : '';
+  event.target.value = '';
+}
+
+function revokeImagePreview() {
+  if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value);
+  imagePreviewUrl.value = '';
+}
+
+function clearSelectedImage() {
+  revokeImagePreview();
+  selectedImageFile.value = null;
+  attachments.value = [];
+}
+
+async function resolveImageUrl() {
+  if (!selectedImageFile.value) return imageUrl.value.trim() || null;
+  return uploadPostImage(selectedImageFile.value);
 }
 
 async function createPost() {
@@ -97,7 +131,8 @@ async function createPost() {
   const tags = [
     selectedBoardMeta.value.tag,
     selectedPrefix.value,
-    uiStore.courseConditions.region,
+    selectedCourse.value ? 'AI 코스' : '',
+    selectedCourse.value?.region ?? uiStore.courseConditions.region,
   ].filter(Boolean);
 
   posting.value = true;
@@ -106,12 +141,28 @@ async function createPost() {
     title: '게시글을 저장하는 중입니다.',
     text: '커뮤니티 피드에 등록할 내용을 backend에 전송하고 있습니다.',
   };
+  let resolvedImageUrl = null;
+  try {
+    resolvedImageUrl = await resolveImageUrl();
+  } catch (error) {
+    posting.value = false;
+    statusNotice.value = {
+      tone: 'error',
+      title: '이미지를 업로드하지 못했습니다.',
+      text: getUserMessage(error, '이미지를 업로드하지 못했습니다. 5MB 이하의 JPG, PNG, WEBP, GIF 이미지를 선택해 주세요.'),
+    };
+    return;
+  }
+
   const created = await uiStore.createPost({
     title: title.value.trim(),
     body: body.value.trim(),
     prefix: selectedPrefix.value,
     tags,
-    region: uiStore.courseConditions.region,
+    region: selectedCourse.value?.region || selectedPrefix.value || uiStore.courseConditions.region,
+    duration: selectedCourse.value?.duration ?? selectedCourse.value?.durationDays,
+    routeId: selectedRouteId.value || null,
+    imageUrl: resolvedImageUrl,
     attachments: attachments.value,
   });
 
@@ -176,6 +227,27 @@ async function createPost() {
           </select>
         </label>
 
+        <label class="form-field course-select-field">
+          AI 코스 연결
+          <select v-model="selectedRouteId">
+            <option value="">선택 안 함</option>
+            <option v-for="course in courseOptions" :key="course.routeId" :value="course.routeId">
+              {{ course.title }} · {{ course.region }}
+            </option>
+          </select>
+          <small>저장한 코스를 직접 선택한 경우에만 게시글에 연결됩니다.</small>
+        </label>
+
+        <div v-if="selectedCourse" class="linked-course write-linked-course">
+          <span class="course-dot">AI</span>
+          <div>
+            <small class="course-kicker">선택한 AI 코스</small>
+            <strong>{{ selectedCourse.title }}</strong>
+            <small>{{ selectedCourse.region }} · {{ selectedCourse.durationDays || selectedCourse.duration }}일</small>
+          </div>
+          <button type="button" class="linked-course-clear" @click="selectedRouteId = ''">해제</button>
+        </div>
+
         <label class="form-field">
           제목
           <input v-model="title" maxlength="50" placeholder="여행 후기 제목" />
@@ -186,18 +258,29 @@ async function createPost() {
           <textarea v-model="body" maxlength="500" placeholder="코스 경험을 공유해 주세요"></textarea>
         </label>
 
+        <label class="form-field">
+          이미지 URL
+          <input v-model="imageUrl" type="url" placeholder="https://example.com/photo.jpg" />
+          <small>이미지 파일을 선택하면 업로드된 이미지가 URL보다 우선 적용됩니다.</small>
+        </label>
+
         <label class="form-field attachment-field">
-          사진/동영상
-          <input type="file" accept="image/*,video/*" multiple @change="handleAttachments" />
-          <small>최대 6개까지 선택할 수 있습니다. 실제 파일 업로드는 아직 지원하지 않으며, 현재 MVP에서는 파일 이름과 형식만 저장합니다.</small>
+          이미지 파일
+          <input type="file" accept="image/*" @change="handleAttachments" />
+          <small>JPG, PNG, WEBP, GIF 이미지를 5MB 이하로 업로드할 수 있습니다.</small>
         </label>
 
         <div v-if="attachments.length" class="attachment-list" aria-label="선택한 첨부 파일">
           <span v-for="attachment in attachments" :key="attachment.id">
-            <b>{{ attachment.type === 'video' ? '동영상' : '사진' }}</b>
+            <b>사진</b>
             {{ attachment.name }}
             <small>{{ attachment.sizeLabel }}</small>
           </span>
+        </div>
+
+        <div v-if="imagePreviewSource" class="post-image-preview" aria-label="게시글 이미지 미리보기">
+          <img :src="imagePreviewSource" alt="" />
+          <button v-if="selectedImageFile" type="button" @click="clearSelectedImage">선택 해제</button>
         </div>
 
         <div class="write-helper">

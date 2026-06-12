@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { loadKakaoMaps } from '../../utils/kakaoMaps.js';
 import { fetchPlaceDetail } from '../../api/placeApi.js';
 
@@ -9,7 +10,9 @@ const props = defineProps({
 });
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
+const KAKAO_MAP_ICON_URL = 'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/1ca66319017800001.png';
 const appKey = import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY?.trim();
+const router = useRouter();
 const mapContainer = ref(null);
 const mapStatus = ref('loading');
 const selectedPlace = ref(null);
@@ -60,24 +63,138 @@ function appendLink(parent, className, text, href, external = false) {
   link.className = className;
   link.textContent = text;
   link.href = href;
+  link.draggable = false;
   if (external) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
+  } else if (href.startsWith('/')) {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closePlaceInfo();
+      router.push(href);
+    });
   }
   parent.appendChild(link);
   return link;
 }
 
+function appendButton(parent, className, text, onClick) {
+  const button = document.createElement('button');
+  button.className = className;
+  button.type = 'button';
+  button.textContent = text;
+  button.draggable = false;
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onClick();
+  });
+  parent.appendChild(button);
+  return button;
+}
+
+function relatedContentItems(place) {
+  const items = [];
+  const seen = new Set();
+
+  function addItem(item = {}) {
+    const contentId = item.contentId ?? item.relatedContentId;
+    const title = item.title ?? item.contentTitle ?? item.relatedContentTitle;
+    if (!contentId || !title) return;
+    const key = `${contentId}:${title}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    items.push({ contentId, title });
+  }
+
+  (place.relatedContents ?? []).forEach(addItem);
+  addItem({
+    contentId: place.relatedContentId,
+    title: place.relatedContentTitle,
+  });
+
+  return items;
+}
+
+function enableHorizontalChipScroll(scroller) {
+  let dragging = false;
+  let startX = 0;
+  let startScrollLeft = 0;
+  let moved = false;
+  let suppressClick = false;
+  let lastDragAt = 0;
+
+  scroller.addEventListener('pointerdown', (event) => {
+    dragging = true;
+    moved = false;
+    startX = event.clientX;
+    startScrollLeft = scroller.scrollLeft;
+    scroller.classList.add('is-dragging');
+  });
+
+  scroller.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    const deltaX = event.clientX - startX;
+    if (Math.abs(deltaX) <= 5) return;
+    moved = true;
+    scroller.scrollLeft = startScrollLeft - deltaX;
+    event.preventDefault();
+  });
+
+  const stopDragging = () => {
+    if (moved) {
+      suppressClick = true;
+      lastDragAt = Date.now();
+      window.setTimeout(() => {
+        suppressClick = false;
+      }, 180);
+    }
+    dragging = false;
+    moved = false;
+    scroller.classList.remove('is-dragging');
+  };
+
+  scroller.addEventListener('pointerup', stopDragging);
+  scroller.addEventListener('pointercancel', stopDragging);
+  scroller.addEventListener('mouseleave', () => {
+    if (dragging) stopDragging();
+  });
+  scroller.addEventListener('click', (event) => {
+    if (!suppressClick && Date.now() - lastDragAt > 220) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  scroller.addEventListener('wheel', (event) => {
+    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+    scroller.scrollLeft += event.deltaY;
+    event.preventDefault();
+  }, { passive: false });
+}
+
+function placeDetailPath(place) {
+  return place?.placeId ? `/places/${place.placeId}` : '';
+}
+
 function createInfoWindowContent(place) {
   const content = document.createElement('article');
   content.className = 'kakao-place-info';
+  ['click', 'mousedown', 'touchstart', 'pointerdown', 'wheel'].forEach((eventName) => {
+    content.addEventListener(eventName, (event) => {
+      event.stopPropagation();
+    });
+  });
 
   const closeButton = document.createElement('button');
   closeButton.className = 'kakao-place-info__close';
   closeButton.type = 'button';
   closeButton.setAttribute('aria-label', '장소 상세 정보 닫기');
   closeButton.textContent = '×';
-  closeButton.addEventListener('click', closePlaceInfo);
+  closeButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closePlaceInfo();
+  });
   content.appendChild(closeButton);
 
   const body = document.createElement('div');
@@ -89,24 +206,42 @@ function createInfoWindowContent(place) {
 
   const links = document.createElement('div');
   links.className = 'kakao-place-info__links';
-  if (props.showDetailLink) {
-    appendLink(links, 'kakao-place-info__link', 'sceniK 상세', place.placeId ? `/places/${place.placeId}` : '');
-  }
-  appendLink(
+  const kakaoLink = appendLink(
     links,
-    'kakao-place-info__link',
-    '카카오맵에서 보기',
+    'kakao-place-info__link kakao-place-info__link--external',
+    '',
     `https://map.kakao.com/link/search/${encodeURIComponent(`${placeName(place)} ${place.address ?? ''}`.trim())}`,
     true,
   );
-  (place.relatedContents ?? []).slice(0, 2).forEach((contentItem) => {
-    appendLink(
-      links,
-      'kakao-place-info__link kakao-place-info__link--related',
-      contentItem.title ? `관련 콘텐츠: ${contentItem.title}` : '관련 콘텐츠 보기',
-      contentItem.contentId ? `/contents/${contentItem.contentId}` : '',
-    );
-  });
+  kakaoLink?.setAttribute('aria-label', '카카오맵에서 보기');
+  if (kakaoLink) {
+    const icon = document.createElement('img');
+    icon.src = KAKAO_MAP_ICON_URL;
+    icon.alt = '';
+    icon.loading = 'lazy';
+    kakaoLink.appendChild(icon);
+  }
+  const relatedContents = relatedContentItems(place);
+  if (relatedContents.length) {
+    const relatedScroller = document.createElement('div');
+    relatedScroller.className = 'kakao-place-info__related-scroll';
+    relatedScroller.setAttribute('aria-label', '관련 콘텐츠');
+    relatedContents.forEach((contentItem) => {
+      const relatedButton = appendButton(
+        relatedScroller,
+        'kakao-place-info__link kakao-place-info__related-chip',
+        contentItem.title,
+        () => {
+          closePlaceInfo();
+          router.push(`/contents/${encodeURIComponent(contentItem.contentId)}`);
+        },
+      );
+      relatedButton?.setAttribute('aria-label', `관련 콘텐츠 ${contentItem.title} 보기`);
+      relatedButton?.setAttribute('title', contentItem.title);
+    });
+    enableHorizontalChipScroll(relatedScroller);
+    links.appendChild(relatedScroller);
+  }
   if (links.childElementCount) content.appendChild(links);
 
   return content;
@@ -128,11 +263,17 @@ async function openPlaceInfo() {
     map,
     position: selectedMarker.value.getPosition(),
     content: createInfoWindowContent(place),
+    clickable: true,
     xAnchor: 0.5,
-    yAnchor: 1.18,
+    yAnchor: 1.08,
     zIndex: 10,
   });
   infoOpen.value = true;
+}
+
+function goToSelectedPlace() {
+  const path = placeDetailPath(selectedPlace.value);
+  if (path) router.push(path);
 }
 
 function clearMarkers() {
@@ -164,6 +305,7 @@ function renderPlaces() {
       selectedPlace.value = place;
       selectedMarker.value = marker;
       map.panTo(position);
+      void openPlaceInfo();
     });
     markers.push(marker);
     bounds.extend(position);
@@ -224,10 +366,10 @@ onBeforeUnmount(() => {
       </template>
     </div>
     <button
-      v-if="selectedPlace?.placeId"
+      v-if="selectedPlace?.placeId && props.showDetailLink"
       class="map-place-popover"
       type="button"
-      @click="openPlaceInfo"
+      @click="goToSelectedPlace"
     >
       <span class="map-place-popover__summary">
         <strong>{{ selectedPlace.placeName }}</strong>

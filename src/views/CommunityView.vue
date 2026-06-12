@@ -40,6 +40,7 @@ const postEditTitle = ref('');
 const postEditBody = ref('');
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
+const failedPostImageKeys = ref(new Set());
 
 const boards = [
   { id: 'drama', icon: '🎬', name: '드라마 게시판', description: '드라마 촬영지 후기와 코스 공유', tag: '드라마' },
@@ -323,6 +324,52 @@ function linkedCourseTo(post) {
   return post?.routeId
     ? { name: 'course-detail', params: { routeId: post.routeId } }
     : '/ai/result';
+}
+
+function hasLinkedCourse(post) {
+  return Boolean(post?.routeId);
+}
+
+function attachmentImageUrl(attachment) {
+  return attachment?.url
+    ?? attachment?.imageUrl
+    ?? attachment?.image_url
+    ?? attachment?.fileUrl
+    ?? attachment?.file_url
+    ?? attachment?.previewUrl
+    ?? attachment?.preview_url
+    ?? attachment?.thumbnailUrl
+    ?? attachment?.thumbnail_url
+    ?? '';
+}
+
+function postImageSources(post) {
+  const directImages = [
+    post?.imageUrl,
+    post?.image_url,
+    post?.thumbnailUrl,
+    post?.thumbnail_url,
+    post?.coverImageUrl,
+    post?.cover_image_url,
+    post?.attachmentUrl,
+    post?.attachment_url,
+  ].filter(Boolean);
+  const attachmentImages = (post?.attachments ?? [])
+    .map(attachmentImageUrl)
+    .filter(Boolean);
+  return [...directImages, ...attachmentImages]
+    .filter((image) => !failedPostImageKeys.value.has(postImageFailureKey(post, image)))
+    .slice(0, 3);
+}
+
+function postImageFailureKey(post, image) {
+  return `${postKey(post) || 'post'}::${image}`;
+}
+
+function markPostImageFailed(post, image) {
+  const next = new Set(failedPostImageKeys.value);
+  next.add(postImageFailureKey(post, image));
+  failedPostImageKeys.value = next;
 }
 
 function canShowAuthorFollow(post) {
@@ -748,10 +795,14 @@ async function nativeShare() {
               <h1>{{ selectedPost.title }}</h1>
               <p>{{ selectedPost.body }}</p>
             </template>
-            <div class="post-gallery" aria-label="Route image previews">
-              <span></span>
-              <span></span>
-              <span></span>
+            <div v-if="postImageSources(selectedPost).length" class="post-gallery" aria-label="게시글 이미지 미리보기">
+              <img
+                v-for="(image, index) in postImageSources(selectedPost)"
+                :key="`post-image-${index}-${image}`"
+                :src="image"
+                alt=""
+                @error="markPostImageFailed(selectedPost, image)"
+              />
             </div>
             <div v-if="selectedPost.attachments?.length" class="attachment-preview-list">
               <span v-for="attachment in selectedPost.attachments" :key="attachment.id">
@@ -759,7 +810,7 @@ async function nativeShare() {
               </span>
             </div>
             <div class="tag-row"><span v-for="tag in selectedPost.tags" :key="tag">{{ tag }}</span></div>
-            <RouterLink class="linked-course" :to="linkedCourseTo(selectedPost)">
+            <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
               <span class="course-dot">AI</span>
               <div>
                 <small class="course-kicker">연결된 AI 코스</small>
@@ -1067,6 +1118,10 @@ async function nativeShare() {
 
       <template v-else>
         <SearchBar v-model="query" placeholder="게시글, 태그 검색" />
+        <div class="mode-toggle community-tabs" aria-label="Community sections">
+          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
+          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
+        </div>
         <div class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
           <span class="list-control-label">정렬</span>
           <SortSegmentedControl
@@ -1075,10 +1130,6 @@ async function nativeShare() {
             aria-label="커뮤니티 글 정렬"
           />
           <span class="list-result-count" aria-live="polite">{{ sortedPosts.length }}개 결과</span>
-        </div>
-        <div class="mode-toggle community-tabs" aria-label="Community sections">
-          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
-          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
         </div>
 
         <form v-if="composeMode" class="compose-card" @submit.prevent="createPost">
@@ -1138,9 +1189,13 @@ async function nativeShare() {
                 {{ isAuthorFollowLoading(post) ? '처리 중' : isAuthorFollowed(post) ? '팔로잉' : '팔로우' }}
               </button>
             </div>
-            <RouterLink class="feed-card-main" :to="`/community/post/${postKey(post)}`">
-              <div class="feed-thumb">
-                <span>{{ post.region?.slice(0, 2) || 'KR' }}</span>
+            <RouterLink
+              class="feed-card-main"
+              :class="{ 'feed-card-main--text-only': !postImageSources(post).length }"
+              :to="`/community/post/${postKey(post)}`"
+            >
+              <div v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
+                <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0])" />
               </div>
               <div class="feed-body">
                 <h2>{{ post.title }}</h2>

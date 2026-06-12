@@ -5,7 +5,6 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FavoriteToggleStatus from '../components/common/FavoriteToggleStatus.vue';
-import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import { useContentStore } from '../stores/contentStore.js';
@@ -25,21 +24,14 @@ const contentId = computed(() => route.params.id || '');
 const liked = computed(() => content.value && uiStore.likedContent.includes(content.value.contentId));
 const likePending = computed(() => Boolean(content.value)
   && uiStore.pendingContentLikes.some((id) => String(id) === String(content.value.contentId)));
-const relatedReviewCount = computed(() => relatedPlaces.value
-  .reduce((sum, place) => sum + Number(place.reviewCount ?? 0), 0));
-const relatedAverageRating = computed(() => {
-  const ratedPlaces = relatedPlaces.value
-    .map((place) => ({
-      rating: Number(place.averageRating ?? 0),
-      count: Number(place.reviewCount ?? 0),
-    }))
-    .filter((item) => item.rating > 0 && item.count > 0);
-  const totalCount = ratedPlaces.reduce((sum, item) => sum + item.count, 0);
-  if (!totalCount) return '0.0';
-  const totalScore = ratedPlaces.reduce((sum, item) => sum + (item.rating * item.count), 0);
-  return (totalScore / totalCount).toFixed(1);
-});
+const contentMeta = computed(() => [
+  content.value?.releaseYear,
+  content.value?.ottPlatform,
+].filter(Boolean).join(' · '));
 const contentImageUrl = computed(() => getContentImageUrl(content.value ?? {}));
+const contentHeroStyle = computed(() => ({
+  '--detail-hero-image': `url("${String(contentImageUrl.value).replaceAll('"', '\\"')}")`,
+}));
 
 async function loadContentDetail() {
   if (!contentId.value) {
@@ -104,38 +96,32 @@ function useFallbackImage(event) {
       @retry="loadContentDetail"
     />
     <section v-else-if="content" class="detail-screen">
-      <div class="detail-hero">
-        <img :key="contentImageUrl" :src="contentImageUrl" :alt="content.title" @error="useFallbackImage" />
+      <div class="detail-hero detail-hero--content" :style="contentHeroStyle">
+        <img class="detail-hero-poster" :key="contentImageUrl" :src="contentImageUrl" :alt="content.title" @error="useFallbackImage" />
         <div>
           <span class="badge dark">{{ content.category }}</span>
           <h1>{{ content.title }}</h1>
-          <p>{{ content.subcategory }} · {{ content.releaseYear }} · {{ content.ottPlatform }}</p>
+          <p>{{ contentMeta }}</p>
         </div>
       </div>
-      <div class="detail-body">
-        <p>{{ content.description }}</p>
-        <p class="meta-line">출연: {{ content.castNames }}</p>
+      <div class="detail-body detail-body--content">
+        <p class="content-description">{{ content.description }}</p>
+        <p class="meta-line content-cast-line">출연: {{ content.castNames }}</p>
         <div class="tag-row"><span v-for="tag in content.tags" :key="tag">{{ tag }}</span></div>
         <div class="action-grid single">
           <BaseButton @click="startCourse">AI Course 만들기</BaseButton>
         </div>
         <FavoriteToggleStatus
+          v-if="likePending"
           :active="Boolean(liked)"
           :pending="likePending"
-          active-text="좋아요 완료"
-          inactive-text="좋아요를 누르면 마이페이지에 저장됩니다."
+          active-text=""
+          inactive-text=""
           pending-text="콘텐츠 좋아요 상태를 저장하는 중입니다."
         />
       </div>
 
-      <div class="section-header"><h2>관련 장소</h2></div>
-      <FormStatusNotice
-        tone="info"
-        title="콘텐츠 리뷰는 관련 촬영지 방문 리뷰로 확인합니다."
-        :text="relatedReviewCount
-          ? `관련 장소 리뷰 ${relatedReviewCount}개 · 평균 ★ ${relatedAverageRating}입니다. 장소 상세에서 실제 방문 리뷰를 작성하거나 수정할 수 있습니다.`
-          : '현재 콘텐츠 전용 리뷰 API는 없으며, 리뷰는 관련 촬영지 장소 상세에서 작성합니다.'"
-      />
+      <div class="section-header content-related-header"><h2>관련 장소</h2></div>
       <EmptyState
         v-if="!relatedPlaces.length"
         compact

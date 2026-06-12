@@ -25,10 +25,37 @@ function normalizeComment(comment = {}) {
   };
 }
 
+function normalizeAttachment(attachment = {}) {
+  const url = firstDefined(
+    attachment.url,
+    attachment.imageUrl,
+    attachment.image_url,
+    attachment.fileUrl,
+    attachment.file_url,
+    attachment.previewUrl,
+    attachment.preview_url,
+    attachment.thumbnailUrl,
+    attachment.thumbnail_url,
+  );
+  return {
+    ...attachment,
+    url,
+    imageUrl: firstDefined(attachment.imageUrl, attachment.image_url, url),
+    thumbnailUrl: firstDefined(attachment.thumbnailUrl, attachment.thumbnail_url, url),
+    type: firstDefined(attachment.type, attachment.mimeType, attachment.mime_type, ''),
+    name: firstDefined(attachment.name, attachment.fileName, attachment.file_name, ''),
+  };
+}
+
 export function normalizePost(post = {}) {
   const postId = firstDefined(post.postId, post.id);
   const comments = (post.comments ?? post.commentItems ?? []).map(normalizeComment);
   const commentCount = Number(firstDefined(post.commentCount, post.commentsCount, post.comment_count, comments.length));
+  const rawAttachments = firstDefined(post.attachments, post.attachmentItems, post.attachment_items, []);
+  const attachments = Array.isArray(rawAttachments) ? rawAttachments.map(normalizeAttachment) : [];
+  const imageUrl = firstDefined(post.imageUrl, post.image_url, post.attachmentUrl, post.attachment_url);
+  const thumbnailUrl = firstDefined(post.thumbnailUrl, post.thumbnail_url);
+  const coverImageUrl = firstDefined(post.coverImageUrl, post.cover_image_url);
   return {
     ...post,
     id: post.id ?? postId,
@@ -47,6 +74,10 @@ export function normalizePost(post = {}) {
     isLiked: Boolean(firstDefined(post.isLiked, post.liked, false)),
     likedBy: post.likedBy ?? [],
     scrappedBy: post.scrappedBy ?? [],
+    imageUrl,
+    thumbnailUrl,
+    coverImageUrl,
+    attachments,
     commentCount,
     commentsCount: commentCount,
     comments,
@@ -83,6 +114,14 @@ export async function createPost(payload) {
   });
   const response = unwrapApiData(data);
   return normalizePost(response?.post ?? response);
+}
+
+export async function uploadPostImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await http.post('/posts/images', formData);
+  const payload = unwrapApiData(data) ?? data;
+  return payload?.imageUrl ?? '';
 }
 
 export async function updatePost(postId, payload) {
