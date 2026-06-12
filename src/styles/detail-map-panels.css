@@ -15,37 +15,107 @@
   box-shadow: var(--shadow-map);
 }
 
-.map-preview::before,
-.map-preview::after {
+.kakao-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.map-status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 24px;
+  color: var(--text);
+  text-align: center;
+  background: var(--map-bg);
+}
+
+.map-status strong {
+  font-size: var(--text-sm);
+}
+
+.map-status span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.map-status code {
+  font-size: 0.95em;
+}
+
+.map-place-popover {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: grid;
+  gap: 3px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(0, 82, 255, 0.14);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+}
+
+.map-place-popover span,
+.map-place-popover small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-place-popover span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.map-place-popover small {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.map-preview--missing-key::before,
+.map-preview--missing-key::after,
+.map-preview--error::before,
+.map-preview--error::after,
+.map-preview--empty::before,
+.map-preview--empty::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.map-preview::before {
+.map-preview--missing-key::before,
+.map-preview--error::before,
+.map-preview--empty::before {
   background-image:
     linear-gradient(rgba(0, 82, 255, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 82, 255, 0.05) 1px, transparent 1px);
   background-size: 34px 34px;
 }
 
-.map-preview::after {
+.map-preview--missing-key::after,
+.map-preview--error::after,
+.map-preview--empty::after {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(238, 240, 243, 0.18));
-}
-
-.map-preview svg {
-  position: absolute;
-  inset: 18px;
-  width: calc(100% - 36px);
-  height: calc(100% - 36px);
-  color: rgba(0, 82, 255, 0.34);
 }
 
 .map-label {
   position: absolute;
   left: 12px;
   top: 12px;
+  z-index: 3;
   max-width: calc(100% - 24px);
   padding: 5px 8px;
   border-radius: var(--radius-sm);
