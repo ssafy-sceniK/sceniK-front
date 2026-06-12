@@ -19,8 +19,8 @@ export async function updateAdminContent(contentId, payload) {
 }
 
 export async function deleteAdminContent(contentId) {
-  const { data } = await http.delete(`/admin/contents/${contentId}`);
-  return unwrapApiData(data);
+  await http.delete(`/admin/contents/${contentId}`);
+  return true;
 }
 
 export async function fetchAdminPlaces() {
@@ -41,6 +41,6 @@ export async function updateAdminPlace(placeId, payload) {
 }
 
 export async function deleteAdminPlace(placeId) {
-  const { data } = await http.delete(`/admin/places/${placeId}`);
-  return unwrapApiData(data);
+  await http.delete(`/admin/places/${placeId}`);
+  return true;
 }

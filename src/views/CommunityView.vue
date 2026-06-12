@@ -180,6 +180,15 @@ const selectedPost = computed(() => {
 const selectedComments = computed(() => selectedPost.value?.comments ?? []);
 const selectedCommentIds = computed(() => new Set(selectedComments.value.map((comment) => String(commentKey(comment)))));
 const selectedCommentCount = computed(() => selectedComments.value.length);
+const expectedCommentCount = computed(() => postCommentCount(selectedPost.value));
+const commentSectionLoading = computed(() => Boolean(selectedPost.value)
+  && uiStore.communityLoading
+  && expectedCommentCount.value > 0
+  && selectedCommentCount.value === 0);
+const commentSectionNeedsRetry = computed(() => Boolean(selectedPost.value)
+  && !uiStore.communityLoading
+  && expectedCommentCount.value > 0
+  && selectedCommentCount.value === 0);
 const topLevelComments = computed(() => selectedComments.value.filter((comment) => {
   const parentId = comment.parentCommentId;
   return !parentId || !selectedCommentIds.value.has(String(parentId));
@@ -204,6 +213,14 @@ function focusCommentSection() {
       section?.focus({ preventScroll: true });
     }
   });
+}
+
+async function retryCommentSection() {
+  const targetPostId = postKey(selectedPost.value) || route.params.id;
+  if (!targetPostId) return;
+  commentNotice.value = null;
+  await uiStore.loadCommunityPost(targetPostId);
+  focusCommentSection();
 }
 
 function boardPostCount(board) {
@@ -771,7 +788,7 @@ async function nativeShare() {
                 <span class="action-icon">{{ isPostLiked(selectedPost) ? '♥' : '♡' }}</span>
                 {{ selectedPost.likes }}
               </button>
-              <a href="#community-comments" @click="focusCommentSection">댓글 {{ selectedCommentCount }}</a>
+              <a href="#community-comments" @click.prevent="focusCommentSection">댓글 {{ selectedCommentCount }}</a>
               <button
                 type="button"
                 :class="{ 'is-active': isPostScrapped(selectedPost) }"
@@ -797,6 +814,9 @@ async function nativeShare() {
           </article>
 
           <CommentThread :count="selectedCommentCount">
+            <p class="helper-text">
+              댓글은 한 단계 답글까지 지원합니다. 삭제된 댓글과 해당 답글은 목록과 댓글 수에서 함께 제외됩니다.
+            </p>
             <FormStatusNotice
               v-if="commentNotice"
               compact
@@ -804,119 +824,51 @@ async function nativeShare() {
               :title="commentNotice.title"
               :text="commentNotice.text"
             />
-            <div
-              v-for="comment in topLevelComments"
-              :key="commentKey(comment)"
-              class="comment-thread"
-            >
-              <div class="comment-row">
-                <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
-                <div class="comment-content">
-                  <div class="comment-header">
-                    <div class="comment-meta">
-                      <b>{{ comment.user }}</b>
-                      <small>{{ commentTimeLabel(comment) }}</small>
-                    </div>
-                    <button
-                      type="button"
-                      class="comment-heart-button"
-                      :class="{ 'is-active': isCommentLiked(comment) }"
-                      :aria-pressed="isCommentLiked(comment)"
-                      :aria-label="commentLikeLabel(comment)"
-                      :disabled="isCommentLikePending(comment)"
-                      @click="toggleCommentLike(comment)"
-                    >
-                      <span class="action-icon" aria-hidden="true">{{ isCommentLiked(comment) ? '♥' : '♡' }}</span>
-                      <span v-if="commentLikeCount(comment)" class="comment-heart-count">{{ commentLikeCount(comment) }}</span>
-                    </button>
-                  </div>
-                  <template v-if="editingCommentId === commentKey(comment)">
-                    <textarea
-                      v-model="editingCommentText"
-                      class="comment-edit-input"
-                      maxlength="500"
-                      placeholder="댓글 내용을 입력해 주세요."
-                    ></textarea>
-                    <div class="comment-row-actions">
-                      <button
-                        type="button"
-                        class="comment-action-button is-primary"
-                        :disabled="commentActionLoading || !editingCommentText.trim()"
-                        @click="saveEditedComment(postKey(selectedPost))"
-                      >
-                        저장
-                      </button>
-                      <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <p>{{ comment.text }}</p>
-                    <div class="comment-row-actions">
-                      <button
-                        type="button"
-                        class="comment-action-button"
-                        :aria-label="`${comment.user}에게 답글 작성`"
-                        @click="startReply(comment)"
-                      >
-                        답글
-                      </button>
-                      <button
-                        v-if="isCommentOwner(comment)"
-                        type="button"
-                        class="comment-action-button"
-                        :aria-label="`${comment.user} 댓글 관리`"
-                        :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(comment)"
-                        @click="openCommentActions(comment)"
-                      >
-                        더보기
-                      </button>
-                    </div>
-                    <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
-                      <input
-                        v-model="replyText"
-                        :placeholder="replyPlaceholder(comment)"
-                        @keyup.enter="addReply(postKey(selectedPost), comment)"
-                      />
-                      <button
-                        type="button"
-                        :disabled="commentActionLoading || !replyText.trim()"
-                        @click="addReply(postKey(selectedPost), comment)"
-                      >
-                        등록
-                      </button>
-                      <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
-                    </div>
-                  </template>
-                </div>
-              </div>
-
-              <div v-if="repliesFor(comment).length" class="reply-thread">
-                <div
-                  v-for="reply in repliesFor(comment)"
-                  :key="commentKey(reply)"
-                  class="comment-row comment-row--reply"
-                >
-                  <span class="comment-avatar comment-avatar--reply">{{ reply.user?.slice(0, 1) || 'U' }}</span>
+            <EmptyState
+              v-if="commentSectionLoading"
+              tone="loading"
+              compact
+              title="댓글을 불러오는 중입니다"
+              text="게시글에 연결된 댓글 목록을 확인하고 있어요."
+            />
+            <EmptyState
+              v-else-if="commentSectionNeedsRetry"
+              icon="!"
+              tone="error"
+              compact
+              title="댓글 목록을 다시 불러와야 합니다"
+              :text="uiStore.communityError || '댓글 수와 실제 댓글 목록이 맞지 않아 다시 조회가 필요합니다.'"
+              action-label="댓글 다시 불러오기"
+              @action="retryCommentSection"
+            />
+            <template v-if="!commentSectionLoading && !commentSectionNeedsRetry">
+              <div
+                v-for="comment in topLevelComments"
+                :key="commentKey(comment)"
+                class="comment-thread"
+              >
+                <div class="comment-row">
+                  <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
                   <div class="comment-content">
                     <div class="comment-header">
                       <div class="comment-meta">
-                        <b>{{ reply.user }}</b>
-                        <small>{{ commentTimeLabel(reply) }}</small>
+                        <b>{{ comment.user }}</b>
+                        <small>{{ commentTimeLabel(comment) }}</small>
                       </div>
                       <button
                         type="button"
                         class="comment-heart-button"
-                        :class="{ 'is-active': isCommentLiked(reply) }"
-                        :aria-pressed="isCommentLiked(reply)"
-                        :aria-label="commentLikeLabel(reply)"
-                        :disabled="isCommentLikePending(reply)"
-                        @click="toggleCommentLike(reply)"
+                        :class="{ 'is-active': isCommentLiked(comment) }"
+                        :aria-pressed="isCommentLiked(comment)"
+                        :aria-label="commentLikeLabel(comment)"
+                        :disabled="isCommentLikePending(comment)"
+                        @click="toggleCommentLike(comment)"
                       >
-                        <span class="action-icon" aria-hidden="true">{{ isCommentLiked(reply) ? '♥' : '♡' }}</span>
-                        <span v-if="commentLikeCount(reply)" class="comment-heart-count">{{ commentLikeCount(reply) }}</span>
+                        <span class="action-icon" aria-hidden="true">{{ isCommentLiked(comment) ? '♥' : '♡' }}</span>
+                        <span v-if="commentLikeCount(comment)" class="comment-heart-count">{{ commentLikeCount(comment) }}</span>
                       </button>
                     </div>
-                    <template v-if="editingCommentId === commentKey(reply)">
+                    <template v-if="editingCommentId === commentKey(comment)">
                       <textarea
                         v-model="editingCommentText"
                         class="comment-edit-input"
@@ -936,37 +888,37 @@ async function nativeShare() {
                       </div>
                     </template>
                     <template v-else>
-                      <p>{{ reply.text }}</p>
+                      <p>{{ comment.text }}</p>
                       <div class="comment-row-actions">
                         <button
                           type="button"
                           class="comment-action-button"
-                          :aria-label="`${reply.user}에게 답글 작성`"
-                          @click="startReply(reply)"
+                          :aria-label="`${comment.user}에게 답글 작성`"
+                          @click="startReply(comment)"
                         >
                           답글
                         </button>
                         <button
-                          v-if="isCommentOwner(reply)"
+                          v-if="isCommentOwner(comment)"
                           type="button"
                           class="comment-action-button"
-                          :aria-label="`${reply.user} 답글 관리`"
-                          :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(reply)"
-                          @click="openCommentActions(reply)"
+                          :aria-label="`${comment.user} 댓글 관리`"
+                          :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(comment)"
+                          @click="openCommentActions(comment)"
                         >
                           더보기
                         </button>
                       </div>
-                      <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
+                      <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
                         <input
                           v-model="replyText"
-                          :placeholder="replyPlaceholder(reply)"
-                          @keyup.enter="addReply(postKey(selectedPost), reply, comment)"
+                          :placeholder="replyPlaceholder(comment)"
+                          @keyup.enter="addReply(postKey(selectedPost), comment)"
                         />
                         <button
                           type="button"
                           :disabled="commentActionLoading || !replyText.trim()"
-                          @click="addReply(postKey(selectedPost), reply, comment)"
+                          @click="addReply(postKey(selectedPost), comment)"
                         >
                           등록
                         </button>
@@ -975,10 +927,97 @@ async function nativeShare() {
                     </template>
                   </div>
                 </div>
+
+                <div v-if="repliesFor(comment).length" class="reply-thread">
+                  <div
+                    v-for="reply in repliesFor(comment)"
+                    :key="commentKey(reply)"
+                    class="comment-row comment-row--reply"
+                  >
+                    <span class="comment-avatar comment-avatar--reply">{{ reply.user?.slice(0, 1) || 'U' }}</span>
+                    <div class="comment-content">
+                      <div class="comment-header">
+                        <div class="comment-meta">
+                          <b>{{ reply.user }}</b>
+                          <small>{{ commentTimeLabel(reply) }}</small>
+                        </div>
+                        <button
+                          type="button"
+                          class="comment-heart-button"
+                          :class="{ 'is-active': isCommentLiked(reply) }"
+                          :aria-pressed="isCommentLiked(reply)"
+                          :aria-label="commentLikeLabel(reply)"
+                          :disabled="isCommentLikePending(reply)"
+                          @click="toggleCommentLike(reply)"
+                        >
+                          <span class="action-icon" aria-hidden="true">{{ isCommentLiked(reply) ? '♥' : '♡' }}</span>
+                          <span v-if="commentLikeCount(reply)" class="comment-heart-count">{{ commentLikeCount(reply) }}</span>
+                        </button>
+                      </div>
+                      <template v-if="editingCommentId === commentKey(reply)">
+                        <textarea
+                          v-model="editingCommentText"
+                          class="comment-edit-input"
+                          maxlength="500"
+                          placeholder="댓글 내용을 입력해 주세요."
+                        ></textarea>
+                        <div class="comment-row-actions">
+                          <button
+                            type="button"
+                            class="comment-action-button is-primary"
+                            :disabled="commentActionLoading || !editingCommentText.trim()"
+                            @click="saveEditedComment(postKey(selectedPost))"
+                          >
+                            저장
+                          </button>
+                          <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p>{{ reply.text }}</p>
+                        <div class="comment-row-actions">
+                          <button
+                            type="button"
+                            class="comment-action-button"
+                            :aria-label="`${reply.user}에게 답글 작성`"
+                            @click="startReply(reply)"
+                          >
+                            답글
+                          </button>
+                          <button
+                            v-if="isCommentOwner(reply)"
+                            type="button"
+                            class="comment-action-button"
+                            :aria-label="`${reply.user} 답글 관리`"
+                            :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(reply)"
+                            @click="openCommentActions(reply)"
+                          >
+                            더보기
+                          </button>
+                        </div>
+                        <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
+                          <input
+                            v-model="replyText"
+                            :placeholder="replyPlaceholder(reply)"
+                            @keyup.enter="addReply(postKey(selectedPost), reply, comment)"
+                          />
+                          <button
+                            type="button"
+                            :disabled="commentActionLoading || !replyText.trim()"
+                            @click="addReply(postKey(selectedPost), reply, comment)"
+                          >
+                            등록
+                          </button>
+                          <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </template>
             <EmptyState
-              v-if="!selectedComments.length"
+              v-if="!selectedComments.length && !commentSectionLoading && !commentSectionNeedsRetry"
               icon="C"
               tone="community"
               compact

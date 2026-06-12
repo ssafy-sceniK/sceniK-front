@@ -189,7 +189,7 @@ async function createPost() {
         <label class="form-field attachment-field">
           사진/동영상
           <input type="file" accept="image/*,video/*" multiple @change="handleAttachments" />
-          <small>최대 6개까지 선택할 수 있습니다. 현재 MVP에서는 파일 이름과 형식만 저장합니다.</small>
+          <small>최대 6개까지 선택할 수 있습니다. 실제 파일 업로드는 아직 지원하지 않으며, 현재 MVP에서는 파일 이름과 형식만 저장합니다.</small>
         </label>
 
         <div v-if="attachments.length" class="attachment-list" aria-label="선택한 첨부 파일">

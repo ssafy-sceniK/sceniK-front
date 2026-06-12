@@ -26,6 +26,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  fieldErrors: {
+    type: Array,
+    default: () => [],
+  },
   error: {
     type: String,
     default: '',
@@ -57,6 +61,12 @@ const props = defineProps({
       title="비밀번호 확인"
       :text="props.passwordMatches ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.'"
     />
+    <ul v-if="props.fieldErrors.length" class="signup-field-error-list" aria-label="회원가입 입력 오류">
+      <li v-for="fieldError in props.fieldErrors" :key="`${fieldError.field}-${fieldError.message}`">
+        <b v-if="fieldError.field">{{ fieldError.field }}</b>
+        <span>{{ fieldError.message }}</span>
+      </li>
+    </ul>
     <FormStatusNotice v-if="props.error" tone="error" title="회원가입 실패" :text="props.error" />
     <FormStatusNotice v-if="props.success" tone="success" title="회원가입 완료" :text="props.success" />
   </section>
@@ -87,5 +97,28 @@ const props = defineProps({
 
 .password-policy-list li.passed {
   color: var(--color-semantic-up);
+}
+
+.signup-field-error-list {
+  margin: -2px 0 0;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+  color: var(--color-semantic-down);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.16);
+  border-radius: var(--radius-md);
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.signup-field-error-list li {
+  display: flex;
+  gap: 6px;
+}
+
+.signup-field-error-list b {
+  flex: 0 0 auto;
 }
 </style>

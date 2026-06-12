@@ -411,6 +411,7 @@ export const useUiStore = defineStore('ui', {
     toastTone: 'info',
     loginRequiredMessage: '',
     authLoading: false,
+    authError: '',
     savedCoursesLoading: false,
     routeActionLoading: false,
     routeError: '',
@@ -422,6 +423,7 @@ export const useUiStore = defineStore('ui', {
     followError: '',
     pendingContentLikes: [],
     pendingPlaceLikes: [],
+    pendingVisitStatuses: [],
     pendingPostLikes: [],
     pendingCommentLikes: [],
     followActionLoadingIds: [],
@@ -451,6 +453,7 @@ export const useUiStore = defineStore('ui', {
         toastTone,
         loginRequiredMessage,
         authLoading,
+        authError,
         savedCoursesLoading,
         routeActionLoading,
         routeError,
@@ -476,6 +479,7 @@ export const useUiStore = defineStore('ui', {
         followError,
         pendingContentLikes,
         pendingPlaceLikes,
+        pendingVisitStatuses,
         pendingPostLikes,
         pendingCommentLikes,
         followActionLoadingIds,
@@ -617,6 +621,7 @@ export const useUiStore = defineStore('ui', {
       if (password.length < 8) throw new Error('비밀번호는 8자 이상이어야 합니다.');
       if (!safeNickname) throw new Error('닉네임을 입력해 주세요.');
       this.authLoading = true;
+      this.authError = '';
       try {
         const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname });
         saveAccessToken(session.accessToken, session.refreshToken);
@@ -629,7 +634,10 @@ export const useUiStore = defineStore('ui', {
         this.notify('회원가입이 완료되었습니다.', 'success');
         return this.currentUser;
       } catch (error) {
-        throw new Error(apiErrorMessage(error, '회원가입에 실패했습니다.'));
+        const message = apiErrorMessage(error, '회원가입에 실패했습니다.');
+        this.authError = message;
+        error.userMessage = message;
+        throw error;
       } finally {
         this.authLoading = false;
       }
@@ -730,6 +738,7 @@ export const useUiStore = defineStore('ui', {
       }
 
       this.authLoading = true;
+      this.authError = '';
       try {
         const updated = await updateMe({
           nickname: safeNickname,
@@ -747,7 +756,8 @@ export const useUiStore = defineStore('ui', {
         this.notify('프로필을 저장했습니다.');
         return true;
       } catch (error) {
-        this.notify(apiErrorMessage(error, '프로필을 저장하지 못했습니다.'));
+        this.authError = apiErrorMessage(error, '프로필을 저장하지 못했습니다.');
+        this.notify(this.authError);
         return false;
       } finally {
         this.authLoading = false;
@@ -818,6 +828,8 @@ export const useUiStore = defineStore('ui', {
     },
     async setVisit(placeId, status) {
       if (!this.requireAuth('로그인하면 방문 상태를 저장할 수 있습니다.')) return;
+      if (this.pendingVisitStatuses.some((id) => sameId(id, placeId))) return;
+      this.pendingVisitStatuses = [...this.pendingVisitStatuses, placeId];
       try {
         await setPlaceVisitStatus(placeId, status);
         this.plannedVisits = this.plannedVisits.filter((id) => id !== placeId);
@@ -833,6 +845,8 @@ export const useUiStore = defineStore('ui', {
         this.notify(status === 'completed' ? '방문 완료로 저장했습니다.' : '방문 예정으로 저장했습니다.');
       } catch (error) {
         this.notify(apiErrorMessage(error, '방문 상태를 저장하지 못했습니다.'));
+      } finally {
+        this.pendingVisitStatuses = this.pendingVisitStatuses.filter((id) => !sameId(id, placeId));
       }
     },
     markViewedPlace(placeId, placeDetail = null) {

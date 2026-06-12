@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
 import { checkEmailAvailability } from '../api/authApi.js';
-import { getUserMessage } from '../api/error.js';
+import { getFieldErrors, getUserMessage } from '../api/error.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import SignupValidationPanel from '../components/auth/SignupValidationPanel.vue';
@@ -16,6 +16,7 @@ const password = ref('');
 const confirm = ref('');
 const error = ref('');
 const success = ref('');
+const fieldErrors = ref([]);
 const loading = ref(false);
 const emailCheckStatus = ref('unchecked');
 const emailCheckMessage = ref('이메일 중복 확인이 필요합니다.');
@@ -43,6 +44,7 @@ const canSubmit = computed(() => (
 watch(email, () => {
   success.value = '';
   error.value = '';
+  fieldErrors.value = [];
   if (!trimmedEmail.value) {
     emailCheckStatus.value = 'unchecked';
     emailCheckMessage.value = '이메일 중복 확인이 필요합니다.';
@@ -56,6 +58,8 @@ watch(email, () => {
 
 watch([password, confirm], () => {
   success.value = '';
+  error.value = '';
+  fieldErrors.value = [];
 });
 
 function emailNoticeTone() {
@@ -87,6 +91,7 @@ async function checkEmail() {
     emailCheckStatus.value = result.available ? 'available' : 'duplicate';
     emailCheckMessage.value = result.message || (result.available ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
   } catch (err) {
+    fieldErrors.value = getFieldErrors(err);
     emailCheckStatus.value = 'error';
     emailCheckMessage.value = getUserMessage(err, '이메일 중복 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.');
   } finally {
@@ -97,6 +102,7 @@ async function checkEmail() {
 async function submit() {
   error.value = '';
   success.value = '';
+  fieldErrors.value = [];
   const trimmedNickname = nickname.value.trim();
 
   if (!trimmedNickname) {
@@ -140,6 +146,7 @@ async function submit() {
     success.value = '회원가입이 완료되었습니다. 취향 설정으로 이동합니다.';
     window.setTimeout(() => router.push('/preferences'), 450);
   } catch (err) {
+    fieldErrors.value = getFieldErrors(err);
     error.value = getUserMessage(err, '회원가입에 실패했습니다.');
   } finally {
     loading.value = false;
@@ -172,6 +179,7 @@ async function submit() {
         :password-policy="passwordPolicy"
         :confirm-entered="confirmEntered"
         :password-matches="passwordMatches"
+        :field-errors="fieldErrors"
         :error="error"
         :success="success"
       />

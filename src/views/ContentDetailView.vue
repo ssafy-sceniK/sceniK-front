@@ -136,7 +136,13 @@ function useFallbackImage(event) {
           ? `관련 장소 리뷰 ${relatedReviewCount}개 · 평균 ★ ${relatedAverageRating}입니다. 장소 상세에서 실제 방문 리뷰를 작성하거나 수정할 수 있습니다.`
           : '현재 콘텐츠 전용 리뷰 API는 없으며, 리뷰는 관련 촬영지 장소 상세에서 작성합니다.'"
       />
-      <div class="stack-list">
+      <EmptyState
+        v-if="!relatedPlaces.length"
+        compact
+        title="연결된 촬영지가 아직 없어요"
+        text="관련 장소 데이터가 비어 있어도 상세 화면은 그대로 유지됩니다."
+      />
+      <div v-else class="stack-list">
         <RouterLink v-for="place in relatedPlaces" :key="place.placeId" :to="`/places/${place.placeId}`">
           <PlaceCard :place="place" compact />
         </RouterLink>

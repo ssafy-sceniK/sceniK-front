@@ -90,7 +90,7 @@ async function saveProfile() {
     : {
         tone: 'error',
         title: '프로필을 저장하지 못했습니다.',
-        text: uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        text: `${uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'} 입력한 내용은 화면에 유지됩니다. 연결 상태를 확인한 뒤 다시 저장해 주세요. 현재 이미지는 서버 업로드가 아니라 미리보기만 지원됩니다.`,
       };
   if (ok) window.setTimeout(() => router.push('/my'), 450);
 }

@@ -27,6 +27,7 @@ const place = ref(null);
 const loading = ref(false);
 const errorMessage = ref('');
 const reviews = ref([]);
+const reviewsLoaded = ref(false);
 const reviewLoading = ref(false);
 const reviewError = ref('');
 const reviewNotice = ref(null);
@@ -45,15 +46,20 @@ const relatedContents = computed(() => place.value?.relatedContents ?? []);
 const liked = computed(() => place.value && uiStore.likedPlaces.includes(place.value.placeId));
 const likePending = computed(() => Boolean(place.value)
   && uiStore.pendingPlaceLikes.some((id) => String(id) === String(place.value.placeId)));
+const visitPending = computed(() => Boolean(place.value)
+  && uiStore.pendingVisitStatuses.some((id) => String(id) === String(place.value.placeId)));
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
   && reviews.value.some((review) => review.userId === uiStore.currentUser.userId));
 const myReview = computed(() => reviews.value.find((review) => (
   Boolean(uiStore.currentUser?.userId) && String(review.userId) === String(uiStore.currentUser.userId)
 )) ?? null);
-const reviewCount = computed(() => reviews.value.length || Number(place.value?.reviewCount ?? 0));
+const reviewCount = computed(() => (
+  reviewsLoaded.value ? reviews.value.length : Number(place.value?.reviewCount ?? 0)
+));
 const averageRating = computed(() => {
   const rated = reviews.value.map((review) => Number(review.rating)).filter((rating) => Number.isFinite(rating));
   if (rated.length) return (rated.reduce((sum, rating) => sum + rating, 0) / rated.length).toFixed(1);
+  if (reviewsLoaded.value) return '0.0';
   const fromPlace = Number(place.value?.averageRating ?? 0);
   return fromPlace > 0 ? fromPlace.toFixed(1) : '0.0';
 });
@@ -69,6 +75,28 @@ const ratingSummary = computed(() => [5, 4, 3, 2, 1].map((score) => {
 function isReviewOwner(review) {
   return Boolean(uiStore.currentUser?.userId)
     && String(review?.userId ?? '') === String(uiStore.currentUser.userId);
+}
+
+function reviewStatsText() {
+  return `현재 리뷰 ${reviewCount.value}개, 평균 ${averageRating.value}점으로 갱신되었습니다.`;
+}
+
+function reviewActionMessage(error, fallback) {
+  const status = error?.response?.status;
+  const code = error?.response?.data?.code;
+  if (code === 'DUPLICATE_ACTION' || status === 409) {
+    return '이미 이 장소에 리뷰를 작성했습니다. 중복 작성 대신 아래 내 리뷰에서 수정하거나 삭제해 주세요.';
+  }
+  if (code === 'FORBIDDEN' || status === 403) {
+    return '본인이 작성한 리뷰만 수정하거나 삭제할 수 있습니다.';
+  }
+  if (code === 'AUTH_REQUIRED' || status === 401) {
+    return '로그인이 필요합니다. 로그인 후 다시 시도해 주세요.';
+  }
+  if (code === 'NOT_FOUND' || status === 404) {
+    return '리뷰 또는 장소 정보를 찾을 수 없습니다. 목록을 새로고침한 뒤 다시 시도해 주세요.';
+  }
+  return getUserMessage(error, fallback);
 }
 
 async function loadPlaceDetail() {
@@ -94,13 +122,16 @@ onMounted(loadPlaceDetail);
 async function loadReviews() {
   if (!placeId.value) return;
   reviewLoading.value = true;
+  reviewsLoaded.value = false;
   reviewError.value = '';
   reviewNotice.value = null;
   try {
     reviews.value = await fetchPlaceReviews(placeId.value);
+    reviewsLoaded.value = true;
   } catch (error) {
     reviewError.value = getUserMessage(error, '리뷰를 불러오지 못했습니다.');
     reviews.value = [];
+    reviewsLoaded.value = true;
   } finally {
     reviewLoading.value = false;
   }
@@ -146,11 +177,11 @@ async function submitReview() {
     reviewNotice.value = {
       tone: 'success',
       title: '저장되었습니다.',
-      text: '방문 리뷰가 등록되었습니다. 한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.',
+      text: `방문 리뷰가 등록되었습니다. ${reviewStatsText()} 한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.`,
     };
     uiStore.notify('리뷰를 등록했습니다.', 'success');
   } catch (error) {
-    reviewError.value = getUserMessage(error, '리뷰를 등록하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, '리뷰를 등록하지 못했습니다.');
     reviewNotice.value = {
       tone: 'error',
       title: '리뷰를 등록하지 못했습니다.',
@@ -219,11 +250,11 @@ async function submitReviewEdit(review) {
     reviewNotice.value = {
       tone: 'success',
       title: '수정되었습니다.',
-      text: '내 방문 리뷰가 업데이트되었습니다.',
+      text: `내 방문 리뷰가 업데이트되었습니다. ${reviewStatsText()}`,
     };
     uiStore.notify('리뷰를 수정했습니다.', 'success');
   } catch (error) {
-    reviewError.value = getUserMessage(error, '리뷰를 수정하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, '리뷰를 수정하지 못했습니다.');
     reviewNotice.value = {
       tone: 'error',
       title: '리뷰를 수정하지 못했습니다.',
@@ -251,11 +282,11 @@ async function removeReview(review) {
     reviewNotice.value = {
       tone: 'success',
       title: '삭제되었습니다.',
-      text: '내 방문 리뷰가 삭제되었습니다. 필요하면 다시 작성할 수 있습니다.',
+      text: `내 방문 리뷰가 삭제되었습니다. ${reviewStatsText()} 필요하면 다시 작성할 수 있습니다.`,
     };
     uiStore.notify('리뷰를 삭제했습니다.', 'success');
   } catch (error) {
-    reviewError.value = getUserMessage(error, '리뷰를 삭제하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, '리뷰를 삭제하지 못했습니다.');
     reviewNotice.value = {
       tone: 'error',
       title: '리뷰를 삭제하지 못했습니다.',
@@ -327,12 +358,14 @@ function useFallbackImage(event) {
         <div class="action-grid two">
           <BaseButton
             :variant="uiStore.plannedVisits.includes(place.placeId) ? 'primary' : 'secondary'"
+            :disabled="visitPending"
             @click="uiStore.setVisit(place.placeId, 'planned')"
           >
             방문 예정
           </BaseButton>
           <BaseButton
             :variant="uiStore.completedVisits.includes(place.placeId) ? 'primary' : 'secondary'"
+            :disabled="visitPending"
             @click="uiStore.setVisit(place.placeId, 'completed')"
           >
             방문 완료
@@ -474,7 +507,13 @@ function useFallbackImage(event) {
       </ReviewPanel>
 
       <div class="section-header"><h2>관련 콘텐츠</h2></div>
-      <div class="chip-row wrap">
+      <EmptyState
+        v-if="!relatedContents.length"
+        compact
+        title="연결된 콘텐츠가 아직 없어요"
+        text="관련 콘텐츠 목록이 비어 있어도 장소 정보와 리뷰는 정상적으로 확인할 수 있습니다."
+      />
+      <div v-else class="chip-row wrap">
         <RouterLink v-for="content in relatedContents" :key="content.contentId" class="chip" :to="`/contents/${content.contentId}`">
           {{ content.title }}
         </RouterLink>
