@@ -7,7 +7,6 @@ import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
-import CommentActionSheet from '../components/community/CommentActionSheet.vue';
 import CommentThread from '../components/community/CommentThread.vue';
 import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
@@ -33,7 +32,6 @@ const editingCommentText = ref('');
 const replyTargetId = ref('');
 const replyText = ref('');
 const commentActionLoading = ref(false);
-const commentActionTarget = ref(null);
 const commentNotice = ref(null);
 const postActionLoading = ref(false);
 const postNotice = ref(null);
@@ -535,7 +533,6 @@ async function addReply(postId, comment, threadParent = comment) {
 function startEditComment(comment) {
   editingCommentId.value = commentKey(comment);
   editingCommentText.value = comment.text ?? '';
-  commentActionTarget.value = null;
   commentNotice.value = {
     tone: 'info',
     title: '댓글 수정',
@@ -594,7 +591,6 @@ async function deleteComment(postId, comment) {
   };
   const deleted = await uiStore.removeComment(postId, targetId);
   commentActionLoading.value = false;
-  commentActionTarget.value = null;
   if (deleted) {
     if (editingCommentId.value === targetId) cancelEditComment();
     commentNotice.value = {
@@ -609,14 +605,6 @@ async function deleteComment(postId, comment) {
     title: '댓글을 삭제하지 못했습니다.',
     text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
   };
-}
-
-function openCommentActions(comment) {
-  commentActionTarget.value = comment;
-}
-
-function closeCommentActions() {
-  commentActionTarget.value = null;
 }
 
 function clearQuery() {
@@ -814,9 +802,6 @@ async function nativeShare() {
           </article>
 
           <CommentThread :count="selectedCommentCount">
-            <p class="helper-text">
-              댓글은 한 단계 답글까지 지원합니다. 삭제된 댓글과 해당 답글은 목록과 댓글 수에서 함께 제외됩니다.
-            </p>
             <FormStatusNotice
               v-if="commentNotice"
               compact
@@ -902,11 +887,21 @@ async function nativeShare() {
                           v-if="isCommentOwner(comment)"
                           type="button"
                           class="comment-action-button"
-                          :aria-label="`${comment.user} 댓글 관리`"
-                          :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(comment)"
-                          @click="openCommentActions(comment)"
+                          :disabled="commentActionLoading"
+                          :aria-label="`${comment.user} 댓글 수정`"
+                          @click="startEditComment(comment)"
                         >
-                          더보기
+                          수정
+                        </button>
+                        <button
+                          v-if="isCommentOwner(comment)"
+                          type="button"
+                          class="comment-action-button is-danger"
+                          :disabled="commentActionLoading"
+                          :aria-label="`${comment.user} 댓글 삭제`"
+                          @click="deleteComment(postKey(selectedPost), comment)"
+                        >
+                          삭제
                         </button>
                       </div>
                       <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
@@ -988,11 +983,21 @@ async function nativeShare() {
                             v-if="isCommentOwner(reply)"
                             type="button"
                             class="comment-action-button"
-                            :aria-label="`${reply.user} 답글 관리`"
-                            :aria-expanded="commentActionTarget && commentKey(commentActionTarget) === commentKey(reply)"
-                            @click="openCommentActions(reply)"
+                            :disabled="commentActionLoading"
+                            :aria-label="`${reply.user} 답글 수정`"
+                            @click="startEditComment(reply)"
                           >
-                            더보기
+                            수정
+                          </button>
+                          <button
+                            v-if="isCommentOwner(reply)"
+                            type="button"
+                            class="comment-action-button is-danger"
+                            :disabled="commentActionLoading"
+                            :aria-label="`${reply.user} 답글 삭제`"
+                            @click="deleteComment(postKey(selectedPost), reply)"
+                          >
+                            삭제
                           </button>
                         </div>
                         <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
@@ -1037,13 +1042,6 @@ async function nativeShare() {
               text="여행 후기와 촬영지 이야기에 댓글로 함께 참여해 보세요."
               action-label="로그인하기"
               action-to="/login"
-            />
-            <CommentActionSheet
-              v-if="commentActionTarget"
-              :loading="commentActionLoading"
-              @edit="startEditComment(commentActionTarget)"
-              @delete="deleteComment(postKey(selectedPost), commentActionTarget)"
-              @cancel="closeCommentActions"
             />
           </CommentThread>
         </CommunityPostDetailPanel>

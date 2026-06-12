@@ -240,19 +240,6 @@ const bodyText = computed(() => props.description || props.text);
   outline-offset: 2px;
 }
 
-:global(.comments-panel) .empty-state {
-  min-height: auto;
-  padding: 14px 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-:global(.comments-panel) .empty-state__visual {
-  display: none;
-}
-
 :global(.course-recommend-panel) .empty-state {
   min-height: auto;
   background: var(--color-surface-soft);
