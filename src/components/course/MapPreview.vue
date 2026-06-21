@@ -11,7 +11,7 @@ const props = defineProps({
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
 const KAKAO_MAP_ICON_URL = 'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/1ca66319017800001.png';
-const appKey = import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY?.trim();
+const appKey = (import.meta.env.VITE_KAKAO_MAP_APP_KEY || import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY)?.trim();
 const router = useRouter();
 const mapContainer = ref(null);
 const mapStatus = ref('loading');
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
       <strong v-if="mapStatus === 'loading'">지도를 불러오는 중입니다</strong>
       <template v-else-if="mapStatus === 'missing-key'">
         <strong>카카오 지도 JavaScript 키가 필요합니다</strong>
-        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>를 설정해 주세요.</span>
+        <span><code>VITE_KAKAO_MAP_APP_KEY</code>를 설정해 주세요.</span>
       </template>
       <template v-else-if="mapStatus === 'empty'">
         <strong>표시할 좌표가 없습니다</strong>

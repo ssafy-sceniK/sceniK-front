@@ -20,6 +20,35 @@ function isMissing(value) {
   return value === undefined || value === null || value === '';
 }
 
+function normalizeRegion(value) {
+  const normalized = String(value ?? '').replace(/\s+/g, '');
+  if (normalized.startsWith('서울')) return '서울';
+  if (normalized.startsWith('부산')) return '부산';
+  if (normalized.startsWith('인천')) return '인천';
+  if (normalized.startsWith('대구')) return '대구';
+  if (normalized.startsWith('대전')) return '대전';
+  if (normalized.startsWith('광주')) return '광주';
+  if (normalized.startsWith('울산')) return '울산';
+  if (normalized.startsWith('세종')) return '세종';
+  if (normalized.startsWith('경기')) return '경기';
+  if (normalized.startsWith('강원')) return '강원';
+  if (normalized.startsWith('충북') || normalized.startsWith('충청북도')) return '충북';
+  if (normalized.startsWith('충남') || normalized.startsWith('충청남도')) return '충남';
+  if (normalized.startsWith('전북') || normalized.startsWith('전라북도')) return '전북';
+  if (normalized.startsWith('전남') || normalized.startsWith('전라남도')) return '전남';
+  if (normalized.startsWith('경북') || normalized.startsWith('경상북도')) return '경북';
+  if (normalized.startsWith('경남') || normalized.startsWith('경상남도')) return '경남';
+  if (normalized.startsWith('제주')) return '제주';
+  return normalized;
+}
+
+function requestRegions(request = {}) {
+  if (Array.isArray(request.regions) && request.regions.length) {
+    return request.regions.map(normalizeRegion).filter(Boolean);
+  }
+  return String(request.region ?? '').split(/[,.·]/).map((region) => normalizeRegion(region)).filter(Boolean);
+}
+
 export function validateAiRoute(route, candidatePlaces, request) {
   const errors = [];
 
@@ -49,8 +78,9 @@ export function validateAiRoute(route, candidatePlaces, request) {
       errors.push(`Candidate place ${place.placeId} is not verified.`);
     }
 
-    if (request.region && place.region !== request.region) {
-      errors.push(`Candidate place ${place.placeId} does not match selected region ${request.region}.`);
+    const regions = requestRegions(request);
+    if (request.strictRegion === true && regions.length && !regions.includes(normalizeRegion(place.region)) && !regions.includes(normalizeRegion(place.address))) {
+      errors.push(`Candidate place ${place.placeId} does not match selected regions ${regions.join(',')}.`);
     }
 
     if (candidateIds.has(place.placeId)) {

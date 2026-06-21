@@ -1,40 +1,10 @@
 # AGENTS.md
 
-## Scope
+## 작업 규칙
 
-This folder is the Vue/Vite frontend for sceniK and is intended to become the
-`sceniK-front` repository.
-
-## Rules
-
-- Keep the app mobile-first and preserve the existing five-tab navigation:
-  AI Course, Explore, Home, Community, My Page.
-- The frontend must call only the Spring Boot backend through `/api` or
-  `VITE_API_BASE_URL`.
-- Never call `sceniK-ai` directly from frontend code.
-- Do not commit secrets or private API keys.
-- Avoid localStorage as the source of truth for backend-backed data such as
-  auth, routes, posts, comments, likes, visit status, reports, and notifications.
-- localStorage may remain for temporary UI state, filters, drafts, and explicit
-  fallback caches.
-- Use user-friendly Korean error messages for API and form failures.
-- Keep the current sceniK visual identity: scenic, cinematic, warm,
-  trustworthy, and Korean-travel focused.
-- Do not add React, Next.js, Tailwind, Bootstrap, or external UI libraries unless
-  explicitly approved.
-
-## Validation
-
-Before finalizing frontend work, run:
-
-```powershell
-npm run build
-```
-
-Run lint and smoke scripts when relevant:
-
-```powershell
-npm run lint
-npm run smoke:errors
-npm run smoke:course
-```
+- 상세 프로젝트 설명, 라우트, 실행 방법, 환경 변수는 `README.md`를 기준으로 확인합니다.
+- 프론트엔드는 Spring Boot 백엔드만 호출하며, AI 서버나 GMS API를 직접 호출하지 않습니다.
+- 실제 secret, API key, OAuth secret, DB password를 프론트엔드 코드와 문서에 작성하지 않습니다.
+- 기존 5개 하단 탭 구조를 유지합니다: AI Course, Explore, Home, Community, My Page.
+- React, Next.js, Tailwind, Bootstrap, 외부 UI 라이브러리는 명시 승인 없이 추가하지 않습니다.
+- 프론트엔드 변경 후 가능한 경우 `npm run build`로 검증합니다.

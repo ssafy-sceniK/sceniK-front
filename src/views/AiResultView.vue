@@ -3,9 +3,10 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
-import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue';
+import KakaoRouteMap from '../components/course/KakaoRouteMap.vue';
 import CourseSaveStatusPanel from '../components/course/CourseSaveStatusPanel.vue';
 import { useUiStore } from '../stores/uiStore.js';
+import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -18,12 +19,24 @@ const saveError = ref('');
 const saveNotice = ref(null);
 const routeCandidateMap = computed(() => new Map((route.value?.candidatePlaces ?? [])
   .map((place) => [place.placeId, place])));
+const selectedRegions = computed(() => {
+  const regions = Array.isArray(route.value?.regions) && route.value.regions.length
+    ? route.value.regions
+    : String(route.value?.region || uiStore.courseConditions.region || '').split(/[,.·]/).map((region) => region.trim()).filter(Boolean);
+  return regions.length ? regions : ['서울'];
+});
+const selectedRegion = computed(() => selectedRegions.value.join(','));
+const selectedRegionLabel = computed(() => selectedRegions.value.join(', '));
 const routePlaces = computed(() => (route.value?.days ?? []).flatMap((day) => day.places ?? []).map((stop) => ({
   ...routeCandidateMap.value.get(stop.placeId),
   ...stop,
   placeName: stop.placeName ?? stop.name ?? routeCandidateMap.value.get(stop.placeId)?.placeName ?? routeCandidateMap.value.get(stop.placeId)?.name,
-})) ?? []);
-const stops = computed(() => route.value?.days.find((day) => day.dayNumber === selectedDay.value)?.places ?? []);
+})).filter((stop) => isSelectedRegionPlace(stop)) ?? []);
+const stops = computed(() => (route.value?.days.find((day) => day.dayNumber === selectedDay.value)?.places ?? []).map((stop) => ({
+  ...routeCandidateMap.value.get(stop.placeId),
+  ...stop,
+  placeName: stop.placeName ?? stop.name ?? routeCandidateMap.value.get(stop.placeId)?.placeName ?? routeCandidateMap.value.get(stop.placeId)?.name,
+})).filter((stop) => isSelectedRegionPlace(stop)));
 const dayTabs = computed(() => route.value?.days.map((day) => day.dayNumber) ?? []);
 const placeCount = computed(() => routePlaces.value.length);
 const resultMeta = computed(() => {
@@ -42,21 +55,45 @@ const shareText = computed(() => route.value ? `${route.value.title}\n${route.va
 const saveStatusRows = computed(() => {
   if (!route.value) return [];
   return [
-    { label: '코스 상태', value: '생성된 AI 코스' },
-    { label: '검증 장소', value: `${placeCount.value}곳` },
-    { label: '일정', value: `${route.value.durationDays}일` },
-    { label: '저장 후 동작', value: '내 코스에서 수정·공유·삭제 가능' },
+    { label: '장소', value: `${placeCount.value}곳` },
+    { label: '선택 콘텐츠', value: contentLabel.value },
+    { label: '지역', value: selectedRegionLabel.value },
+    { label: '여행 기간', value: travelPeriodLabel.value },
+    { label: '이동수단', value: route.value.transport ?? uiStore.courseConditions.transport },
+    { label: '예산', value: route.value.budget ?? uiStore.courseConditions.budget },
+    { label: '테마', value: themeLabel.value },
+    { label: '숙소', value: lodgingInfo.value ? lodgingInfo.value.name : '없음' },
   ];
 });
-const resultEvidenceRows = computed(() => {
-  if (!route.value) return [];
-  return [
-    { label: '추천 기준', value: '검증된 장소 데이터 기반 추천' },
-    { label: '추천 이유', value: route.value.trustMessage ?? '선택한 K-content와 지역 조건에 맞는 실제 촬영지를 연결했습니다.' },
-    { label: '예상 체류 시간', value: route.value.days?.map((day) => `Day ${day.dayNumber}: ${day.estimatedTravelTime ?? '이동 시간 확인 필요'}`).join(' · ') },
-    { label: '이동 팁', value: route.value.transport ?? uiStore.courseConditions.transport },
-  ];
+const contentLabel = computed(() => {
+  if (!route.value) return '';
+  if (route.value.contentTitle) return route.value.contentTitle;
+  const titles = (route.value.candidatePlaces ?? []).map((place) => place.relatedContentTitle).filter(Boolean);
+  return [...new Set(titles)].join(', ') || '선택 콘텐츠';
 });
+const themeLabel = computed(() => {
+  const styles = Array.isArray(route.value?.travelStyles) && route.value.travelStyles.length
+    ? route.value.travelStyles
+    : String(route.value?.style ?? uiStore.courseConditions.style ?? '').split(/[,.·]/).map((style) => style.trim()).filter(Boolean);
+  return styles.join(', ') || '선택 안 함';
+});
+const travelPeriodLabel = computed(() => {
+  const source = {
+    startDate: route.value?.startDate ?? uiStore.courseConditions.startDate,
+    endDate: route.value?.endDate ?? uiStore.courseConditions.endDate,
+  };
+  const range = route.value?.dateRangeLabel || formatDateRange(source);
+  const days = route.value?.requestedDurationDays || getTripDurationDays(source) || route.value?.durationDays;
+  return `${range} · ${days}일`;
+});
+const lodgingInfo = computed(() => {
+  const address = route.value?.hotelAddress?.trim() || uiStore.courseConditions.hotelAddress?.trim();
+  if (!address) return null;
+  const tokens = address.split(/\s+/).filter(Boolean);
+  const name = tokens.slice(-2).join(' ') || '숙소 위치';
+  return { name, address };
+});
+const isSaved = computed(() => Boolean(route.value?.routeId && uiStore.savedCourses.some((course) => course.routeId === route.value.routeId)) || saveNotice.value?.tone === 'success');
 
 watch(route, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
@@ -107,10 +144,10 @@ function post() {
   const created = uiStore.createPost({
     title: route.value.title,
     body: route.value.summary,
-    region: route.value.region,
+    region: selectedRegion.value,
     duration: `${route.value.durationDays}일`,
     routeId: route.value.routeId,
-    tags: ['AI Course', route.value.region, route.value.style].filter(Boolean),
+    tags: ['AI Course', selectedRegion.value, route.value.style].filter(Boolean),
   });
   if (created) router.push('/community');
 }
@@ -120,11 +157,42 @@ function stopPlace(stop) {
 }
 
 function stopTags(stop) {
+  return [stopCategory(stop)];
+}
+
+function stopCategory(stop) {
   const place = stopPlace(stop);
-  return [
-    place?.category ?? '검증 장소',
-    stop.travelTip?.match(/(도보|지하철|버스|이동)[^,.·]*/)?.[0] ?? '동선 확인',
-  ].filter(Boolean).slice(0, 2);
+  return place?.category || stop.category || '촬영지';
+}
+
+function normalizeRegion(value) {
+  const normalized = String(value ?? '').replace(/\s+/g, '');
+  if (normalized.startsWith('서울')) return '서울';
+  if (normalized.startsWith('부산')) return '부산';
+  if (normalized.startsWith('인천')) return '인천';
+  if (normalized.startsWith('대구')) return '대구';
+  if (normalized.startsWith('대전')) return '대전';
+  if (normalized.startsWith('광주')) return '광주';
+  if (normalized.startsWith('울산')) return '울산';
+  if (normalized.startsWith('세종')) return '세종';
+  if (normalized.startsWith('경기')) return '경기';
+  if (normalized.startsWith('강원')) return '강원';
+  if (normalized.startsWith('충북') || normalized.startsWith('충청북도')) return '충북';
+  if (normalized.startsWith('충남') || normalized.startsWith('충청남도')) return '충남';
+  if (normalized.startsWith('전북') || normalized.startsWith('전라북도')) return '전북';
+  if (normalized.startsWith('전남') || normalized.startsWith('전라남도')) return '전남';
+  if (normalized.startsWith('경북') || normalized.startsWith('경상북도')) return '경북';
+  if (normalized.startsWith('경남') || normalized.startsWith('경상남도')) return '경남';
+  if (normalized.startsWith('제주')) return '제주';
+  return normalized;
+}
+
+function isSelectedRegionPlace(place) {
+  if (!selectedRegions.value.length) return true;
+  return selectedRegions.value.some((region) => (
+    normalizeRegion(place?.region) === normalizeRegion(region)
+    || normalizeRegion(place?.address) === normalizeRegion(region)
+  ));
 }
 
 function closeShareSheet() {
@@ -182,12 +250,6 @@ function postFromShareSheet() {
         </button>
         <div v-if="showActionMenu" class="result-menu-backdrop" @click="showActionMenu = false">
           <div id="ai-result-action-menu" class="result-menu-popover" role="menu" @click.stop>
-            <button type="button" role="menuitem" @click="saveRoute">
-              <span class="result-menu-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z" /></svg>
-              </span>
-              저장
-            </button>
             <button type="button" role="menuitem" @click="openShareSheet">
               <span class="result-menu-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg>
@@ -210,16 +272,13 @@ function postFromShareSheet() {
 
         <CourseSaveStatusPanel
           title="생성된 AI 코스"
-          description="저장 전 장소 수와 일정 조건을 확인하세요. 저장 후 마이페이지에서 다시 수정할 수 있습니다."
+          eyebrow=""
+          description=""
           :rows="saveStatusRows"
           :notice="saveNotice"
         />
 
-        <AiPromptContextSummary class="result" title="사용된 조건 요약 · 검증된 장소 데이터 기반 추천" :rows="resultEvidenceRows" />
-
-        <div class="ai-result-map-card">
-          <span>지도 기반 동선</span>
-        </div>
+        <KakaoRouteMap :stops="stops" :regions="selectedRegions" />
 
         <div v-if="dayTabs.length > 1" class="day-tabs result-day-tabs">
           <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
@@ -233,7 +292,7 @@ function postFromShareSheet() {
             <div>
               <small>{{ stop.recommendedTime }}</small>
               <strong>{{ stop.placeName }}</strong>
-              <p>{{ stop.reason }}</p>
+              <p>{{ stopCategory(stop) }}</p>
               <div class="prototype-stop-tags">
                 <span v-for="tag in stopTags(stop)" :key="tag">{{ tag }}</span>
               </div>
@@ -243,6 +302,9 @@ function postFromShareSheet() {
       </div>
 
       <footer class="ai-result-footer">
+        <BaseButton class="ai-result-save-button" variant="secondary" block :disabled="savingRoute || isSaved" @click="saveRoute">
+          {{ isSaved ? '저장됨' : savingRoute ? '저장 중' : '저장' }}
+        </BaseButton>
         <BaseButton block @click="router.push('/home')">완료</BaseButton>
       </footer>
 

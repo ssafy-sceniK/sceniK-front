@@ -56,16 +56,17 @@ const loadingSummary = computed(() => {
   const selected = selectedContents();
   const title = selected.length > 1 ? `${selected[0].title} 외 ${selected.length - 1}개` : selected[0]?.title ?? '선택한 콘텐츠';
   const duration = getTripDurationDays(uiStore.courseConditions);
-  return `${uiStore.courseConditions.region || '선택 지역'} ${duration}일 코스 · ${title}`;
+  return `${selectedRegionLabel()} ${duration}일 코스 · ${title}`;
 });
 
 const loadingStatusText = computed(() => loadingSteps[activeStepIndex.value].detail);
 const loadingContextRows = computed(() => [
-  { label: '지역', value: uiStore.courseConditions.region || '선택 지역' },
+  { label: '지역', value: selectedRegionLabel() },
   { label: '일수', value: `${getTripDurationDays(uiStore.courseConditions)}일` },
   { label: '이동', value: uiStore.courseConditions.transport },
-  { label: '테마', value: uiStore.courseConditions.style },
+  { label: '테마', value: selectedTravelStyles().join(', ') || uiStore.courseConditions.style },
   { label: '예산', value: uiStore.courseConditions.budget },
+  { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
 ]);
 
 function loadingStepState(index, step) {
@@ -86,6 +87,24 @@ function selectedContents() {
     contentId,
     title: contentId,
   });
+}
+
+function selectedTravelStyles() {
+  const styles = Array.isArray(uiStore.courseConditions.travelStyles)
+    ? uiStore.courseConditions.travelStyles.filter(Boolean)
+    : [];
+  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
+}
+
+function selectedRegions() {
+  const regions = Array.isArray(uiStore.courseConditions.regions)
+    ? uiStore.courseConditions.regions.filter(Boolean)
+    : [];
+  return regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean);
+}
+
+function selectedRegionLabel(separator = ', ') {
+  return selectedRegions().join(separator) || '선택 지역';
 }
 
 function candidateFromPlace(place, selectedContent) {
@@ -130,35 +149,14 @@ async function collectCandidatePlaces(selected) {
   return [...byPlaceId.values()];
 }
 
-function makeRegionalCandidate(place, selected) {
-  const relatedContent = selected.find((content) => place.relatedContentIds?.includes(content.contentId)
-    || place.relatedContents?.some((item) => item.contentId === content.contentId)) ?? selected[0];
-  return candidateFromPlace(place, relatedContent);
-}
-
-async function resolveCandidatePlaces(selected, preferredRegion, durationDays) {
+async function resolveCandidatePlaces(selected, preferredRegions, durationDays) {
   const candidates = await collectCandidatePlaces(selected);
-  const groupsByRegion = candidates.reduce((acc, place) => {
-    if (!acc.has(place.region)) acc.set(place.region, []);
-    acc.get(place.region).push(place);
-    return acc;
-  }, new Map());
-  const exact = groupsByRegion.get(preferredRegion) ?? [];
-  const targetCount = Math.max(6, durationDays * 2);
-  const exactIds = new Set(exact.map((place) => place.placeId));
-  const regionalFallback = placeStore.items
-    .filter((place) => place.verified !== false && place.region === preferredRegion && !exactIds.has(place.placeId))
-    .slice(0, Math.max(0, targetCount - exact.length))
-    .map((place) => makeRegionalCandidate(place, selected));
-
-  if (exact.length || regionalFallback.length) {
-    return { region: preferredRegion, candidatePlaces: [...exact, ...regionalFallback] };
+  const exact = candidates.filter((place) => preferredRegions.includes(place.region));
+  if (exact.length) {
+    return { region: preferredRegions.join(','), regions: preferredRegions, candidatePlaces: exact };
   }
 
-  const [region, candidatePlaces] = [...groupsByRegion.entries()]
-    .sort((a, b) => b[1].length - a[1].length)[0] ?? [preferredRegion, exact];
-
-  return { region, candidatePlaces };
+  return { region: preferredRegions.join(','), regions: preferredRegions, candidatePlaces: [] };
 }
 
 async function generateRoute() {
@@ -176,24 +174,34 @@ async function generateRoute() {
   uiStore.courseConditions.duration = requestedDuration;
   const primaryContent = selected[0];
   const contentIds = selected.map((content) => content.contentId);
+  const travelStyles = selectedTravelStyles();
+  const regions = selectedRegions();
+  const selectedContentTitle = selected.map((content) => content.title).join(' · ');
 
   try {
     const backendRoute = await generateAiRoute({
       contentId: primaryContent.contentId,
       contentIds,
-      region: uiStore.courseConditions.region,
+      region: regions.join(','),
+      regions,
       durationDays: requestedDuration,
       startDate: uiStore.courseConditions.startDate,
       endDate: uiStore.courseConditions.endDate,
+      dateRangeLabel: formatDateRange(uiStore.courseConditions),
       transport: uiStore.courseConditions.transport,
       companion: uiStore.courseConditions.companion,
-      style: uiStore.courseConditions.style,
+      style: travelStyles.join(', '),
+      travelStyles,
       budgetMin: uiStore.courseConditions.budgetMin,
       budgetMax: uiStore.courseConditions.budgetMax,
+      budget: uiStore.courseConditions.budget,
+      hotelAddress: uiStore.courseConditions.hotelAddress,
     });
     const validation = validateAiRoute(backendRoute, backendRoute.candidatePlaces, {
-      region: backendRoute.region,
+      region: regions.join(','),
+      regions,
       durationDays: backendRoute.durationDays,
+      strictRegion: true,
     });
     if (!validation.ok) {
       console.warn('AI route validation failed', validation.errors);
@@ -201,15 +209,21 @@ async function generateRoute() {
     }
     uiStore.generatedRoute = {
       ...backendRoute,
+      title: `${selectedContentTitle} ${selectedRegionLabel('·')} ${(travelStyles[0] ?? uiStore.courseConditions.style ?? '감성 여행').replace(' 여행', '')} 여행 코스`,
+      contentTitle: selectedContentTitle,
+      regions: backendRoute.regions ?? regions,
+      region: backendRoute.region ?? regions.join(','),
       requestedDurationDays: requestedDuration,
       startDate: backendRoute.startDate ?? uiStore.courseConditions.startDate,
       endDate: backendRoute.endDate ?? uiStore.courseConditions.endDate,
       transport: backendRoute.transport ?? uiStore.courseConditions.transport,
       companion: backendRoute.companion ?? uiStore.courseConditions.companion,
-      style: backendRoute.style ?? uiStore.courseConditions.style,
+      style: backendRoute.style ?? travelStyles.join(', '),
+      travelStyles: backendRoute.travelStyles ?? travelStyles,
       budgetMin: backendRoute.budgetMin ?? uiStore.courseConditions.budgetMin,
       budgetMax: backendRoute.budgetMax ?? uiStore.courseConditions.budgetMax,
       budget: backendRoute.budget ?? uiStore.courseConditions.budget,
+      hotelAddress: backendRoute.hotelAddress ?? uiStore.courseConditions.hotelAddress,
     };
     uiStore.persist();
     router.push('/ai/result');
@@ -225,15 +239,16 @@ async function generateRoute() {
     // Local deterministic route is opt-in for offline demos only.
   }
 
-  const resolved = await resolveCandidatePlaces(selected, uiStore.courseConditions.region, requestedDuration);
+  const resolved = await resolveCandidatePlaces(selected, regions, requestedDuration);
   const dayCount = Math.max(1, Math.min(requestedDuration, resolved.candidatePlaces.length));
-  const contentTitle = selected.length > 1 ? `${primaryContent.title} 외 ${selected.length - 1}개` : primaryContent.title;
+  const contentTitle = selected.map((content) => content.title).join(' · ');
   const dateRangeLabel = formatDateRange(uiStore.courseConditions);
-  const styleLabel = (uiStore.courseConditions.style ?? '감성 여행').replace(' 여행', '');
+  const styleLabel = (travelStyles[0] ?? '감성 여행').replace(' 여행', '');
   const durationLabel = dayCount > 1 ? `${dayCount - 1}박 ${dayCount}일` : '1일 코스';
   const request = {
     contentId: primaryContent.contentId,
     region: resolved.region,
+    regions: resolved.regions,
     durationDays: dayCount,
   };
   const candidatePlaces = resolved.candidatePlaces;
@@ -249,6 +264,7 @@ async function generateRoute() {
     contentIds,
     contentTitle,
     region: request.region,
+    regions: request.regions,
     durationDays: dayCount,
     requestedDurationDays: requestedDuration,
     startDate: uiStore.courseConditions.startDate,
@@ -256,10 +272,12 @@ async function generateRoute() {
     dateRangeLabel,
     transport: uiStore.courseConditions.transport,
     companion: uiStore.courseConditions.companion,
-    style: uiStore.courseConditions.style,
+    style: travelStyles.join(', '),
+    travelStyles,
     budgetMin: uiStore.courseConditions.budgetMin,
     budgetMax: uiStore.courseConditions.budgetMax,
     budget: uiStore.courseConditions.budget,
+    hotelAddress: uiStore.courseConditions.hotelAddress,
     trustMessage: '등록된 실제 장소 데이터만 사용했습니다. 임의 장소는 포함하지 않습니다.',
     candidatePlaces,
     days: groups.map((group, dayIndex) => ({
@@ -271,8 +289,10 @@ async function generateRoute() {
         dayNumber: dayIndex + 1,
         visitOrder: placeIndex + 1,
         recommendedTime: placeIndex === 0 ? '10:00' : placeIndex === 1 ? '14:00' : '17:30',
-        reason: `${place.relatedContentTitle}의 장면 맥락과 ${uiStore.courseConditions.style} 조건에 잘 맞는 실제 장소입니다.`,
-        travelTip: `${place.region} 이동 동선을 확인하고 운영 시간을 방문 전 다시 확인하세요.`,
+        reason: place.category || '촬영지',
+        travelTip: uiStore.courseConditions.hotelAddress
+          ? `${placeIndex === 0 ? `숙소(${uiStore.courseConditions.hotelAddress})에서 출발하는 동선을 참고하세요. ` : ''}${place.region} 이동 동선을 확인하고 운영 시간을 방문 전 다시 확인하세요.${placeIndex === group.length - 1 ? ' 일정 후 숙소 복귀 시간을 함께 확인하세요.' : ''}`
+          : `${place.region} 이동 동선을 확인하고 운영 시간을 방문 전 다시 확인하세요.`,
       })),
     })),
   };
@@ -316,7 +336,6 @@ onBeforeUnmount(() => {
         aria-valuemax="100"
         :aria-valuenow="loadingProgress"
       >
-        <span class="loading-orbit__track" aria-hidden="true"></span>
         <strong>{{ loadingProgress }}%</strong>
       </div>
 

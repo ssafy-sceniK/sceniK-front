@@ -22,6 +22,7 @@ import {
   deleteRoute,
   fetchMyRoutes,
   fetchRoute,
+  serializeRoutePayload,
   updateRoute,
 } from '../api/routeApi.js';
 import {
@@ -103,15 +104,18 @@ function defaultState() {
     selectedContentIds: [],
     courseConditions: {
       region: '서울',
+      regions: ['서울'],
       duration: 1,
       startDate: dateAfter(7),
       endDate: dateAfter(7),
       transport: '대중교통',
       companion: '친구',
       style: '감성 여행',
+      travelStyles: ['감성 여행'],
       budgetMin: 100000,
       budgetMax: 300000,
       budget: '10만원 ~ 30만원',
+      hotelAddress: '',
     },
     generatedRoute: null,
   };
@@ -129,10 +133,20 @@ function readState() {
     const budgetMax = Number(state.courseConditions?.budgetMax ?? conditionDefaults.budgetMax);
     const normalizedBudgetMin = Math.min(budgetMin, budgetMax);
     const normalizedBudgetMax = Math.max(budgetMin, budgetMax);
+    const storedRegions = Array.isArray(state.courseConditions?.regions)
+      ? state.courseConditions.regions.filter(Boolean)
+      : String(state.courseConditions?.region ?? conditionDefaults.region).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
+    const storedStyles = Array.isArray(state.courseConditions?.travelStyles)
+      ? state.courseConditions.travelStyles.filter(Boolean)
+      : String(state.courseConditions?.style ?? conditionDefaults.style).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
     state.courseConditions = {
       ...conditionDefaults,
       ...state.courseConditions,
       ...dateRange,
+      regions: storedRegions.length ? storedRegions : conditionDefaults.regions,
+      region: (storedRegions.length ? storedRegions : conditionDefaults.regions).join(','),
+      travelStyles: storedStyles.length ? storedStyles : conditionDefaults.travelStyles,
+      style: (storedStyles.length ? storedStyles : conditionDefaults.travelStyles).join(', '),
       budgetMin: normalizedBudgetMin,
       budgetMax: normalizedBudgetMax,
       budget: formatBudgetRange(normalizedBudgetMin, normalizedBudgetMax),
@@ -197,6 +211,9 @@ function inferCourseContentIds(course = {}, placeIds = []) {
 
 function relatedVerifiedPlacesForCourse(course = {}, placeIds = []) {
   const contentIds = inferCourseContentIds(course, placeIds);
+  const courseRegions = Array.isArray(course.regions) && course.regions.length
+    ? course.regions
+    : String(course.region ?? '').split(/[,.·]/).map((region) => region.trim()).filter(Boolean);
   const mappedPlaceIds = new Set();
 
   contentPlaces.forEach((item) => {
@@ -213,8 +230,8 @@ function relatedVerifiedPlacesForCourse(course = {}, placeIds = []) {
     .map((placeId) => places.find((place) => place.placeId === placeId))
     .filter((place) => place?.verified === true);
 
-  if (!course.region) return relatedPlaces;
-  return relatedPlaces.filter((place) => place.region === course.region);
+  if (!courseRegions.length) return relatedPlaces;
+  return relatedPlaces.filter((place) => courseRegions.includes(place.region));
 }
 
 function buildCandidatePlaces(placeIds = [], course = {}) {
@@ -243,11 +260,34 @@ function buildCandidatePlaces(placeIds = [], course = {}) {
     addCandidate(makeCandidatePlace(place, relatedContentForPlace(place, preferredContentIds)));
   });
 
+  const usedPlaceIds = [...new Set(placeIds)];
+  const generatedCandidatesCoverRoute = usedPlaceIds.length > 0
+    && usedPlaceIds.every((placeId) => candidates.has(placeId));
+
+  if (generatedCandidatesCoverRoute && Array.isArray(course.candidatePlaces) && course.candidatePlaces.length) {
+    return [...candidates.values()];
+  }
+
   relatedVerifiedPlacesForCourse(course, placeIds).forEach((place) => {
     addCandidate(makeCandidatePlace(place, relatedContentForPlace(place, preferredContentIds)));
   });
 
   return [...candidates.values()];
+}
+
+function summarizeRoutePayload(payload = {}) {
+  const days = Array.isArray(payload.days) ? payload.days : [];
+  const stops = days.flatMap((day) => day.places ?? []);
+  return {
+    title: payload.title,
+    region: payload.region,
+    regions: payload.regions,
+    durationDays: payload.durationDays,
+    candidateCount: payload.candidatePlaces?.length ?? 0,
+    dayCount: days.length,
+    stopCount: stops.length,
+    stopPlaceIds: stops.map((stop) => stop.placeId),
+  };
 }
 
 function normalizeDays(days = []) {
@@ -282,7 +322,10 @@ function normalizeCourseToRoute(course) {
       duration: course.duration ?? course.durationDays ?? days.length,
       durationDays: days.length,
       transport: course.transport ?? 'Transit',
-      style: course.style ?? course.tags?.[0] ?? 'K-content travel',
+      region: course.region ?? course.regions?.join(',') ?? 'Korea',
+      regions: course.regions ?? String(course.region ?? '').split(/[,.·]/).map((item) => item.trim()).filter(Boolean),
+      style: course.style ?? course.travelStyles?.join(', ') ?? course.tags?.[0] ?? 'K-content travel',
+      travelStyles: course.travelStyles ?? String(course.style ?? course.tags?.[0] ?? 'K-content travel').split(/[,.·]/).map((item) => item.trim()).filter(Boolean),
       trustMessage: course.trustMessage ?? 'This course uses only verified sceniK places.',
       places: placeIds,
       candidatePlaces: buildCandidatePlaces(placeIds, course),
@@ -309,7 +352,10 @@ function normalizeCourseToRoute(course) {
     summary: course.summary ?? `${course.region ?? 'Korea'} verified places connected into a sceniK travel course.`,
     durationDays: dayCount,
     transport: course.transport ?? 'Transit',
+    region: course.region ?? course.regions?.join(',') ?? 'Korea',
+    regions: course.regions ?? String(course.region ?? '').split(/[,.·]/).map((item) => item.trim()).filter(Boolean),
     style: course.style ?? course.tags?.[0] ?? 'K-content travel',
+    travelStyles: course.travelStyles ?? String(course.style ?? course.tags?.[0] ?? 'K-content travel').split(/[,.·]/).map((item) => item.trim()).filter(Boolean),
     trustMessage: course.trustMessage ?? 'This course uses only verified sceniK places.',
     candidatePlaces,
     days: groups.map((group, dayIndex) => ({
@@ -857,31 +903,42 @@ export const useUiStore = defineStore('ui', {
       this.persist();
     },
     async saveCourse(route) {
-      if (!this.requireAuth('로그인하면 AI 코스를 저장할 수 있습니다.')) return;
+      if (!this.requireAuth('로그인하면 AI 코스를 저장할 수 있습니다.')) {
+        this.routeError = '로그인이 필요합니다.';
+        return null;
+      }
       const normalized = normalizeCourseToRoute(route);
       const validation = validateRoute(normalized);
       if (!validation.ok) {
-        console.warn('Route validation failed before save', validation.errors);
-        this.notify(AI_ROUTE_VALIDATION_USER_MESSAGE);
-        return;
+        const detail = validation.errors[0] ?? AI_ROUTE_VALIDATION_USER_MESSAGE;
+        this.routeError = `저장 전 검증 실패: ${detail}`;
+        console.warn('Route validation failed before save', {
+          errors: validation.errors,
+          payload: summarizeRoutePayload(normalized),
+        });
+        this.notify(this.routeError);
+        return null;
       }
       this.routeActionLoading = true;
       this.routeError = '';
       try {
         const savingGeneratedRoute = this.generatedRoute?.routeId === normalized.routeId;
         const placeIds = normalized.places ?? routePlaceIdsFromDays(normalized.days);
-        const saved = normalizeCourseToRoute(await createRoute({
+        const requestPayload = {
           ...normalized,
           duration: normalized.duration ?? normalized.durationDays,
           places: placeIds,
           tags: normalized.tags ?? ['AI 코스', normalized.region, normalized.style].filter(Boolean),
-        }));
+        };
+        console.info('AI route save request payload', summarizeRoutePayload(serializeRoutePayload(requestPayload)));
+        const saved = normalizeCourseToRoute(await createRoute(requestPayload));
         this.savedCourses = [saved, ...this.savedCourses.filter((item) => item.routeId !== saved.routeId)];
         if (savingGeneratedRoute || this.generatedRoute?.routeId === saved.routeId) this.generatedRoute = saved;
         this.persist();
         this.notify('AI 코스를 저장했습니다.');
         return saved;
       } catch (error) {
+        console.error('AI route save failed', error?.response?.data ?? error);
         this.routeError = apiErrorMessage(error, 'AI 코스를 저장하지 못했습니다.');
         this.notify(this.routeError);
         return null;

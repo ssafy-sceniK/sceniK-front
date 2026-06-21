@@ -18,9 +18,9 @@ const uiStore = useUiStore();
 const relatedPlaces = ref([]);
 const candidateLoading = ref(false);
 const budgetBounds = {
-  min: 50000,
-  max: 10000000,
-  step: 100000,
+  min: 100000,
+  perDayMax: 1000000,
+  step: 10000,
 };
 const selectedContentIds = computed(() => {
   const ids = Array.isArray(uiStore.selectedContentIds) && uiStore.selectedContentIds.length
@@ -76,20 +76,24 @@ const regionOptions = computed(() => {
   const allRegions = placeStore.regions.filter((item) => item && item !== '전체');
   return relatedRegions.length ? relatedRegions : allRegions.length ? allRegions : ['서울'];
 });
-const exactRelatedPlaces = computed(() => relatedPlaces.value.filter((place) => place.region === uiStore.courseConditions.region));
+const selectedRegions = computed(() => {
+  const regions = Array.isArray(uiStore.courseConditions.regions)
+    ? uiStore.courseConditions.regions.filter(Boolean)
+    : [];
+  return regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean);
+});
+const selectedRegionLabel = computed(() => selectedRegions.value.join(', '));
+const exactRelatedPlaces = computed(() => relatedPlaces.value.filter((place) => selectedRegions.value.includes(place.region)));
 const today = dateAfter(0);
 const tripDurationDays = computed(() => getTripDurationDays(uiStore.courseConditions));
 const tripDateRangeLabel = computed(() => formatDateRange(uiStore.courseConditions));
+const budgetMaxLimit = computed(() => Math.max(budgetBounds.min, tripDurationDays.value * budgetBounds.perDayMax));
 const targetCandidateCount = computed(() => Math.max(6, tripDurationDays.value * 2));
-const fallbackCandidatePlaces = computed(() => {
-  const exactIds = new Set(exactRelatedPlaces.value.map((place) => place.placeId));
-  return placeStore.items
-    .filter((place) => place.verified !== false && place.region === uiStore.courseConditions.region && !exactIds.has(place.placeId))
-    .slice(0, Math.max(0, targetCandidateCount.value - exactRelatedPlaces.value.length));
-});
-const candidatePlaces = computed(() => uniquePlaces([...exactRelatedPlaces.value, ...fallbackCandidatePlaces.value]));
-const candidateDayLimit = computed(() => Math.max(1, candidatePlaces.value.length));
-const generatedDayCount = computed(() => Math.min(tripDurationDays.value, candidateDayLimit.value));
+const fallbackCandidatePlaces = computed(() => relatedPlaces.value
+  .filter((place) => !selectedRegions.value.includes(place.region))
+  .slice(0, Math.max(0, targetCandidateCount.value - exactRelatedPlaces.value.length)));
+const candidatePlaces = computed(() => uniquePlaces(exactRelatedPlaces.value.length ? exactRelatedPlaces.value : fallbackCandidatePlaces.value));
+const generatedDayCount = computed(() => tripDurationDays.value);
 const canGenerate = computed(() => selectedContentIds.value.length > 0 && !candidateLoading.value);
 const budgetRangeLabel = computed(() => formatBudgetRange(uiStore.courseConditions.budgetMin, uiStore.courseConditions.budgetMax));
 const budgetMinPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMin));
@@ -98,8 +102,8 @@ const candidateHelpText = computed(() => {
   if (candidateLoading.value) return '선택한 콘텐츠와 연결된 실제 장소를 확인하고 있어요.';
   if (!selectedContentIds.value.length) return 'AI 코스를 만들 콘텐츠를 먼저 선택해 주세요.';
   if (!candidatePlaces.value.length) return '미리보기 장소가 비어 있어도 백엔드가 선택 콘텐츠와 지역 조건으로 검증 장소를 다시 찾습니다.';
-  if (!fallbackCandidatePlaces.value.length) return '선택한 K-content와 직접 연결된 실제 장소만 표시하고 있어요.';
-  return `직접 연결 장소 ${exactRelatedPlaces.value.length}곳에 같은 지역의 검증 장소 ${fallbackCandidatePlaces.value.length}곳을 더했어요.`;
+  if (exactRelatedPlaces.value.length) return '선택한 K-content와 직접 연결된 실제 장소만 표시하고 있어요.';
+  return `선택 지역 장소가 부족해 선택 콘텐츠와 연결된 다른 지역 장소 ${fallbackCandidatePlaces.value.length}곳을 확인하고 있어요.`;
 });
 const selectedSummaryTitle = computed(() => {
   if (selectedContents.value.length) return selectedContents.value.map((content) => content.title).join(', ');
@@ -108,11 +112,36 @@ const selectedSummaryTitle = computed(() => {
 });
 const aiContextRows = computed(() => [
   { label: '선택 콘텐츠', value: selectedSummaryTitle.value },
-  { label: '지역', value: uiStore.courseConditions.region },
+  { label: '지역', value: selectedRegionLabel.value },
   { label: '여행 기간', value: `${tripDateRangeLabel.value} · ${tripDurationDays.value}일` },
   { label: '이동 수단', value: uiStore.courseConditions.transport },
-  { label: '예산/테마', value: `${budgetRangeLabel.value} · ${uiStore.courseConditions.style}` },
+  { label: '예산/테마', value: `${budgetRangeLabel.value} · ${travelStyleLabel.value}` },
+  { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
 ]);
+const travelStyleOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '성지순례'];
+const selectedTravelStyles = computed(() => {
+  const styles = Array.isArray(uiStore.courseConditions.travelStyles)
+    ? uiStore.courseConditions.travelStyles.filter(Boolean)
+    : [];
+  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
+});
+const travelStyleLabel = computed(() => selectedTravelStyles.value.join(', ') || '선택 안 함');
+
+function toggleTravelStyle(style) {
+  const current = new Set(selectedTravelStyles.value);
+  if (current.has(style)) current.delete(style);
+  else current.add(style);
+  uiStore.courseConditions.travelStyles = [...current];
+  uiStore.courseConditions.style = uiStore.courseConditions.travelStyles.join(', ');
+}
+
+function toggleRegion(region) {
+  const current = new Set(selectedRegions.value);
+  if (current.has(region) && current.size > 1) current.delete(region);
+  else current.add(region);
+  uiStore.courseConditions.regions = [...current];
+  uiStore.courseConditions.region = uiStore.courseConditions.regions.join(',');
+}
 
 function formatWon(value) {
   const amount = Number(value) || 0;
@@ -125,28 +154,36 @@ function formatBudgetRange(min, max) {
 }
 
 function budgetPercent(value) {
-  const range = budgetBounds.max - budgetBounds.min;
+  const range = budgetMaxLimit.value - budgetBounds.min;
+  if (range <= 0) return '0%';
   return `${Math.round(((Number(value) - budgetBounds.min) / range) * 100)}%`;
 }
 
 function normalizeBudgetRange() {
   const min = Number(uiStore.courseConditions.budgetMin ?? budgetBounds.min);
-  const max = Number(uiStore.courseConditions.budgetMax ?? budgetBounds.max);
-  uiStore.courseConditions.budgetMin = Math.max(budgetBounds.min, Math.min(min, budgetBounds.max));
-  uiStore.courseConditions.budgetMax = Math.max(uiStore.courseConditions.budgetMin, Math.min(max, budgetBounds.max));
+  const max = Number(uiStore.courseConditions.budgetMax ?? budgetMaxLimit.value);
+  uiStore.courseConditions.budgetMin = Math.max(budgetBounds.min, Math.min(min, budgetMaxLimit.value));
+  uiStore.courseConditions.budgetMax = Math.max(uiStore.courseConditions.budgetMin, Math.min(max, budgetMaxLimit.value));
   uiStore.courseConditions.budget = formatBudgetRange(uiStore.courseConditions.budgetMin, uiStore.courseConditions.budgetMax);
 }
 
 watchEffect(() => {
-  if (regionOptions.value.length && !regionOptions.value.includes(uiStore.courseConditions.region)) {
-    uiStore.courseConditions.region = regionOptions.value[0];
+  if (!Array.isArray(uiStore.courseConditions.regions) || !uiStore.courseConditions.regions.length) {
+    uiStore.courseConditions.regions = [uiStore.courseConditions.region || regionOptions.value[0]].filter(Boolean);
   }
+  const validRegions = uiStore.courseConditions.regions.filter((region) => regionOptions.value.includes(region));
+  uiStore.courseConditions.regions = validRegions.length ? validRegions : [regionOptions.value[0]];
+  uiStore.courseConditions.region = uiStore.courseConditions.regions.join(',');
 
   const normalizedDateRange = ensureDateRange(uiStore.courseConditions);
   uiStore.courseConditions.startDate = normalizedDateRange.startDate;
   uiStore.courseConditions.endDate = normalizedDateRange.endDate;
   uiStore.courseConditions.duration = tripDurationDays.value;
   normalizeBudgetRange();
+  if (!Array.isArray(uiStore.courseConditions.travelStyles) || !uiStore.courseConditions.travelStyles.length) {
+    uiStore.courseConditions.travelStyles = [uiStore.courseConditions.style].filter(Boolean);
+  }
+  uiStore.courseConditions.style = uiStore.courseConditions.travelStyles.join(', ');
 });
 </script>
 
@@ -175,7 +212,19 @@ watchEffect(() => {
 
       <div class="condition-block">
         <h2>지역</h2>
-        <ChipGroup v-model="uiStore.courseConditions.region" :items="regionOptions" />
+        <div class="chip-row wrap">
+          <button
+            v-for="region in regionOptions"
+            :key="region"
+            type="button"
+            class="chip"
+            :class="{ selected: selectedRegions.includes(region) }"
+            :aria-pressed="selectedRegions.includes(region)"
+            @click="toggleRegion(region)"
+          >
+            {{ region }}
+          </button>
+        </div>
       </div>
       <div class="condition-block">
         <h2>여행 날짜</h2>
@@ -194,9 +243,6 @@ watchEffect(() => {
           </label>
           <p>
             {{ tripDateRangeLabel }} · 선택 기간 {{ tripDurationDays }}일
-            <span v-if="generatedDayCount !== tripDurationDays">
-              · 현재 장소 수 기준 결과는 {{ generatedDayCount }}일 코스로 조정돼요
-            </span>
           </p>
         </div>
       </div>
@@ -223,7 +269,7 @@ watchEffect(() => {
               type="range"
               aria-label="최소 예산"
               :min="budgetBounds.min"
-              :max="budgetBounds.max"
+              :max="budgetMaxLimit"
               :step="budgetBounds.step"
               @input="normalizeBudgetRange"
             />
@@ -233,7 +279,7 @@ watchEffect(() => {
               type="range"
               aria-label="최대 예산"
               :min="budgetBounds.min"
-              :max="budgetBounds.max"
+              :max="budgetMaxLimit"
               :step="budgetBounds.step"
               @input="normalizeBudgetRange"
             />
@@ -242,11 +288,34 @@ watchEffect(() => {
             <span>최소 <b>{{ formatWon(uiStore.courseConditions.budgetMin) }}</b></span>
             <span>최대 <b>{{ formatWon(uiStore.courseConditions.budgetMax) }}</b></span>
           </div>
+          <p class="budget-range-note">선택 기간 기준 최대 {{ formatWon(budgetMaxLimit) }}까지 설정할 수 있어요.</p>
         </div>
       </div>
       <div class="condition-block">
+        <h2>숙소 주소 또는 호텔 위치 <span class="optional-label">(선택)</span></h2>
+        <label class="hotel-address-field">
+          <input
+            v-model.trim="uiStore.courseConditions.hotelAddress"
+            type="text"
+            placeholder="예: 서울특별시 중구 을지로 30 롯데호텔 서울"
+            autocomplete="street-address"
+          />
+        </label>
+      </div>
+      <div class="condition-block">
         <h2>여행 스타일</h2>
-        <ChipGroup v-model="uiStore.courseConditions.style" :items="['감성 여행', '맛집 중심', '촬영지 중심', '성지순례']" />
+        <div class="chip-row wrap">
+          <button
+            v-for="style in travelStyleOptions"
+            :key="style"
+            type="button"
+            class="chip"
+            :class="{ selected: selectedTravelStyles.includes(style) }"
+            @click="toggleTravelStyle(style)"
+          >
+            {{ style }}
+          </button>
+        </div>
       </div>
 
       <div class="section-header"><h2>AI 코스에 사용할 장소</h2><span>{{ candidatePlaces.length }}곳</span></div>

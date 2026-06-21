@@ -43,6 +43,17 @@ function normalizeStop(stop = {}, dayNumber, stopIndex, candidateMap) {
   };
 }
 
+function normalizeTravelStyles(route = {}) {
+  if (Array.isArray(route.travelStyles)) return route.travelStyles.filter(Boolean);
+  const source = firstDefined(route.style, route.theme, '');
+  return String(source).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
+}
+
+function normalizeRegions(route = {}) {
+  if (Array.isArray(route.regions)) return route.regions.filter(Boolean);
+  return String(firstDefined(route.region, '')).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
+}
+
 function sourceDays(route = {}) {
   if (Array.isArray(route.days)) return route.days;
   if (Array.isArray(route.routeDays)) return route.routeDays;
@@ -87,6 +98,8 @@ export function normalizeRoutePayload(rawRoute) {
   const candidatePlaces = [...candidateMap.values()];
   const durationDays = Number(firstDefined(route.durationDays, route.duration, route.dayCount, days.length, 1));
   const routeId = firstDefined(route.routeId, route.id);
+  const travelStyles = normalizeTravelStyles(route);
+  const regions = normalizeRegions(route);
 
   return {
     ...route,
@@ -94,11 +107,13 @@ export function normalizeRoutePayload(rawRoute) {
     id: route.id ?? routeId,
     title: firstDefined(route.title, route.routeTitle, 'sceniK AI Course'),
     summary: firstDefined(route.summary, route.description, 'Verified sceniK places connected into a travel course.'),
-    region: firstDefined(route.region, candidatePlaces[0]?.region, 'Korea'),
+    region: firstDefined(route.region, regions.join(','), candidatePlaces[0]?.region, 'Korea'),
+    regions,
     durationDays,
     duration: Number(firstDefined(route.duration, durationDays)),
     transport: firstDefined(route.transport, 'Transit'),
-    style: firstDefined(route.style, route.theme, 'K-content travel'),
+    style: firstDefined(route.style, route.theme, travelStyles.join(', '), 'K-content travel'),
+    travelStyles,
     trustMessage: firstDefined(route.trustMessage, 'This course uses only verified sceniK places.'),
     tags: route.tags ?? ['AI Course', route.region, route.style].filter(Boolean),
     places: route.places ?? routePlaceIds,
@@ -126,6 +141,10 @@ export function serializeRoutePayload(route) {
   return {
     ...normalized,
     routeId: normalized?.routeId,
+    style: normalized?.travelStyles?.length ? normalized.travelStyles.join(', ') : normalized?.style,
+    travelStyles: normalized?.travelStyles ?? [],
+    region: normalized?.regions?.length ? normalized.regions.join(',') : normalized?.region,
+    regions: normalized?.regions ?? [],
     candidatePlaces: normalized?.candidatePlaces ?? [],
     places: sourcePlaces,
     days: normalized?.days ?? [],
