@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import AuthSessionPanel from '../components/auth/AuthSessionPanel.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
+const router = useRouter();
 const uiStore = useUiStore();
 const language = ref('ko');
 const theme = ref('light');
@@ -27,6 +29,7 @@ async function handleLogout() {
       title: '로그아웃되었습니다.',
       text: '이 기기에서 세션이 종료되었습니다. 다시 이용하려면 로그인해 주세요.',
     };
+    await router.replace('/');
   } catch {
     sessionNotice.value = {
       tone: 'error',
@@ -86,7 +89,7 @@ async function handleLogout() {
             v-if="uiStore.currentUser"
             type="button"
             class="settings-action-row settings-action-row--logout"
-            @click="uiStore.logout()"
+            @click="handleLogout"
           >
             <span>로그아웃</span>
             <em aria-hidden="true">›</em>

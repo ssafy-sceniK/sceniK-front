@@ -247,29 +247,6 @@
   gap: 12px;
 }
 
-.step-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.step-dots b,
-.step-dots i {
-  display: block;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--border);
-}
-
-.step-dots b {
-  width: 24px;
-  background: var(--text);
-}
-
-.step-dots i {
-  width: 6px;
-}
 
 .scenik-logo {
   display: inline-flex;

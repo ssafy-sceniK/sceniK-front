@@ -1,4 +1,4 @@
-﻿import { defineStore } from 'pinia';
+import { defineStore } from 'pinia';
 import {
   clearAccessToken,
   exchangeOAuthCode,
@@ -1216,7 +1216,6 @@ export const useUiStore = defineStore('ui', {
             ))
           );
         });
-        this.notify('댓글을 수정했습니다.');
         return updated;
       } catch (error) {
         this.communityError = apiErrorMessage(error, '댓글을 수정하지 못했습니다.');
@@ -1237,7 +1236,6 @@ export const useUiStore = defineStore('ui', {
           ));
           return withCommunityCommentCount(post, comments);
         });
-        this.notify('댓글을 삭제했습니다.');
         return true;
       } catch (error) {
         this.communityError = apiErrorMessage(error, '댓글을 삭제하지 못했습니다.');

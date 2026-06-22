@@ -515,12 +515,7 @@ async function addComment(postId) {
   const created = await uiStore.addComment(postId, commentText.value);
   if (created) {
     commentText.value = '';
-    commentNotice.value = {
-      tone: 'success',
-      title: '댓글이 등록되었습니다.',
-      text: '게시글 댓글 목록에 새 댓글이 추가되었습니다.',
-    };
-    uiStore.notify('댓글이 등록되었습니다.', 'success');
+    commentNotice.value = null;
     return;
   }
   commentNotice.value = {
@@ -562,12 +557,7 @@ async function addReply(postId, comment, threadParent = comment) {
   commentActionLoading.value = false;
   if (created) {
     cancelReply();
-    commentNotice.value = {
-      tone: 'success',
-      title: '답글이 등록되었습니다.',
-      text: '답글은 한 단계 thread 안에 표시됩니다.',
-    };
-    uiStore.notify('답글이 등록되었습니다.', 'success');
+    commentNotice.value = null;
     return;
   }
   commentNotice.value = {
@@ -613,11 +603,7 @@ async function saveEditedComment(postId) {
   commentActionLoading.value = false;
   if (updated) {
     cancelEditComment();
-    commentNotice.value = {
-      tone: 'success',
-      title: '댓글이 수정되었습니다.',
-      text: '수정한 내용이 댓글 목록에 반영되었습니다.',
-    };
+    commentNotice.value = null;
     return;
   }
   commentNotice.value = {
@@ -640,11 +626,7 @@ async function deleteComment(postId, comment) {
   commentActionLoading.value = false;
   if (deleted) {
     if (editingCommentId.value === targetId) cancelEditComment();
-    commentNotice.value = {
-      tone: 'success',
-      title: '댓글이 삭제되었습니다.',
-      text: '선택한 댓글이 목록에서 제거되었습니다.',
-    };
+    commentNotice.value = null;
     return;
   }
   commentNotice.value = {

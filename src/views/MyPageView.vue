@@ -72,6 +72,11 @@ const tabs = computed(() => [
     label: '게시글',
   },
 ]);
+
+async function logoutToLanding() {
+  await uiStore.logout();
+  router.replace('/');
+}
 </script>
 
 <template>
@@ -108,7 +113,7 @@ const tabs = computed(() => [
         </div>
         <div class="profile-actions">
           <RouterLink class="profile-edit-button" to="/my/profile-edit">프로필 편집</RouterLink>
-          <button type="button" class="profile-edit-button profile-logout" @click="uiStore.logout()">로그아웃</button>
+          <button type="button" class="profile-edit-button profile-logout" @click="logoutToLanding">로그아웃</button>
         </div>
       </div>
 

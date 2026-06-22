@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { readAccessToken } from '../api/authApi.js';
+import { useUiStore } from '../stores/uiStore.js';
 import SplashView from '../views/SplashView.vue';
 import LoginView from '../views/LoginView.vue';
 import SignupView from '../views/SignupView.vue';
@@ -28,11 +30,11 @@ import AdminView from '../views/AdminView.vue';
 import OAuthCallbackView from '../views/OAuthCallbackView.vue';
 
 const routes = [
-  { path: '/', name: 'splash', component: SplashView },
-  { path: '/login', name: 'login', component: LoginView },
-  { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
-  { path: '/signup', name: 'signup', component: SignupView },
-  { path: '/preferences', name: 'preferences', component: PreferencesView },
+  { path: '/', name: 'splash', component: SplashView, meta: { public: true } },
+  { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
+  { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView, meta: { public: true } },
+  { path: '/signup', name: 'signup', component: SignupView, meta: { public: true } },
+  { path: '/preferences', name: 'preferences', component: PreferencesView, meta: { public: true } },
   { path: '/home', name: 'home', component: HomeView },
   { path: '/home/recent-all', name: 'home-recent-all', component: SimpleListView, meta: { title: '최근 본 장소', type: 'recent' } },
   { path: '/home/content-all', name: 'home-content-all', component: ContentListView },
@@ -95,10 +97,24 @@ const routes = [
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ];
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior() {
     return { top: 0 };
   },
 });
+
+router.beforeEach((to) => {
+  if (to.matched.some((record) => record.meta.public)) return true;
+
+  const uiStore = useUiStore();
+  if (uiStore.currentUser || readAccessToken()) return true;
+
+  return {
+    name: 'splash',
+    query: to.fullPath && to.fullPath !== '/' ? { redirect: to.fullPath } : {},
+  };
+});
+
+export default router;
