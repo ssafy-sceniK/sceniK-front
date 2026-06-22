@@ -136,16 +136,17 @@ function editCourse() {
 }
 
 function post() {
-  if (!route.value) return;
-  const created = uiStore.createPost({
+  if (!route.value || !uiStore.requireAuth('로그인하면 코스를 커뮤니티 글로 공유할 수 있습니다.')) return;
+  sessionStorage.setItem('scenik-community-draft', JSON.stringify({
+    board: 'region',
     title: route.value.title,
     body: route.value.summary,
     region: selectedRegion.value,
     duration: `${route.value.durationDays}일`,
-    routeId: route.value.routeId,
-    tags: ['AI Course', selectedRegion.value, route.value.style].filter(Boolean),
-  });
-  if (created) router.push('/community');
+    routeId: isSaved.value ? route.value.routeId : '',
+    tags: ['AI 코스', selectedRegion.value, route.value.style].filter(Boolean),
+  }));
+  router.push({ name: 'community-write', query: { from: 'ai', routeId: isSaved.value ? route.value.routeId : undefined } });
 }
 
 function stopPlace(stop) {
@@ -159,6 +160,37 @@ function stopTags(stop) {
 function stopCategory(stop) {
   const place = stopPlace(stop);
   return place?.category || stop.category || '촬영지';
+}
+
+function stopAddress(stop) {
+  const place = stopPlace(stop);
+  return [stop.address, place?.address, stop.roadAddress, place?.roadAddress]
+    .map((value) => String(value ?? '').trim())
+    .find(Boolean) ?? '';
+}
+
+function stopTransitInfo(stop) {
+  const place = stopPlace(stop);
+  const station = [
+    stop.nearestStationName,
+    place?.nearestStationName,
+    stop.nearestStation,
+    place?.nearestStation,
+    stop.stationName,
+    place?.stationName,
+    stop.transitStation,
+    place?.transitStation,
+  ].map((value) => String(value ?? '').trim()).find(Boolean) ?? '';
+  const numberFrom = (...values) => values.map(Number).find((value) => Number.isFinite(value) && value > 0) ?? null;
+  const minutes = numberFrom(stop.nearestStationWalkingMinutes, place?.nearestStationWalkingMinutes, stop.walkingMinutes, place?.walkingMinutes, stop.transitMinutes, place?.transitMinutes);
+  const meters = numberFrom(stop.nearestStationDistanceMeters, place?.nearestStationDistanceMeters, stop.stationDistanceMeters, place?.stationDistanceMeters, stop.transitDistanceMeters, place?.transitDistanceMeters);
+  if (!((minutes != null && minutes <= 30) || (meters != null && meters <= 2000))) return '';
+  if (station && minutes != null) return `${station}에서 도보 ${Math.round(minutes)}분`;
+  if (station && meters != null) return `${station}에서 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  if (station) return station;
+  if (minutes != null) return `가까운 대중교통까지 도보 ${Math.round(minutes)}분`;
+  if (meters != null) return `가까운 대중교통까지 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  return '';
 }
 
 function normalizeRegion(value) {
@@ -218,9 +250,15 @@ async function shareMessage() {
   closeShareSheet();
 }
 
-function saveFromShareSheet() {
-  void saveRoute();
+async function markRoutePlacesPlanned() {
+  if (!route.value || !uiStore.requireAuth('로그인하면 방문 예정 장소를 저장할 수 있습니다.')) return;
+  const placeIds = [...new Set(routePlaces.value.map((place) => place.placeId).filter(Boolean))];
+  showActionMenu.value = false;
   closeShareSheet();
+  for (const placeId of placeIds) {
+    await uiStore.setVisit(placeId, 'planned');
+  }
+  if (placeIds.length) uiStore.notify(`${placeIds.length}곳을 방문 예정으로 등록했습니다.`, 'success');
 }
 
 function postFromShareSheet() {
@@ -251,6 +289,12 @@ function postFromShareSheet() {
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg>
               </span>
               공유
+            </button>
+            <button type="button" role="menuitem" @click="markRoutePlacesPlanned">
+              <span class="result-menu-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11.2A7 7 0 0 0 5 9.8C5 15.6 12 21 12 21Z" /><circle cx="12" cy="9.8" r="2.3" /></svg>
+              </span>
+              방문 예정으로 등록하기
             </button>
             <button type="button" role="menuitem" @click="editCourse">
               <span class="result-menu-icon" aria-hidden="true">
@@ -286,9 +330,9 @@ function postFromShareSheet() {
           <article v-for="(stop, index) in stops" :key="`${stop.placeId}-${index}`" class="prototype-timeline-item">
             <span class="prototype-timeline-dot"></span>
             <div>
-              <small>{{ stop.recommendedTime }}</small>
               <strong>{{ stop.placeName }}</strong>
-              <p>{{ stopCategory(stop) }}</p>
+              <p v-if="stopAddress(stop)">{{ stopAddress(stop) }}</p>
+              <p v-if="stopTransitInfo(stop)" class="timeline-note">{{ stopTransitInfo(stop) }}</p>
               <div class="prototype-stop-tags">
                 <span v-for="tag in stopTags(stop)" :key="tag">{{ tag }}</span>
               </div>
@@ -298,7 +342,7 @@ function postFromShareSheet() {
       </div>
 
       <footer class="ai-result-footer">
-        <BaseButton class="ai-result-save-button" variant="secondary" block :disabled="savingRoute || isSaved" @click="saveRoute">
+        <BaseButton class="ai-result-save-button" :variant="isSaved ? 'secondary' : 'primary'" block :disabled="savingRoute || isSaved" @click="saveRoute">
           {{ isSaved ? '저장됨' : savingRoute ? '저장 중' : '저장' }}
         </BaseButton>
         <BaseButton block @click="router.push('/home')">완료</BaseButton>
@@ -316,7 +360,7 @@ function postFromShareSheet() {
             <button type="button" @click="copyShareLink"><b class="link">🔗</b><span>링크 복사</span></button>
           </div>
           <div class="ai-share-actions">
-            <button type="button" @click="saveFromShareSheet">마이페이지에 저장</button>
+            <button type="button" @click="markRoutePlacesPlanned">방문 예정으로 등록하기</button>
             <button type="button" @click="postFromShareSheet">커뮤니티에 게시</button>
           </div>
           <button type="button" class="ai-share-close" @click="closeShareSheet">닫기</button>

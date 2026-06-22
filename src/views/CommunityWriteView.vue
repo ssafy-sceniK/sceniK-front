@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
@@ -11,6 +11,7 @@ import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 
+const route = useRoute();
 const router = useRouter();
 const contentStore = useContentStore();
 const placeStore = usePlaceStore();
@@ -25,7 +26,7 @@ const boards = [
 ];
 
 const selectedBoard = ref('drama');
-const selectedPrefix = ref('');
+const selectedHashtags = ref([]);
 const title = ref('');
 const body = ref('');
 const attachments = ref([]);
@@ -45,9 +46,10 @@ onMounted(() => {
   if (!contentStore.items.length) contentStore.load();
   if (!placeStore.items.length) placeStore.load();
   if (uiStore.currentUser) void uiStore.loadSavedCourses();
+  restoreDraft();
 });
 
-const prefixOptions = computed(() => {
+const hashtagOptions = computed(() => {
   if (selectedBoard.value === 'region') {
     return uniqueValues(placeStore.items.map((place) => place.region)).slice(0, 16);
   }
@@ -73,7 +75,7 @@ const prefixOptions = computed(() => {
 });
 
 watch(selectedBoard, () => {
-  selectedPrefix.value = '';
+  selectedHashtags.value = [];
 });
 
 onBeforeUnmount(() => {
@@ -82,6 +84,29 @@ onBeforeUnmount(() => {
 
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
+}
+
+function toggleHashtag(tag) {
+  const exists = selectedHashtags.value.includes(tag);
+  selectedHashtags.value = exists
+    ? selectedHashtags.value.filter((item) => item !== tag)
+    : [...selectedHashtags.value, tag].slice(0, 5);
+}
+
+function restoreDraft() {
+  const rawDraft = sessionStorage.getItem('scenik-community-draft');
+  if (!rawDraft && !route.query.routeId) return;
+  try {
+    const draft = rawDraft ? JSON.parse(rawDraft) : {};
+    sessionStorage.removeItem('scenik-community-draft');
+    selectedBoard.value = draft.board || 'region';
+    title.value = draft.title || title.value;
+    body.value = draft.body || body.value;
+    selectedRouteId.value = draft.routeId || String(route.query.routeId || '');
+    selectedHashtags.value = uniqueValues((draft.tags ?? []).filter((tag) => !boards.some((board) => board.tag === tag))).slice(0, 5);
+  } catch {
+    sessionStorage.removeItem('scenik-community-draft');
+  }
 }
 
 function handleAttachments(event) {
@@ -130,7 +155,7 @@ async function createPost() {
 
   const tags = [
     selectedBoardMeta.value.tag,
-    selectedPrefix.value,
+    ...selectedHashtags.value,
     selectedCourse.value ? 'AI 코스' : '',
     selectedCourse.value?.region ?? uiStore.courseConditions.region,
   ].filter(Boolean);
@@ -157,9 +182,8 @@ async function createPost() {
   const created = await uiStore.createPost({
     title: title.value.trim(),
     body: body.value.trim(),
-    prefix: selectedPrefix.value,
     tags,
-    region: selectedCourse.value?.region || selectedPrefix.value || uiStore.courseConditions.region,
+    region: selectedCourse.value?.region || selectedHashtags.value[0] || uiStore.courseConditions.region,
     duration: selectedCourse.value?.duration ?? selectedCourse.value?.durationDays,
     routeId: selectedRouteId.value || null,
     imageUrl: resolvedImageUrl,
@@ -200,7 +224,7 @@ async function createPost() {
     <form v-else class="community-write-screen" @submit.prevent="createPost">
       <div class="write-intro">
         <h1>커뮤니티 글 작성</h1>
-        <p>게시판과 말머리를 고르고, 방문한 장면과 이동 팁을 다른 여행자에게 공유해 주세요.</p>
+        <p>게시판과 해시태그를 고르고, 방문한 장면과 이동 팁을 다른 여행자에게 공유해 주세요.</p>
       </div>
 
       <div class="write-card">
@@ -219,13 +243,22 @@ async function createPost() {
           </div>
         </label>
 
-        <label class="form-field">
-          말머리
-          <select v-model="selectedPrefix">
-            <option value="">선택 안 함</option>
-            <option v-for="option in prefixOptions" :key="option" :value="option">{{ option }}</option>
-          </select>
-        </label>
+        <div class="form-field">
+          <span>해시태그</span>
+          <div class="chip-row wrap write-hashtag-row">
+            <button
+              v-for="option in hashtagOptions"
+              :key="option"
+              type="button"
+              class="chip"
+              :class="{ selected: selectedHashtags.includes(option) }"
+              :aria-pressed="selectedHashtags.includes(option)"
+              @click="toggleHashtag(option)"
+            >
+              #{{ option }}
+            </button>
+          </div>
+        </div>
 
         <label class="form-field course-select-field">
           AI 코스 연결
@@ -285,7 +318,7 @@ async function createPost() {
 
         <div class="write-helper">
           <span>{{ body.length }}/500</span>
-          <span>{{ selectedBoardMeta.label }}{{ selectedPrefix ? ` · ${selectedPrefix}` : '' }}</span>
+          <span>{{ selectedBoardMeta.label }}{{ selectedHashtags.length ? ` · #${selectedHashtags.join(' #')}` : '' }}</span>
         </div>
       </div>
 

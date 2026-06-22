@@ -4,8 +4,6 @@ import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
-import EmptyState from '../components/common/EmptyState.vue';
-import PlaceCard from '../components/place/PlaceCard.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -17,11 +15,13 @@ const placeStore = usePlaceStore();
 const uiStore = useUiStore();
 const relatedPlaces = ref([]);
 const candidateLoading = ref(false);
+const showGenerateConfirm = ref(false);
 const budgetBounds = {
   min: 100000,
   perDayMax: 1000000,
   step: 10000,
 };
+
 const selectedContentIds = computed(() => {
   const ids = Array.isArray(uiStore.selectedContentIds) && uiStore.selectedContentIds.length
     ? uiStore.selectedContentIds
@@ -31,6 +31,11 @@ const selectedContentIds = computed(() => {
 const selectedContents = computed(() => selectedContentIds.value
   .map((contentId) => contentStore.items.find((content) => content.contentId === contentId))
   .filter(Boolean));
+const selectedSummaryTitle = computed(() => {
+  if (selectedContents.value.length) return selectedContents.value.map((content) => content.title).join(', ');
+  if (selectedContentIds.value.length) return `${selectedContentIds.value.length}개 콘텐츠 선택됨`;
+  return '선택한 콘텐츠가 없습니다';
+});
 
 function uniquePlaces(list = []) {
   return [...list.reduce((map, place) => {
@@ -67,6 +72,7 @@ onMounted(loadAiInputs);
 watch(() => selectedContentIds.value.join('|'), () => {
   void loadRelatedPlaces();
 });
+
 const regionOptions = computed(() => {
   const counts = relatedPlaces.value.reduce((acc, place) => {
     acc.set(place.region, (acc.get(place.region) ?? 0) + 1);
@@ -83,33 +89,22 @@ const selectedRegions = computed(() => {
   return regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean);
 });
 const selectedRegionLabel = computed(() => selectedRegions.value.join(', '));
-const exactRelatedPlaces = computed(() => relatedPlaces.value.filter((place) => selectedRegions.value.includes(place.region)));
 const today = dateAfter(0);
 const tripDurationDays = computed(() => getTripDurationDays(uiStore.courseConditions));
 const tripDateRangeLabel = computed(() => formatDateRange(uiStore.courseConditions));
 const budgetMaxLimit = computed(() => Math.max(budgetBounds.min, tripDurationDays.value * budgetBounds.perDayMax));
-const targetCandidateCount = computed(() => Math.max(6, tripDurationDays.value * 2));
-const fallbackCandidatePlaces = computed(() => relatedPlaces.value
-  .filter((place) => !selectedRegions.value.includes(place.region))
-  .slice(0, Math.max(0, targetCandidateCount.value - exactRelatedPlaces.value.length)));
-const candidatePlaces = computed(() => uniquePlaces(exactRelatedPlaces.value.length ? exactRelatedPlaces.value : fallbackCandidatePlaces.value));
-const generatedDayCount = computed(() => tripDurationDays.value);
 const canGenerate = computed(() => selectedContentIds.value.length > 0 && !candidateLoading.value);
 const budgetRangeLabel = computed(() => formatBudgetRange(uiStore.courseConditions.budgetMin, uiStore.courseConditions.budgetMax));
 const budgetMinPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMin));
 const budgetMaxPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMax));
-const candidateHelpText = computed(() => {
-  if (candidateLoading.value) return '선택한 콘텐츠와 연결된 실제 장소를 확인하고 있어요.';
-  if (!selectedContentIds.value.length) return 'AI 코스를 만들 콘텐츠를 먼저 선택해 주세요.';
-  if (!candidatePlaces.value.length) return '미리보기 장소가 비어 있어도 백엔드가 선택 콘텐츠와 지역 조건으로 검증 장소를 다시 찾습니다.';
-  if (exactRelatedPlaces.value.length) return '선택한 K-content와 직접 연결된 실제 장소만 표시하고 있어요.';
-  return `선택 지역 장소가 부족해 선택 콘텐츠와 연결된 다른 지역 장소 ${fallbackCandidatePlaces.value.length}곳을 확인하고 있어요.`;
+const travelStyleOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '숨은 명소'];
+const selectedTravelStyles = computed(() => {
+  const styles = Array.isArray(uiStore.courseConditions.travelStyles)
+    ? uiStore.courseConditions.travelStyles.filter(Boolean)
+    : [];
+  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
 });
-const selectedSummaryTitle = computed(() => {
-  if (selectedContents.value.length) return selectedContents.value.map((content) => content.title).join(', ');
-  if (selectedContentIds.value.length) return `${selectedContentIds.value.length}개 콘텐츠 선택됨`;
-  return '선택된 콘텐츠가 없습니다';
-});
+const travelStyleLabel = computed(() => selectedTravelStyles.value.join(', ') || '선택 안 함');
 const aiContextRows = computed(() => [
   { label: '선택 콘텐츠', value: selectedSummaryTitle.value },
   { label: '지역', value: selectedRegionLabel.value },
@@ -118,14 +113,6 @@ const aiContextRows = computed(() => [
   { label: '예산/테마', value: `${budgetRangeLabel.value} · ${travelStyleLabel.value}` },
   { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
 ]);
-const travelStyleOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '성지순례'];
-const selectedTravelStyles = computed(() => {
-  const styles = Array.isArray(uiStore.courseConditions.travelStyles)
-    ? uiStore.courseConditions.travelStyles.filter(Boolean)
-    : [];
-  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
-});
-const travelStyleLabel = computed(() => selectedTravelStyles.value.join(', ') || '선택 안 함');
 
 function toggleTravelStyle(style) {
   const current = new Set(selectedTravelStyles.value);
@@ -167,6 +154,17 @@ function normalizeBudgetRange() {
   uiStore.courseConditions.budget = formatBudgetRange(uiStore.courseConditions.budgetMin, uiStore.courseConditions.budgetMax);
 }
 
+function openGenerateConfirm() {
+  if (!canGenerate.value) return;
+  showGenerateConfirm.value = true;
+}
+
+function confirmGenerate() {
+  uiStore.persist();
+  showGenerateConfirm.value = false;
+  router.push('/ai/loading');
+}
+
 watchEffect(() => {
   if (!Array.isArray(uiStore.courseConditions.regions) || !uiStore.courseConditions.regions.length) {
     uiStore.courseConditions.regions = [uiStore.courseConditions.region || regionOptions.value[0]].filter(Boolean);
@@ -191,23 +189,9 @@ watchEffect(() => {
   <AppLayout title="여행 조건" back>
     <section class="course-step">
       <div class="progress-line"><b style="width: 50%"></b><span>2/4</span></div>
-      <div class="selected-summary">
+      <div class="selected-summary compact-selected-summary">
         <span class="badge ai">선택 콘텐츠</span>
         <strong>{{ selectedSummaryTitle }}</strong>
-        <p>{{ selectedContentIds.length }}개 콘텐츠 · 실제 장소 데이터 기반</p>
-      </div>
-
-      <div class="ai-context-panel">
-        <div>
-          <strong>AI가 참고하는 조건</strong>
-          <small>선택한 K-content와 검증 장소 데이터만 사용합니다.</small>
-        </div>
-        <dl>
-          <template v-for="row in aiContextRows" :key="row.label">
-            <dt>{{ row.label }}</dt>
-            <dd>{{ row.value }}</dd>
-          </template>
-        </dl>
       </div>
 
       <div class="condition-block">
@@ -241,9 +225,7 @@ watchEffect(() => {
               :min="uiStore.courseConditions.startDate || today"
             />
           </label>
-          <p>
-            {{ tripDateRangeLabel }} · 선택 기간 {{ tripDurationDays }}일
-          </p>
+          <p>{{ tripDateRangeLabel }} · 선택 기간 {{ tripDurationDays }}일</p>
         </div>
       </div>
       <div class="condition-block">
@@ -318,26 +300,29 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="section-header"><h2>AI 코스에 사용할 장소</h2><span>{{ candidatePlaces.length }}곳</span></div>
-      <p class="candidate-helper">{{ candidateHelpText }}</p>
-      <EmptyState
-        v-if="candidateLoading"
-        tone="loading"
-        compact
-        title="장소 후보를 불러오는 중입니다"
-        text="선택 콘텐츠와 연결된 검증 장소를 확인하고 있어요."
-      />
-      <div v-else class="stack-list">
-        <PlaceCard v-for="place in candidatePlaces" :key="place.placeId" :place="place" compact />
+      <div class="sticky-actions">
+        <BaseButton class="course-primary-cta" block :disabled="!canGenerate" @click="openGenerateConfirm">
+          <span>{{ canGenerate ? 'AI 코스 생성하기' : '콘텐츠를 먼저 선택해 주세요' }}</span>
+        </BaseButton>
       </div>
 
-      <div class="sticky-actions">
-        <BaseButton class="course-primary-cta" block :disabled="!canGenerate" @click="uiStore.persist(); router.push('/ai/loading')">
-          <span>{{ canGenerate ? 'AI 코스 생성하기' : '콘텐츠를 먼저 선택해 주세요' }}</span>
-          <small v-if="canGenerate">
-            {{ candidatePlaces.length ? `${candidatePlaces.length}곳의 실제 장소로 ${generatedDayCount}일 동선을 만듭니다` : '백엔드 검증 장소 fallback으로 코스를 생성합니다' }}
-          </small>
-        </BaseButton>
+      <div v-if="showGenerateConfirm" class="condition-confirm-backdrop" @click.self="showGenerateConfirm = false">
+        <section class="condition-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="condition-confirm-title">
+          <div>
+            <span class="badge ai">AI 코스 생성</span>
+            <h2 id="condition-confirm-title">이 조건으로 AI 코스를 생성할까요?</h2>
+          </div>
+          <dl class="condition-confirm-rows">
+            <template v-for="row in aiContextRows" :key="row.label">
+              <dt>{{ row.label }}</dt>
+              <dd>{{ row.value }}</dd>
+            </template>
+          </dl>
+          <div class="condition-confirm-actions">
+            <BaseButton variant="ghost" block @click="showGenerateConfirm = false">취소</BaseButton>
+            <BaseButton block @click="confirmGenerate">생성하기</BaseButton>
+          </div>
+        </section>
       </div>
     </section>
   </AppLayout>

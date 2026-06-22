@@ -40,7 +40,9 @@ onMounted(async () => {
 
   try {
     await uiStore.completeOAuthLogin(code, provider.value);
-    const returnTo = sessionStorage.getItem('scenik-oauth-return-to') || '/home';
+    const returnTo = uiStore.preferencesCompleted
+      ? sessionStorage.getItem('scenik-oauth-return-to') || '/home'
+      : '/preferences';
     sessionStorage.removeItem('scenik-oauth-return-to');
     await router.replace(returnTo);
   } catch (err) {

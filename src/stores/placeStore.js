@@ -33,6 +33,10 @@ export const usePlaceStore = defineStore('place', {
     categories: (state) => ['전체', ...new Set(state.items.map((item) => item.category))],
   },
   actions: {
+    prepareExplore() {
+      this.error = '';
+      if (!this.items.length) this.loading = true;
+    },
     async load(params = {}) {
       this.loading = true;
       this.error = '';

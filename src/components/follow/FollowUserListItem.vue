@@ -35,14 +35,16 @@ const emit = defineEmits(['toggle']);
 
 <template>
   <article class="user-list-row follow-user-list-item">
-    <span class="user-list-avatar">{{ props.initial }}</span>
-    <div>
-      <strong>
-        {{ props.user.nickname }}
-        <em v-if="props.mutual" class="mutual-follow-badge">맞팔</em>
-      </strong>
-      <small>팔로워 {{ props.user.followerCount }} · 팔로잉 {{ props.user.followingCount }}</small>
-    </div>
+    <RouterLink class="follow-user-link" :to="`/users/${props.user.userId}`">
+      <span class="user-list-avatar">{{ props.initial }}</span>
+      <span>
+        <strong>
+          {{ props.user.nickname }}
+          <em v-if="props.mutual" class="mutual-follow-badge">맞팔</em>
+        </strong>
+        <small>팔로워 {{ props.user.followerCount ?? 0 }} · 팔로잉 {{ props.user.followingCount ?? 0 }}</small>
+      </span>
+    </RouterLink>
     <button
       v-if="String(props.user.userId) !== String(props.currentUserId)"
       type="button"

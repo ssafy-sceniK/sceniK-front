@@ -5,63 +5,70 @@ const props = defineProps({
   stops: { type: Array, default: () => [] },
 });
 
-const GENERIC_NOTE_PATTERNS = [
-  /opening hours/i,
-  /transit/i,
-  /verified sceniK route/i,
-  /added to saved route/i,
-  /운영\s*시간/,
-  /이동편/,
-  /이동\s*동선/,
-  /방문\s*전.*확인/,
-  /출발.*이동/,
-  /복귀.*동선/,
-];
-
-const WEAK_REASON_PATTERNS = [
-  /^촬영지$/,
-  /^관광지$/,
-  /^검증 장소$/,
-  /^장소$/,
-  /^spot$/i,
-  /^place$/i,
-  /verified sceniK route/i,
-  /added to saved route/i,
-];
-
 const displayStops = computed(() => props.stops.map((stop) => ({
   ...stop,
   displayCategory: meaningfulCategory(stop),
-  displayReason: meaningfulStopReason(stop),
-  displayNote: meaningfulStopNote(stop),
+  displayAddress: meaningfulAddress(stop),
+  displayTransit: usefulTransitInfo(stop),
 })));
 
 function cleanText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
 
-function isGenericText(value) {
-  const text = cleanText(value);
-  return !text || GENERIC_NOTE_PATTERNS.some((pattern) => pattern.test(text));
+function firstText(...values) {
+  return values.map(cleanText).find(Boolean) ?? '';
 }
 
 function meaningfulCategory(stop) {
-  return cleanText(stop.category || stop.placeCategory || stop.type || '장소');
+  return firstText(stop.category, stop.placeCategory, stop.type, '장소');
 }
 
-function meaningfulStopReason(stop) {
-  const reason = cleanText(stop.recommendReason || stop.reason || stop.description);
+function meaningfulAddress(stop) {
+  const address = firstText(stop.address, stop.roadAddress, stop.jibunAddress);
+  const placeName = firstText(stop.placeName, stop.name);
   const category = meaningfulCategory(stop);
-  if (!reason || isGenericText(reason) || WEAK_REASON_PATTERNS.some((pattern) => pattern.test(reason))) return '';
-  if (category && reason.toLocaleLowerCase('ko-KR') === category.toLocaleLowerCase('ko-KR')) return '';
-  return reason;
+  if (!address || address === placeName || address === category) return '';
+  return address;
 }
 
-function meaningfulStopNote(stop) {
-  const note = cleanText(stop.travelTip || stop.note || stop.memo || stop.transportTip || stop.stayNote);
-  if (isGenericText(note)) return '';
-  if (note === meaningfulStopReason(stop)) return '';
-  return note;
+function numericValue(...values) {
+  for (const value of values) {
+    const number = Number(value);
+    if (Number.isFinite(number) && number > 0) return number;
+  }
+  return null;
+}
+
+function usefulTransitInfo(stop) {
+  const station = firstText(
+    stop.nearestStationName,
+    stop.nearestStation,
+    stop.stationName,
+    stop.transitStation,
+    stop.subwayStation,
+  );
+  const minutes = numericValue(
+    stop.nearestStationWalkingMinutes,
+    stop.walkingMinutes,
+    stop.transitMinutes,
+    stop.stationWalkingMinutes,
+  );
+  const meters = numericValue(
+    stop.nearestStationDistanceMeters,
+    stop.stationDistanceMeters,
+    stop.transitDistanceMeters,
+    stop.distanceToStationMeters,
+  );
+  const closeByTime = minutes != null && minutes <= 30;
+  const closeByDistance = meters != null && meters <= 2000;
+  if (!closeByTime && !closeByDistance) return '';
+  if (station && minutes != null) return `${station}에서 도보 ${Math.round(minutes)}분`;
+  if (station && meters != null) return `${station}에서 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  if (station) return station;
+  if (minutes != null) return `가까운 대중교통까지 도보 ${Math.round(minutes)}분`;
+  if (meters != null) return `가까운 대중교통까지 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  return '';
 }
 </script>
 
@@ -73,12 +80,11 @@ function meaningfulStopNote(stop) {
       </div>
       <div class="timeline-card">
         <div class="timeline-card__meta">
-          <small>{{ stop.recommendedTime }}</small>
           <span v-if="stop.displayCategory">{{ stop.displayCategory }}</span>
         </div>
         <strong>{{ stop.placeName || stop.name || '장소' }}</strong>
-        <p v-if="stop.displayReason">{{ stop.displayReason }}</p>
-        <p v-if="stop.displayNote" class="timeline-note">{{ stop.displayNote }}</p>
+        <p v-if="stop.displayAddress">{{ stop.displayAddress }}</p>
+        <p v-if="stop.displayTransit" class="timeline-note">{{ stop.displayTransit }}</p>
       </div>
     </article>
   </div>

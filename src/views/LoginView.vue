@@ -58,7 +58,7 @@ async function submit() {
   loading.value = true;
   try {
     await uiStore.login({ email: trimmedEmail, password: password.value });
-    router.push('/home');
+    router.push(uiStore.preferencesCompleted ? '/home' : '/preferences');
   } catch (err) {
     error.value = getUserMessage(err, '로그인에 실패했습니다.');
   } finally {

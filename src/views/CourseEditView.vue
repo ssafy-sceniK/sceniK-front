@@ -20,7 +20,6 @@ const draftDays = ref([]);
 const saveError = ref('');
 const editToast = ref(null);
 const draftTitle = ref('');
-const activeTimePicker = ref('');
 const candidateTargetDay = ref(1);
 const placeSearchKeyword = ref('');
 const placeSearchRegion = ref('');
@@ -32,7 +31,6 @@ const dragOverStop = ref(null);
 const pointerDrag = ref({ active: false });
 let editToastTimer;
 
-const timeOptions = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 const routeId = computed(() => route.params.routeId ?? '');
 const isAiEdit = computed(() => route.name === 'ai-edit');
 const detail = computed(() => isAiEdit.value ? null : uiStore.resolveCourseDetail(routeId.value));
@@ -151,7 +149,6 @@ watch(course, (value) => {
   draftDays.value = cloneDays(value);
   saveError.value = '';
   editToast.value = null;
-  activeTimePicker.value = '';
   candidateTargetDay.value = draftDays.value[0]?.dayNumber ?? 1;
   placeSearchRegion.value = value?.region ?? '';
   draggingStop.value = null;
@@ -482,12 +479,6 @@ function removeStop(dayIndex, stopIndex) {
   };
 }
 
-function setStopTime(stop, value) {
-  stop.recommendedTime = value;
-  activeTimePicker.value = '';
-  editToast.value = null;
-}
-
 function buildEditedRoute() {
   const candidateMap = new Map((course.value?.candidatePlaces ?? []).map((place) => [place.placeId, place]));
   const days = renumberDays(draftDays.value);
@@ -621,7 +612,7 @@ onBeforeUnmount(() => {
       <div class="page-intro compact-intro">
         <span class="badge ai">{{ isAiEdit ? 'AI 결과 편집' : '저장 코스 편집' }}</span>
         <h1>{{ course.title }}</h1>
-        <p>날짜별 장소를 정리하고 방문 시간을 조정해 코스를 다듬어 보세요.</p>
+        <p>날짜별 장소 순서와 구성을 다듬어 보세요.</p>
       </div>
 
       <section class="course-edit-entity-form" aria-labelledby="course-edit-form-title">
@@ -664,17 +655,6 @@ onBeforeUnmount(() => {
                 >
                   ⋮⋮
                 </button>
-
-                <div class="time-picker-wrap">
-                  <button type="button" class="time-pill" @click="activeTimePicker = activeTimePicker === stopKey(dayIndex, stopIndex) ? '' : stopKey(dayIndex, stopIndex)">
-                    {{ stop.recommendedTime }}
-                  </button>
-                  <div v-if="activeTimePicker === stopKey(dayIndex, stopIndex)" class="time-menu">
-                    <button v-for="time in timeOptions" :key="time" type="button" @click="setStopTime(stop, time)">
-                      {{ time }}
-                    </button>
-                  </div>
-                </div>
 
                 <div class="editable-stop-copy">
                   <strong>{{ stop.placeName || placeName(stop.placeId) }}</strong>

@@ -8,6 +8,7 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
+placeStore.prepareExplore();
 const ALL_FILTER = '전체';
 const query = ref('');
 const region = ref(ALL_FILTER);
@@ -134,7 +135,7 @@ function onFilterClick(event) {
         @action="placeStore.load"
       />
       <template v-else>
-        <MapPreview class="map-explore-preview" :route-places="filteredPlaces" />
+        <MapPreview class="map-explore-preview" :route-places="filteredPlaces" :draw-path="false" />
       </template>
       <EmptyState
         v-if="!placeStore.loading && !placeStore.error && !filteredPlaces.length"

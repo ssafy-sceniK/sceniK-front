@@ -328,3 +328,26 @@
 .home-screen > .section-header {
   padding-top: 16px;
 }
+
+
+.notification-nav-button {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  background: #e23d3d;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}

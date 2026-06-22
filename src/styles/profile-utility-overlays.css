@@ -1322,3 +1322,126 @@
     border-right: 1px solid var(--border-strong);
   }
 }
+
+
+.follow-user-link {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.public-profile-screen {
+  display: grid;
+  gap: 16px;
+}
+
+.public-profile-card {
+  align-items: flex-start;
+}
+
+.follow-user-list-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.follow-user-list-item .follow-user-link {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.follow-user-list-item .follow-user-link > span:last-child {
+  min-width: 0;
+}
+
+.follow-user-list-item strong,
+.follow-user-list-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.follow-user-list-item button {
+  min-width: 76px;
+  justify-self: end;
+}
+
+.public-profile-screen {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.public-profile-card {
+  margin: 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.public-profile-card .profile-copy,
+.public-profile-card .profile-name-row {
+  min-width: 0;
+}
+
+.public-profile-card .profile-actions {
+  grid-column: 1 / -1;
+}
+
+.public-profile-screen .my-section-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 3px;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.public-profile-screen .my-section-tabs button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.public-profile-screen .my-section-tabs button.active {
+  color: var(--text);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+.visit-control-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 3px;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.visit-control-row a {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+}
+
+.visit-control-row a.router-link-active,
+.visit-control-row a:focus-visible {
+  color: var(--text);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}

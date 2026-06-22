@@ -24,6 +24,7 @@ const isMyCourseRoute = computed(() => route.path.startsWith('/my/course-manage'
 const detail = computed(() => uiStore.resolveCourseDetail(routeId.value));
 const course = computed(() => detail.value?.route ?? null);
 const isSavedCourse = computed(() => isMyCourseRoute.value && detail.value?.source === 'saved');
+const canManageCourse = computed(() => isSavedCourse.value);
 const shouldRequireLogin = computed(() => isMyCourseRoute.value && !uiStore.currentUser);
 const validationErrors = computed(() => detail.value?.validation?.errors ?? []);
 const routeCandidateMap = computed(() => new Map((course.value?.candidatePlaces ?? [])
@@ -57,7 +58,7 @@ const courseDetailChips = computed(() => [
 const courseSummaryText = computed(() => {
   const summary = String(course.value?.summary ?? '').trim();
   if (summary && summary.length <= 72 && !isInternalCourseCopy(summary)) return summary;
-  return `선택한 콘텐츠를 바탕으로 구성한 ${displayRegionLabel.value} ${displayDurationLabel.value} ${primaryStyleLabel.value} 코스입니다.`;
+  return '';
 });
 const courseTrustMessage = computed(() => {
   if (isSavedCourse.value) return '';
@@ -245,13 +246,13 @@ async function deleteCourse() {
         </button>
         <div v-if="showActionMenu" class="course-detail-menu__overlay" @click="closeActionMenu"></div>
         <div v-if="showActionMenu" class="course-detail-menu__popover" role="menu">
-          <button type="button" role="menuitem" @click="runCourseAction(editCourse)">수정</button>
+          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">수정</button>
           <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">공유</button>
           <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
             {{ uiStore.routeActionLoading ? '저장 중' : '저장' }}
           </button>
-          <button type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">AI 결과로 보기</button>
-          <button v-if="isSavedCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
+          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">AI 결과로 보기</button>
+          <button v-if="canManageCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
             삭제
           </button>
         </div>
@@ -312,7 +313,6 @@ async function deleteCourse() {
       </div>
 
       <Timeline :stops="stops" />
-      <p class="course-detail-visit-note">방문 전 운영 시간과 이동편은 현장에서 한 번 더 확인해 주세요.</p>
 
       <CourseDeleteActionSheet
         v-if="showDeleteSheet"

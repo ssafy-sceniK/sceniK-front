@@ -9,6 +9,7 @@ import {
   saveAccessToken,
   signup as signupRequest,
   updateMe,
+  uploadProfileImage as uploadProfileImageRequest,
 } from '../api/authApi.js';
 import { getUserMessage } from '../api/error.js';
 import {
@@ -42,10 +43,15 @@ import {
   getPost as fetchCommunityPost,
   getPosts as fetchCommunityPosts,
   likeComment as likeCommunityComment,
+  getNotifications as fetchNotifications,
   likePost as likeCommunityPost,
+  markAllNotificationsRead as markAllNotificationsReadRequest,
+  markNotificationRead as markNotificationReadRequest,
   normalizePost as normalizeCommunityPost,
+  scrapPost as scrapCommunityPost,
   unlikeComment as unlikeCommunityComment,
   unlikePost as unlikeCommunityPost,
+  unscrapPost as unscrapCommunityPost,
   updateComment as updateCommunityComment,
   updatePost as updateCommunityPost,
 } from '../api/communityApi.js';
@@ -59,6 +65,7 @@ import { fetchMyReviews } from '../api/reviewApi.js';
 import { contentPlaces, contents, courseTemplates, places } from '../data/mockData.js';
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
+import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
@@ -73,11 +80,7 @@ function formatBudgetRange(min, max) {
 }
 
 function flattenPreferences(preferences) {
-  if (!preferences) return [];
-  if (Array.isArray(preferences)) return preferences.filter(Boolean);
-  return Object.values(preferences)
-    .flatMap((value) => Array.isArray(value) ? value : [value])
-    .filter(Boolean);
+  return flattenPreferenceSelection(preferences);
 }
 
 function defaultState() {
@@ -97,6 +100,8 @@ function defaultState() {
     recentViewedPlaceDetails: [],
     savedCourses: [],
     communityPosts: [],
+    notifications: [],
+    unreadNotificationCount: 0,
     myReviews: [],
     followingUsers: [],
     followerUsers: [],
@@ -467,6 +472,8 @@ export const useUiStore = defineStore('ui', {
     routeError: '',
     communityLoading: false,
     communityError: '',
+    engagementLoading: false,
+    engagementError: '',
     myReviewsLoading: false,
     myReviewsError: '',
     followLoading: false,
@@ -475,17 +482,22 @@ export const useUiStore = defineStore('ui', {
     pendingPlaceLikes: [],
     pendingVisitStatuses: [],
     pendingPostLikes: [],
+    pendingPostScraps: [],
     pendingCommentLikes: [],
     followActionLoadingIds: [],
+    notificationsLoading: false,
+    notificationsError: '',
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.currentUser),
+    preferencesCompleted: (state) => Boolean(state.currentUser?.preferencesCompleted || hasCompletePreferences(state.currentUser?.preferences)),
     likedContentItems: (state) => state.likedContentDetails,
     likedPlaceItems: (state) => state.likedPlaceDetails,
     plannedVisitItems: (state) => state.plannedVisitDetails,
     completedVisitItems: (state) => state.completedVisitDetails,
     recentPlaceItems: (state) => state.recentViewedPlaceDetails,
     followingIds: (state) => state.followingUsers.map((user) => user.userId).filter(Boolean),
+    unreadNotifications: (state) => Number(state.unreadNotificationCount || state.notifications.filter((item) => !item.read).length),
   },
   actions: {
     restore() {
@@ -518,6 +530,10 @@ export const useUiStore = defineStore('ui', {
         completedVisitDetails,
         recentViewedPlaceDetails,
         communityPosts,
+        notifications,
+        unreadNotificationCount,
+        notificationsLoading,
+        notificationsError,
         communityLoading,
         communityError,
         myReviews,
@@ -531,6 +547,7 @@ export const useUiStore = defineStore('ui', {
         pendingPlaceLikes,
         pendingVisitStatuses,
         pendingPostLikes,
+        pendingPostScraps,
         pendingCommentLikes,
         followActionLoadingIds,
         selectedContentId,
@@ -559,10 +576,11 @@ export const useUiStore = defineStore('ui', {
       this.authLoading = true;
       try {
         this.currentUser = await fetchMe();
-        this.onboardingSeen = true;
+        this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
         await this.loadFollowState();
+        await this.loadNotifications();
         this.persist();
       } catch {
         clearAccessToken();
@@ -589,6 +607,57 @@ export const useUiStore = defineStore('ui', {
         return [];
       } finally {
         this.savedCoursesLoading = false;
+      }
+    },
+    async loadNotifications() {
+      if (!this.currentUser || !readAccessToken()) {
+        this.notifications = [];
+        this.unreadNotificationCount = 0;
+        return [];
+      }
+      this.notificationsLoading = true;
+      this.notificationsError = '';
+      try {
+        this.notifications = await fetchNotifications();
+        this.unreadNotificationCount = this.notifications.filter((item) => !item.read).length;
+        return this.notifications;
+      } catch (error) {
+        this.notificationsError = apiErrorMessage(error, '알림을 불러오지 못했습니다.');
+        this.notifications = [];
+        this.unreadNotificationCount = 0;
+        return [];
+      } finally {
+        this.notificationsLoading = false;
+      }
+    },
+    async markNotificationRead(notificationId) {
+      if (!notificationId || !this.currentUser) return null;
+      try {
+        const updated = await markNotificationReadRequest(notificationId);
+        this.notifications = this.notifications.map((item) => (
+          sameId(item.notificationId ?? item.id, notificationId)
+            ? { ...item, ...updated, read: true }
+            : item
+        ));
+        this.unreadNotificationCount = this.notifications.filter((item) => !item.read).length;
+        return updated;
+      } catch (error) {
+        this.notificationsError = apiErrorMessage(error, '알림 읽음 처리에 실패했습니다.');
+        this.notify(this.notificationsError);
+        return null;
+      }
+    },
+    async markAllNotificationsRead() {
+      if (!this.currentUser) return false;
+      try {
+        await markAllNotificationsReadRequest();
+        this.notifications = this.notifications.map((item) => ({ ...item, read: true }));
+        this.unreadNotificationCount = 0;
+        return true;
+      } catch (error) {
+        this.notificationsError = apiErrorMessage(error, '알림을 모두 읽음 처리하지 못했습니다.');
+        this.notify(this.notificationsError);
+        return false;
       }
     },
     async loadCommunityPosts(params = {}) {
@@ -622,6 +691,8 @@ export const useUiStore = defineStore('ui', {
     },
     async loadEngagementState() {
       if (!this.currentUser || !readAccessToken()) return;
+      this.engagementLoading = true;
+      this.engagementError = '';
       try {
         const [likes, visitStatuses] = await Promise.all([
           fetchMyLikes(),
@@ -641,7 +712,10 @@ export const useUiStore = defineStore('ui', {
         this.completedVisitDetails = await loadPlaceDetails(this.completedVisits);
         this.persist();
       } catch (error) {
-        this.notify(apiErrorMessage(error, '좋아요와 방문 상태를 불러오지 못했습니다.'));
+        this.engagementError = apiErrorMessage(error, '방문 상태를 불러오지 못했습니다.');
+        this.notify(this.engagementError);
+      } finally {
+        this.engagementLoading = false;
       }
     },
     async loadCourseDetail(routeId) {
@@ -676,10 +750,11 @@ export const useUiStore = defineStore('ui', {
         const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname });
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
-        this.onboardingSeen = true;
+        this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
         await this.loadFollowState();
+        await this.loadNotifications();
         this.persist();
         this.notify('회원가입이 완료되었습니다.', 'success');
         return this.currentUser;
@@ -701,10 +776,11 @@ export const useUiStore = defineStore('ui', {
         const session = await loginRequest({ email: safeEmail, password });
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
-        this.onboardingSeen = true;
+        this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
         await this.loadFollowState();
+        await this.loadNotifications();
         this.persist();
         this.notify('로그인되었습니다.', 'success');
         return this.currentUser;
@@ -722,11 +798,12 @@ export const useUiStore = defineStore('ui', {
         if (!session.accessToken) throw new Error('로그인 토큰을 받지 못했습니다.');
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
-        this.onboardingSeen = true;
+        this.onboardingSeen = this.preferencesCompleted;
         await Promise.all([
           this.loadSavedCourses(),
           this.loadEngagementState(),
           this.loadFollowState(),
+          this.loadNotifications(),
         ]);
         this.persist();
         const providerName = ({ google: 'Google', kakao: '카카오' })[provider] ?? '소셜';
@@ -758,26 +835,49 @@ export const useUiStore = defineStore('ui', {
       this.notify('로그아웃되었습니다.', 'success');
     },
     async savePreferences(preferences) {
+      const normalized = normalizePreferenceSelection(preferences);
       if (this.currentUser) {
         try {
           const updated = readAccessToken()
             ? await updateMe({
                 nickname: this.currentUser.nickname,
-                preferences: flattenPreferences(preferences),
+                bio: this.currentUser.bio ?? '',
+                preferences: flattenPreferences(normalized),
               })
             : {};
           this.currentUser = {
             ...this.currentUser,
             ...updated,
-            preferences,
+            preferences: normalized,
+            preferencesCompleted: hasCompletePreferences(normalized),
           };
         } catch (error) {
-          this.currentUser.preferences = preferences;
+          this.currentUser.preferences = normalized;
+          this.currentUser.preferencesCompleted = hasCompletePreferences(normalized);
           this.notify(apiErrorMessage(error, '취향 설정을 서버에 저장하지 못했습니다.'));
         }
       }
       this.onboardingSeen = true;
       this.persist();
+    },
+    async uploadProfileImage(file) {
+      if (!this.currentUser || !readAccessToken()) {
+        this.authError = '로그인이 필요합니다.';
+        return false;
+      }
+      try {
+        const updated = await uploadProfileImageRequest(file);
+        this.currentUser = {
+          ...this.currentUser,
+          ...updated,
+        };
+        this.persist();
+        return true;
+      } catch (error) {
+        this.authError = apiErrorMessage(error, '프로필 이미지를 저장하지 못했습니다.');
+        this.notify(this.authError);
+        return false;
+      }
     },
     async updateProfile({ nickname, bio, preferences }) {
       if (!this.requireAuth('로그인하면 프로필을 수정할 수 있습니다.')) return false;
@@ -790,17 +890,19 @@ export const useUiStore = defineStore('ui', {
       this.authLoading = true;
       this.authError = '';
       try {
+        const normalizedPreferences = normalizePreferenceSelection(preferences ?? this.currentUser.preferences);
         const updated = await updateMe({
           nickname: safeNickname,
           bio: bio?.trim() ?? '',
-          preferences: flattenPreferences(preferences ?? this.currentUser.preferences),
+          preferences: flattenPreferences(normalizedPreferences),
         });
         this.currentUser = {
           ...this.currentUser,
           ...updated,
           nickname: updated.nickname ?? safeNickname,
           bio: updated.bio ?? bio?.trim() ?? '',
-          preferences: preferences ?? updated.preferences ?? this.currentUser.preferences ?? {},
+          preferences: normalizePreferenceSelection(updated.preferences ?? normalizedPreferences),
+          preferencesCompleted: hasCompletePreferences(updated.preferences ?? normalizedPreferences),
         };
         this.persist();
         this.notify('프로필을 저장했습니다.');
@@ -1160,26 +1262,31 @@ export const useUiStore = defineStore('ui', {
         this.pendingCommentLikes = this.pendingCommentLikes.filter((id) => !sameId(id, commentId));
       }
     },
-    togglePostScrap(postId) {
+    async togglePostScrap(postId) {
       if (!this.requireAuth('로그인하면 커뮤니티 글을 스크랩할 수 있습니다.')) return;
-      let scrappedPost = false;
-      let changed = false;
-      this.communityPosts = this.communityPosts.map((post) => {
-        if (!sameId(post.id, postId) && !sameId(post.postId, postId)) return post;
-        const scrappedBy = post.scrappedBy ?? [];
-        const scrapped = scrappedBy.includes(this.currentUser.userId);
-        scrappedPost = !scrapped;
-        changed = true;
-        return {
-          ...post,
+      if (this.pendingPostScraps.some((id) => sameId(id, postId))) return;
+      const current = this.communityPosts.find((post) => sameId(post.id, postId) || sameId(post.postId, postId));
+      if (!current) return;
+      const scrappedBy = current.scrappedBy ?? [];
+      const scrapped = current.isScrapped || scrappedBy.includes(this.currentUser.userId);
+      this.pendingPostScraps = [...this.pendingPostScraps, postId];
+      try {
+        const updated = scrapped ? await unscrapCommunityPost(postId) : await scrapCommunityPost(postId);
+        const nextPost = updated ?? {
+          ...current,
+          isScrapped: !scrapped,
           scrappedBy: scrapped
-            ? scrappedBy.filter((id) => id !== this.currentUser.userId)
+            ? scrappedBy.filter((id) => !sameId(id, this.currentUser.userId))
             : [...scrappedBy, this.currentUser.userId],
         };
-      });
-      if (!changed) return;
-      this.persist();
-      this.notify(scrappedPost ? '게시글을 스크랩했습니다.' : '게시글 스크랩을 해제했습니다.');
+        this.communityPosts = mergeCommunityPost(this.communityPosts, nextPost);
+        this.notify(scrapped ? '게시글 스크랩을 해제했습니다.' : '게시글을 스크랩했습니다.');
+      } catch (error) {
+        this.communityError = apiErrorMessage(error, '게시글 스크랩을 변경하지 못했습니다.');
+        this.notify(this.communityError);
+      } finally {
+        this.pendingPostScraps = this.pendingPostScraps.filter((id) => !sameId(id, postId));
+      }
     },
     async addComment(postId, text, parentCommentId = null) {
       if (!this.requireAuth('로그인하면 댓글을 작성할 수 있습니다.')) return null;

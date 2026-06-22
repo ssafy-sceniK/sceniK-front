@@ -26,6 +26,7 @@ import NoticeListView from '../views/NoticeListView.vue';
 import SimpleListView from '../views/SimpleListView.vue';
 import NotificationsView from '../views/NotificationsView.vue';
 import SettingsView from '../views/SettingsView.vue';
+import PublicUserProfileView from '../views/PublicUserProfileView.vue';
 import AdminView from '../views/AdminView.vue';
 import OAuthCallbackView from '../views/OAuthCallbackView.vue';
 
@@ -34,7 +35,7 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView, meta: { public: true } },
   { path: '/signup', name: 'signup', component: SignupView, meta: { public: true } },
-  { path: '/preferences', name: 'preferences', component: PreferencesView, meta: { public: true } },
+  { path: '/preferences', name: 'preferences', component: PreferencesView },
   { path: '/home', name: 'home', component: HomeView },
   { path: '/home/recent-all', name: 'home-recent-all', component: SimpleListView, meta: { title: '최근 본 장소', type: 'recent' } },
   { path: '/home/content-all', name: 'home-content-all', component: ContentListView },
@@ -68,6 +69,7 @@ const routes = [
   { path: '/community/drama-board', name: 'community-drama-board', component: CommunityView },
   { path: '/community/search', name: 'community-search', component: CommunityView, meta: { search: true } },
   { path: '/community/edit', name: 'community-edit', component: CommunityWriteView },
+  { path: '/users/:userId', name: 'user-profile', component: PublicUserProfileView },
   { path: '/my', name: 'my', component: MyPageView },
   { path: '/my/activity/liked-content', name: 'my-liked-content', component: SimpleListView, meta: { title: '좋아한 콘텐츠', type: 'liked-content' } },
   { path: '/my/activity/liked-places', name: 'my-liked-places', component: SimpleListView, meta: { title: '좋아한 장소', type: 'liked-places' } },
@@ -105,16 +107,33 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to) => {
-  if (to.matched.some((record) => record.meta.public)) return true;
-
+router.beforeEach(async (to) => {
   const uiStore = useUiStore();
-  if (uiStore.currentUser || readAccessToken()) return true;
+  const hasToken = Boolean(readAccessToken());
+  const isPublic = to.matched.some((record) => record.meta.public);
 
-  return {
-    name: 'splash',
-    query: to.fullPath && to.fullPath !== '/' ? { redirect: to.fullPath } : {},
-  };
+  if (to.name === 'oauth-callback') return true;
+  if (isPublic) return true;
+
+  if (!uiStore.currentUser && hasToken && !uiStore.authLoading) {
+    await uiStore.syncSessionFromServer();
+  }
+
+  if (!uiStore.currentUser && !readAccessToken()) {
+    return {
+      name: 'splash',
+      query: to.fullPath && to.fullPath !== '/' ? { redirect: to.fullPath } : {},
+    };
+  }
+
+  if (to.name !== 'preferences' && uiStore.currentUser && !uiStore.preferencesCompleted) {
+    return {
+      name: 'preferences',
+      query: to.fullPath && to.fullPath !== '/preferences' ? { redirect: to.fullPath } : {},
+    };
+  }
+
+  return true;
 });
 
 export default router;

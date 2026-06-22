@@ -7,33 +7,44 @@ import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 import { useUiStore } from '../stores/uiStore.js';
+import { PREFERENCE_CONTENT_TYPES, PREFERENCE_REGIONS, PREFERENCE_THEMES, normalizePreferenceSelection } from '../utils/preferences.js';
+
+const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 const router = useRouter();
 const uiStore = useUiStore();
 
-const contentOptions = ['드라마', '영화', '예능', '아이돌', '배우'];
-const regionOptions = ['서울', '부산', '제주', '경기', '강원', '인천'];
-const themeOptions = ['감성 여행', '촬영지 투어', '맛집', '산책', '가족', '혼자 여행', '친구와 여행'];
+const contentOptions = PREFERENCE_CONTENT_TYPES;
+const regionOptions = PREFERENCE_REGIONS;
+const themeOptions = PREFERENCE_THEMES;
 
 const nickname = ref(uiStore.currentUser?.nickname ?? '');
 const bio = ref(uiStore.currentUser?.bio ?? 'K-content 여행 중');
-const selectedTypes = ref([...(uiStore.currentUser?.preferences?.contentTypes ?? ['드라마'])]);
-const selectedRegions = ref([...(uiStore.currentUser?.preferences?.regions ?? ['서울'])]);
-const selectedThemes = ref([...(uiStore.currentUser?.preferences?.themes ?? ['감성 여행'])]);
+const currentPreferences = normalizePreferenceSelection(uiStore.currentUser?.preferences);
+const selectedTypes = ref([...currentPreferences.contentTypes]);
+const selectedRegions = ref([...currentPreferences.regions]);
+const selectedThemes = ref([...currentPreferences.themes]);
 const nicknameError = ref('');
 const saving = ref(false);
 const saveNotice = ref(null);
 const selectedImageName = ref('');
+const selectedImageFile = ref(null);
 const previewObjectUrl = ref('');
 
 const profileInitial = computed(() => nickname.value?.slice(0, 1).toUpperCase() || 'K');
 const currentProfileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
 const profilePreviewUrl = computed(() => previewObjectUrl.value || currentProfileImageUrl.value);
+const providerLabel = computed(() => ({
+  google: 'Google 로그인 연결됨',
+  kakao: 'Kakao 로그인 연결됨',
+  email: '이메일 로그인',
+})[uiStore.currentUser?.authProvider] ?? '이메일 로그인');
 
 function toggle(list, item) {
-  const index = list.value.indexOf(item);
-  if (index >= 0) list.value.splice(index, 1);
-  else list.value.push(item);
+  const index = list.indexOf(item);
+  if (index >= 0) list.splice(index, 1);
+  else list.push(item);
 }
 
 function validateNickname() {
@@ -51,26 +62,65 @@ function validateNickname() {
   return true;
 }
 
+function clearPreviewUrl() {
+  if (previewObjectUrl.value) URL.revokeObjectURL(previewObjectUrl.value);
+  previewObjectUrl.value = '';
+}
+
 function handleImageChange(event) {
   const [file] = event.target.files ?? [];
-  if (previewObjectUrl.value) URL.revokeObjectURL(previewObjectUrl.value);
-  if (!file) {
-    previewObjectUrl.value = '';
-    selectedImageName.value = '';
+  clearPreviewUrl();
+  selectedImageFile.value = null;
+  selectedImageName.value = '';
+
+  if (!file) return;
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    saveNotice.value = {
+      tone: 'warning',
+      title: '이미지 형식을 확인해 주세요.',
+      text: 'JPG, PNG, WEBP, GIF 이미지만 업로드할 수 있습니다.',
+    };
+    event.target.value = '';
     return;
   }
-  previewObjectUrl.value = URL.createObjectURL(file);
+  if (file.size > MAX_PROFILE_IMAGE_SIZE) {
+    saveNotice.value = {
+      tone: 'warning',
+      title: '이미지 용량을 확인해 주세요.',
+      text: '프로필 이미지는 5MB 이하만 업로드할 수 있습니다.',
+    };
+    event.target.value = '';
+    return;
+  }
+
+  selectedImageFile.value = file;
   selectedImageName.value = file.name;
+  previewObjectUrl.value = URL.createObjectURL(file);
   saveNotice.value = {
     tone: 'info',
-    title: '프로필 이미지 미리보기',
-    text: '선택한 이미지는 미리보기로만 표시됩니다. 프로필 이미지 업로드는 추후 지원 예정입니다.',
+    title: '프로필 이미지가 선택되었습니다.',
+    text: '저장하면 sceniK 프로필 이미지로 업로드됩니다.',
   };
 }
 
 async function saveProfile() {
   if (!validateNickname()) return;
   saving.value = true;
+  saveNotice.value = null;
+
+  if (selectedImageFile.value) {
+    const uploaded = await uiStore.uploadProfileImage(selectedImageFile.value);
+    if (!uploaded) {
+      saving.value = false;
+      saveNotice.value = {
+        tone: 'error',
+        title: '프로필 이미지를 저장하지 못했습니다.',
+        text: uiStore.authError || '이미지 업로드 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+      };
+      return;
+    }
+  }
+
   const ok = await uiStore.updateProfile({
     nickname: nickname.value,
     bio: bio.value,
@@ -85,19 +135,17 @@ async function saveProfile() {
     ? {
         tone: 'success',
         title: '프로필이 저장되었습니다.',
-        text: '닉네임, 소개, 콘텐츠 취향과 선호 지역/테마가 업데이트되었습니다.',
+        text: '닉네임, 소개, 취향, 프로필 이미지가 sceniK 프로필에 반영되었습니다.',
       }
     : {
         tone: 'error',
         title: '프로필을 저장하지 못했습니다.',
-        text: `${uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'} 입력한 내용은 화면에 유지됩니다. 연결 상태를 확인한 뒤 다시 저장해 주세요. 현재 이미지는 서버 업로드가 아니라 미리보기만 지원됩니다.`,
+        text: uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
       };
   if (ok) window.setTimeout(() => router.push('/my'), 450);
 }
 
-onBeforeUnmount(() => {
-  if (previewObjectUrl.value) URL.revokeObjectURL(previewObjectUrl.value);
-});
+onBeforeUnmount(clearPreviewUrl);
 </script>
 
 <template>
@@ -129,16 +177,16 @@ onBeforeUnmount(() => {
             preview
           />
           <div>
-            <h2 id="profile-preview-title">프로필 이미지 미리보기</h2>
-            <p>선택한 이미지는 이 화면에서만 미리보기로 표시됩니다.</p>
+            <h2 id="profile-preview-title">sceniK 프로필 이미지</h2>
+            <p>SNS 로그인 방식과 별개로 sceniK에서 사용할 프로필입니다.</p>
           </div>
         </div>
         <label class="profile-image-picker">
           <span>이미지 선택</span>
-          <input type="file" accept="image/*" @change="handleImageChange" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="handleImageChange" />
         </label>
         <small class="profile-image-note">
-          {{ selectedImageName ? `${selectedImageName} · ` : '' }}프로필 이미지 업로드는 추후 지원 예정입니다.
+          {{ selectedImageName ? `${selectedImageName} · ` : '' }}JPG, PNG, WEBP, GIF · 최대 5MB
         </small>
       </section>
 
@@ -146,6 +194,11 @@ onBeforeUnmount(() => {
         <label class="form-field">
           이메일
           <input :value="uiStore.currentUser.email" readonly aria-readonly="true" />
+        </label>
+
+        <label class="form-field">
+          로그인 방식
+          <input :value="providerLabel" readonly aria-readonly="true" />
         </label>
 
         <label class="form-field">
@@ -226,7 +279,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="sticky-actions">
-        <BaseButton block :disabled="saving" @click="saveProfile">{{ saving ? '저장 중' : '프로필 저장' }}</BaseButton>
+        <BaseButton block :disabled="saving" @click="saveProfile">{{ saving ? '저장 중입니다' : '프로필 저장' }}</BaseButton>
         <BaseButton variant="ghost" block @click="router.push('/my')">취소</BaseButton>
       </div>
     </section>

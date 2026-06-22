@@ -38,6 +38,8 @@ const postNotice = ref(null);
 const editingPost = ref(false);
 const postEditTitle = ref('');
 const postEditBody = ref('');
+const postEditBoard = ref('drama');
+const postEditHashtags = ref([]);
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 const failedPostImageKeys = ref(new Set());
@@ -226,6 +228,21 @@ function boardPostCount(board) {
   return uiStore.communityPosts.filter((post) => (post.tags ?? []).some((tag) => tag.includes(board.tag))).length;
 }
 
+const postEditHashtagOptions = computed(() => {
+  const currentBoard = boards.find((board) => board.id === postEditBoard.value) ?? boards[0];
+  const tags = uiStore.communityPosts
+    .flatMap((post) => post.tags ?? [])
+    .filter((tag) => tag && tag !== currentBoard.tag);
+  return [...new Set([...(selectedPost.value?.tags ?? []), ...tags])].slice(0, 14);
+});
+
+function togglePostEditHashtag(tag) {
+  const exists = postEditHashtags.value.includes(tag);
+  postEditHashtags.value = exists
+    ? postEditHashtags.value.filter((item) => item !== tag)
+    : [...postEditHashtags.value, tag].slice(0, 5);
+}
+
 function isPostLiked(post) {
   return Boolean(post?.isLiked || (uiStore.currentUser?.userId && (post.likedBy ?? []).includes(uiStore.currentUser.userId)));
 }
@@ -412,6 +429,8 @@ function startPostEdit() {
   editingPost.value = true;
   postEditTitle.value = selectedPost.value.title ?? '';
   postEditBody.value = selectedPost.value.body ?? '';
+  postEditBoard.value = boards.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id ?? 'drama';
+  postEditHashtags.value = (selectedPost.value.tags ?? []).filter((tag) => !boards.some((board) => tag.includes(board.tag))).slice(0, 5);
   postNotice.value = {
     tone: 'info',
     title: '게시글 수정',
@@ -423,6 +442,7 @@ function cancelPostEdit() {
   editingPost.value = false;
   postEditTitle.value = '';
   postEditBody.value = '';
+  postEditHashtags.value = [];
 }
 
 async function savePostEdit() {
@@ -445,7 +465,7 @@ async function savePostEdit() {
   const updated = await uiStore.editPost(postKey(target), {
     title: postEditTitle.value.trim(),
     body: postEditBody.value.trim(),
-    tags: target.tags ?? [],
+    tags: [boards.find((board) => board.id === postEditBoard.value)?.tag, ...postEditHashtags.value].filter(Boolean),
     region: target.region,
     duration: target.duration,
     routeId: target.routeId,
@@ -758,6 +778,27 @@ async function nativeShare() {
               :text="postNotice.text"
             />
             <template v-if="editingPost">
+              <label class="form-field compact">
+                게시판
+                <select v-model="postEditBoard">
+                  <option v-for="board in boards" :key="board.id" :value="board.id">{{ board.name }}</option>
+                </select>
+              </label>
+              <div class="form-field compact">
+                <span>해시태그</span>
+                <div class="chip-row wrap write-hashtag-row">
+                  <button
+                    v-for="tag in postEditHashtagOptions"
+                    :key="tag"
+                    type="button"
+                    class="chip"
+                    :class="{ selected: postEditHashtags.includes(tag) }"
+                    @click="togglePostEditHashtag(tag)"
+                  >
+                    #{{ tag }}
+                  </button>
+                </div>
+              </div>
               <label class="form-field compact">
                 제목
                 <input v-model="postEditTitle" maxlength="50" placeholder="게시글 제목" />

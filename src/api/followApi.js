@@ -1,5 +1,8 @@
 import { unwrapApiData } from './error.js';
 import { http } from './http.js';
+import { normalizePost } from './communityApi.js';
+import { normalizeRoutePayload } from './routeApi.js';
+import { normalizeUser } from './authApi.js';
 
 function normalizeFollowUser(user = {}) {
   const userId = user.userId ?? user.id;
@@ -52,4 +55,22 @@ export async function fetchFollowing(userId) {
 export async function fetchMyFollowing() {
   const { data } = await http.get('/users/me/following');
   return listFrom(data).map(normalizeFollowUser);
+}
+
+
+export async function fetchPublicProfile(userId) {
+  const { data } = await http.get(`/users/${userId}/profile`);
+  const payload = unwrapApiData(data) ?? {};
+  const user = normalizeUser(payload.user ?? payload);
+  return {
+    ...payload,
+    user,
+    userId: user.userId,
+    nickname: user.nickname,
+    followerCount: Number(payload.followerCount ?? user.followerCount ?? 0),
+    followingCount: Number(payload.followingCount ?? user.followingCount ?? 0),
+    followedByMe: Boolean(payload.followedByMe ?? user.followedByMe),
+    savedCourses: (payload.savedCourses ?? payload.routes ?? []).map(normalizeRoutePayload).filter(Boolean),
+    posts: (payload.posts ?? []).map(normalizePost),
+  };
 }

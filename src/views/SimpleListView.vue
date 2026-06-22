@@ -69,6 +69,7 @@ const visibleCount = computed(() => {
 });
 const isLoading = computed(() => {
   if (type.value === 'saved-routes') return uiStore.savedCoursesLoading;
+  if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) return uiStore.engagementLoading;
   if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityLoading;
   if (type.value === 'reviews') return uiStore.myReviewsLoading;
   if (['following', 'followers'].includes(type.value)) return uiStore.followLoading;
@@ -76,6 +77,7 @@ const isLoading = computed(() => {
 });
 const errorMessage = computed(() => {
   if (type.value === 'saved-routes') return uiStore.routeError;
+  if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) return uiStore.engagementError;
   if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityError;
   if (type.value === 'reviews') return uiStore.myReviewsError;
   if (['following', 'followers'].includes(type.value)) return uiStore.followError;

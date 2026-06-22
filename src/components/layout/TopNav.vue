@@ -1,6 +1,8 @@
 <script setup>
+import { computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import BrandLogo from '../brand/BrandLogo.vue';
+import { useUiStore } from '../../stores/uiStore.js';
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -8,6 +10,16 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const uiStore = useUiStore();
+const unreadCount = computed(() => uiStore.unreadNotifications);
+
+onMounted(() => {
+  if (uiStore.currentUser) void uiStore.loadNotifications();
+});
+
+watch(() => uiStore.currentUser?.userId, (userId) => {
+  if (userId) void uiStore.loadNotifications();
+});
 </script>
 
 <template>
@@ -25,11 +37,12 @@ const router = useRouter();
 
     <div class="top-actions">
       <slot name="actions">
-        <RouterLink class="icon-button" to="/notifications" aria-label="알림">
+        <RouterLink class="icon-button notification-nav-button" to="/notifications" aria-label="알림">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9z" />
             <path d="M10 21h4" />
           </svg>
+          <span v-if="unreadCount" class="notification-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
         </RouterLink>
         <RouterLink class="icon-button" to="/settings" aria-label="설정">
           <svg viewBox="0 0 24 24" aria-hidden="true">

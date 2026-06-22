@@ -56,6 +56,7 @@ export function normalizePost(post = {}) {
   const imageUrl = firstDefined(post.imageUrl, post.image_url, post.attachmentUrl, post.attachment_url);
   const thumbnailUrl = firstDefined(post.thumbnailUrl, post.thumbnail_url);
   const coverImageUrl = firstDefined(post.coverImageUrl, post.cover_image_url);
+  const isScrapped = Boolean(firstDefined(post.isScrapped, post.scrapped, false));
   return {
     ...post,
     id: post.id ?? postId,
@@ -73,7 +74,9 @@ export function normalizePost(post = {}) {
     likes: Number(firstDefined(post.likes, post.likeCount, 0)),
     isLiked: Boolean(firstDefined(post.isLiked, post.liked, false)),
     likedBy: post.likedBy ?? [],
-    scrappedBy: post.scrappedBy ?? [],
+    isScrapped,
+    scrappedBy: Array.isArray(post.scrappedBy) ? post.scrappedBy : [],
+    scrapCount: Number(firstDefined(post.scrapCount, post.scraps, 0)),
     imageUrl,
     thumbnailUrl,
     coverImageUrl,
@@ -190,6 +193,18 @@ export async function unlikePost(postId) {
   return response ? normalizePost(response?.post ?? response) : null;
 }
 
+export async function scrapPost(postId) {
+  const { data } = await http.post(`/posts/${postId}/scraps`);
+  const response = unwrapApiData(data);
+  return response ? normalizePost(response?.post ?? response) : null;
+}
+
+export async function unscrapPost(postId) {
+  const { data } = await http.delete(`/posts/${postId}/scraps`);
+  const response = unwrapApiData(data);
+  return response ? normalizePost(response?.post ?? response) : null;
+}
+
 export async function reportPost(postId, payload = {}) {
   const { data } = await http.post(`/posts/${postId}/reports`, payload);
   return unwrapApiData(data);
@@ -202,8 +217,40 @@ export async function getNotifications() {
   return list.map((item) => ({
     ...item,
     id: item.notificationId ?? item.id,
+    notificationId: item.notificationId ?? item.id,
     read: Boolean(item.isRead ?? item.read),
     subtitle: item.message ?? item.subtitle ?? '',
-    time: item.createdAt?.slice?.(0, 10) ?? '',
+    time: item.time ?? item.createdAt?.slice?.(0, 10) ?? '',
+    targetType: item.targetType,
+    targetId: item.targetId,
+    postId: item.postId,
+    commentId: item.commentId,
+    actorUserId: item.actorUserId,
+    routeId: item.routeId,
+    placeId: item.placeId,
+    to: item.to
+      || (item.postId ? `/community/post/${item.postId}` : '')
+      || (item.routeId ? `/ai/courses/${item.routeId}` : '')
+      || (item.placeId ? `/places/${item.placeId}` : '')
+      || (item.actorUserId ? `/users/${item.actorUserId}` : '')
+      || '/community',
   }));
+}
+
+export async function markNotificationRead(notificationId) {
+  const { data } = await http.patch(`/notifications/${notificationId}/read`);
+  const response = unwrapApiData(data);
+  return response ? {
+    ...response,
+    id: response.notificationId ?? response.id,
+    read: Boolean(response.isRead ?? response.read),
+    subtitle: response.message ?? response.subtitle ?? '',
+    time: response.time ?? response.createdAt?.slice?.(0, 10) ?? '',
+    to: response.to ?? '/community',
+  } : null;
+}
+
+export async function markAllNotificationsRead() {
+  const { data } = await http.patch('/notifications/read');
+  return unwrapApiData(data) ?? data;
 }

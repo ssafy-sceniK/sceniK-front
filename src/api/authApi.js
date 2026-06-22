@@ -1,5 +1,6 @@
 import { unwrapApiData } from './error.js';
 import { API_BASE_URL, AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, http } from './http.js';
+import { hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 
 export const GOOGLE_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/google`;
 export const KAKAO_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/kakao`;
@@ -24,10 +25,16 @@ export function clearAccessToken() {
 
 export function normalizeUser(user = {}) {
   const userId = user.userId ?? user.id;
+  const preferences = normalizePreferenceSelection(user.preferences);
+  const authProvider = user.authProvider ?? user.loginProvider ?? user.provider ?? 'email';
   return {
     ...user,
     id: user.id ?? userId,
     userId,
+    preferences,
+    authProvider,
+    loginProvider: authProvider,
+    preferencesCompleted: Boolean(user.preferencesCompleted ?? hasCompletePreferences(preferences)),
     password: undefined,
   };
 }
@@ -91,6 +98,14 @@ export async function fetchMe() {
 
 export async function updateMe(payload) {
   const { data } = await http.patch('/users/me', payload);
+  const user = unwrapApiData(data);
+  return normalizeUser(user?.user ?? user);
+}
+
+export async function uploadProfileImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await http.post('/users/me/profile-image', formData);
   const user = unwrapApiData(data);
   return normalizeUser(user?.user ?? user);
 }

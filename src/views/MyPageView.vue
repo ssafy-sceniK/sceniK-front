@@ -195,7 +195,6 @@ async function logoutToLanding() {
         <div class="visit-control-row">
           <RouterLink to="/my/visit-planned">방문 예정 {{ plannedCount }}</RouterLink>
           <RouterLink to="/my/visit-completed">방문 완료 {{ completedCount }}</RouterLink>
-          <RouterLink to="/my/visit-map">지도</RouterLink>
         </div>
 
         <div class="visit-progress-card" :style="{ '--visit-progress': `${visitProgress}%` }">

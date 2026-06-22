@@ -22,6 +22,7 @@ const statusMessage = ref('');
 let map;
 let markers = [];
 let polyline;
+let infoOverlay;
 
 const appKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY || import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY;
 const mapStops = computed(() => props.stops.filter((stop) => (
@@ -62,7 +63,53 @@ function isSelectedRegionPlace(stop) {
   });
 }
 
+function closeInfoOverlay() {
+  infoOverlay?.setMap(null);
+  infoOverlay = null;
+}
+
+function placeName(stop) {
+  return stop.placeName ?? stop.name ?? '장소';
+}
+
+function createStopInfo(stop) {
+  const content = document.createElement('article');
+  content.className = 'route-stop-info';
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'route-stop-info__close';
+  closeButton.textContent = '×';
+  closeButton.setAttribute('aria-label', '장소 정보 닫기');
+  closeButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeInfoOverlay();
+  });
+  const title = document.createElement('strong');
+  title.textContent = placeName(stop);
+  const meta = document.createElement('span');
+  meta.textContent = [stop.region, stop.category].filter(Boolean).join(' · ');
+  const address = document.createElement('small');
+  address.textContent = stop.address ?? '';
+  content.append(closeButton, title, meta, address);
+  return content;
+}
+
+function openStopInfo(kakaoMaps, marker, stop) {
+  closeInfoOverlay();
+  infoOverlay = new kakaoMaps.CustomOverlay({
+    map,
+    position: marker.getPosition(),
+    content: createStopInfo(stop),
+    clickable: true,
+    xAnchor: 0.5,
+    yAnchor: 1.08,
+    zIndex: 10,
+  });
+}
+
 function clearMapObjects() {
+  closeInfoOverlay();
   markers.forEach((marker) => marker.setMap(null));
   markers = [];
   if (polyline) {
@@ -100,8 +147,9 @@ async function renderMap() {
       const marker = new kakaoMaps.Marker({
         map,
         position,
-        title: stop.placeName ?? stop.name ?? '장소',
+        title: placeName(stop),
       });
+      kakaoMaps.event.addListener(marker, 'click', () => openStopInfo(kakaoMaps, marker, stop));
       markers.push(marker);
       return position;
     });

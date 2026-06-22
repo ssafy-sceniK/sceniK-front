@@ -1,42 +1,33 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { getNotifications } from '../api/communityApi.js';
 import { readAccessToken } from '../api/authApi.js';
-import { getUserMessage } from '../api/error.js';
+import { useUiStore } from '../stores/uiStore.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 
 const router = useRouter();
-const notifications = ref([]);
-const error = ref('');
-const loading = ref(false);
+const uiStore = useUiStore();
+const notifications = computed(() => uiStore.notifications);
+const error = computed(() => uiStore.notificationsError);
+const loading = computed(() => uiStore.notificationsLoading);
 const hasToken = ref(Boolean(readAccessToken()));
 
 async function loadNotifications() {
   hasToken.value = Boolean(readAccessToken());
   if (!readAccessToken()) {
-    notifications.value = [];
+    uiStore.notifications = [];
     return;
   }
-  loading.value = true;
-  error.value = '';
-  try {
-    notifications.value = await getNotifications();
-  } catch (err) {
-    error.value = getUserMessage(err, '알림을 불러오지 못했습니다.');
-    notifications.value = [];
-  } finally {
-    loading.value = false;
-  }
+  await uiStore.loadNotifications();
 }
 
 function markAllRead() {
-  notifications.value = notifications.value.map((item) => ({ ...item, read: true }));
+  void uiStore.markAllNotificationsRead();
 }
 
-function openNotification(notification) {
-  notification.read = true;
+async function openNotification(notification) {
+  await uiStore.markNotificationRead(notification.notificationId ?? notification.id);
   router.push(notification.to ?? '/community');
 }
 
