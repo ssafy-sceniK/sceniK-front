@@ -5,10 +5,14 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
-import RouteProgressSummary from '../components/course/RouteProgressSummary.vue';
 import { getUserMessage } from '../api/error.js';
 import { fetchPlaces } from '../api/placeApi.js';
+import { contentPlaces, places as catalogPlaces } from '../data/mockData.js';
 import { useUiStore } from '../stores/uiStore.js';
+
+const VISIT_WORTHY_KEYWORDS = ['촬영', '관광', '궁궐', '전통', '마을', '거리', '카페', '공원', '문화', '시장', '전망', '해변', '미술관', '박물관'];
+const REST_KEYWORDS = ['맛집', '공연', '서점', '갤러리'];
+const WEAK_STOP_KEYWORDS = ['학교', '호텔', '모텔', '리조트', '상점', '매장', '회사', '병원'];
 
 const route = useRoute();
 const router = useRouter();
@@ -36,23 +40,109 @@ const course = computed(() => isAiEdit.value ? uiStore.generatedRoute : detail.v
 const isSavedCourse = computed(() => !isAiEdit.value && detail.value?.source === 'saved');
 const usedPlaceIds = computed(() => new Set(draftDays.value.flatMap((day) => day.places.map((stop) => stop.placeId))));
 const candidateById = computed(() => new Map((course.value?.candidatePlaces ?? [])
+  .filter((place) => place?.placeId)
   .map((place) => [place.placeId, place])));
-const availableCandidates = computed(() => (course.value?.candidatePlaces ?? [])
-  .filter((place) => !usedPlaceIds.value.has(place.placeId)));
-const verifiedSearchCandidates = computed(() => searchedPlaces.value);
+const selectedContentIdSet = computed(() => {
+  const ids = new Set([course.value?.contentId, ...(course.value?.contentIds ?? [])].filter(Boolean));
+  (course.value?.candidatePlaces ?? []).forEach((candidate) => {
+    candidateContentIds(candidate).forEach((contentId) => ids.add(contentId));
+  });
+  draftDays.value.flatMap((day) => day.places).forEach((stop) => {
+    candidateContentIds(stop).forEach((contentId) => ids.add(contentId));
+    contentPlaces
+      .filter((item) => item.placeId === stop.placeId)
+      .forEach((item) => ids.add(item.contentId));
+    const catalogPlace = catalogPlaces.find((place) => place.placeId === stop.placeId);
+    (catalogPlace?.relatedContentIds ?? []).forEach((contentId) => ids.add(contentId));
+  });
+  return ids;
+});
+const courseRegionSet = computed(() => {
+  const regions = new Set();
+  if (Array.isArray(course.value?.regions)) {
+    course.value.regions.filter(Boolean).forEach((region) => regions.add(region));
+  }
+  String(course.value?.region ?? '')
+    .split(/[,.·]/)
+    .map((region) => region.trim())
+    .filter(Boolean)
+    .forEach((region) => regions.add(region));
+  draftDays.value.flatMap((day) => day.places)
+    .map((stop) => stop.region ?? candidateById.value.get(stop.placeId)?.region)
+    .filter(Boolean)
+    .forEach((region) => regions.add(region));
+  return regions;
+});
+const routeCenter = computed(() => {
+  const coordinates = draftDays.value
+    .flatMap((day) => day.places)
+    .map((stop) => candidateById.value.get(stop.placeId) ?? stop)
+    .map((place) => ({ latitude: Number(place.latitude), longitude: Number(place.longitude) }))
+    .filter((point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude));
+  if (!coordinates.length) return null;
+  return {
+    latitude: coordinates.reduce((sum, point) => sum + point.latitude, 0) / coordinates.length,
+    longitude: coordinates.reduce((sum, point) => sum + point.longitude, 0) / coordinates.length,
+  };
+});
+const recommendationPool = computed(() => {
+  const candidates = new Map();
+
+  function addCandidate(candidate) {
+    const placeId = candidate?.placeId;
+    const name = candidate?.name ?? candidate?.placeName;
+    if (!placeId || !name || usedPlaceIds.value.has(placeId)) return;
+    candidates.set(placeId, { ...candidates.get(placeId), ...candidate, name, placeName: candidate.placeName ?? name });
+  }
+
+  (course.value?.candidatePlaces ?? []).forEach(addCandidate);
+
+  const selectedContentIds = selectedContentIdSet.value;
+  contentPlaces
+    .filter((item) => selectedContentIds.has(item.contentId))
+    .forEach((item) => {
+      const place = catalogPlaces.find((catalogPlace) => catalogPlace.placeId === item.placeId);
+      addCandidate(normalizeCatalogCandidate(place, item.contentId));
+    });
+
+  catalogPlaces
+    .filter((place) => (place.relatedContentIds ?? []).some((contentId) => selectedContentIds.has(contentId)))
+    .forEach((place) => addCandidate(normalizeCatalogCandidate(place)));
+
+  if (candidates.size < 8) {
+    catalogPlaces
+      .filter((place) => isCourseRegionCandidate(place) && visitCategoryScore(place) > 0)
+      .forEach((place) => addCandidate(normalizeCatalogCandidate(place)));
+  }
+
+  return [...candidates.values()];
+});
+const recommendedCandidates = computed(() => sortCandidatePlaces(recommendationPool.value).slice(0, 12));
+const verifiedSearchCandidates = computed(() => sortCandidatePlaces(searchedPlaces.value
+  .filter((place) => place?.placeId && !usedPlaceIds.value.has(place.placeId))));
 const currentPlaceCount = computed(() => draftDays.value.reduce((sum, day) => sum + day.places.length, 0));
 const originalPlaceCount = computed(() => (course.value?.days ?? []).reduce((sum, day) => sum + (day.places?.length ?? 0), 0));
 const changedPlaceCount = computed(() => Math.abs(currentPlaceCount.value - originalPlaceCount.value));
 
 function cloneDays(value) {
+  const candidates = new Map((value?.candidatePlaces ?? []).map((place) => [place.placeId, place]));
   return (value?.days ?? []).map((day, dayIndex) => ({
     ...day,
     dayNumber: dayIndex + 1,
-    places: (day.places ?? []).map((stop, stopIndex) => ({
-      ...stop,
-      dayNumber: dayIndex + 1,
-      visitOrder: stopIndex + 1,
-    })),
+    places: (day.places ?? []).map((stop, stopIndex) => {
+      const candidate = candidates.get(stop.placeId) ?? {};
+      return {
+        ...candidate,
+        ...stop,
+        placeName: stop.placeName ?? stop.name ?? candidate.placeName ?? candidate.name,
+        category: stop.category ?? stop.placeCategory ?? stop.type ?? candidate.category ?? '장소',
+        address: stop.address ?? candidate.address,
+        latitude: stop.latitude ?? candidate.latitude,
+        longitude: stop.longitude ?? candidate.longitude,
+        dayNumber: dayIndex + 1,
+        visitOrder: stopIndex + 1,
+      };
+    }),
   }));
 }
 
@@ -103,6 +193,31 @@ function cloneDraftDays() {
   }));
 }
 
+function normalizeCatalogCandidate(place, relatedContentId = '') {
+  if (!place) return null;
+  const contentId = relatedContentId || place.relatedContentIds?.find((id) => selectedContentIdSet.value.has(id)) || place.relatedContentIds?.[0] || '';
+  return {
+    placeId: place.placeId,
+    name: place.placeName ?? place.name,
+    placeName: place.placeName ?? place.name,
+    region: place.region,
+    category: place.category,
+    address: place.address,
+    latitude: place.latitude,
+    longitude: place.longitude,
+    relatedContentId: contentId,
+    relatedContentIds: place.relatedContentIds ?? (contentId ? [contentId] : []),
+    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '선택 콘텐츠',
+    sceneDescription: place.description,
+    verified: place.verified !== false,
+    imageUrl: place.imageUrl,
+  };
+}
+
+function isCourseRegionCandidate(candidate = {}) {
+  if (!courseRegionSet.value.size) return true;
+  return courseRegionSet.value.has(candidate.region);
+}
 function normalizeSearchPlace(place) {
   return {
     placeId: place.placeId,
@@ -114,11 +229,66 @@ function normalizeSearchPlace(place) {
     latitude: place.latitude,
     longitude: place.longitude,
     relatedContentId: course.value?.contentId ?? course.value?.contentIds?.[0] ?? 'db-place-search',
-    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '저장한 코스',
-    sceneDescription: place.description ?? '검증된 장소 데이터에서 선택한 장소입니다.',
+    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '저장 코스',
+    sceneDescription: place.description ?? '검증된 장소입니다.',
     verified: place.verified !== false,
     imageUrl: place.imageUrl,
   };
+}
+
+function candidateContentIds(candidate = {}) {
+  return [
+    candidate.relatedContentId,
+    ...(candidate.relatedContentIds ?? []),
+    ...(candidate.relatedContents ?? []).map((content) => content.contentId ?? content.relatedContentId),
+  ].filter(Boolean);
+}
+
+function isSelectedContentCandidate(candidate) {
+  const selectedIds = selectedContentIdSet.value;
+  if (!selectedIds.size) return false;
+  return candidateContentIds(candidate).some((contentId) => selectedIds.has(contentId));
+}
+
+function includesAny(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword.toLowerCase()));
+}
+
+function visitCategoryScore(candidate = {}) {
+  const text = `${candidate.category ?? ''} ${candidate.name ?? candidate.placeName ?? ''}`.toLowerCase();
+  if (includesAny(text, VISIT_WORTHY_KEYWORDS)) return 4;
+  if (includesAny(text, REST_KEYWORDS)) return 2;
+  if (includesAny(text, WEAK_STOP_KEYWORDS)) return -4;
+  return 0;
+}
+
+function distanceScore(candidate = {}) {
+  if (!routeCenter.value) return 0;
+  const latitude = Number(candidate.latitude);
+  const longitude = Number(candidate.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return 0;
+  const distance = Math.abs(latitude - routeCenter.value.latitude) + Math.abs(longitude - routeCenter.value.longitude);
+  return Math.max(0, 3 - distance * 35);
+}
+
+function candidatePriority(candidate) {
+  return (isSelectedContentCandidate(candidate) ? 10 : 0)
+    + (isCourseRegionCandidate(candidate) ? 4 : 0)
+    + visitCategoryScore(candidate)
+    + distanceScore(candidate);
+}
+
+function sortCandidatePlaces(list = []) {
+  return [...list].sort((left, right) => candidatePriority(right) - candidatePriority(left)
+    || String(left.region ?? '').localeCompare(String(right.region ?? ''), 'ko')
+    || String(left.name ?? left.placeName ?? '').localeCompare(String(right.name ?? right.placeName ?? ''), 'ko'));
+}
+
+function candidateReason(candidate = {}) {
+  if (isSelectedContentCandidate(candidate)) {
+    return `${candidate.relatedContentTitle ?? '선택 콘텐츠'} 분위기와 연결된 장소입니다.`;
+  }
+  return `${candidate.region ?? '같은 지역'}에서 함께 들르기 좋은 ${candidate.category ?? '장소'}입니다.`;
 }
 
 async function searchVerifiedPlaces() {
@@ -232,21 +402,17 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
   }
   targetDay.places.splice(Math.max(0, insertIndex), 0, item);
   draftDays.value = renumberDays(days);
-  saveNotice.value = {
-    tone: 'success',
-    title: '순서가 변경되었습니다.',
-    text: '변경사항 저장을 누르면 새 순서가 코스에 반영됩니다.',
-  };
+  saveNotice.value = null;
   finishDrag();
 }
 
 function addCandidateToDay(dayIndex, candidate) {
   if (!candidate || !draftDays.value[dayIndex]) return;
   if (usedPlaceIds.value.has(candidate.placeId)) {
-    saveError.value = `${candidate.name ?? candidate.placeName}은 이미 코스에 포함되어 있습니다.`;
+    saveError.value = `${candidate.name ?? candidate.placeName}는 이미 코스에 포함되어 있습니다.`;
     saveNotice.value = {
       tone: 'warning',
-      title: '중복 장소입니다.',
+      title: '이미 추가된 장소입니다.',
       text: saveError.value,
     };
     uiStore.notify(saveError.value);
@@ -256,16 +422,20 @@ function addCandidateToDay(dayIndex, candidate) {
   days[dayIndex].places.push({
     placeId: candidate.placeId,
     placeName: candidate.name ?? candidate.placeName,
+    category: candidate.category ?? '장소',
+    address: candidate.address,
+    latitude: candidate.latitude,
+    longitude: candidate.longitude,
     dayNumber: dayIndex + 1,
     visitOrder: days[dayIndex].places.length + 1,
     recommendedTime: '17:00',
-    reason: `${candidate.relatedContentTitle}와 연결된 검증 장소입니다.`,
-    travelTip: '방문 전 운영 시간과 이동 동선을 확인해 주세요.',
+    reason: candidateReason(candidate),
+    travelTip: '',
   });
   draftDays.value = renumberDays(days);
   saveNotice.value = {
     tone: 'success',
-    title: '장소가 추가되었습니다.',
+    title: '장소를 추가했습니다.',
     text: `${candidate.name ?? candidate.placeName}을 Day ${dayIndex + 1}에 추가했습니다.`,
   };
 }
@@ -296,19 +466,15 @@ function removeStop(dayIndex, stopIndex) {
   draftDays.value = renumberDays(days);
   saveNotice.value = {
     tone: 'success',
-    title: '삭제되었습니다.',
-    text: '선택한 장소를 코스에서 제거했습니다. 저장해야 실제 코스에 반영됩니다.',
+    title: '장소를 제거했습니다.',
+    text: '',
   };
 }
 
 function setStopTime(stop, value) {
   stop.recommendedTime = value;
   activeTimePicker.value = '';
-  saveNotice.value = {
-    tone: 'info',
-    title: '방문 시간이 변경되었습니다.',
-    text: '저장 전까지는 현재 편집 화면의 초안에만 반영됩니다.',
-  };
+  saveNotice.value = null;
 }
 
 function buildEditedRoute() {
@@ -349,8 +515,8 @@ async function saveEdit() {
   }
   saveNotice.value = {
     tone: 'info',
-    title: '수정 내용을 저장하는 중입니다.',
-    text: '장소 순서와 방문 시간을 backend 상태에 반영하고 있습니다.',
+    title: '저장 중입니다.',
+    text: '변경한 코스를 저장하고 있습니다.',
   };
   const editedRoute = buildEditedRoute();
 
@@ -387,7 +553,7 @@ async function saveEdit() {
   saveNotice.value = {
     tone: 'success',
     title: '수정되었습니다.',
-    text: '저장한 코스의 일정과 장소 순서가 업데이트되었습니다.',
+    text: '저장한 코스가 업데이트되었습니다.',
   };
   window.setTimeout(() => router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
 }
@@ -443,35 +609,20 @@ onBeforeUnmount(() => {
       <div class="page-intro compact-intro">
         <span class="badge ai">{{ isAiEdit ? 'AI 결과 편집' : '저장 코스 편집' }}</span>
         <h1>{{ course.title }}</h1>
-        <p>프로토타입처럼 모든 Day를 한 화면에서 확인하고, 왼쪽 핸들을 드래그해 순서를 바꿉니다. 장소는 검증된 후보에서만 추가됩니다.</p>
+        <p>날짜별 장소를 정리하고 방문 시간을 조정해 코스를 다듬어 보세요.</p>
       </div>
 
       <section class="course-edit-entity-form" aria-labelledby="course-edit-form-title">
         <div class="section-mini-header">
-          <h2 id="course-edit-form-title">코스 수정 폼</h2>
-          <span>{{ isAiEdit ? '생성 결과 초안' : '저장 코스' }}</span>
+          <h2 id="course-edit-form-title">코스 수정</h2>
+          <span>{{ isAiEdit ? '생성 결과' : '저장 코스' }}</span>
         </div>
         <label class="form-field">
           코스 제목
           <input v-model="draftTitle" maxlength="48" placeholder="코스 제목" />
         </label>
-        <FormStatusNotice
-          compact
-          tone="info"
-          title="저장 방식"
-          :text="isAiEdit ? 'AI 결과 편집은 저장 전 초안에 반영됩니다. 저장하면 내 코스에서 다시 수정할 수 있습니다.' : '변경사항 저장을 누르면 저장한 코스의 장소 순서와 시간이 backend에 반영됩니다.'"
-        />
       </section>
-
-      <RouteProgressSummary
-        :places-count="currentPlaceCount"
-        :duration-days="course.durationDays"
-        :transport="course.transport"
-        :style-label="course.style"
-        :changed-count="changedPlaceCount"
-      />
-
-      <div class="all-day-edit-list">
+<div class="all-day-edit-list">
         <section
           v-for="(day, dayIndex) in draftDays"
           :key="day.dayNumber"
@@ -515,23 +666,22 @@ onBeforeUnmount(() => {
 
                 <div class="editable-stop-copy">
                   <strong>{{ stop.placeName || placeName(stop.placeId) }}</strong>
-                  <small>{{ stop.reason }}</small>
+                  <small>{{ stop.category || stop.reason }}</small>
                 </div>
 
                 <button type="button" class="remove-stop-button" aria-label="장소 제거" @click="removeStop(dayIndex, stopIndex)">×</button>
               </div>
             </article>
           </div>
-
         </section>
       </div>
 
       <section class="candidate-panel course-recommend-panel">
         <div class="section-mini-header">
           <h2>추천 장소</h2>
-          <span>{{ availableCandidates.length }}곳</span>
+          <span>{{ recommendedCandidates.length }}곳</span>
         </div>
-        <p>검증된 후보 장소를 선택한 Day에 추가할 수 있습니다.</p>
+        <p>선택한 콘텐츠와 연결된 장소를 먼저 보여주고, 이미 포함된 장소는 제외합니다.</p>
         <div v-if="draftDays.length" class="candidate-day-tabs" aria-label="추천 장소를 추가할 Day 선택">
           <button
             v-for="day in draftDays"
@@ -566,12 +716,12 @@ onBeforeUnmount(() => {
           >
             <strong>{{ candidate.name }}</strong>
             <small>{{ candidate.region }} · {{ candidate.category }}</small>
-            <span>{{ usedPlaceIds.has(candidate.placeId) ? '이미 추가됨' : '추가' }}</span>
+            <span>추가</span>
           </button>
         </div>
-        <div v-if="availableCandidates.length" class="candidate-chip-grid recommended-place-grid">
+        <div v-if="recommendedCandidates.length" class="candidate-chip-grid recommended-place-grid">
           <button
-            v-for="candidate in availableCandidates"
+            v-for="candidate in recommendedCandidates"
             :key="candidate.placeId"
             type="button"
             @click="addCandidateToSelectedDay(candidate)"
@@ -586,8 +736,8 @@ onBeforeUnmount(() => {
           icon="P"
           tone="search"
           compact
-          title="추가 가능한 추천 장소가 없습니다"
-          text="현재 코스에 모든 검증 후보 장소가 포함되어 있습니다. 검색어를 바꿔 다른 장소를 찾아보세요."
+          title="추가할 추천 장소가 없습니다"
+          text="현재 코스에 연결된 후보 장소가 모두 포함되어 있습니다. 검색으로 다른 검증 장소를 찾아보세요."
         />
       </section>
 
