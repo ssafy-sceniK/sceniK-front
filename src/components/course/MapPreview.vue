@@ -6,7 +6,9 @@ import { fetchPlaceDetail } from '../../api/placeApi.js';
 
 const props = defineProps({
   routePlaces: { type: Array, default: () => [] },
+  totalPlaces: { type: Number, default: null },
   showDetailLink: { type: Boolean, default: true },
+  drawPath: { type: Boolean, default: true },
 });
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
@@ -32,10 +34,19 @@ const validPlaces = computed(() => props.routePlaces.filter((place) => {
     && longitude >= -180
     && longitude <= 180;
 }));
+const totalPlaceCount = computed(() => {
+  const explicitCount = Number(props.totalPlaces);
+  return Number.isFinite(explicitCount) && explicitCount >= 0 ? explicitCount : props.routePlaces.length;
+});
+const missingCoordinateCount = computed(() => Math.max(0, totalPlaceCount.value - validPlaces.value.length));
+const mapCountLabel = computed(() => (missingCoordinateCount.value > 0
+  ? `지도 표시 ${validPlaces.value.length} / 전체 ${totalPlaceCount.value}`
+  : `${validPlaces.value.length}개 장소 표시 중`));
 
 let kakaoMaps;
 let map;
 let markers = [];
+let routePathLine;
 let resizeObserver;
 let infoOverlay;
 
@@ -276,9 +287,15 @@ function goToSelectedPlace() {
   if (path) router.push(path);
 }
 
+function clearRoutePath() {
+  routePathLine?.setMap(null);
+  routePathLine = undefined;
+}
+
 function clearMarkers() {
   closePlaceInfo();
   infoOverlay = undefined;
+  clearRoutePath();
   markers.forEach((marker) => marker.setMap(null));
   markers = [];
 }
@@ -298,9 +315,11 @@ function renderPlaces() {
   }
 
   const bounds = new kakaoMaps.LatLngBounds();
+  const pathPositions = [];
   validPlaces.value.forEach((place) => {
     const position = new kakaoMaps.LatLng(Number(place.latitude), Number(place.longitude));
-    const marker = new kakaoMaps.Marker({ map, position, title: place.placeName });
+    pathPositions.push(position);
+    const marker = new kakaoMaps.Marker({ map, position, title: placeName(place) });
     kakaoMaps.event.addListener(marker, 'click', () => {
       selectedPlace.value = place;
       selectedMarker.value = marker;
@@ -311,8 +330,19 @@ function renderPlaces() {
     bounds.extend(position);
   });
 
+  if (props.drawPath && pathPositions.length > 1) {
+    routePathLine = new kakaoMaps.Polyline({
+      map,
+      path: pathPositions,
+      strokeWeight: 4,
+      strokeColor: '#0052ff',
+      strokeOpacity: 0.82,
+      strokeStyle: 'solid',
+    });
+  }
+
   if (validPlaces.value.length === 1) {
-    map.setCenter(bounds.getSouthWest());
+    map.setCenter(pathPositions[0]);
     map.setLevel(4);
   } else {
     map.setBounds(bounds, 48, 48, 48, 48);
@@ -354,15 +384,16 @@ onBeforeUnmount(() => {
       <strong v-if="mapStatus === 'loading'">지도를 불러오는 중입니다</strong>
       <template v-else-if="mapStatus === 'missing-key'">
         <strong>카카오 지도 JavaScript 키가 필요합니다</strong>
-        <span><code>VITE_KAKAO_MAP_APP_KEY</code>를 설정해 주세요.</span>
+        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>를 설정해 주세요.</span>
       </template>
       <template v-else-if="mapStatus === 'empty'">
         <strong>표시할 좌표가 없습니다</strong>
-        <span>장소의 위도와 경도를 확인해 주세요.</span>
+        <span v-if="totalPlaceCount">전체 {{ totalPlaceCount }}곳 중 지도에 표시할 좌표가 없습니다.</span>
+        <span v-else>장소의 위도와 경도를 확인해 주세요.</span>
       </template>
       <template v-else>
         <strong>카카오 지도를 불러오지 못했습니다</strong>
-        <span>JavaScript 키와 SDK 도메인 설정을 확인해 주세요.</span>
+        <span>JavaScript 앱 키와 SDK 설정을 확인해 주세요.</span>
       </template>
     </div>
     <button
@@ -377,6 +408,6 @@ onBeforeUnmount(() => {
       </span>
       <small>장소 상세 보기</small>
     </button>
-    <span v-if="mapStatus === 'ready' && !infoOpen" class="map-label">{{ validPlaces.length }}개 장소 표시 중</span>
+    <span v-if="mapStatus === 'ready' && !infoOpen" class="map-label">{{ mapCountLabel }}</span>
   </div>
 </template>

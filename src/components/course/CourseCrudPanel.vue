@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+
 defineOptions({
   name: 'CourseCrudPanel',
 });
@@ -10,17 +12,9 @@ const props = defineProps({
   },
   description: {
     type: String,
-    default: '저장한 코스의 수정, 공유, 삭제 상태를 한곳에서 확인합니다.',
+    default: '코스 정보를 확인하고 필요한 작업을 이어갈 수 있습니다.',
   },
   courseTitle: {
-    type: String,
-    default: '',
-  },
-  routeId: {
-    type: [String, Number],
-    default: '',
-  },
-  sourceLabel: {
     type: String,
     default: '',
   },
@@ -28,39 +22,43 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  updatedAt: {
+  regionLabel: {
+    type: String,
+    default: '',
+  },
+  durationLabel: {
+    type: String,
+    default: '',
+  },
+  transportLabel: {
     type: String,
     default: '',
   },
 });
+
+const metaItems = computed(() => [
+  { label: '코스명', value: props.courseTitle || '생성된 AI 코스' },
+  { label: '방문 장소', value: props.placeCount + '곳' },
+  { label: '지역', value: props.regionLabel },
+  { label: '기간', value: props.durationLabel },
+  { label: '이동수단', value: props.transportLabel },
+].filter((item) => item.value));
 </script>
 
 <template>
   <section class="course-crud-panel" aria-labelledby="course-crud-panel-title">
     <div class="course-crud-panel__head">
       <div>
-        <span class="course-crud-panel__eyebrow">{{ props.sourceLabel || 'Course entity' }}</span>
+        <span class="course-crud-panel__eyebrow">내 여행 코스</span>
         <h2 id="course-crud-panel-title">{{ props.title }}</h2>
         <p>{{ props.description }}</p>
       </div>
     </div>
 
-    <dl class="course-crud-panel__meta" aria-label="코스 엔티티 정보">
-      <div>
-        <dt>코스명</dt>
-        <dd>{{ props.courseTitle || '생성된 AI 코스' }}</dd>
-      </div>
-      <div>
-        <dt>장소 수</dt>
-        <dd>{{ props.placeCount }}곳</dd>
-      </div>
-      <div v-if="props.routeId">
-        <dt>routeId</dt>
-        <dd>{{ props.routeId }}</dd>
-      </div>
-      <div>
-        <dt>상태</dt>
-        <dd>{{ props.updatedAt || '저장 후 내 코스에서 수정 가능' }}</dd>
+    <dl class="course-crud-panel__meta" aria-label="코스 정보">
+      <div v-for="item in metaItems" :key="item.label">
+        <dt>{{ item.label }}</dt>
+        <dd>{{ item.value }}</dd>
       </div>
     </dl>
 

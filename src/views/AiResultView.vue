@@ -93,7 +93,7 @@ const lodgingInfo = computed(() => {
   const name = tokens.slice(-2).join(' ') || '숙소 위치';
   return { name, address };
 });
-const isSaved = computed(() => Boolean(route.value?.routeId && uiStore.savedCourses.some((course) => course.routeId === route.value.routeId)) || saveNotice.value?.tone === 'success');
+const isSaved = computed(() => Boolean(route.value?.routeId && uiStore.savedCourses.some((course) => course.routeId === route.value.routeId)));
 
 watch(route, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
@@ -120,11 +120,7 @@ async function saveRoute() {
     };
     return;
   }
-  saveNotice.value = {
-    tone: 'success',
-    title: '저장되었습니다.',
-    text: '저장 후 내 코스에서 다시 수정할 수 있어요.',
-  };
+  saveNotice.value = null;
 }
 
 function openShareSheet() {

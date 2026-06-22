@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
-import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import { getUserMessage } from '../api/error.js';
 import { fetchPlaces } from '../api/placeApi.js';
 import { contentPlaces, places as catalogPlaces } from '../data/mockData.js';
@@ -19,7 +18,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const draftDays = ref([]);
 const saveError = ref('');
-const saveNotice = ref(null);
+const editToast = ref(null);
 const draftTitle = ref('');
 const activeTimePicker = ref('');
 const candidateTargetDay = ref(1);
@@ -31,6 +30,7 @@ const placeSearchError = ref('');
 const draggingStop = ref(null);
 const dragOverStop = ref(null);
 const pointerDrag = ref({ active: false });
+let editToastTimer;
 
 const timeOptions = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 const routeId = computed(() => route.params.routeId ?? '');
@@ -150,13 +150,20 @@ watch(course, (value) => {
   draftTitle.value = value?.title ?? '';
   draftDays.value = cloneDays(value);
   saveError.value = '';
-  saveNotice.value = null;
+  editToast.value = null;
   activeTimePicker.value = '';
   candidateTargetDay.value = draftDays.value[0]?.dayNumber ?? 1;
   placeSearchRegion.value = value?.region ?? '';
   draggingStop.value = null;
   dragOverStop.value = null;
 }, { immediate: true });
+watch(editToast, (value) => {
+  window.clearTimeout(editToastTimer);
+  if (!value) return;
+  editToastTimer = window.setTimeout(() => {
+    editToast.value = null;
+  }, value.tone === 'warning' || value.tone === 'error' ? 3200 : 1800);
+});
 
 onMounted(async () => {
   if (!isAiEdit.value && routeId.value) {
@@ -402,7 +409,11 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
   }
   targetDay.places.splice(Math.max(0, insertIndex), 0, item);
   draftDays.value = renumberDays(days);
-  saveNotice.value = null;
+  editToast.value = {
+    tone: 'success',
+    title: '순서를 변경했습니다.',
+    text: '',
+  };
   finishDrag();
 }
 
@@ -410,7 +421,7 @@ function addCandidateToDay(dayIndex, candidate) {
   if (!candidate || !draftDays.value[dayIndex]) return;
   if (usedPlaceIds.value.has(candidate.placeId)) {
     saveError.value = `${candidate.name ?? candidate.placeName}는 이미 코스에 포함되어 있습니다.`;
-    saveNotice.value = {
+    editToast.value = {
       tone: 'warning',
       title: '이미 추가된 장소입니다.',
       text: saveError.value,
@@ -433,7 +444,7 @@ function addCandidateToDay(dayIndex, candidate) {
     travelTip: '',
   });
   draftDays.value = renumberDays(days);
-  saveNotice.value = {
+  editToast.value = {
     tone: 'success',
     title: '장소를 추가했습니다.',
     text: `${candidate.name ?? candidate.placeName}을 Day ${dayIndex + 1}에 추가했습니다.`,
@@ -453,7 +464,7 @@ function removeStop(dayIndex, stopIndex) {
   const day = draftDays.value[dayIndex];
   if (!day) return;
   if (day.places.length <= 1) {
-    saveNotice.value = {
+    editToast.value = {
       tone: 'warning',
       title: '삭제할 수 없습니다.',
       text: '각 Day에는 최소 1개 장소가 필요합니다.',
@@ -464,7 +475,7 @@ function removeStop(dayIndex, stopIndex) {
   const days = cloneDraftDays();
   days[dayIndex].places.splice(stopIndex, 1);
   draftDays.value = renumberDays(days);
-  saveNotice.value = {
+  editToast.value = {
     tone: 'success',
     title: '장소를 제거했습니다.',
     text: '',
@@ -474,7 +485,7 @@ function removeStop(dayIndex, stopIndex) {
 function setStopTime(stop, value) {
   stop.recommendedTime = value;
   activeTimePicker.value = '';
-  saveNotice.value = null;
+  editToast.value = null;
 }
 
 function buildEditedRoute() {
@@ -497,7 +508,7 @@ async function saveEdit() {
   saveError.value = '';
   if (!draftTitle.value.trim()) {
     saveError.value = '코스 제목을 입력해 주세요.';
-    saveNotice.value = {
+    editToast.value = {
       tone: 'warning',
       title: '입력 내용을 확인해 주세요.',
       text: saveError.value,
@@ -506,14 +517,14 @@ async function saveEdit() {
   }
   if (!currentPlaceCount.value) {
     saveError.value = '장소를 1개 이상 포함해 주세요.';
-    saveNotice.value = {
+    editToast.value = {
       tone: 'warning',
       title: '코스 구성을 확인해 주세요.',
       text: saveError.value,
     };
     return;
   }
-  saveNotice.value = {
+  editToast.value = {
     tone: 'info',
     title: '저장 중입니다.',
     text: '변경한 코스를 저장하고 있습니다.',
@@ -524,14 +535,14 @@ async function saveEdit() {
     const updated = uiStore.updateGeneratedRoute(editedRoute);
     if (!updated) {
       saveError.value = uiStore.toast || 'AI 코스를 저장하지 못했습니다.';
-      saveNotice.value = {
+      editToast.value = {
         tone: 'error',
         title: '저장하지 못했습니다.',
         text: saveError.value,
       };
       return;
     }
-    saveNotice.value = {
+    editToast.value = {
       tone: 'success',
       title: '수정되었습니다.',
       text: 'AI 코스 편집 결과가 반영되었습니다.',
@@ -543,14 +554,14 @@ async function saveEdit() {
   const updated = await uiStore.updateSavedCourse(editedRoute);
   if (!updated) {
     saveError.value = uiStore.toast || '저장 코스를 수정하지 못했습니다.';
-    saveNotice.value = {
+    editToast.value = {
       tone: 'error',
       title: '수정하지 못했습니다.',
       text: saveError.value,
     };
     return;
   }
-  saveNotice.value = {
+  editToast.value = {
     tone: 'success',
     title: '수정되었습니다.',
     text: '저장한 코스가 업데이트되었습니다.',
@@ -567,6 +578,7 @@ function cancelEdit() {
 }
 
 onBeforeUnmount(() => {
+  window.clearTimeout(editToastTimer);
   cleanupPointerDrag();
 });
 </script>
@@ -741,12 +753,16 @@ onBeforeUnmount(() => {
         />
       </section>
 
-      <FormStatusNotice
-        v-if="saveNotice"
-        :tone="saveNotice.tone"
-        :title="saveNotice.title"
-        :text="saveNotice.text"
-      />
+      <div
+        v-if="editToast"
+        class="course-edit-toast"
+        :class="'course-edit-toast--' + editToast.tone"
+        role="status"
+        aria-live="polite"
+      >
+        <strong>{{ editToast.title }}</strong>
+        <span v-if="editToast.text">{{ editToast.text }}</span>
+      </div>
       <p v-if="saveError" class="form-error">{{ saveError }}</p>
 
       <div class="sticky-actions">

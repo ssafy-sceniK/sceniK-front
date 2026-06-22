@@ -300,11 +300,15 @@ function normalizeDays(days = []) {
         ...stop,
         placeId: stop.placeId,
         placeName: stop.placeName ?? stop.name ?? place?.placeName ?? '검증 장소',
+        category: stop.category ?? stop.placeCategory ?? stop.type ?? place?.category ?? '장소',
+        address: stop.address ?? place?.address,
+        latitude: stop.latitude ?? place?.latitude,
+        longitude: stop.longitude ?? place?.longitude,
         dayNumber: dayIndex + 1,
         visitOrder: stopIndex + 1,
         recommendedTime: stop.recommendedTime ?? '10:00',
-        reason: stop.reason ?? `${place?.placeName ?? 'This place'} is part of a verified sceniK route.`,
-        travelTip: stop.travelTip ?? 'Check opening hours and transit before visiting.',
+        reason: stop.reason ?? `${place?.placeName ?? '이 장소'}는 선택한 콘텐츠와 연결된 검증 장소입니다.`,
+        travelTip: stop.travelTip ?? '',
       };
     }),
   }));
@@ -367,8 +371,8 @@ function normalizeCourseToRoute(course) {
         dayNumber: dayIndex + 1,
         visitOrder: placeIndex + 1,
         recommendedTime: placeIndex === 0 ? '10:00' : placeIndex === 1 ? '14:00' : '17:30',
-        reason: `${place.relatedContentTitle} related verified place for this course.`,
-        travelTip: `Check opening hours before visiting ${place.name}.`,
+        reason: `${place.relatedContentTitle} 분위기와 연결된 검증 장소입니다.`,
+        travelTip: '',
       })),
     })),
   };

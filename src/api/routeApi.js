@@ -30,16 +30,20 @@ function stopSource(stop = {}) {
 }
 
 function normalizeStop(stop = {}, dayNumber, stopIndex, candidateMap) {
-  const place = normalizeCandidatePlace(stopSource(stop), stop);
+  const source = stopSource(stop);
+  const placeId = firstDefined(source.placeId, stop.placeId);
+  const candidate = candidateMap?.get?.(placeId) ?? {};
+  const place = normalizeCandidatePlace(source, { ...candidate, ...stop });
   return {
     ...stop,
     placeId: place.placeId,
     placeName: firstDefined(stop.placeName, stop.name, place.placeName, place.name),
+    category: firstDefined(stop.category, stop.placeCategory, stop.type, place.category, '검증 장소'),
     dayNumber,
     visitOrder: Number(firstDefined(stop.visitOrder, stop.order, stop.sequence, stopIndex + 1)),
     recommendedTime: firstDefined(stop.recommendedTime, stop.time, '10:00'),
-    reason: firstDefined(stop.reason, stop.description, `${place.name} is part of a verified sceniK route.`),
-    travelTip: firstDefined(stop.travelTip, stop.tip, 'Check opening hours and transit before visiting.'),
+    reason: firstDefined(stop.reason, stop.description, `${place.name}는 선택한 콘텐츠와 연결된 검증 장소입니다.`),
+    travelTip: firstDefined(stop.travelTip, stop.tip, ''),
   };
 }
 

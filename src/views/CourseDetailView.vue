@@ -2,14 +2,11 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
-import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
-import CourseCrudPanel from '../components/course/CourseCrudPanel.vue';
 import CourseDeleteActionSheet from '../components/course/CourseDeleteActionSheet.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import MapPreview from '../components/course/MapPreview.vue';
-import RouteProgressSummary from '../components/course/RouteProgressSummary.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
@@ -20,6 +17,7 @@ const selectedDay = ref(1);
 const showDeleteSheet = ref(false);
 const loadingDetail = ref(false);
 const actionNotice = ref(null);
+const showActionMenu = ref(false);
 
 const routeId = computed(() => route.params.routeId ?? '');
 const isMyCourseRoute = computed(() => route.path.startsWith('/my/course-manage'));
@@ -28,33 +26,83 @@ const course = computed(() => detail.value?.route ?? null);
 const isSavedCourse = computed(() => isMyCourseRoute.value && detail.value?.source === 'saved');
 const shouldRequireLogin = computed(() => isMyCourseRoute.value && !uiStore.currentUser);
 const validationErrors = computed(() => detail.value?.validation?.errors ?? []);
-const dayTabs = computed(() => course.value?.days?.map((day) => day.dayNumber) ?? []);
-const stops = computed(() => course.value?.days?.find((day) => day.dayNumber === selectedDay.value)?.places ?? []);
 const routeCandidateMap = computed(() => new Map((course.value?.candidatePlaces ?? [])
+  .filter((place) => place?.placeId)
   .map((place) => [place.placeId, place])));
-const routePlaces = computed(() => (course.value?.days ?? []).flatMap((day) => day.places ?? []).map((stop) => ({
-  ...routeCandidateMap.value.get(stop.placeId),
-  ...stop,
-  placeName: stop.placeName ?? stop.name ?? routeCandidateMap.value.get(stop.placeId)?.placeName ?? routeCandidateMap.value.get(stop.placeId)?.name,
-})) ?? []);
-const courseSourceLabel = computed(() => (isSavedCourse.value ? 'Saved Course CRUD' : 'AI Course template'));
-const courseUpdatedLabel = computed(() => (
-  course.value?.updatedAt
-  ?? course.value?.createdAt
-  ?? course.value?.dateRangeLabel
-  ?? (isSavedCourse.value ? '저장한 코스' : '저장 전 템플릿')
-));
+const routeDays = computed(() => (course.value?.days ?? []).map((day) => ({
+  ...day,
+  places: (day.places ?? []).map(enrichStop),
+})));
+const dayTabs = computed(() => routeDays.value.map((day) => day.dayNumber));
+const stops = computed(() => routeDays.value.find((day) => day.dayNumber === selectedDay.value)?.places ?? []);
+const routePlaces = computed(() => routeDays.value.flatMap((day) => day.places ?? []));
+const selectedDayRoutePlaces = computed(() => stops.value);
+const displayRegionLabel = computed(() => firstText(course.value?.region, routePlaces.value.find((place) => place.region)?.region, '선택 지역'));
+const displayDurationLabel = computed(() => `${Number(course.value?.durationDays ?? dayTabs.value.length ?? 1) || 1}일`);
+const displayTransportLabel = computed(() => firstText(course.value?.transport, '이동 조건'));
+const travelStyleChips = computed(() => {
+  const styles = Array.isArray(course.value?.travelStyles) && course.value.travelStyles.length
+    ? course.value.travelStyles
+    : splitDisplayList(course.value?.style);
+  return [...new Set(styles.map((style) => String(style).trim()).filter(Boolean))];
+});
+const primaryStyleLabel = computed(() => travelStyleChips.value[0] ?? '감성 여행');
+const courseDetailChips = computed(() => [
+  displayRegionLabel.value,
+  displayDurationLabel.value,
+  displayTransportLabel.value,
+  `${routePlaces.value.length}곳`,
+  ...travelStyleChips.value,
+].filter(Boolean));
 const courseSummaryText = computed(() => {
-  const summary = course.value?.summary?.trim?.() ?? '';
-  if (/verified places connected into a sceniK travel course/i.test(summary)) return '';
-  return summary;
+  const summary = String(course.value?.summary ?? '').trim();
+  if (summary && summary.length <= 72 && !isInternalCourseCopy(summary)) return summary;
+  return `선택한 콘텐츠를 바탕으로 구성한 ${displayRegionLabel.value} ${displayDurationLabel.value} ${primaryStyleLabel.value} 코스입니다.`;
 });
 const courseTrustMessage = computed(() => {
-  const message = course.value?.trustMessage?.trim?.() ?? '';
-  if (/This course uses only verified sceniK places/i.test(message)) return '';
+  if (isSavedCourse.value) return '';
+  const message = String(course.value?.trustMessage ?? '').trim();
+  if (isInternalCourseCopy(message)) return '';
   return message;
 });
 const deleteLoading = computed(() => uiStore.routeActionLoading && showDeleteSheet.value);
+
+function firstText(...values) {
+  return values.find((value) => value !== undefined && value !== null && String(value).trim() !== '') ?? '';
+}
+
+function splitDisplayList(value) {
+  return String(value ?? '')
+    .split(/[,.·]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function enrichStop(stop = {}) {
+  const candidate = routeCandidateMap.value.get(stop.placeId) ?? {};
+  const placeName = firstText(stop.placeName, stop.name, candidate.placeName, candidate.name, '장소');
+  return {
+    ...candidate,
+    ...stop,
+    name: firstText(stop.name, stop.placeName, candidate.name, candidate.placeName, placeName),
+    placeName,
+    category: firstText(stop.category, stop.placeCategory, stop.type, candidate.category, '장소'),
+    address: firstText(stop.address, candidate.address),
+    region: firstText(stop.region, candidate.region),
+    district: firstText(stop.district, candidate.district),
+    latitude: firstText(stop.latitude, candidate.latitude),
+    longitude: firstText(stop.longitude, candidate.longitude),
+    imageUrl: firstText(stop.imageUrl, stop.thumbnailUrl, candidate.imageUrl, candidate.thumbnailUrl),
+  };
+}
+
+function isInternalCourseCopy(value) {
+  if (!value) return false;
+  return /C_[A-Z]+_\d+/.test(value)
+    || /contentId|routeId|Course CRUD|AI Course template/i.test(value)
+    || /sceniK DB|DB|verified places connected|This course uses only verified/i.test(value)
+    || /검증\s*장소만|검증된\s*장소만|내부|정책/.test(value);
+}
 
 async function loadDetail() {
   if (!isMyCourseRoute.value) return;
@@ -86,15 +134,15 @@ async function saveTemplateCourse() {
   if (!course.value) return;
   actionNotice.value = {
     tone: 'info',
-    title: '코스를 저장하는 중입니다.',
-    text: '선택한 코스를 내 저장 목록에 추가하고 있습니다.',
+    title: '코스를 저장하고 있습니다.',
+    text: '선택한 코스를 저장 목록에 추가하고 있습니다.',
   };
   const saved = await uiStore.saveCourse(course.value);
   actionNotice.value = saved
     ? {
         tone: 'success',
         title: '저장되었습니다.',
-        text: '마이페이지 저장한 코스에서 다시 확인할 수 있습니다.',
+        text: '마이페이지에서 다시 확인할 수 있습니다.',
       }
     : {
         tone: 'error',
@@ -108,33 +156,54 @@ function viewAsAiResult() {
   if (uiStore.openCourse(course.value)) router.push('/ai/result');
 }
 
-function shareCourse() {
+function closeActionMenu() {
+  showActionMenu.value = false;
+}
+
+function runCourseAction(action) {
+  closeActionMenu();
+  action();
+}
+
+function openDeleteSheet() {
+  closeActionMenu();
+  showDeleteSheet.value = true;
+}
+
+function shareUrl() {
+  if (typeof window === 'undefined') return '';
+  return window.location.href;
+}
+
+async function shareCourse() {
   if (!uiStore.requireAuth('로그인하면 코스를 공유할 수 있습니다.')) return;
-  const text = course.value ? `${course.value.title}\n${course.value.summary}` : 'sceniK course';
-  navigator.clipboard?.writeText?.(text)
-    .then(() => {
-      actionNotice.value = {
-        tone: 'success',
-        title: '공유 문구를 복사했습니다.',
-        text: '메신저나 노트에 붙여넣어 코스를 공유할 수 있습니다.',
-      };
-      uiStore.notify('공유 문구를 복사했습니다.', 'success');
-    })
-    .catch(() => {
-      actionNotice.value = {
-        tone: 'info',
-        title: '공유 문구가 준비되었습니다.',
-        text: '브라우저 권한 때문에 자동 복사는 제한되었지만 공유할 문구는 준비했습니다.',
-      };
-      uiStore.notify('공유 문구가 준비되었습니다.');
-    });
+  if (!course.value) return;
+
+  const payload = {
+    title: course.value.title,
+    text: courseSummaryText.value,
+    url: shareUrl(),
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(payload);
+    } else if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(`${payload.title}\n${payload.text}\n${payload.url}`.trim());
+    }
+    actionNotice.value = null;
+    uiStore.notify('공유되었습니다.', 'success');
+  } catch (error) {
+    if (error?.name === 'AbortError') return;
+    uiStore.notify('공유를 완료하지 못했습니다.');
+  }
 }
 
 async function deleteCourse() {
   if (!isSavedCourse.value || !course.value?.routeId) return;
   actionNotice.value = {
     tone: 'info',
-    title: '코스를 삭제하는 중입니다.',
+    title: '코스를 삭제하고 있습니다.',
     text: '저장한 코스 목록에서 제거하고 있습니다.',
   };
   const deleted = await uiStore.deleteSavedCourse(course.value.routeId);
@@ -149,16 +218,46 @@ async function deleteCourse() {
   actionNotice.value = {
     tone: 'success',
     title: '삭제되었습니다.',
-    text: '저장한 코스 목록에서 제거되었습니다.',
+    text: '저장한 코스 목록에서 제거했습니다.',
   };
   showDeleteSheet.value = false;
   window.setTimeout(() => router.replace('/my/activity/saved-routes'), 450);
 }
-
 </script>
 
 <template>
   <AppLayout title="코스 상세" back>
+    <template #actions>
+      <div v-if="course" class="course-detail-menu">
+        <button
+          type="button"
+          class="icon-button course-detail-menu__trigger"
+          aria-label="코스 메뉴"
+          aria-haspopup="menu"
+          :aria-expanded="showActionMenu"
+          @click="showActionMenu = !showActionMenu"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="5" cy="12" r="1.8" />
+            <circle cx="12" cy="12" r="1.8" />
+            <circle cx="19" cy="12" r="1.8" />
+          </svg>
+        </button>
+        <div v-if="showActionMenu" class="course-detail-menu__overlay" @click="closeActionMenu"></div>
+        <div v-if="showActionMenu" class="course-detail-menu__popover" role="menu">
+          <button type="button" role="menuitem" @click="runCourseAction(editCourse)">수정</button>
+          <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">공유</button>
+          <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
+            {{ uiStore.routeActionLoading ? '저장 중' : '저장' }}
+          </button>
+          <button type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">AI 결과로 보기</button>
+          <button v-if="isSavedCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
+            삭제
+          </button>
+        </div>
+      </div>
+    </template>
+
     <section v-if="shouldRequireLogin" class="course-detail-screen">
       <EmptyState
         icon="K"
@@ -181,14 +280,12 @@ async function deleteCourse() {
 
     <section v-else-if="course" class="course-detail-screen">
       <div class="course-manage-header result-hero">
-        <span class="badge ai">{{ isSavedCourse ? 'Saved Course' : 'Popular Course' }}</span>
+        <span class="badge ai course-detail-badge">{{ isSavedCourse ? '저장 코스' : '추천 코스' }}</span>
         <h1>{{ course.title }}</h1>
-        <p v-if="courseSummaryText">{{ courseSummaryText }}</p>
+        <p v-if="courseSummaryText" class="course-detail-summary">{{ courseSummaryText }}</p>
         <div v-if="course.dateRangeLabel" class="result-date">{{ course.dateRangeLabel }}</div>
-        <div class="result-stats">
-          <span>{{ course.region }}</span>
-          <span>{{ course.durationDays }}일</span>
-          <span>{{ course.transport }}</span>
+        <div class="course-detail-chip-list" aria-label="코스 정보">
+          <span v-for="chip in courseDetailChips" :key="chip" class="course-detail-chip">{{ chip }}</span>
         </div>
       </div>
 
@@ -206,49 +303,7 @@ async function deleteCourse() {
         :text="actionNotice.text"
       />
 
-      <MapPreview :route-places="routePlaces" />
-
-      <RouteProgressSummary
-        :places-count="routePlaces.length"
-        :duration-days="course.durationDays"
-        :transport="course.transport"
-        :style-label="course.style"
-      />
-
-      <CourseCrudPanel
-        title="코스 관리"
-        :description="isSavedCourse ? '저장한 코스를 수정, 공유, 삭제할 수 있습니다.' : '저장 전 코스는 먼저 저장하면 내 코스에서 수정과 삭제가 가능합니다.'"
-        :course-title="course.title"
-        :route-id="course.routeId"
-        :source-label="courseSourceLabel"
-        :place-count="routePlaces.length"
-        :updated-at="courseUpdatedLabel"
-      >
-        <template #status>
-          <FormStatusNotice
-            compact
-            tone="info"
-            :title="isSavedCourse ? '저장된 코스입니다.' : '저장 전 코스입니다.'"
-            :text="isSavedCourse ? '내 코스에서 장소 순서와 방문 시간을 수정하고 삭제할 수 있습니다.' : '저장하면 마이페이지의 저장한 AI 코스에서 다시 수정할 수 있습니다.'"
-          />
-        </template>
-        <template #actions>
-          <BaseButton @click="editCourse">{{ isSavedCourse ? '코스 수정' : 'AI 결과 편집' }}</BaseButton>
-          <BaseButton v-if="!isSavedCourse" variant="secondary" :disabled="uiStore.routeActionLoading" @click="saveTemplateCourse">
-            {{ uiStore.routeActionLoading ? '저장 중...' : '코스 저장' }}
-          </BaseButton>
-          <BaseButton variant="secondary" @click="shareCourse">공유</BaseButton>
-          <BaseButton variant="secondary" @click="viewAsAiResult">AI 결과로 보기</BaseButton>
-          <BaseButton
-            v-if="isSavedCourse"
-            variant="danger"
-            :disabled="uiStore.routeActionLoading"
-            @click="showDeleteSheet = true"
-          >
-            코스 삭제
-          </BaseButton>
-        </template>
-      </CourseCrudPanel>
+      <MapPreview :route-places="selectedDayRoutePlaces" :total-places="stops.length" />
 
       <div v-if="dayTabs.length > 1" class="day-tabs">
         <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
@@ -257,6 +312,7 @@ async function deleteCourse() {
       </div>
 
       <Timeline :stops="stops" />
+      <p class="course-detail-visit-note">방문 전 운영 시간과 이동편은 현장에서 한 번 더 확인해 주세요.</p>
 
       <CourseDeleteActionSheet
         v-if="showDeleteSheet"
@@ -269,7 +325,7 @@ async function deleteCourse() {
     <section v-else class="course-detail-screen">
       <DetailNotFoundPanel
         title="코스를 찾을 수 없습니다"
-        :text="uiStore.routeError || '저장 목록에서 삭제되었거나 아직 저장한 코스가 없습니다. 저장한 코스를 다시 선택하거나 새 AI 코스를 만들어보세요.'"
+        :text="uiStore.routeError || '저장 목록에서 삭제되었거나 아직 저장한 코스가 없습니다. 저장한 코스를 다시 선택하거나 AI 코스를 만들어 보세요.'"
         list-label="저장한 코스 보기"
         list-to="/my/activity/saved-routes"
         @retry="loadDetail"
