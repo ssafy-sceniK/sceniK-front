@@ -76,8 +76,7 @@ const selectedCount = computed(() => uiStore.selectedContentIds?.length ?? 0);
         </div>
         <p class="course-crud-hint">생성한 AI 코스는 저장 후 마이페이지에서 수정, 공유, 삭제할 수 있어요.</p>
         <BaseButton class="course-primary-cta" block :disabled="!selectedCount" @click="router.push('/ai/conditions')">
-          <span>여행 조건 설정하기<span v-if="selectedCount"> · {{ selectedCount }}개 선택</span></span>
-          <small>{{ selectedCount ? '선택한 K-content 기반으로 검증 장소를 찾습니다' : '콘텐츠를 선택하면 다음 단계로 이동할 수 있어요' }}</small>
+          <span>여행 조건 설정하기</span>
         </BaseButton>
       </div>
     </section>

@@ -99,6 +99,7 @@ function defaultState() {
     recentViewedPlaces: [],
     recentViewedPlaceDetails: [],
     savedCourses: [],
+    courseDetailCache: [],
     communityPosts: [],
     notifications: [],
     unreadNotificationCount: 0,
@@ -520,6 +521,7 @@ export const useUiStore = defineStore('ui', {
         routeActionLoading,
         routeError,
         savedCourses,
+        courseDetailCache,
         likedContent,
         likedPlaces,
         likedContentDetails,
@@ -586,6 +588,7 @@ export const useUiStore = defineStore('ui', {
         clearAccessToken();
         this.currentUser = null;
         this.savedCourses = [];
+        this.courseDetailCache = [];
         this.persist();
       } finally {
         this.authLoading = false;
@@ -603,6 +606,7 @@ export const useUiStore = defineStore('ui', {
       } catch (error) {
         this.routeError = apiErrorMessage(error, '저장한 코스를 불러오지 못했습니다.');
         this.savedCourses = [];
+        this.courseDetailCache = [];
         this.persist();
         return [];
       } finally {
@@ -719,13 +723,20 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async loadCourseDetail(routeId) {
-      if (!routeId || !this.currentUser || !readAccessToken()) return this.resolveCourseDetail(routeId);
+      if (!routeId) return this.resolveCourseDetail(routeId);
       this.savedCoursesLoading = true;
       this.routeError = '';
       try {
         const loaded = normalizeCourseToRoute(await fetchRoute(routeId));
         if (loaded) {
-          this.savedCourses = [loaded, ...this.savedCourses.filter((item) => item.routeId !== loaded.routeId)];
+          const savedIndex = this.savedCourses.findIndex((item) => item.routeId === loaded.routeId);
+          if (savedIndex >= 0) {
+            this.savedCourses.splice(savedIndex, 1, loaded);
+          } else if (this.generatedRoute?.routeId === loaded.routeId) {
+            this.generatedRoute = loaded;
+          } else {
+            this.courseDetailCache = [loaded, ...this.courseDetailCache.filter((item) => item.routeId !== loaded.routeId)].slice(0, 10);
+          }
           this.persist();
         }
         return this.resolveCourseDetail(routeId);
@@ -1054,10 +1065,11 @@ export const useUiStore = defineStore('ui', {
 
     },
     resolveCourseDetail(routeId) {
-      const source = this.savedCourses.find((course) => course.routeId === routeId)
-        ?? courseTemplates.find((course) => course.routeId === routeId)
-        ?? (this.generatedRoute?.routeId === routeId ? this.generatedRoute : null)
-        ?? (!routeId ? this.savedCourses[0] ?? this.generatedRoute ?? null : null);
+      const saved = this.savedCourses.find((course) => course.routeId === routeId);
+      const cached = this.courseDetailCache.find((course) => course.routeId === routeId);
+      const template = courseTemplates.find((course) => course.routeId === routeId);
+      const generated = this.generatedRoute?.routeId === routeId ? this.generatedRoute : null;
+      const source = saved ?? cached ?? template ?? generated ?? (!routeId ? this.savedCourses[0] ?? this.generatedRoute ?? null : null);
 
       const route = normalizeCourseToRoute(source);
       if (!route) return null;
@@ -1065,7 +1077,7 @@ export const useUiStore = defineStore('ui', {
       return {
         route,
         validation: validateRoute(route),
-        source: this.savedCourses.some((course) => course.routeId === route.routeId) ? 'saved' : 'template',
+        source: saved ? 'saved' : cached ? 'public' : 'template',
       };
     },
     async updateSavedCourse(route) {

@@ -10,6 +10,7 @@ import SortSegmentedControl from '../components/common/SortSegmentedControl.vue'
 import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
+placeStore.prepareExplore();
 const route = useRoute();
 const router = useRouter();
 const query = ref('');
@@ -24,9 +25,14 @@ const sortOptions = [
   { value: 'name', label: '이름순' },
 ];
 
-onMounted(() => {
-  restoreQueryState();
+function loadPlaces() {
   placeStore.load({ sort: sort.value, size: 50 });
+}
+
+onMounted(() => {
+  placeStore.prepareExplore();
+  restoreQueryState();
+  loadPlaces();
 });
 
 const filteredPlaces = computed(() => placeStore.search({
@@ -132,7 +138,7 @@ function loadMore() {
         title="장소를 불러오지 못했습니다"
         :text="placeStore.error"
         action-label="다시 시도"
-        @action="placeStore.load"
+        @action="loadPlaces"
       />
       <div v-else class="stack-list">
         <RouterLink v-for="place in visiblePlaces" :key="place.placeId" :to="`/places/${place.placeId}`">

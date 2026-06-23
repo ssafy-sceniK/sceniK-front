@@ -102,11 +102,11 @@ function isInternalCourseCopy(value) {
   return /C_[A-Z]+_\d+/.test(value)
     || /contentId|routeId|Course CRUD|AI Course template/i.test(value)
     || /sceniK DB|DB|verified places connected|This course uses only verified/i.test(value)
-    || /검증\s*장소만|검증된\s*장소만|내부|정책/.test(value);
+    || /검증\s*장소만|검증된\s*장소만|검증된.*장소로만|sceniK\s*장소로만|내부|정책/.test(value);
 }
 
 async function loadDetail() {
-  if (!isMyCourseRoute.value) return;
+  if (!isMyCourseRoute.value && !routeId.value) return;
   loadingDetail.value = true;
   await uiStore.loadCourseDetail(routeId.value);
   loadingDetail.value = false;
@@ -232,27 +232,34 @@ async function deleteCourse() {
       <div v-if="course" class="course-detail-menu">
         <button
           type="button"
-          class="icon-button course-detail-menu__trigger"
+          class="result-menu-button course-detail-menu__trigger"
           aria-label="코스 메뉴"
           aria-haspopup="menu"
           :aria-expanded="showActionMenu"
           @click="showActionMenu = !showActionMenu"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="5" cy="12" r="1.8" />
-            <circle cx="12" cy="12" r="1.8" />
-            <circle cx="19" cy="12" r="1.8" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
         </button>
-        <div v-if="showActionMenu" class="course-detail-menu__overlay" @click="closeActionMenu"></div>
-        <div v-if="showActionMenu" class="course-detail-menu__popover" role="menu">
-          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">수정</button>
-          <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">공유</button>
+        <div v-if="showActionMenu" class="result-menu-backdrop course-detail-menu__overlay" @click="closeActionMenu"></div>
+        <div v-if="showActionMenu" class="result-menu-popover course-detail-menu__popover" role="menu">
+          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">
+            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg></span>
+            수정
+          </button>
+          <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">
+            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
+            공유
+          </button>
           <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
+            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>
             {{ uiStore.routeActionLoading ? '저장 중' : '저장' }}
           </button>
-          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">AI 결과로 보기</button>
+          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">
+            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m5 10 7-7 7 7" /><path d="M5 21h14" /></svg></span>
+            AI 결과로 보기
+          </button>
           <button v-if="canManageCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
+            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m10 11 .4 6" /><path d="m14 11-.4 6" /><path d="M5 6l1 15h12l1-15" /></svg></span>
             삭제
           </button>
         </div>

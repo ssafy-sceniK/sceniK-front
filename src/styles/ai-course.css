@@ -1237,6 +1237,9 @@
   width: 100%;
   display: inline-flex;
   justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .condition-confirm-backdrop {
@@ -1244,9 +1247,9 @@
   z-index: 70;
   inset: 0;
   display: grid;
-  align-items: end;
+  align-items: center;
   justify-items: center;
-  padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+  padding: 24px 14px calc(24px + env(safe-area-inset-bottom));
   background: rgba(15, 23, 42, 0.34);
 }
 
@@ -1258,7 +1261,9 @@
   background: #ffffff;
   border: 1px solid rgba(222, 225, 230, 0.9);
   border-radius: 8px;
-  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.22);
+    max-height: calc(100dvh - 48px);
+  overflow: auto;
+box-shadow: 0 22px 48px rgba(15, 23, 42, 0.22);
 }
 
 .condition-confirm-modal h2 {
@@ -1299,4 +1304,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.condition-confirm-actions .button-ghost {
+  border: 1px solid var(--border);
+  background: #ffffff;
 }

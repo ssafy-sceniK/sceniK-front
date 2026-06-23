@@ -193,8 +193,8 @@ async function logoutToLanding() {
 
       <div v-else-if="activeTab === 'visits'" class="my-section-panel stack-list">
         <div class="visit-control-row">
-          <RouterLink to="/my/visit-planned">방문 예정 {{ plannedCount }}</RouterLink>
-          <RouterLink to="/my/visit-completed">방문 완료 {{ completedCount }}</RouterLink>
+          <RouterLink to="/my/visit-planned">방문 예정</RouterLink>
+          <RouterLink to="/my/visit-completed">방문 완료</RouterLink>
         </div>
 
         <div class="visit-progress-card" :style="{ '--visit-progress': `${visitProgress}%` }">

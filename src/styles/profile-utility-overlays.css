@@ -1423,25 +1423,28 @@
 }
 .visit-control-row {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-  padding: 3px;
-  background: var(--color-surface-strong);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .visit-control-row a {
-  min-height: 40px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  box-shadow: none;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
   color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
 }
 
 .visit-control-row a.router-link-active,
 .visit-control-row a:focus-visible {
-  color: var(--text);
-  background: #ffffff;
-  box-shadow: var(--shadow-sm);
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border-color: rgba(0, 82, 255, 0.32);
+  box-shadow: none;
 }
