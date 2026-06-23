@@ -1,5 +1,6 @@
-<script setup>
+﻿<script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -11,6 +12,7 @@ import { useSearchStore } from '../stores/searchStore.js';
 const searchStore = useSearchStore();
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const keyword = ref(searchStore.keyword);
 const restoringQuery = ref(false);
 const hasResults = computed(() => (
@@ -54,50 +56,50 @@ watch(() => route.query.keyword, restoreQueryState);
 </script>
 
 <template>
-  <AppLayout title="검색" back>
+  <AppLayout :title="t('search.title')" back>
     <section class="search-screen">
-      <SearchBar v-model="keyword" placeholder="작품, 장소, 태그를 검색하세요" @update:model-value="runSearch" />
+      <SearchBar v-model="keyword" :placeholder="t('search.placeholder')" @update:model-value="runSearch" />
       <EmptyState
         v-if="!keyword"
         icon="?"
         tone="search"
-        title="무엇을 찾고 있나요?"
-        text="좋아하는 K-content, 촬영 장소, 지역 키워드로 검색해보세요."
+        :title="t('search.emptyStartTitle')"
+        :text="t('search.emptyStartText')"
       />
       <template v-else>
         <EmptyState
           v-if="searchStore.loading"
           tone="loading"
           compact
-          title="검색 중입니다"
-          text="콘텐츠와 검증된 장소를 함께 찾고 있어요."
+          :title="t('search.loadingTitle')"
+          :text="t('search.loadingText')"
         />
         <EmptyState
           v-else-if="searchStore.error"
           icon="!"
           tone="error"
-          title="검색 결과를 불러오지 못했습니다"
+          :title="t('search.errorTitle')"
           :text="searchStore.error"
-          action-label="다시 시도"
+          :action-label="t('common.retry')"
           @action="runSearch"
         />
         <EmptyState
           v-else-if="!hasResults"
           icon="?"
           tone="search"
-          title="검색 결과가 없습니다"
-          text="키워드를 조금 더 짧게 입력하거나 다른 K-content 이름으로 찾아보세요."
-          action-label="검색어 지우기"
+          :title="t('search.noResultsTitle')"
+          :text="t('search.noResultsText')"
+          :action-label="t('search.clear')"
           @action="clearSearch"
         />
         <template v-else>
-          <div class="section-header"><h2>콘텐츠</h2></div>
+          <div class="section-header"><h2>{{ t('search.contentSection') }}</h2></div>
           <div class="content-grid">
             <RouterLink v-for="content in searchStore.results.contents" :key="content.contentId" :to="`/contents/${content.contentId}`">
               <ContentCard :content="content" />
             </RouterLink>
           </div>
-          <div class="section-header"><h2>장소</h2></div>
+          <div class="section-header"><h2>{{ t('search.placeSection') }}</h2></div>
           <div class="stack-list">
             <RouterLink v-for="place in searchStore.results.places" :key="place.placeId" :to="`/places/${place.placeId}`">
               <PlaceCard :place="place" compact />

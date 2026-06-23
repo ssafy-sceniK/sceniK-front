@@ -1,0 +1,411 @@
+{
+  "language": {
+    "ko": "韩语",
+    "en": "English",
+    "ja": "日语",
+    "zh-CN": "简体中文",
+    "selectorTitle": "语言",
+    "selectorDescription": "选择应用显示语言。"
+  },
+  "nav": {
+    "home": "首页",
+    "explore": "探索",
+    "ai": "AI行程",
+    "community": "社区",
+    "my": "我的",
+    "notifications": "通知",
+    "settings": "设置",
+    "back": "返回"
+  },
+  "settings": {
+    "title": "设置",
+    "theme": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "notifications": "通知管理",
+    "routeNotifications": "AI行程通知",
+    "likeNotifications": "点赞通知",
+    "commentNotifications": "评论通知",
+    "account": "账号",
+    "profileEdit": "编辑资料 / 偏好",
+    "logout": "退出登录",
+    "login": "登录",
+    "session": "会话管理",
+    "languageSaved": "语言设置已保存。",
+    "languageSaveFailed": "无法将语言设置保存到服务器，已保存在此设备。"
+  },
+  "common": {
+    "loading": "加载中",
+    "retry": "重试",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "share": "分享",
+    "view": "查看",
+    "close": "关闭",
+    "loginRequired": "需要登录。",
+    "networkError": "无法连接服务器。",
+    "temporaryError": "发生临时错误，请稍后再试。",
+    "viewAll": "查看全部",
+    "checking": "确认中",
+    "loadMore": "查看更多",
+    "resultCount": "{count} 个结果",
+    "sort": {
+      "label": "排序",
+      "latest": "最新",
+      "popular": "热门",
+      "name": "名称"
+    },
+    "noneSelected": "未选择",
+    "notEntered": "未输入",
+    "optional": "可选"
+  },
+  "community": {
+    "all": "全部",
+    "boards": "版块",
+    "searchPlaceholder": "搜索帖子或标签",
+    "comments": "评论 {count}",
+    "writePost": "发布帖子",
+    "sort": "排序",
+    "latest": "最新",
+    "popular": "热门",
+    "emptyTitle": "还没有帖子",
+    "emptyText": "分享第一篇旅行故事吧。"
+  },
+  "reviews": {
+    "title": "评论",
+    "emptyTitle": "还没有评论",
+    "emptyText": "如果你去过这里，留下第一条评论吧。",
+    "rating": "评分",
+    "submit": "提交评论"
+  },
+  "translation": {
+    "show": "查看翻译",
+    "original": "查看原文",
+    "loading": "翻译中...",
+    "failed": "无法加载翻译，显示原文。",
+    "cached": "已缓存翻译",
+    "sourceLabel": "原文语言",
+    "targetLabel": "翻译语言"
+  },
+  "content": {
+    "category": {
+      "all": "全部",
+      "drama": "电视剧",
+      "movie": "电影",
+      "variety": "综艺",
+      "filmingLocation": "拍摄地",
+      "cafe": "咖啡馆",
+      "restaurant": "美食",
+      "park": "公园",
+      "street": "街道",
+      "school": "学校",
+      "hotel": "酒店",
+      "idol": "偶像",
+      "actor": "演员"
+    },
+    "region": {
+      "all": "全部",
+      "seoul": "首尔",
+      "busan": "釜山",
+      "incheon": "仁川",
+      "gyeonggi": "京畿",
+      "gangwon": "江原",
+      "jeju": "济州",
+      "chungnam": "忠南"
+    },
+    "list": {
+      "searchPlaceholder": "搜索电视剧 / 地点 / 演员 / 偶像",
+      "contentMode": "内容探索",
+      "mapMode": "地图探索",
+      "category": "分类",
+      "sortAria": "内容排序和结果数量",
+      "loadingTitle": "正在加载内容",
+      "loadingText": "正在确认热门 K-content 列表。",
+      "errorTitle": "无法加载内容",
+      "emptyTitle": "没有符合条件的内容",
+      "emptyText": "请更改分类或关键词后再试。",
+      "viewAll": "查看全部"
+    }
+  },
+  "auth": {
+    "fields": {
+      "nickname": "昵称",
+      "email": "邮箱",
+      "password": "密码",
+      "passwordConfirm": "确认密码"
+    },
+    "validation": {
+      "nicknameRequired": "请输入昵称。",
+      "emailRequired": "请输入邮箱。",
+      "emailInvalid": "请输入有效的邮箱地址。",
+      "passwordRequired": "请输入密码。",
+      "passwordTooShort": "密码至少需要 8 个字符。",
+      "passwordMismatch": "两次输入的密码不一致。"
+    },
+    "login": {
+      "title": "登录",
+      "heading": "继续你的旅程",
+      "subtitle": "登录后可继续查看已保存路线和访问状态。",
+      "expiredTitle": "登录已过期",
+      "expiredText": "请重新登录。",
+      "google": "使用 Google 继续",
+      "kakao": "使用 Kakao 继续",
+      "socialNotice": "社交登录提示",
+      "or": "或",
+      "errorTitle": "登录失败",
+      "loading": "登录中...",
+      "submit": "登录",
+      "failedFallback": "登录失败。"
+    },
+    "signup": {
+      "title": "注册",
+      "heading": "创建 sceniK 账号",
+      "subtitle": "保存偏好，并集中管理 AI 路线、点赞和访问记录。",
+      "nicknamePlaceholder": "输入昵称",
+      "passwordPlaceholder": "至少 8 个字符",
+      "passwordConfirmPlaceholder": "再次输入",
+      "passwordRuleLength": "至少 8 个字符",
+      "emailCheckRequired": "请先确认邮箱是否重复。",
+      "emailCheckPrompt": "确认邮箱后点击重复检查。",
+      "emailChecking": "正在检查邮箱是否可用。",
+      "emailAvailable": "此邮箱可以使用。",
+      "emailDuplicate": "此邮箱已被使用。",
+      "emailCheckFailed": "邮箱重复检查失败。请稍后重试。",
+      "emailCheckBeforeSubmit": "注册前请完成邮箱重复检查。",
+      "checkDuplicate": "检查",
+      "success": "注册完成。正在前往偏好设置。",
+      "failedFallback": "注册失败。",
+      "loading": "注册中...",
+      "submit": "完成注册"
+    },
+    "oauth": {
+      "providerSocial": "社交账号",
+      "title": "{provider} 登录",
+      "failed": "{provider} 登录失败。",
+      "missingCode": "未收到登录代码。请重试。",
+      "loadingTitle": "正在确认登录信息",
+      "loadingText": "请稍等。",
+      "errorTitle": "{provider} 登录失败",
+      "backToLogin": "返回登录页",
+      "errors": {
+        "cancelled": "登录已取消。",
+        "authFailed": "认证失败。请重试。",
+        "accountFailed": "无法处理账号信息。",
+        "emailRequired": "登录需要同意提供账号邮箱。",
+        "emailNotVerified": "请使用已验证邮箱的账号登录。"
+      }
+    }
+  },
+  "preferences": {
+    "title": "偏好选择",
+    "heading": "选择你喜欢的 K-内容",
+    "subtitle": "这些信息会用于 AI 个性化推荐。可以多选。",
+    "saveAndStart": "保存偏好并开始",
+    "groups": {
+      "contentTypes": "内容类型",
+      "regions": "偏好地区",
+      "themes": "偏好主题"
+    },
+    "validation": {
+      "requiredAll": "请分别至少选择一个内容类型、地区和主题。"
+    },
+    "options": {
+      "contentTypes": {
+        "drama": "电视剧",
+        "movie": "电影",
+        "variety": "综艺",
+        "idol": "偶像",
+        "actor": "演员"
+      },
+      "themes": {
+        "sentimental": "氛围旅行",
+        "food": "美食为主",
+        "filming": "取景地为主",
+        "hidden": "小众名胜"
+      }
+    }
+  },
+  "home": {
+    "sections": {
+      "recentPlaces": "最近浏览地点",
+      "recommendedContent": "推荐内容",
+      "popularCourses": "热门旅行路线",
+      "notices": "公告"
+    },
+    "tabs": {
+      "aiRecommended": "AI 推荐",
+      "realtime": "实时",
+      "byRegion": "按地区",
+      "byTheme": "按主题"
+    },
+    "empty": {
+      "contentTitle": "暂无推荐内容",
+      "contentText": "请更改筛选条件或稍后再试。",
+      "viewAllContent": "查看全部内容"
+    }
+  },
+  "course": {
+    "errors": {
+      "detailUnavailable": "无法打开路线详情。"
+    }
+  },
+  "place": {
+    "list": {
+      "title": "地点探索",
+      "searchPlaceholder": "搜索地点名、地区或分类",
+      "region": "地区",
+      "category": "分类",
+      "sortAria": "地点排序和结果数量",
+      "loadingTitle": "正在加载地点",
+      "loadingText": "正在确认已验证的取景地和旅行地点。",
+      "errorTitle": "无法加载地点",
+      "emptyTitle": "没有符合条件的地点",
+      "emptyText": "请更改地区或关键词后重新搜索。",
+      "viewAll": "查看全部地点"
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "description": "这里汇总社区活动和路线更新。",
+    "markAllRead": "全部已读",
+    "loadingTitle": "正在加载通知",
+    "loadingText": "正在确认新活动和路线更新。",
+    "errorTitle": "无法加载通知",
+    "emptyTitle": "暂无新通知",
+    "emptyText": "有新活动时，我们会在这里为你整理提醒。",
+    "loginTitle": "登录后可查看通知",
+    "loginText": "可集中查看已保存路线、评论和点赞消息。",
+    "communityAction": "浏览社区"
+  },
+  "search": {
+    "title": "搜索",
+    "placeholder": "搜索作品、地点或标签",
+    "emptyStartTitle": "你想找什么？",
+    "emptyStartText": "试试用 K-content、取景地或地区关键词搜索。",
+    "loadingTitle": "正在搜索",
+    "loadingText": "正在同时搜索内容和已验证地点。",
+    "errorTitle": "无法加载搜索结果",
+    "noResultsTitle": "没有搜索结果",
+    "noResultsText": "请缩短关键词或换一个 K-content 名称。",
+    "clear": "清除搜索词",
+    "contentSection": "内容",
+    "placeSection": "地点"
+  },
+  "map": {
+    "searchPlaceholder": "搜索地点名，例如：南山塔",
+    "loadingTitle": "正在加载地图地点",
+    "loadingText": "正在确认已验证取景地坐标。",
+    "errorTitle": "无法加载地图地点",
+    "emptyTitle": "没有可显示的地点",
+    "emptyText": "请更改地区或关键词后重新查找地图地点。"
+  },
+  "aiCourse": {
+    "selection": {
+      "heading": "想用哪些内容规划旅行？",
+      "subtitle": "可以同时选择多个电视剧、电影或综艺。",
+      "searchPlaceholder": "搜索内容",
+      "loadingTitle": "正在加载内容",
+      "loadingText": "正在准备可连接到 AI 路线的 K-content。",
+      "emptyTitle": "没有可选择的内容",
+      "emptyText": "请缩短搜索词或尝试其他分类。",
+      "selectedCount": "已选择 {count} 个内容",
+      "manageHint": "生成的 AI 路线保存后，可在我的页面编辑、分享或删除。",
+      "next": "设置旅行条件"
+    },
+    "transport": {
+      "PUBLIC_TRANSIT": "公共交通",
+      "CAR": "车辆"
+    },
+    "companion": {
+      "solo": "独自",
+      "friends": "朋友",
+      "couple": "情侣",
+      "family": "家人"
+    },
+    "context": {
+      "selectedContent": "已选内容",
+      "region": "地区",
+      "tripPeriod": "旅行期间",
+      "transport": "交通方式",
+      "budgetTheme": "预算/主题",
+      "hotel": "住宿"
+    },
+    "conditions": {
+      "title": "旅行条件",
+      "noSelectedContent": "尚未选择内容",
+      "tripDate": "旅行日期",
+      "startDate": "出发日期",
+      "endDate": "返回日期",
+      "durationSummary": "{range} · 已选 {days} 天",
+      "carDays": "车辆使用日",
+      "carDaysHelp": "未选择的日期将使用公共交通。",
+      "companion": "同行类型",
+      "budget": "预算",
+      "totalBudgetRange": "总预算范围",
+      "minBudget": "最低预算",
+      "maxBudget": "最高预算",
+      "budgetNote": "根据所选期间，最多可设置 {amount}。",
+      "hotel": "住宿地址或酒店位置",
+      "hotelPlaceholder": "例：首尔特别市中区乙支路30 乐天酒店首尔",
+      "travelStyle": "旅行风格",
+      "generate": "生成 AI 路线",
+      "selectContentFirst": "请先选择内容",
+      "confirmTitle": "要用这些条件生成 AI 路线吗？",
+      "confirmGenerate": "生成"
+    }
+  },
+  "my": {
+    "guest": {
+      "heading": "登录后管理你的 sceniK 旅行记录",
+      "subtitle": "点赞、计划访问和保存的 AI 路线都会汇总在这里。",
+      "loginSignup": "登录 / 注册"
+    },
+    "profile": {
+      "defaultBio": "K-content 旅行中",
+      "avatarAlt": "我的头像",
+      "edit": "编辑资料",
+      "preferencesAria": "我的旅行偏好"
+    },
+    "tabs": {
+      "activity": "我的活动",
+      "visits": "访问管理",
+      "posts": "帖子"
+    },
+    "stats": {
+      "courses": "路线",
+      "posts": "帖子",
+      "completedVisits": "已访问",
+      "reviews": "评论"
+    },
+    "menu": {
+      "likedContent": "点赞的内容",
+      "likedPlaces": "点赞的地点",
+      "savedCourses": "保存的 AI 路线",
+      "myReviews": "我的评论",
+      "following": "正在关注",
+      "followers": "粉丝",
+      "myPosts": "我写的帖子",
+      "commentedPosts": "评论过的帖子",
+      "scraps": "收藏"
+    },
+    "counts": {
+      "content": "内容 {count} 个",
+      "places": "地点 {count} 处",
+      "courses": "路线 {count} 个",
+      "reviews": "评论 {count} 条",
+      "users": "用户 {count} 名",
+      "posts": "帖子 {count} 个",
+      "scraps": "收藏 {count} 个"
+    },
+    "visits": {
+      "planned": "计划访问",
+      "completed": "已访问",
+      "progress": "共 {total} 处，已访问 {completed} 处",
+      "progressPercent": "完成 {percent}%",
+      "emptyTitle": "还没有访问记录",
+      "emptyText": "在地点详情中点击计划访问或已访问，开始记录你的旅行。"
+    }
+  }
+}

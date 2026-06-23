@@ -1,0 +1,411 @@
+{
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh-CN": "简体中文",
+    "selectorTitle": "언어",
+    "selectorDescription": "앱 화면 언어를 선택하세요."
+  },
+  "nav": {
+    "home": "홈",
+    "explore": "탐색",
+    "ai": "AI코스",
+    "community": "커뮤니티",
+    "my": "마이",
+    "notifications": "알림",
+    "settings": "설정",
+    "back": "뒤로"
+  },
+  "settings": {
+    "title": "설정",
+    "theme": "테마",
+    "light": "라이트",
+    "dark": "다크",
+    "notifications": "알림 관리",
+    "routeNotifications": "AI 코스 알림",
+    "likeNotifications": "좋아요 알림",
+    "commentNotifications": "댓글 알림",
+    "account": "계정",
+    "profileEdit": "프로필 / 취향 수정",
+    "logout": "로그아웃",
+    "login": "로그인",
+    "session": "세션 관리",
+    "languageSaved": "언어 설정이 저장되었습니다.",
+    "languageSaveFailed": "언어 설정을 서버에 저장하지 못했습니다. 이 기기에는 저장되었습니다."
+  },
+  "common": {
+    "loading": "불러오는 중입니다",
+    "retry": "다시 시도",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "share": "공유",
+    "view": "보기",
+    "close": "닫기",
+    "loginRequired": "로그인이 필요합니다.",
+    "networkError": "서버에 연결할 수 없습니다.",
+    "temporaryError": "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "viewAll": "전체보기",
+    "checking": "확인 중",
+    "loadMore": "더 보기",
+    "resultCount": "{count}개 결과",
+    "sort": {
+      "label": "정렬",
+      "latest": "최신순",
+      "popular": "인기순",
+      "name": "이름순"
+    },
+    "noneSelected": "선택 안 함",
+    "notEntered": "입력 안 함",
+    "optional": "선택"
+  },
+  "community": {
+    "all": "전체",
+    "boards": "게시판",
+    "searchPlaceholder": "게시글, 태그 검색",
+    "comments": "댓글 {count}",
+    "writePost": "게시글 작성",
+    "sort": "정렬",
+    "latest": "최신순",
+    "popular": "인기순",
+    "emptyTitle": "아직 게시글이 없습니다",
+    "emptyText": "첫 여행 이야기를 남겨보세요."
+  },
+  "reviews": {
+    "title": "리뷰",
+    "emptyTitle": "아직 등록된 리뷰가 없습니다",
+    "emptyText": "이 장소를 다녀왔다면 첫 리뷰를 남겨보세요.",
+    "rating": "평점",
+    "submit": "리뷰 등록"
+  },
+  "translation": {
+    "show": "번역 보기",
+    "original": "원문 보기",
+    "loading": "번역 중...",
+    "failed": "번역을 불러오지 못했습니다. 원문을 표시합니다.",
+    "cached": "저장된 번역",
+    "sourceLabel": "원문 언어",
+    "targetLabel": "번역 언어"
+  },
+  "content": {
+    "category": {
+      "all": "전체",
+      "drama": "드라마",
+      "movie": "영화",
+      "variety": "예능",
+      "filmingLocation": "촬영지",
+      "cafe": "카페",
+      "restaurant": "맛집",
+      "park": "공원",
+      "street": "거리",
+      "school": "학교",
+      "hotel": "호텔",
+      "idol": "아이돌",
+      "actor": "배우"
+    },
+    "region": {
+      "all": "전체",
+      "seoul": "서울",
+      "busan": "부산",
+      "incheon": "인천",
+      "gyeonggi": "경기",
+      "gangwon": "강원",
+      "jeju": "제주",
+      "chungnam": "충남"
+    },
+    "list": {
+      "searchPlaceholder": "드라마 / 장소 / 배우 / 아이돌 검색",
+      "contentMode": "콘텐츠 탐색",
+      "mapMode": "지도 탐색",
+      "category": "카테고리",
+      "sortAria": "콘텐츠 정렬과 결과 수",
+      "loadingTitle": "콘텐츠를 불러오는 중입니다",
+      "loadingText": "인기 K-content 목록을 확인하고 있어요.",
+      "errorTitle": "콘텐츠를 불러오지 못했습니다",
+      "emptyTitle": "조건에 맞는 콘텐츠가 없습니다",
+      "emptyText": "카테고리나 검색어를 바꿔 다시 찾아보세요.",
+      "viewAll": "전체 보기"
+    }
+  },
+  "auth": {
+    "fields": {
+      "nickname": "닉네임",
+      "email": "이메일",
+      "password": "비밀번호",
+      "passwordConfirm": "비밀번호 확인"
+    },
+    "validation": {
+      "nicknameRequired": "닉네임을 입력해 주세요.",
+      "emailRequired": "이메일을 입력해 주세요.",
+      "emailInvalid": "올바른 이메일 형식이 아닙니다.",
+      "passwordRequired": "비밀번호를 입력해 주세요.",
+      "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다."
+    },
+    "login": {
+      "title": "로그인",
+      "heading": "다시 만날 준비가 됐어요",
+      "subtitle": "계정으로 로그인하면 저장한 코스와 방문 상태를 이어서 볼 수 있어요.",
+      "expiredTitle": "로그인 시간이 만료되었습니다",
+      "expiredText": "다시 로그인해 주세요.",
+      "google": "Google로 계속하기",
+      "kakao": "Kakao로 계속하기",
+      "socialNotice": "소셜 로그인 안내",
+      "or": "또는",
+      "errorTitle": "로그인 실패",
+      "loading": "로그인 중...",
+      "submit": "로그인",
+      "failedFallback": "로그인에 실패했습니다."
+    },
+    "signup": {
+      "title": "회원가입",
+      "heading": "sceniK 계정 만들기",
+      "subtitle": "취향을 저장하고 AI 코스, 좋아요, 방문 기록을 한 곳에서 관리하세요.",
+      "nicknamePlaceholder": "닉네임 입력",
+      "passwordPlaceholder": "8자 이상",
+      "passwordConfirmPlaceholder": "다시 입력",
+      "passwordRuleLength": "8자 이상",
+      "emailCheckRequired": "이메일 중복 확인이 필요합니다.",
+      "emailCheckPrompt": "이메일을 확인한 뒤 중복 확인을 눌러 주세요.",
+      "emailChecking": "이메일 사용 가능 여부를 확인하는 중입니다.",
+      "emailAvailable": "사용 가능한 이메일입니다.",
+      "emailDuplicate": "이미 사용 중인 이메일입니다.",
+      "emailCheckFailed": "이메일 중복 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      "emailCheckBeforeSubmit": "회원가입 전에 이메일 중복 확인을 완료해 주세요.",
+      "checkDuplicate": "중복 확인",
+      "success": "회원가입이 완료되었습니다. 취향 설정으로 이동합니다.",
+      "failedFallback": "회원가입에 실패했습니다.",
+      "loading": "가입 중...",
+      "submit": "가입 완료"
+    },
+    "oauth": {
+      "providerSocial": "소셜",
+      "title": "{provider} 로그인",
+      "failed": "{provider} 로그인에 실패했습니다.",
+      "missingCode": "로그인 코드가 전달되지 않았습니다. 다시 시도해 주세요.",
+      "loadingTitle": "로그인 정보를 확인하고 있어요",
+      "loadingText": "잠시만 기다려 주세요.",
+      "errorTitle": "{provider} 로그인 실패",
+      "backToLogin": "로그인 화면으로 돌아가기",
+      "errors": {
+        "cancelled": "로그인이 취소되었습니다.",
+        "authFailed": "인증에 실패했습니다. 다시 시도해 주세요.",
+        "accountFailed": "계정 정보를 처리하지 못했습니다.",
+        "emailRequired": "로그인하려면 계정 이메일 제공에 동의해 주세요.",
+        "emailNotVerified": "인증된 이메일이 있는 계정으로 로그인해 주세요."
+      }
+    }
+  },
+  "preferences": {
+    "title": "취향 선택",
+    "heading": "좋아하는 K-콘텐츠를 선택해주세요",
+    "subtitle": "AI 맞춤 추천에 활용돼요. 복수 선택할 수 있습니다.",
+    "saveAndStart": "취향 저장하고 시작하기",
+    "groups": {
+      "contentTypes": "콘텐츠 유형",
+      "regions": "선호 지역",
+      "themes": "선호 테마"
+    },
+    "validation": {
+      "requiredAll": "콘텐츠 유형, 선호 지역, 선호 테마를 각각 1개 이상 선택해 주세요."
+    },
+    "options": {
+      "contentTypes": {
+        "drama": "드라마",
+        "movie": "영화",
+        "variety": "예능",
+        "idol": "아이돌",
+        "actor": "배우"
+      },
+      "themes": {
+        "sentimental": "감성 여행",
+        "food": "맛집 중심",
+        "filming": "촬영지 중심",
+        "hidden": "숨은 명소"
+      }
+    }
+  },
+  "home": {
+    "sections": {
+      "recentPlaces": "최근 본 장소",
+      "recommendedContent": "추천 콘텐츠",
+      "popularCourses": "인기 여행 코스",
+      "notices": "공지사항"
+    },
+    "tabs": {
+      "aiRecommended": "AI 추천",
+      "realtime": "실시간",
+      "byRegion": "지역별",
+      "byTheme": "테마별"
+    },
+    "empty": {
+      "contentTitle": "추천 콘텐츠가 없습니다",
+      "contentText": "필터를 바꾸거나 잠시 후 다시 확인해 주세요.",
+      "viewAllContent": "전체 콘텐츠 보기"
+    }
+  },
+  "course": {
+    "errors": {
+      "detailUnavailable": "코스 상세를 열 수 없습니다."
+    }
+  },
+  "place": {
+    "list": {
+      "title": "장소 탐색",
+      "searchPlaceholder": "장소명, 지역, 카테고리 검색",
+      "region": "지역",
+      "category": "카테고리",
+      "sortAria": "장소 정렬과 결과 수",
+      "loadingTitle": "장소를 불러오는 중입니다",
+      "loadingText": "검증된 촬영지와 여행 장소를 확인하고 있어요.",
+      "errorTitle": "장소를 불러오지 못했습니다",
+      "emptyTitle": "조건에 맞는 장소가 없습니다",
+      "emptyText": "지역이나 검색어를 바꿔 검증된 촬영지를 다시 찾아보세요.",
+      "viewAll": "전체 장소 보기"
+    }
+  },
+  "notifications": {
+    "title": "알림",
+    "description": "커뮤니티 활동과 코스 업데이트를 모아 보여줍니다.",
+    "markAllRead": "모두 읽음",
+    "loadingTitle": "알림을 불러오는 중입니다",
+    "loadingText": "새 활동과 코스 업데이트를 확인하고 있어요.",
+    "errorTitle": "알림을 불러오지 못했습니다",
+    "emptyTitle": "새로운 알림이 없습니다",
+    "emptyText": "새 활동이 생기면 차분하게 정리해 알려드릴게요.",
+    "loginTitle": "로그인하면 알림을 확인할 수 있습니다",
+    "loginText": "저장한 코스, 댓글, 좋아요 소식을 한곳에서 볼 수 있어요.",
+    "communityAction": "커뮤니티 둘러보기"
+  },
+  "search": {
+    "title": "검색",
+    "placeholder": "작품, 장소, 태그를 검색하세요",
+    "emptyStartTitle": "무엇을 찾고 있나요?",
+    "emptyStartText": "좋아하는 K-content, 촬영 장소, 지역 키워드로 검색해보세요.",
+    "loadingTitle": "검색 중입니다",
+    "loadingText": "콘텐츠와 검증된 장소를 함께 찾고 있어요.",
+    "errorTitle": "검색 결과를 불러오지 못했습니다",
+    "noResultsTitle": "검색 결과가 없습니다",
+    "noResultsText": "키워드를 조금 더 짧게 입력하거나 다른 K-content 이름으로 찾아보세요.",
+    "clear": "검색어 지우기",
+    "contentSection": "콘텐츠",
+    "placeSection": "장소"
+  },
+  "map": {
+    "searchPlaceholder": "장소명 검색 예: 남산타워",
+    "loadingTitle": "지도 장소를 불러오는 중입니다",
+    "loadingText": "검증된 촬영지 좌표를 확인하고 있어요.",
+    "errorTitle": "지도 장소를 불러오지 못했습니다",
+    "emptyTitle": "표시할 장소가 없습니다",
+    "emptyText": "지역이나 검색어를 바꿔 지도에 표시할 장소를 다시 찾아보세요."
+  },
+  "aiCourse": {
+    "selection": {
+      "heading": "어떤 콘텐츠로 여행할까요?",
+      "subtitle": "드라마·영화·예능을 두 개 이상 함께 선택할 수 있어요.",
+      "searchPlaceholder": "콘텐츠 검색",
+      "loadingTitle": "콘텐츠를 불러오는 중입니다",
+      "loadingText": "AI 코스에 연결할 K-content를 준비하고 있어요.",
+      "emptyTitle": "선택할 콘텐츠가 없습니다",
+      "emptyText": "검색어를 줄이거나 다른 카테고리에서 여행의 시작점을 찾아보세요.",
+      "selectedCount": "{count}개 콘텐츠 선택됨",
+      "manageHint": "생성한 AI 코스는 저장 후 마이페이지에서 수정, 공유, 삭제할 수 있어요.",
+      "next": "여행 조건 설정하기"
+    },
+    "transport": {
+      "PUBLIC_TRANSIT": "대중교통",
+      "CAR": "차량"
+    },
+    "companion": {
+      "solo": "혼자",
+      "friends": "친구",
+      "couple": "연인",
+      "family": "가족"
+    },
+    "context": {
+      "selectedContent": "선택 콘텐츠",
+      "region": "지역",
+      "tripPeriod": "여행 기간",
+      "transport": "이동 수단",
+      "budgetTheme": "예산/테마",
+      "hotel": "숙소"
+    },
+    "conditions": {
+      "title": "여행 조건",
+      "noSelectedContent": "선택한 콘텐츠가 없습니다",
+      "tripDate": "여행 날짜",
+      "startDate": "출발 날짜",
+      "endDate": "복귀 날짜",
+      "durationSummary": "{range} · 선택 기간 {days}일",
+      "carDays": "차량 이용일",
+      "carDaysHelp": "선택하지 않은 날은 대중교통으로 이동합니다.",
+      "companion": "동행 유형",
+      "budget": "예산",
+      "totalBudgetRange": "총 예산 범위",
+      "minBudget": "최소 예산",
+      "maxBudget": "최대 예산",
+      "budgetNote": "선택 기간 기준 최대 {amount}까지 설정할 수 있어요.",
+      "hotel": "숙소 주소 또는 호텔 위치",
+      "hotelPlaceholder": "예: 서울특별시 중구 을지로 30 롯데호텔 서울",
+      "travelStyle": "여행 스타일",
+      "generate": "AI 코스 생성하기",
+      "selectContentFirst": "콘텐츠를 먼저 선택해 주세요",
+      "confirmTitle": "이 조건으로 AI 코스를 생성할까요?",
+      "confirmGenerate": "생성하기"
+    }
+  },
+  "my": {
+    "guest": {
+      "heading": "로그인하고 나만의 sceniK 여행 기록을 관리하세요",
+      "subtitle": "좋아요, 방문 예정, 저장한 AI Course가 한곳에 모입니다.",
+      "loginSignup": "로그인 / 회원가입"
+    },
+    "profile": {
+      "defaultBio": "K-content 여행 중",
+      "avatarAlt": "내 프로필 이미지",
+      "edit": "프로필 편집",
+      "preferencesAria": "내 여행 취향"
+    },
+    "tabs": {
+      "activity": "내 활동",
+      "visits": "방문 관리",
+      "posts": "게시글"
+    },
+    "stats": {
+      "courses": "코스",
+      "posts": "게시글",
+      "completedVisits": "방문 완료",
+      "reviews": "리뷰"
+    },
+    "menu": {
+      "likedContent": "좋아요한 콘텐츠",
+      "likedPlaces": "좋아요한 장소",
+      "savedCourses": "저장한 AI 코스",
+      "myReviews": "내 리뷰",
+      "following": "팔로잉",
+      "followers": "팔로워",
+      "myPosts": "내가 쓴 글",
+      "commentedPosts": "댓글 단 글",
+      "scraps": "스크랩"
+    },
+    "counts": {
+      "content": "콘텐츠 {count}개",
+      "places": "장소 {count}곳",
+      "courses": "코스 {count}개",
+      "reviews": "작성 리뷰 {count}개",
+      "users": "사용자 {count}명",
+      "posts": "게시글 {count}개",
+      "scraps": "스크랩 {count}개"
+    },
+    "visits": {
+      "planned": "방문 예정",
+      "completed": "방문 완료",
+      "progress": "총 {total}곳 중 {completed}곳 방문 완료",
+      "progressPercent": "{percent}% 완료",
+      "emptyTitle": "아직 방문 기록이 없어요",
+      "emptyText": "장소 상세에서 방문 예정이나 방문 완료를 눌러 여행 기록을 시작해보세요."
+    }
+  }
+}

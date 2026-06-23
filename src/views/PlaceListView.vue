@@ -1,5 +1,6 @@
-<script setup>
+﻿<script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -7,23 +8,33 @@ import ChipGroup from '../components/common/ChipGroup.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
+import { localizeSystemLabel } from '../i18n/systemContent.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
 placeStore.prepareExplore();
 const route = useRoute();
 const router = useRouter();
+const { t, locale } = useI18n();
 const query = ref('');
 const region = ref('전체');
 const category = ref('전체');
 const sort = ref('latest');
 const visibleLimit = ref(12);
 const restoringQuery = ref(false);
-const sortOptions = [
-  { value: 'latest', label: '최신순' },
-  { value: 'popular', label: '인기순' },
-  { value: 'name', label: '이름순' },
-];
+const sortOptions = computed(() => [
+  { value: 'latest', label: t('common.sort.latest') },
+  { value: 'popular', label: t('common.sort.popular') },
+  { value: 'name', label: t('common.sort.name') },
+]);
+const regionOptions = computed(() => placeStore.regions.map((item) => ({
+  value: item,
+  label: item === '전체' ? t('content.region.all') : localizeSystemLabel(item, 'region', t, locale.value),
+})));
+const categoryOptions = computed(() => placeStore.categories.map((item) => ({
+  value: item,
+  label: item === '전체' ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
+})));
 
 function loadPlaces() {
   placeStore.load({ sort: sort.value, size: 50 });
@@ -107,37 +118,37 @@ function loadMore() {
 </script>
 
 <template>
-  <AppLayout title="장소 탐색" back>
+  <AppLayout :title="t('place.list.title')" back>
     <section class="list-screen">
-      <SearchBar v-model="query" placeholder="장소명, 지역, 카테고리 검색" />
-      <h3 class="subsection-title">지역</h3>
-      <ChipGroup v-model="region" :items="placeStore.regions" />
-      <h3 class="subsection-title">카테고리</h3>
-      <ChipGroup v-model="category" :items="placeStore.categories" />
-      <div class="list-control-row explore-sort-row" aria-label="장소 정렬과 결과 수">
-        <span class="list-control-label">정렬</span>
+      <SearchBar v-model="query" :placeholder="t('place.list.searchPlaceholder')" />
+      <h3 class="subsection-title">{{ t('place.list.region') }}</h3>
+      <ChipGroup v-model="region" :items="regionOptions" />
+      <h3 class="subsection-title">{{ t('place.list.category') }}</h3>
+      <ChipGroup v-model="category" :items="categoryOptions" />
+      <div class="list-control-row explore-sort-row" :aria-label="t('place.list.sortAria')">
+        <span class="list-control-label">{{ t('common.sort.label') }}</span>
         <SortSegmentedControl
           v-model="sort"
           :options="sortOptions"
-          aria-label="장소 정렬"
+          :aria-label="t('place.list.sortAria')"
         />
-        <span class="list-result-count">{{ sortedPlaces.length }}개 결과</span>
+        <span class="list-result-count">{{ t('common.resultCount', { count: sortedPlaces.length }) }}</span>
       </div>
       <EmptyState
         v-if="placeStore.loading"
         tone="loading"
         compact
-        title="장소를 불러오는 중입니다"
-        text="검증된 촬영지와 여행 장소를 확인하고 있어요."
+        :title="t('place.list.loadingTitle')"
+        :text="t('place.list.loadingText')"
       />
       <EmptyState
         v-else-if="placeStore.error"
         icon="!"
         tone="error"
         compact
-        title="장소를 불러오지 못했습니다"
+        :title="t('place.list.errorTitle')"
         :text="placeStore.error"
-        action-label="다시 시도"
+        :action-label="t('common.retry')"
         @action="loadPlaces"
       />
       <div v-else class="stack-list">
@@ -146,15 +157,15 @@ function loadMore() {
         </RouterLink>
       </div>
       <div v-if="hasMorePlaces" class="load-more-row">
-        <button type="button" @click="loadMore">더 보기</button>
+        <button type="button" @click="loadMore">{{ t('common.loadMore') }}</button>
       </div>
       <EmptyState
         v-if="!placeStore.loading && !placeStore.error && !sortedPlaces.length"
         icon="P"
         tone="search"
-        title="조건에 맞는 장소가 없습니다"
-        text="지역이나 검색어를 바꿔 검증된 촬영지를 다시 찾아보세요."
-        action-label="전체 장소 보기"
+        :title="t('place.list.emptyTitle')"
+        :text="t('place.list.emptyText')"
+        :action-label="t('place.list.viewAll')"
         @action="resetFilters"
       />
     </section>

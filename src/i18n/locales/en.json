@@ -1,0 +1,411 @@
+{
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh-CN": "Simplified Chinese",
+    "selectorTitle": "Language",
+    "selectorDescription": "Choose the app display language."
+  },
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "ai": "AI Course",
+    "community": "Community",
+    "my": "My",
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "back": "Back"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "notifications": "Notifications",
+    "routeNotifications": "AI course alerts",
+    "likeNotifications": "Like alerts",
+    "commentNotifications": "Comment alerts",
+    "account": "Account",
+    "profileEdit": "Edit profile / preferences",
+    "logout": "Log out",
+    "login": "Log in",
+    "session": "Session",
+    "languageSaved": "Language preference saved.",
+    "languageSaveFailed": "Could not save language to the server. It was saved on this device."
+  },
+  "common": {
+    "loading": "Loading",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "view": "View",
+    "close": "Close",
+    "loginRequired": "Log in is required.",
+    "networkError": "Cannot connect to the server.",
+    "temporaryError": "A temporary error occurred. Please try again soon.",
+    "viewAll": "View all",
+    "checking": "Checking",
+    "loadMore": "Load more",
+    "resultCount": "{count} results",
+    "sort": {
+      "label": "Sort",
+      "latest": "Latest",
+      "popular": "Popular",
+      "name": "Name"
+    },
+    "noneSelected": "Not selected",
+    "notEntered": "Not entered",
+    "optional": "Optional"
+  },
+  "community": {
+    "all": "All",
+    "boards": "Boards",
+    "searchPlaceholder": "Search posts or tags",
+    "comments": "Comments {count}",
+    "writePost": "Create Post",
+    "sort": "Sort",
+    "latest": "Latest",
+    "popular": "Popular",
+    "emptyTitle": "No posts yet",
+    "emptyText": "Share the first travel story."
+  },
+  "reviews": {
+    "title": "Reviews",
+    "emptyTitle": "No reviews yet",
+    "emptyText": "If you visited this place, leave the first review.",
+    "rating": "Rating",
+    "submit": "Submit review"
+  },
+  "translation": {
+    "show": "Translate",
+    "original": "Show original",
+    "loading": "Translating...",
+    "failed": "Could not load translation. Showing the original text.",
+    "cached": "Cached translation",
+    "sourceLabel": "Source language",
+    "targetLabel": "Translation language"
+  },
+  "content": {
+    "category": {
+      "all": "All",
+      "drama": "Drama",
+      "movie": "Movie",
+      "variety": "Variety",
+      "filmingLocation": "Filming location",
+      "cafe": "Cafe",
+      "restaurant": "Restaurant",
+      "park": "Park",
+      "street": "Street",
+      "school": "School",
+      "hotel": "Hotel",
+      "idol": "Idol",
+      "actor": "Actor"
+    },
+    "region": {
+      "all": "All",
+      "seoul": "Seoul",
+      "busan": "Busan",
+      "incheon": "Incheon",
+      "gyeonggi": "Gyeonggi",
+      "gangwon": "Gangwon",
+      "jeju": "Jeju",
+      "chungnam": "Chungnam"
+    },
+    "list": {
+      "searchPlaceholder": "Search dramas, places, actors, idols",
+      "contentMode": "Content",
+      "mapMode": "Map",
+      "category": "Category",
+      "sortAria": "Content sort and result count",
+      "loadingTitle": "Loading content",
+      "loadingText": "Checking popular K-content for you.",
+      "errorTitle": "Could not load content",
+      "emptyTitle": "No content matches your filters",
+      "emptyText": "Try another category or keyword.",
+      "viewAll": "View all"
+    }
+  },
+  "auth": {
+    "fields": {
+      "nickname": "Nickname",
+      "email": "Email",
+      "password": "Password",
+      "passwordConfirm": "Confirm password"
+    },
+    "validation": {
+      "nicknameRequired": "Please enter a nickname.",
+      "emailRequired": "Please enter your email.",
+      "emailInvalid": "Please enter a valid email address.",
+      "passwordRequired": "Please enter your password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordMismatch": "Passwords do not match."
+    },
+    "login": {
+      "title": "Log in",
+      "heading": "Ready to continue your trip",
+      "subtitle": "Log in to keep your saved courses and visit status in sync.",
+      "expiredTitle": "Your login session expired",
+      "expiredText": "Please log in again.",
+      "google": "Continue with Google",
+      "kakao": "Continue with Kakao",
+      "socialNotice": "Social login notice",
+      "or": "or",
+      "errorTitle": "Login failed",
+      "loading": "Logging in...",
+      "submit": "Log in",
+      "failedFallback": "Login failed."
+    },
+    "signup": {
+      "title": "Sign up",
+      "heading": "Create your sceniK account",
+      "subtitle": "Save your tastes and manage AI courses, likes, and visits in one place.",
+      "nicknamePlaceholder": "Enter nickname",
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordConfirmPlaceholder": "Enter again",
+      "passwordRuleLength": "At least 8 characters",
+      "emailCheckRequired": "Please check email availability.",
+      "emailCheckPrompt": "Check the email, then run duplicate check.",
+      "emailChecking": "Checking whether this email is available.",
+      "emailAvailable": "This email is available.",
+      "emailDuplicate": "This email is already in use.",
+      "emailCheckFailed": "Email duplicate check failed. Please try again later.",
+      "emailCheckBeforeSubmit": "Please complete email duplicate check before signing up.",
+      "checkDuplicate": "Check",
+      "success": "Sign-up is complete. Moving to preferences.",
+      "failedFallback": "Sign-up failed.",
+      "loading": "Signing up...",
+      "submit": "Complete sign-up"
+    },
+    "oauth": {
+      "providerSocial": "Social",
+      "title": "{provider} login",
+      "failed": "{provider} login failed.",
+      "missingCode": "Login code was not provided. Please try again.",
+      "loadingTitle": "Checking login information",
+      "loadingText": "Please wait a moment.",
+      "errorTitle": "{provider} login failed",
+      "backToLogin": "Back to login",
+      "errors": {
+        "cancelled": "Login was cancelled.",
+        "authFailed": "Authentication failed. Please try again.",
+        "accountFailed": "Could not process account information.",
+        "emailRequired": "Please agree to provide your account email to log in.",
+        "emailNotVerified": "Please log in with an account that has a verified email."
+      }
+    }
+  },
+  "preferences": {
+    "title": "Preferences",
+    "heading": "Choose your favorite K-content",
+    "subtitle": "We use this for AI recommendations. You can select multiple options.",
+    "saveAndStart": "Save preferences and start",
+    "groups": {
+      "contentTypes": "Content types",
+      "regions": "Preferred regions",
+      "themes": "Preferred themes"
+    },
+    "validation": {
+      "requiredAll": "Select at least one content type, region, and theme."
+    },
+    "options": {
+      "contentTypes": {
+        "drama": "Drama",
+        "movie": "Movie",
+        "variety": "Variety show",
+        "idol": "Idol",
+        "actor": "Actor"
+      },
+      "themes": {
+        "sentimental": "Emotional travel",
+        "food": "Food-focused",
+        "filming": "Filming locations",
+        "hidden": "Hidden gems"
+      }
+    }
+  },
+  "home": {
+    "sections": {
+      "recentPlaces": "Recently viewed places",
+      "recommendedContent": "Recommended content",
+      "popularCourses": "Popular travel courses",
+      "notices": "Notices"
+    },
+    "tabs": {
+      "aiRecommended": "AI picks",
+      "realtime": "Live",
+      "byRegion": "By region",
+      "byTheme": "By theme"
+    },
+    "empty": {
+      "contentTitle": "No recommended content",
+      "contentText": "Change filters or check again later.",
+      "viewAllContent": "View all content"
+    }
+  },
+  "course": {
+    "errors": {
+      "detailUnavailable": "Course details are unavailable."
+    }
+  },
+  "place": {
+    "list": {
+      "title": "Explore Places",
+      "searchPlaceholder": "Search place, region, or category",
+      "region": "Region",
+      "category": "Category",
+      "sortAria": "Place sort and result count",
+      "loadingTitle": "Loading places",
+      "loadingText": "Checking verified filming and travel places.",
+      "errorTitle": "Could not load places",
+      "emptyTitle": "No places match your filters",
+      "emptyText": "Change region or keyword and search again.",
+      "viewAll": "View all places"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Community activity and course updates are collected here.",
+    "markAllRead": "Mark all read",
+    "loadingTitle": "Loading notifications",
+    "loadingText": "Checking new activity and course updates.",
+    "errorTitle": "Could not load notifications",
+    "emptyTitle": "No new notifications",
+    "emptyText": "When new activity arrives, we will organize it here.",
+    "loginTitle": "Log in to check notifications",
+    "loginText": "See saved course, comment, and like updates in one place.",
+    "communityAction": "Browse community"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search titles, places, or tags",
+    "emptyStartTitle": "What are you looking for?",
+    "emptyStartText": "Search by K-content, filming location, or region keyword.",
+    "loadingTitle": "Searching",
+    "loadingText": "Searching content and verified places together.",
+    "errorTitle": "Could not load search results",
+    "noResultsTitle": "No search results",
+    "noResultsText": "Try a shorter keyword or another K-content title.",
+    "clear": "Clear keyword",
+    "contentSection": "Content",
+    "placeSection": "Places"
+  },
+  "map": {
+    "searchPlaceholder": "Search place name, e.g. Namsan Tower",
+    "loadingTitle": "Loading map places",
+    "loadingText": "Checking coordinates for verified filming locations.",
+    "errorTitle": "Could not load map places",
+    "emptyTitle": "No places to show",
+    "emptyText": "Change region or keyword to find places on the map."
+  },
+  "aiCourse": {
+    "selection": {
+      "heading": "Which content should shape your trip?",
+      "subtitle": "You can choose multiple dramas, movies, or variety shows.",
+      "searchPlaceholder": "Search content",
+      "loadingTitle": "Loading content",
+      "loadingText": "Preparing K-content for your AI course.",
+      "emptyTitle": "No content to select",
+      "emptyText": "Use a shorter keyword or try another category.",
+      "selectedCount": "{count} content selected",
+      "manageHint": "After saving, generated AI courses can be edited, shared, or deleted from My Page.",
+      "next": "Set travel conditions"
+    },
+    "transport": {
+      "PUBLIC_TRANSIT": "Public transit",
+      "CAR": "Car"
+    },
+    "companion": {
+      "solo": "Solo",
+      "friends": "Friends",
+      "couple": "Couple",
+      "family": "Family"
+    },
+    "context": {
+      "selectedContent": "Selected content",
+      "region": "Region",
+      "tripPeriod": "Trip period",
+      "transport": "Transport",
+      "budgetTheme": "Budget/Theme",
+      "hotel": "Hotel"
+    },
+    "conditions": {
+      "title": "Travel Conditions",
+      "noSelectedContent": "No content selected",
+      "tripDate": "Trip dates",
+      "startDate": "Start date",
+      "endDate": "Return date",
+      "durationSummary": "{range} · {days} days selected",
+      "carDays": "Car days",
+      "carDaysHelp": "Days not selected will use public transit.",
+      "companion": "Companion type",
+      "budget": "Budget",
+      "totalBudgetRange": "Total budget range",
+      "minBudget": "Minimum budget",
+      "maxBudget": "Maximum budget",
+      "budgetNote": "You can set up to {amount} for the selected period.",
+      "hotel": "Hotel address or location",
+      "hotelPlaceholder": "e.g. 30 Eulji-ro, Jung-gu, Seoul, Lotte Hotel Seoul",
+      "travelStyle": "Travel style",
+      "generate": "Generate AI course",
+      "selectContentFirst": "Select content first",
+      "confirmTitle": "Generate an AI course with these conditions?",
+      "confirmGenerate": "Generate"
+    }
+  },
+  "my": {
+    "guest": {
+      "heading": "Log in to manage your sceniK travel record",
+      "subtitle": "Likes, planned visits, and saved AI courses come together here.",
+      "loginSignup": "Log in / Sign up"
+    },
+    "profile": {
+      "defaultBio": "Exploring K-content travel",
+      "avatarAlt": "My profile image",
+      "edit": "Edit profile",
+      "preferencesAria": "My travel preferences"
+    },
+    "tabs": {
+      "activity": "My Activity",
+      "visits": "Visit Management",
+      "posts": "Posts"
+    },
+    "stats": {
+      "courses": "Courses",
+      "posts": "Posts",
+      "completedVisits": "Completed visits",
+      "reviews": "Reviews"
+    },
+    "menu": {
+      "likedContent": "Liked content",
+      "likedPlaces": "Liked places",
+      "savedCourses": "Saved AI courses",
+      "myReviews": "My reviews",
+      "following": "Following",
+      "followers": "Followers",
+      "myPosts": "My posts",
+      "commentedPosts": "Commented posts",
+      "scraps": "Scraps"
+    },
+    "counts": {
+      "content": "{count} content",
+      "places": "{count} places",
+      "courses": "{count} courses",
+      "reviews": "{count} reviews",
+      "users": "{count} users",
+      "posts": "{count} posts",
+      "scraps": "{count} scraps"
+    },
+    "visits": {
+      "planned": "Planned visits",
+      "completed": "Completed visits",
+      "progress": "{completed} of {total} places completed",
+      "progressPercent": "{percent}% complete",
+      "emptyTitle": "No visit records yet",
+      "emptyText": "Start your travel record by marking planned or completed visits on place detail pages."
+    }
+  }
+}

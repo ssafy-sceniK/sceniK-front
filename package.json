@@ -8,13 +8,15 @@
     "build": "vite build",
     "lint": "node scripts/check-frontend.js",
     "smoke:course": "node scripts/check-course-flow.js",
-    "smoke:errors": "node scripts/check-error-handling.js"
+    "smoke:errors": "node scripts/check-error-handling.js",
+    "i18n:audit": "node scripts/i18n-audit.mjs"
   },
   "dependencies": {
     "axios": "^1.7.9",
     "motion-v": "^2.3.0",
     "pinia": "^2.3.0",
     "vue": "^3.5.22",
+    "vue-i18n": "^11.4.6",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

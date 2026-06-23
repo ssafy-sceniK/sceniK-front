@@ -8,6 +8,7 @@ import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import ReviewPanel from '../components/review/ReviewPanel.vue';
+import TranslatableText from '../components/translation/TranslatableText.vue';
 import {
   createPlaceReview,
   deletePlaceReview,
@@ -479,7 +480,7 @@ function markPlaceImageFailed() {
                 </div>
               </template>
               <template v-else>
-                <p>{{ review.content }}</p>
+                <TranslatableText :text="review.content" :source-language="review.language" resource-type="REVIEW" :resource-id="review.reviewId" field="content" />
                 <div v-if="isReviewOwner(review)" class="review-row-actions">
                   <button type="button" @click="startEditReview(review)">수정</button>
                   <button type="button" @click="removeReview(review)">삭제</button>

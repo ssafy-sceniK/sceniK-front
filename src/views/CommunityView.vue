@@ -11,6 +11,7 @@ import CommentThread from '../components/community/CommentThread.vue';
 import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
+import TranslatableText from '../components/translation/TranslatableText.vue';
 import { useUiStore } from '../stores/uiStore.js';
 
 const route = useRoute();
@@ -44,6 +45,12 @@ const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 const failedPostImageKeys = ref(new Set());
 const boardSelectorOpen = ref(false);
+const postEditHashtagInput = ref('');
+const imageViewerPost = ref(null);
+const imageViewerIndex = ref(0);
+
+const MAX_HASHTAGS = 10;
+const MAX_POST_IMAGES = 10;
 
 const boards = [
   { id: 'drama', icon: '🎬', name: '드라마 게시판', description: '드라마 촬영지 후기와 코스 공유', tag: '드라마' },
@@ -113,10 +120,12 @@ onMounted(() => {
   restoreQueryState();
   void loadCommunity();
   document.addEventListener('pointerdown', handleBoardSelectorPointerDown);
+  document.addEventListener('keydown', handleImageViewerKeydown);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleBoardSelectorPointerDown);
+  document.removeEventListener('keydown', handleImageViewerKeydown);
 });
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
 watch(() => route.query.board, () => {
@@ -204,6 +213,8 @@ const topLevelComments = computed(() => selectedComments.value.filter((comment) 
   const parentId = comment.parentCommentId;
   return !parentId || !selectedCommentIds.value.has(String(parentId));
 }));
+const imageViewerImages = computed(() => (imageViewerPost.value ? postImageSources(imageViewerPost.value) : []));
+const imageViewerImage = computed(() => imageViewerImages.value[imageViewerIndex.value] ?? '');
 
 function postKey(post) {
   return post?.postId ?? post?.id;
@@ -259,19 +270,58 @@ function selectBoard(board) {
     },
   });
 }
-const postEditHashtagOptions = computed(() => {
-  const currentBoard = boards.find((board) => board.id === postEditBoard.value) ?? boards[0];
-  const tags = uiStore.communityPosts
-    .flatMap((post) => post.tags ?? [])
-    .filter((tag) => tag && tag !== currentBoard.tag);
-  return [...new Set([...(selectedPost.value?.tags ?? []), ...tags])].slice(0, 14);
-});
+function uniqueValues(values) {
+  return [...new Set(values.filter(Boolean))];
+}
 
-function togglePostEditHashtag(tag) {
-  const exists = postEditHashtags.value.includes(tag);
-  postEditHashtags.value = exists
-    ? postEditHashtags.value.filter((item) => item !== tag)
-    : [...postEditHashtags.value, tag].slice(0, 5);
+function normalizeHashtag(value) {
+  return String(value ?? '').trim().replace(/^#+/, '').replace(/[\s,]+$/g, '').trim();
+}
+
+function hashtagText(rawValue, fallbackValue) {
+  return typeof rawValue === 'string' ? rawValue : fallbackValue;
+}
+
+function isBoardTag(tag) {
+  return boards.some((board) => board.tag === tag);
+}
+
+function isSystemPostTag(tag) {
+  return isBoardTag(tag) || tag === 'AI 코스';
+}
+
+function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
+  const tag = normalizeHashtag(hashtagText(rawValue, postEditHashtagInput.value));
+  postEditHashtagInput.value = '';
+  if (!tag || postEditHashtags.value.includes(tag)) return;
+  if (postEditHashtags.value.length >= MAX_HASHTAGS) {
+    postNotice.value = {
+      tone: 'warning',
+      title: '해시태그는 최대 10개까지 추가할 수 있습니다.',
+      text: '불필요한 태그를 삭제한 뒤 다시 추가해 주세요.',
+    };
+    return;
+  }
+  postEditHashtags.value = [...postEditHashtags.value, tag];
+}
+
+function handlePostEditHashtagKeydown(event) {
+  if (event.key === 'Enter' || event.key === ',' || event.key === ' ') {
+    event.preventDefault();
+    addPostEditHashtag();
+  }
+}
+
+function removePostEditHashtag(tag) {
+  postEditHashtags.value = postEditHashtags.value.filter((item) => item !== tag);
+}
+
+function buildPostEditTags(target) {
+  return uniqueValues([
+    boards.find((board) => board.id === postEditBoard.value)?.tag,
+    ...postEditHashtags.value,
+    target?.routeId ? 'AI 코스' : '',
+  ]);
 }
 
 function isPostLiked(post) {
@@ -405,9 +455,9 @@ function postImageSources(post) {
   const attachmentImages = (post?.attachments ?? [])
     .map(attachmentImageUrl)
     .filter(Boolean);
-  return [...directImages, ...attachmentImages]
+  return uniqueValues([...directImages, ...attachmentImages])
     .filter((image) => !failedPostImageKeys.value.has(postImageFailureKey(post, image)))
-    .slice(0, 3);
+    .slice(0, MAX_POST_IMAGES);
 }
 
 function postImageFailureKey(post, image) {
@@ -418,6 +468,40 @@ function markPostImageFailed(post, image) {
   const next = new Set(failedPostImageKeys.value);
   next.add(postImageFailureKey(post, image));
   failedPostImageKeys.value = next;
+}
+
+function openImageViewer(post, index = 0) {
+  const images = postImageSources(post);
+  if (!images.length) return;
+  imageViewerPost.value = post;
+  imageViewerIndex.value = Math.max(0, Math.min(index, images.length - 1));
+}
+
+function closeImageViewer() {
+  imageViewerPost.value = null;
+  imageViewerIndex.value = 0;
+}
+
+function moveImageViewer(offset) {
+  const total = imageViewerImages.value.length;
+  if (total <= 1) return;
+  imageViewerIndex.value = (imageViewerIndex.value + offset + total) % total;
+}
+
+function handleImageViewerKeydown(event) {
+  if (!imageViewerImage.value) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeImageViewer();
+  }
+  if (event.key === 'ArrowRight') {
+    event.preventDefault();
+    moveImageViewer(1);
+  }
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault();
+    moveImageViewer(-1);
+  }
 }
 
 function canShowAuthorFollow(post) {
@@ -465,7 +549,11 @@ function startPostEdit() {
   postEditTitle.value = selectedPost.value.title ?? '';
   postEditBody.value = selectedPost.value.body ?? '';
   postEditBoard.value = boards.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id ?? 'drama';
-  postEditHashtags.value = (selectedPost.value.tags ?? []).filter((tag) => !boards.some((board) => tag.includes(board.tag))).slice(0, 5);
+  postEditHashtagInput.value = '';
+  postEditHashtags.value = uniqueValues((selectedPost.value.tags ?? [])
+    .map(normalizeHashtag)
+    .filter((tag) => tag && !isSystemPostTag(tag)))
+    .slice(0, MAX_HASHTAGS);
   postNotice.value = {
     tone: 'info',
     title: '게시글 수정',
@@ -478,6 +566,7 @@ function cancelPostEdit() {
   postEditTitle.value = '';
   postEditBody.value = '';
   postEditHashtags.value = [];
+  postEditHashtagInput.value = '';
 }
 
 async function savePostEdit() {
@@ -500,10 +589,11 @@ async function savePostEdit() {
   const updated = await uiStore.editPost(postKey(target), {
     title: postEditTitle.value.trim(),
     body: postEditBody.value.trim(),
-    tags: [boards.find((board) => board.id === postEditBoard.value)?.tag, ...postEditHashtags.value].filter(Boolean),
+    tags: buildPostEditTags(target),
     region: target.region,
     duration: target.duration,
     routeId: target.routeId,
+    imageUrl: target.imageUrl ?? target.image_url ?? null,
     prefix: target.prefix,
     attachments: target.attachments ?? [],
   });
@@ -819,18 +909,31 @@ async function nativeShare() {
               </label>
               <div class="form-field compact">
                 <span>해시태그</span>
-                <div class="chip-row wrap write-hashtag-row">
+                <div class="hashtag-input-row">
+                  <span aria-hidden="true">#</span>
+                  <input
+                    v-model="postEditHashtagInput"
+                    type="text"
+                    maxlength="24"
+                    placeholder="태그 입력"
+                    @keydown="handlePostEditHashtagKeydown"
+                    @blur="addPostEditHashtag()"
+                  />
+                  <button type="button" @click="addPostEditHashtag()">추가</button>
+                </div>
+                <div v-if="postEditHashtags.length" class="chip-row wrap write-hashtag-row selected-hashtag-row">
                   <button
-                    v-for="tag in postEditHashtagOptions"
+                    v-for="tag in postEditHashtags"
                     :key="tag"
                     type="button"
-                    class="chip"
-                    :class="{ selected: postEditHashtags.includes(tag) }"
-                    @click="togglePostEditHashtag(tag)"
+                    class="chip selected"
+                    :aria-label="tag + ' 해시태그 삭제'"
+                    @click="removePostEditHashtag(tag)"
                   >
-                    #{{ tag }}
+                    #{{ tag }} <span aria-hidden="true">×</span>
                   </button>
                 </div>
+                <small>{{ postEditHashtags.length }}/{{ MAX_HASHTAGS }}</small>
               </div>
               <label class="form-field compact">
                 제목
@@ -849,16 +952,19 @@ async function nativeShare() {
             </template>
             <template v-else>
               <h1>{{ selectedPost.title }}</h1>
-              <p>{{ selectedPost.body }}</p>
+              <TranslatableText :text="selectedPost.body" :source-language="selectedPost.language" resource-type="POST" :resource-id="postKey(selectedPost)" field="content" />
             </template>
             <div v-if="postImageSources(selectedPost).length" class="post-gallery" aria-label="게시글 이미지 미리보기">
-              <img
+              <button
                 v-for="(image, index) in postImageSources(selectedPost)"
                 :key="`post-image-${index}-${image}`"
-                :src="image"
-                alt=""
-                @error="markPostImageFailed(selectedPost, image)"
-              />
+                type="button"
+                class="post-gallery-item"
+                :aria-label="`게시글 이미지 ${index + 1} 확대 보기`"
+                @click="openImageViewer(selectedPost, index)"
+              >
+                <img :src="image" alt="" @error="markPostImageFailed(selectedPost, image)" />
+              </button>
             </div>
             <div v-if="selectedPost.attachments?.length" class="attachment-preview-list">
               <span v-for="attachment in selectedPost.attachments" :key="attachment.id">
@@ -983,7 +1089,7 @@ async function nativeShare() {
                       </div>
                     </template>
                     <template v-else>
-                      <p>{{ comment.text }}</p>
+                      <TranslatableText :text="comment.text" :source-language="comment.language" resource-type="COMMENT" :resource-id="commentKey(comment)" field="content" />
                       <div class="comment-row-actions">
                         <button
                           type="button"
@@ -1079,7 +1185,7 @@ async function nativeShare() {
                         </div>
                       </template>
                       <template v-else>
-                        <p>{{ reply.text }}</p>
+                        <TranslatableText :text="reply.text" :source-language="reply.language" resource-type="COMMENT" :resource-id="commentKey(reply)" field="content" />
                         <div class="comment-row-actions">
                           <button
                             type="button"
@@ -1289,6 +1395,7 @@ async function nativeShare() {
             >
               <div v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
                 <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0])" />
+                <span v-if="postImageSources(post).length > 1" class="feed-thumb-count">+{{ postImageSources(post).length - 1 }}</span>
               </div>
               <div class="feed-body">
                 <h2>{{ post.title }}</h2>
@@ -1336,6 +1443,20 @@ async function nativeShare() {
         <RouterLink class="fab" to="/community/write" aria-label="Write post">+</RouterLink>
       </template>
     </section>
+
+    <div v-if="imageViewerImage" class="community-image-viewer-backdrop" role="dialog" aria-modal="true" aria-label="게시글 이미지 확대 보기" @click.self="closeImageViewer">
+      <section class="community-image-viewer">
+        <header>
+          <span>{{ imageViewerIndex + 1 }} / {{ imageViewerImages.length }}</span>
+          <button type="button" aria-label="이미지 닫기" @click="closeImageViewer">×</button>
+        </header>
+        <div class="community-image-viewer-body">
+          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav prev" aria-label="이전 이미지" @click="moveImageViewer(-1)">‹</button>
+          <img :src="imageViewerImage" alt="게시글 이미지 확대 보기" @error="markPostImageFailed(imageViewerPost, imageViewerImage); closeImageViewer()" />
+          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav next" aria-label="다음 이미지" @click="moveImageViewer(1)">›</button>
+        </div>
+      </section>
+    </div>
 
     <div v-if="shareTarget" class="sheet-backdrop" @click.self="closeShareSheet">
       <div class="bottom-sheet community-share-sheet" role="dialog" aria-modal="true" aria-label="게시글 공유">

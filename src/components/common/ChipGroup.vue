@@ -5,19 +5,28 @@ defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+function itemValue(item) {
+  return item && typeof item === 'object' ? item.value : item;
+}
+
+function itemLabel(item) {
+  if (!item || typeof item !== 'object') return item;
+  return item.label ?? item.value;
+}
 </script>
 
 <template>
   <div class="chip-row">
     <button
       v-for="item in items"
-      :key="item"
+      :key="itemValue(item)"
       class="chip"
-      :class="{ selected: item === modelValue }"
+      :class="{ selected: itemValue(item) === modelValue }"
       type="button"
-      @click="emit('update:modelValue', item)"
+      @click="emit('update:modelValue', itemValue(item))"
     >
-      {{ item }}
+      {{ itemLabel(item) }}
     </button>
   </div>
 </template>

@@ -698,6 +698,34 @@ body {
 :root[data-theme="dark"] .budget-range-input.max-range {
   z-index: 7;
 }
+/* AI condition car-day selector follows the same dark card surface as budget and transport controls. */
+:root[data-theme="dark"] .car-day-card {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .car-day-card strong {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .car-day-card small {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .car-day-grid button {
+  color: #e5e7eb;
+  background: var(--card-strong);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .car-day-grid button.selected {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+}
 /* Notification list uses dark cards instead of inherited light utility surfaces. */
 :root[data-theme="dark"] .notification-list {
   background: #2a2a2a;
@@ -1034,4 +1062,136 @@ body {
 
 :root[data-theme="dark"] .course-edit-toast--info {
   border-color: rgba(148, 163, 184, 0.36);
+}
+
+/* AI result dark-mode polish: match community post card surfaces without changing light mode. */
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel h2,
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel dd,
+:root[data-theme="dark"] .ai-result-scroll h2 {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel p,
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel dt,
+:root[data-theme="dark"] .ai-result-meta {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .ai-result-scroll .course-save-status-panel dl {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme="dark"] .kakao-route-map {
+  background: #252525;
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .kakao-route-map__notice {
+  color: #fecaca;
+  background: rgba(24, 24, 27, 0.92);
+  border-color: rgba(239, 68, 68, 0.28);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .result-day-tabs {
+  background: transparent;
+}
+
+:root[data-theme="dark"] .result-day-tabs button {
+  color: #e5e7eb;
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .result-day-tabs button.active,
+:root[data-theme="dark"] .result-day-tabs button:active {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+:root[data-theme="dark"] .prototype-timeline-item::before {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+:root[data-theme="dark"] .prototype-timeline-dot {
+  background: #ef4444;
+}
+
+:root[data-theme="dark"] .prototype-stop-tags span {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border-color: var(--dark-soft-red-border);
+}
+
+/* Community write modal/editor dark-mode surfaces. */
+:root[data-theme="dark"] .hashtag-input-row,
+:root[data-theme="dark"] .course-picker-trigger,
+:root[data-theme="dark"] .course-picker-modal header > button,
+:root[data-theme="dark"] .course-picker-option,
+:root[data-theme="dark"] .post-image-preview {
+  color: var(--text);
+  background: #292727;
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .course-picker-modal {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .course-picker-option.selected {
+  background: var(--dark-soft-red-bg);
+  border-color: var(--dark-soft-red-border);
+}
+
+:root[data-theme="dark"] .course-picker-option.selected strong,
+:root[data-theme="dark"] .course-picker-option.selected small {
+  color: var(--dark-soft-red-text);
+}
+
+/* Dark-mode overflow menus for AI result and course detail. */
+:root[data-theme="dark"] .result-menu-popover {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .result-menu-popover button {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .result-menu-popover button:active,
+:root[data-theme="dark"] .result-menu-popover button:focus-visible {
+  color: #ffffff;
+  background: var(--panel-soft);
+}
+
+:root[data-theme="dark"] .result-menu-popover .result-menu-icon {
+  color: var(--dark-soft-red-text);
+}
+
+:root[data-theme="dark"] .result-menu-popover button.danger {
+  color: var(--dark-soft-red-text);
+  background: var(--card);
+}
+
+:root[data-theme="dark"] .course-picker-load-more {
+  color: var(--dark-soft-red-text);
+  background: var(--card-strong);
+  border-color: var(--border);
 }

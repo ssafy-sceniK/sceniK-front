@@ -1,13 +1,17 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { localizePlace } from '../../i18n/systemContent.js';
 
 const props = defineProps({
   place: { type: Object, required: true },
   compact: { type: Boolean, default: false },
 });
 
+const { locale, t } = useI18n();
 const imageLoadFailed = ref(false);
 const imageUrl = computed(() => props.place?.imageUrl || '');
+const displayPlace = computed(() => localizePlace(props.place, locale.value, t));
 const placeInitial = computed(() => props.place?.placeName?.trim?.().slice(0, 1) || 'P');
 
 watch(imageUrl, () => {
@@ -25,7 +29,7 @@ function markImageFailed() {
       <img
         v-if="imageUrl && !imageLoadFailed"
         :src="imageUrl"
-        :alt="`${place.placeName} 장소 이미지`"
+        :alt="`${place.placeName} place image`"
         @error="markImageFailed"
       />
       <div v-else class="place-thumb-placeholder" aria-hidden="true">
@@ -33,9 +37,9 @@ function markImageFailed() {
       </div>
     </div>
     <div class="place-body">
-      <strong>{{ place.placeName }}</strong>
-      <p>{{ place.region }} · {{ place.district }}</p>
-      <small>{{ place.category }}</small>
+      <strong>{{ displayPlace.placeName }}</strong>
+      <p>{{ displayPlace.region }} · {{ place.district }}</p>
+      <small>{{ displayPlace.category }}</small>
     </div>
   </article>
 </template>

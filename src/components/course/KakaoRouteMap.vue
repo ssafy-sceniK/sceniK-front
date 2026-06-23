@@ -23,6 +23,7 @@ let map;
 let markers = [];
 let polyline;
 let infoOverlay;
+let themeObserver;
 
 const appKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY || import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY;
 const mapStops = computed(() => props.stops.filter((stop) => (
@@ -108,6 +109,11 @@ function openStopInfo(kakaoMaps, marker, stop) {
   });
 }
 
+function routeStrokeColor() {
+  if (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark') return '#ef4444';
+  return '#1455ff';
+}
+
 function clearMapObjects() {
   closeInfoOverlay();
   markers.forEach((marker) => marker.setMap(null));
@@ -159,7 +165,7 @@ async function renderMap() {
         map,
         path,
         strokeWeight: 4,
-        strokeColor: '#1455ff',
+        strokeColor: routeStrokeColor(),
         strokeOpacity: 0.8,
         strokeStyle: 'solid',
       });
@@ -175,9 +181,16 @@ async function renderMap() {
 
 watch(() => [props.stops, props.region, props.regions], renderMap, { deep: true });
 
-onMounted(renderMap);
+onMounted(() => {
+  void renderMap();
+  if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+    themeObserver = new MutationObserver(() => { void renderMap(); });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+});
 
 onBeforeUnmount(() => {
+  themeObserver?.disconnect();
   clearMapObjects();
 });
 </script>

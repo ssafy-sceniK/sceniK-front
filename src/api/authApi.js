@@ -1,6 +1,7 @@
 import { unwrapApiData } from './error.js';
 import { API_BASE_URL, AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, http } from './http.js';
 import { hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
+import { normalizeLocale } from '../i18n/languages.js';
 
 export const GOOGLE_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/google`;
 export const KAKAO_OAUTH_URL = `${API_BASE_URL.replace(/\/$/, '')}/auth/oauth/kakao`;
@@ -34,6 +35,7 @@ export function normalizeUser(user = {}) {
     preferences,
     authProvider,
     loginProvider: authProvider,
+    language: normalizeLocale(user.language) || 'ko',
     preferencesCompleted: Boolean(user.preferencesCompleted ?? hasCompletePreferences(preferences)),
     password: undefined,
   };

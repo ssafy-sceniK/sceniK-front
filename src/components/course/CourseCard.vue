@@ -1,8 +1,17 @@
 <script setup>
+import { computed } from 'vue';
 const props = defineProps({
   course: { type: Object, required: true },
   variant: { type: String, default: 'visual' },
   rank: { type: Number, default: 0 },
+  hideGenericAiTag: { type: Boolean, default: false },
+});
+
+const genericAiCourseTags = new Set(['AI Course', 'AI 코스']);
+const visibleTags = computed(() => {
+  const tags = Array.isArray(props.course.tags) ? props.course.tags : [];
+  if (!props.hideGenericAiTag) return tags;
+  return tags.filter((tag) => !genericAiCourseTags.has(String(tag).trim()));
 });
 
 function routePlaceIds(course) {
@@ -51,7 +60,7 @@ function courseMeta(course) {
       <p>{{ courseMeta(course) }}</p>
       <small>{{ routePlaceNames(course) }}</small>
       <div class="tag-row">
-        <span v-for="tag in (course.tags ?? [])" :key="tag">{{ tag }}</span>
+        <span v-for="tag in visibleTags" :key="tag">{{ tag }}</span>
       </div>
     </div>
   </article>

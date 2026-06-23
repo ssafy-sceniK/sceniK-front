@@ -331,7 +331,7 @@ async function toggleFollowFromList(user) {
             class="course-link-card"
             @click="openCourse(course)"
           >
-            <CourseCard :course="course" />
+            <CourseCard :course="course" hide-generic-ai-tag />
           </button>
         </article>
       </div>

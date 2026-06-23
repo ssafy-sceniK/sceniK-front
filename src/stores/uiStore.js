@@ -68,12 +68,19 @@ import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/r
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
+import { normalizeLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
 function applyColorTheme(theme) {
   if (typeof document === 'undefined') return;
   document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+}
+
+function applyLanguage(language) {
+  const normalized = normalizeLocale(language) || 'ko';
+  setLocale(normalized);
+  return normalized;
 }
 
 function formatWon(value) {
@@ -93,6 +100,7 @@ function flattenPreferences(preferences) {
 function defaultState() {
   return {
     theme: 'light',
+    language: 'ko',
     onboardingSeen: false,
     currentUser: null,
     users: [],
@@ -143,6 +151,7 @@ function readState() {
     const state = raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
     state.selectedContentId = '';
     state.selectedContentIds = [];
+    state.language = normalizeLocale(state.currentUser?.language || state.language) || 'ko';
     const dateRange = ensureDateRange(state.courseConditions);
     const conditionDefaults = defaultState().courseConditions;
     const budgetMin = Number(state.courseConditions?.budgetMin ?? conditionDefaults.budgetMin);
@@ -532,6 +541,7 @@ export const useUiStore = defineStore('ui', {
       Object.assign(this, readState());
       this.theme = this.theme === 'dark' ? 'dark' : 'light';
       applyColorTheme(this.theme);
+      this.language = applyLanguage(this.currentUser?.language || this.language);
       this.users = [];
       if (!readAccessToken()) {
         this.currentUser = null;
@@ -592,6 +602,37 @@ export const useUiStore = defineStore('ui', {
       applyColorTheme(this.theme);
       this.persist();
     },
+    async updateLanguage(language) {
+      const normalized = applyLanguage(language);
+      this.language = normalized;
+      if (this.currentUser) {
+        this.currentUser = { ...this.currentUser, language: normalized };
+      }
+      this.persist();
+      if (!this.currentUser || !readAccessToken()) return true;
+      try {
+        const normalizedPreferences = normalizePreferenceSelection(this.currentUser.preferences);
+        const updated = await updateMe({
+          nickname: this.currentUser.nickname,
+          bio: this.currentUser.bio ?? '',
+          preferences: flattenPreferences(normalizedPreferences),
+          language: normalized,
+        });
+        this.currentUser = {
+          ...this.currentUser,
+          ...updated,
+          language: normalizeLocale(updated.language) || normalized,
+          preferences: normalizePreferenceSelection(updated.preferences ?? normalizedPreferences),
+        };
+        this.language = applyLanguage(this.currentUser.language);
+        this.persist();
+        return true;
+      } catch (error) {
+        this.authError = apiErrorMessage(error, '언어 설정을 서버에 저장하지 못했습니다.');
+        this.persist();
+        return false;
+      }
+    },
     notify(message, tone = 'info') {
       this.toast = message;
       this.toastTone = tone;
@@ -612,6 +653,7 @@ export const useUiStore = defineStore('ui', {
       this.authLoading = true;
       try {
         this.currentUser = await fetchMe();
+        this.language = applyLanguage(this.currentUser.language || this.language);
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -795,6 +837,7 @@ export const useUiStore = defineStore('ui', {
         const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname });
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
+        this.language = applyLanguage(this.currentUser.language || this.language);
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -821,6 +864,7 @@ export const useUiStore = defineStore('ui', {
         const session = await loginRequest({ email: safeEmail, password });
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
+        this.language = applyLanguage(this.currentUser.language || this.language);
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -843,6 +887,7 @@ export const useUiStore = defineStore('ui', {
         if (!session.accessToken) throw new Error('로그인 토큰을 받지 못했습니다.');
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
+        this.language = applyLanguage(this.currentUser.language || this.language);
         this.onboardingSeen = this.preferencesCompleted;
         await Promise.all([
           this.loadSavedCourses(),
@@ -888,6 +933,7 @@ export const useUiStore = defineStore('ui', {
                 nickname: this.currentUser.nickname,
                 bio: this.currentUser.bio ?? '',
                 preferences: flattenPreferences(normalized),
+                language: this.currentUser.language || this.language,
               })
             : {};
           this.currentUser = {
@@ -944,7 +990,7 @@ export const useUiStore = defineStore('ui', {
         return false;
       }
     },
-    async updateProfile({ nickname, bio, preferences }) {
+    async updateProfile({ nickname, bio, preferences, language }) {
       if (!this.requireAuth('로그인하면 프로필을 수정할 수 있습니다.')) return false;
       const safeNickname = nickname?.trim();
       if (!safeNickname || safeNickname.length < 2) {
@@ -956,16 +1002,19 @@ export const useUiStore = defineStore('ui', {
       this.authError = '';
       try {
         const normalizedPreferences = normalizePreferenceSelection(preferences ?? this.currentUser.preferences);
+        const normalizedLanguage = normalizeLocale(language ?? this.currentUser.language ?? this.language) || 'ko';
         const updated = await updateMe({
           nickname: safeNickname,
           bio: bio?.trim() ?? '',
           preferences: flattenPreferences(normalizedPreferences),
+          language: normalizedLanguage,
         });
         this.currentUser = {
           ...this.currentUser,
           ...updated,
           nickname: updated.nickname ?? safeNickname,
           bio: updated.bio ?? bio?.trim() ?? '',
+          language: normalizeLocale(updated.language) || normalizedLanguage,
           preferences: normalizePreferenceSelection(updated.preferences ?? normalizedPreferences),
           preferencesCompleted: hasCompletePreferences(updated.preferences ?? normalizedPreferences),
         };

@@ -1,13 +1,16 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
+import { localizePreferenceOption } from '../i18n/systemContent.js';
 import { PREFERENCE_CONTENT_TYPES, PREFERENCE_REGIONS, PREFERENCE_THEMES, normalizePreferenceSelection } from '../utils/preferences.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 const types = PREFERENCE_CONTENT_TYPES;
 const regions = PREFERENCE_REGIONS;
 const themes = PREFERENCE_THEMES;
@@ -23,6 +26,10 @@ onMounted(() => {
   selectedThemes.value = [...preferences.themes];
 });
 
+function optionLabel(group, item) {
+  return localizePreferenceOption(group, item, t, locale.value);
+}
+
 function toggle(list, item) {
   const index = list.indexOf(item);
   if (index >= 0) list.splice(index, 1);
@@ -31,7 +38,7 @@ function toggle(list, item) {
 
 async function complete() {
   if (!canComplete.value) {
-    uiStore.notify('콘텐츠 유형, 선호 지역, 선호 테마를 각각 1개 이상 선택해 주세요.');
+    uiStore.notify(t('preferences.validation.requiredAll'));
     return;
   }
   await uiStore.savePreferences({
@@ -48,15 +55,15 @@ function routeRedirectPath() {
 </script>
 
 <template>
-  <AppLayout title="취향 선택" hide-bottom>
+  <AppLayout :title="t('preferences.title')" hide-bottom>
     <section class="preference-screen">
       <div class="page-intro preference-intro">
-        <h1>좋아하는 K-콘텐츠를 선택해주세요</h1>
-        <p>AI 맞춤 추천에 활용돼요. 복수 선택할 수 있습니다.</p>
+        <h1>{{ t('preferences.heading') }}</h1>
+        <p>{{ t('preferences.subtitle') }}</p>
       </div>
 
       <div class="preference-block">
-        <h2>콘텐츠 유형</h2>
+        <h2>{{ t('preferences.groups.contentTypes') }}</h2>
         <div class="chip-row wrap">
           <button
             v-for="item in types"
@@ -67,13 +74,13 @@ function routeRedirectPath() {
             :aria-pressed="selectedTypes.includes(item)"
             @click="toggle(selectedTypes, item)"
           >
-            {{ item }}
+            {{ optionLabel('contentTypes', item) }}
           </button>
         </div>
       </div>
 
       <div class="preference-block">
-        <h2>선호 지역</h2>
+        <h2>{{ t('preferences.groups.regions') }}</h2>
         <div class="chip-row wrap">
           <button
             v-for="item in regions"
@@ -84,13 +91,13 @@ function routeRedirectPath() {
             :aria-pressed="selectedRegions.includes(item)"
             @click="toggle(selectedRegions, item)"
           >
-            {{ item }}
+            {{ optionLabel('regions', item) }}
           </button>
         </div>
       </div>
 
       <div class="preference-block">
-        <h2>선호 테마</h2>
+        <h2>{{ t('preferences.groups.themes') }}</h2>
         <div class="chip-row wrap">
           <button
             v-for="item in themes"
@@ -101,13 +108,13 @@ function routeRedirectPath() {
             :aria-pressed="selectedThemes.includes(item)"
             @click="toggle(selectedThemes, item)"
           >
-            {{ item }}
+            {{ optionLabel('themes', item) }}
           </button>
         </div>
       </div>
 
       <div class="sticky-actions">
-        <BaseButton block :disabled="!canComplete" @click="complete">취향 저장하고 시작하기</BaseButton>
+        <BaseButton block :disabled="!canComplete" @click="complete">{{ t('preferences.saveAndStart') }}</BaseButton>
       </div>
     </section>
   </AppLayout>

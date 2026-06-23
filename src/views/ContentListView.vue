@@ -1,5 +1,6 @@
-<script setup>
+﻿<script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -7,22 +8,27 @@ import ChipGroup from '../components/common/ChipGroup.vue';
 import ContentCard from '../components/content/ContentCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
+import { localizeSystemLabel } from '../i18n/systemContent.js';
 import { useContentStore } from '../stores/contentStore.js';
 
 const router = useRouter();
 const route = useRoute();
 const contentStore = useContentStore();
+const { t, locale } = useI18n();
 const query = ref('');
 const category = ref('전체');
-const mode = ref('콘텐츠 탐색');
+const mode = ref('content');
 const sort = ref('popular');
 const visibleLimit = ref(24);
 const restoringQuery = ref(false);
-const exploreCategories = computed(() => contentStore.categories);
-const sortOptions = [
-  { value: 'popular', label: '인기순' },
-  { value: 'latest', label: '최신순' },
-];
+const exploreCategories = computed(() => contentStore.categories.map((item) => ({
+  value: item,
+  label: item === '전체' ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
+})));
+const sortOptions = computed(() => [
+  { value: 'popular', label: t('common.sort.popular') },
+  { value: 'latest', label: t('common.sort.latest') },
+]);
 
 onMounted(() => {
   restoreQueryState();
@@ -98,38 +104,38 @@ function loadMore() {
 <template>
   <AppLayout>
     <section class="explore-screen">
-      <SearchBar v-model="query" placeholder="드라마 / 장소 / 배우 / 아이돌 검색" @focus="router.push('/search')" />
+      <SearchBar v-model="query" :placeholder="t('content.list.searchPlaceholder')" @focus="router.push('/search')" />
       <div class="mode-toggle">
-        <button :class="{ active: mode === '콘텐츠 탐색' }" @click="mode = '콘텐츠 탐색'">콘텐츠 탐색</button>
-        <button :class="{ active: mode === '지도 탐색' }" @click="router.push('/explore/map')">지도 탐색</button>
+        <button :class="{ active: mode === 'content' }" @click="mode = 'content'">{{ t('content.list.contentMode') }}</button>
+        <button :class="{ active: mode === 'map' }" @click="router.push('/explore/map')">{{ t('content.list.mapMode') }}</button>
       </div>
-      <h3 class="subsection-title">카테고리</h3>
+      <h3 class="subsection-title">{{ t('content.list.category') }}</h3>
       <ChipGroup v-model="category" :items="exploreCategories" />
-      <div class="list-control-row explore-sort-row" aria-label="콘텐츠 정렬과 결과 수">
-        <span class="list-control-label">정렬</span>
+      <div class="list-control-row explore-sort-row" :aria-label="t('content.list.sortAria')">
+        <span class="list-control-label">{{ t('common.sort.label') }}</span>
         <SortSegmentedControl
           v-model="sort"
           :options="sortOptions"
-          aria-label="콘텐츠 정렬"
+          :aria-label="t('content.list.sortAria')"
         />
-        <span class="list-result-count">{{ sortedContents.length }}개 결과</span>
+        <span class="list-result-count">{{ t('common.resultCount', { count: sortedContents.length }) }}</span>
       </div>
 
       <EmptyState
         v-if="contentStore.loading"
         tone="loading"
         compact
-        title="콘텐츠를 불러오는 중입니다"
-        text="인기 K-content 목록을 확인하고 있어요."
+        :title="t('content.list.loadingTitle')"
+        :text="t('content.list.loadingText')"
       />
       <EmptyState
         v-else-if="contentStore.error"
         icon="!"
         tone="error"
         compact
-        title="콘텐츠를 불러오지 못했습니다"
+        :title="t('content.list.errorTitle')"
         :text="contentStore.error"
-        action-label="다시 시도"
+        :action-label="t('common.retry')"
         @action="contentStore.load()"
       />
       <div v-else class="content-grid">
@@ -138,15 +144,15 @@ function loadMore() {
         </RouterLink>
       </div>
       <div v-if="hasMoreContents" class="load-more-row">
-        <button type="button" @click="loadMore">더 보기</button>
+        <button type="button" @click="loadMore">{{ t('common.loadMore') }}</button>
       </div>
       <EmptyState
         v-if="!contentStore.loading && !sortedContents.length"
         icon="?"
         tone="search"
-        title="조건에 맞는 콘텐츠가 없습니다"
-        text="카테고리나 검색어를 바꿔 다시 찾아보세요."
-        action-label="전체 보기"
+        :title="t('content.list.emptyTitle')"
+        :text="t('content.list.emptyText')"
+        :action-label="t('content.list.viewAll')"
         @action="resetFilters"
       />
     </section>

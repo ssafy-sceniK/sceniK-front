@@ -527,3 +527,47 @@
   color: var(--dim);
   pointer-events: none;
 }
+
+.settings-helper {
+  margin: -2px 0 10px;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.translatable-text {
+  display: block;
+}
+
+.translation-control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.translation-toggle {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--color-surface-strong);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.translation-toggle:disabled {
+  opacity: 0.55;
+}
+
+.translation-control-row small {
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.translation-error {
+  color: var(--color-danger, #d64545);
+}

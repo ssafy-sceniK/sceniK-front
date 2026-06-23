@@ -1,5 +1,6 @@
-<script setup>
+﻿<script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { motion } from 'motion-v';
 import { readAccessToken } from '../api/authApi.js';
@@ -10,6 +11,7 @@ import { motionVariants } from '../utils/motion.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
+const { t } = useI18n();
 const notifications = computed(() => uiStore.notifications);
 const error = computed(() => uiStore.notificationsError);
 const loading = computed(() => uiStore.notificationsLoading);
@@ -37,28 +39,28 @@ onMounted(loadNotifications);
 </script>
 
 <template>
-  <AppLayout title="알림" back>
+  <AppLayout :title="t('notifications.title')" back>
     <section class="utility-screen">
       <div class="utility-header">
-        <p>커뮤니티 활동과 코스 업데이트를 모아 보여줍니다.</p>
-        <button v-if="notifications.length" type="button" @click="markAllRead">모두 읽음</button>
+        <p>{{ t('notifications.description') }}</p>
+        <button v-if="notifications.length" type="button" @click="markAllRead">{{ t('notifications.markAllRead') }}</button>
       </div>
 
       <EmptyState
         v-if="loading"
         tone="loading"
         compact
-        title="알림을 불러오는 중입니다"
-        text="새 활동과 코스 업데이트를 확인하고 있어요."
+        :title="t('notifications.loadingTitle')"
+        :text="t('notifications.loadingText')"
       />
       <EmptyState
         v-else-if="error"
         icon="!"
         tone="error"
         compact
-        title="알림을 불러오지 못했습니다"
+        :title="t('notifications.errorTitle')"
         :text="error"
-        action-label="다시 시도"
+        :action-label="t('common.retry')"
         @action="loadNotifications"
       />
 
@@ -85,9 +87,9 @@ onMounted(loadNotifications);
         v-else
         icon="!"
         tone="notification"
-        :title="hasToken ? '새로운 알림이 없습니다' : '로그인하면 알림을 확인할 수 있습니다'"
-        :text="hasToken ? '새 활동이 생기면 차분하게 정리해 알려드릴게요.' : '저장한 코스, 댓글, 좋아요 소식을 한곳에서 볼 수 있어요.'"
-        :action-label="hasToken ? '커뮤니티 둘러보기' : '로그인하기'"
+        :title="hasToken ? t('notifications.emptyTitle') : t('notifications.loginTitle')"
+        :text="hasToken ? t('notifications.emptyText') : t('notifications.loginText')"
+        :action-label="hasToken ? t('notifications.communityAction') : t('settings.login')"
         :action-to="hasToken ? '/community' : '/login'"
       />
     </section>
