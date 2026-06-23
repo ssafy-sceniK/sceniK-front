@@ -1,0 +1,8 @@
+/* sceniK 로고 워드마크 전용 디스플레이 서체 */
+@font-face {
+  font-family: 'Dit Magi';
+  src: url('../assets/fonts/DitMagi-Demo.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

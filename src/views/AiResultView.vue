@@ -1,12 +1,14 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { AnimatePresence, motion } from 'motion-v';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import KakaoRouteMap from '../components/course/KakaoRouteMap.vue';
 import CourseSaveStatusPanel from '../components/course/CourseSaveStatusPanel.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
+import { motionVariants } from '../utils/motion.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -282,8 +284,9 @@ function postFromShareSheet() {
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
         </button>
-        <div v-if="showActionMenu" class="result-menu-backdrop" @click="showActionMenu = false">
-          <div id="ai-result-action-menu" class="result-menu-popover" role="menu" @click.stop>
+        <AnimatePresence>
+          <motion.div v-if="showActionMenu" class="result-menu-backdrop" v-bind="motionVariants.backdrop()" @click="showActionMenu = false">
+          <motion.div id="ai-result-action-menu" class="result-menu-popover" role="menu" v-bind="motionVariants.popover()" @click.stop>
             <button type="button" role="menuitem" @click="openShareSheet">
               <span class="result-menu-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg>
@@ -302,8 +305,9 @@ function postFromShareSheet() {
               </span>
               편집
             </button>
-          </div>
-        </div>
+          </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </header>
 
       <div class="ai-result-scroll">
@@ -348,8 +352,9 @@ function postFromShareSheet() {
         <BaseButton block @click="router.push('/home')">완료</BaseButton>
       </footer>
 
-      <div v-if="showShareSheet" class="sheet-backdrop ai-result-share-backdrop" @click.self="closeShareSheet">
-        <div class="bottom-sheet ai-result-share-sheet" role="dialog" aria-modal="true" aria-label="코스 공유">
+      <AnimatePresence>
+        <motion.div v-if="showShareSheet" class="sheet-backdrop ai-result-share-backdrop" v-bind="motionVariants.backdrop()" @click.self="closeShareSheet">
+        <motion.div class="bottom-sheet ai-result-share-sheet" role="dialog" aria-modal="true" aria-label="코스 공유" v-bind="motionVariants.bottomSheet()">
           <div class="sheet-handle"></div>
           <h2>{{ route.title }}</h2>
           <p>{{ shareSummary }}</p>
@@ -364,8 +369,9 @@ function postFromShareSheet() {
             <button type="button" @click="postFromShareSheet">커뮤니티에 게시</button>
           </div>
           <button type="button" class="ai-share-close" @click="closeShareSheet">닫기</button>
-        </div>
-      </div>
+        </motion.div>
+        </motion.div>
+      </AnimatePresence>
     </section>
 
     <section v-else class="result-empty">
