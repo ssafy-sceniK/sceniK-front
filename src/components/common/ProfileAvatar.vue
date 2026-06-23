@@ -28,8 +28,10 @@ function handleClick(event) {
     :aria-label="interactive ? ariaLabel : undefined"
     @click="handleClick"
   >
-    <img v-if="imageUrl" :src="imageUrl" :alt="alt" />
-    <span v-else>{{ initial }}</span>
+    <span class="avatar-image-frame">
+      <img v-if="imageUrl" :src="imageUrl" :alt="alt" />
+      <span v-else class="avatar-initial">{{ initial }}</span>
+    </span>
     <span class="avatar-edit-badge large">{{ badgeLabel }}</span>
   </component>
 </template>

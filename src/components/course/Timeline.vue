@@ -5,6 +5,8 @@ const props = defineProps({
   stops: { type: Array, default: () => [] },
 });
 
+const INTERNAL_TRAVEL_TIP_PATTERN = /missing\s+traveltip\s+for\s+day\s+\d+\.?/i;
+
 const displayStops = computed(() => props.stops.map((stop) => ({
   ...stop,
   displayCategory: meaningfulCategory(stop),
@@ -18,6 +20,12 @@ function cleanText(value) {
 
 function firstText(...values) {
   return values.map(cleanText).find(Boolean) ?? '';
+}
+
+function meaningfulTravelTip(stop) {
+  const tip = firstText(stop.travelTip, stop.tip, stop.transitTip);
+  if (!tip || INTERNAL_TRAVEL_TIP_PATTERN.test(tip)) return '';
+  return tip;
 }
 
 function meaningfulCategory(stop) {
@@ -41,6 +49,9 @@ function numericValue(...values) {
 }
 
 function usefulTransitInfo(stop) {
+  const travelTip = meaningfulTravelTip(stop);
+  if (travelTip) return travelTip;
+
   const station = firstText(
     stop.nearestStationName,
     stop.nearestStation,

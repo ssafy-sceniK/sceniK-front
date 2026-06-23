@@ -10,6 +10,7 @@ import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
+import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -63,7 +64,7 @@ const loadingStatusText = computed(() => loadingSteps[activeStepIndex.value].det
 const loadingContextRows = computed(() => [
   { label: '지역', value: selectedRegionLabel() },
   { label: '일수', value: `${getTripDurationDays(uiStore.courseConditions)}일` },
-  { label: '이동', value: uiStore.courseConditions.transport },
+  { label: '이동', value: selectedTransportLabel() },
   { label: '테마', value: selectedTravelStyles().join(', ') || uiStore.courseConditions.style },
   { label: '예산', value: uiStore.courseConditions.budget },
   { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
@@ -75,6 +76,17 @@ function loadingStepState(index, step) {
   return 'waiting';
 }
 
+function selectedTransportModes() {
+  return normalizeTransportModes(uiStore.courseConditions.transportModes, uiStore.courseConditions.transport);
+}
+
+function selectedCarDays() {
+  return normalizeCarDays(uiStore.courseConditions.carDays, getTripDurationDays(uiStore.courseConditions), selectedTransportModes());
+}
+
+function selectedTransportLabel() {
+  return transportLabel(selectedTransportModes(), selectedCarDays(), getTripDurationDays(uiStore.courseConditions));
+}
 function selectedContentIds() {
   const ids = Array.isArray(uiStore.selectedContentIds) && uiStore.selectedContentIds.length
     ? uiStore.selectedContentIds
@@ -85,7 +97,7 @@ function selectedContentIds() {
 function selectedContents() {
   return selectedContentIds().map((contentId) => contentStore.items.find((content) => content.contentId === contentId) ?? {
     contentId,
-    title: contentId,
+    title: '\uC120\uD0DD\uD55C K-\uCF58\uD150\uCE20',
   });
 }
 
@@ -177,6 +189,9 @@ async function generateRoute() {
   const travelStyles = selectedTravelStyles();
   const regions = selectedRegions();
   const selectedContentTitle = selected.map((content) => content.title).join(' · ');
+  const transportModes = selectedTransportModes();
+  const carDays = selectedCarDays();
+  const transport = selectedTransportLabel();
 
   try {
     const backendRoute = await generateAiRoute({
@@ -188,7 +203,9 @@ async function generateRoute() {
       startDate: uiStore.courseConditions.startDate,
       endDate: uiStore.courseConditions.endDate,
       dateRangeLabel: formatDateRange(uiStore.courseConditions),
-      transport: uiStore.courseConditions.transport,
+      transport,
+      transportModes,
+      carDays,
       companion: uiStore.courseConditions.companion,
       style: travelStyles.join(', '),
       travelStyles,
@@ -216,7 +233,9 @@ async function generateRoute() {
       requestedDurationDays: requestedDuration,
       startDate: backendRoute.startDate ?? uiStore.courseConditions.startDate,
       endDate: backendRoute.endDate ?? uiStore.courseConditions.endDate,
-      transport: backendRoute.transport ?? uiStore.courseConditions.transport,
+      transport: backendRoute.transport ?? transport,
+      transportModes,
+      carDays,
       companion: backendRoute.companion ?? uiStore.courseConditions.companion,
       style: backendRoute.style ?? travelStyles.join(', '),
       travelStyles: backendRoute.travelStyles ?? travelStyles,
@@ -270,7 +289,9 @@ async function generateRoute() {
     startDate: uiStore.courseConditions.startDate,
     endDate: uiStore.courseConditions.endDate,
     dateRangeLabel,
-    transport: uiStore.courseConditions.transport,
+    transport,
+    transportModes,
+    carDays,
     companion: uiStore.courseConditions.companion,
     style: travelStyles.join(', '),
     travelStyles,

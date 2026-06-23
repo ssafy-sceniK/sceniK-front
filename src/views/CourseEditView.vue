@@ -29,6 +29,9 @@ const placeSearchError = ref('');
 const draggingStop = ref(null);
 const dragOverStop = ref(null);
 const pointerDrag = ref({ active: false });
+const draggingDay = ref(null);
+const dragOverDay = ref(null);
+const dayPointerDrag = ref({ active: false });
 let editToastTimer;
 
 const routeId = computed(() => route.params.routeId ?? '');
@@ -153,6 +156,8 @@ watch(course, (value) => {
   placeSearchRegion.value = value?.region ?? '';
   draggingStop.value = null;
   dragOverStop.value = null;
+  draggingDay.value = null;
+  dragOverDay.value = null;
 }, { immediate: true });
 watch(editToast, (value) => {
   window.clearTimeout(editToastTimer);
@@ -317,6 +322,102 @@ async function searchVerifiedPlaces() {
   }
 }
 
+function isDayDragTarget(dayIndex) {
+  return draggingDay.value !== null && dragOverDay.value === dayIndex;
+}
+
+function finishDayDrag() {
+  draggingDay.value = null;
+  dragOverDay.value = null;
+}
+
+function cleanupDayPointerDrag() {
+  window.removeEventListener('pointermove', moveDayPointerDrag);
+  window.removeEventListener('pointerup', endDayPointerDrag);
+  window.removeEventListener('pointercancel', cancelDayPointerDrag);
+  dayPointerDrag.value = { active: false };
+}
+
+function shouldSkipDayDrag(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest('button, a, input, textarea, select, label, [role="button"], .editable-stop-card'));
+}
+
+function startDayPointerDrag(dayIndex, event) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+  if (shouldSkipDayDrag(event)) return;
+  event.preventDefault();
+  cancelPointerDrag();
+  dayPointerDrag.value = {
+    active: true,
+    dayIndex,
+    startX: event.clientX,
+    startY: event.clientY,
+    moved: false,
+  };
+  draggingDay.value = dayIndex;
+  dragOverDay.value = dayIndex;
+  window.addEventListener('pointermove', moveDayPointerDrag);
+  window.addEventListener('pointerup', endDayPointerDrag);
+  window.addEventListener('pointercancel', cancelDayPointerDrag);
+}
+
+function moveDayPointerDrag(event) {
+  if (!dayPointerDrag.value.active) return;
+  const distanceX = Math.abs(event.clientX - dayPointerDrag.value.startX);
+  const distanceY = Math.abs(event.clientY - dayPointerDrag.value.startY);
+  if (!dayPointerDrag.value.moved && distanceX + distanceY < 6) return;
+  dayPointerDrag.value = { ...dayPointerDrag.value, moved: true };
+  const target = document.elementFromPoint(event.clientX, event.clientY);
+  const dayElement = target?.closest?.('[data-day-index]');
+  if (!dayElement) return;
+  const rect = dayElement.getBoundingClientRect();
+  const dayIndex = Number(dayElement.dataset.dayIndex);
+  dragOverDay.value = dayIndex + (event.clientY > rect.top + rect.height / 2 ? 1 : 0);
+}
+
+function endDayPointerDrag() {
+  if (dayPointerDrag.value.active && dayPointerDrag.value.moved && dragOverDay.value !== null) {
+    moveDraggedDay(dragOverDay.value);
+  } else {
+    finishDayDrag();
+  }
+  cleanupDayPointerDrag();
+}
+function cancelDayPointerDrag() {
+  finishDayDrag();
+  cleanupDayPointerDrag();
+}
+
+function moveDraggedDay(targetDayIndex) {
+  const sourceDayIndex = draggingDay.value;
+  if (sourceDayIndex === null || sourceDayIndex === undefined) return;
+
+  const days = cloneDraftDays();
+  const [day] = days.splice(sourceDayIndex, 1);
+  if (!day) {
+    finishDayDrag();
+    return;
+  }
+
+  let insertIndex = targetDayIndex;
+  if (sourceDayIndex < targetDayIndex) insertIndex -= 1;
+  insertIndex = Math.max(0, Math.min(insertIndex, days.length));
+  if (insertIndex === sourceDayIndex) {
+    finishDayDrag();
+    return;
+  }
+  days.splice(insertIndex, 0, day);
+  draftDays.value = renumberDays(days);
+  candidateTargetDay.value = Math.min(candidateTargetDay.value, draftDays.value.length) || 1;
+  editToast.value = {
+    tone: 'success',
+    title: 'Day 순서를 변경했습니다.',
+    text: '저장하면 변경한 Day 순서가 코스에 반영됩니다.',
+  };
+  finishDayDrag();
+}
 function isDragTarget(dayIndex, stopIndex) {
   return dragOverStop.value?.dayIndex === dayIndex && dragOverStop.value?.stopIndex === stopIndex;
 }
@@ -324,6 +425,8 @@ function isDragTarget(dayIndex, stopIndex) {
 function finishDrag() {
   draggingStop.value = null;
   dragOverStop.value = null;
+  draggingDay.value = null;
+  dragOverDay.value = null;
 }
 
 function cleanupPointerDrag() {
@@ -334,6 +437,7 @@ function cleanupPointerDrag() {
 }
 
 function startPointerDrag(dayIndex, stopIndex, event) {
+  if (dayPointerDrag.value.active) return;
   if (event.pointerType === 'mouse' && event.button !== 0) return;
   event.preventDefault();
   pointerDrag.value = { active: true, dayIndex, stopIndex };
@@ -345,6 +449,7 @@ function startPointerDrag(dayIndex, stopIndex, event) {
 }
 
 function movePointerDrag(event) {
+  if (dayPointerDrag.value.active) return;
   if (!pointerDrag.value.active) return;
   const target = document.elementFromPoint(event.clientX, event.clientY);
   const stopElement = target?.closest?.('[data-stop-day]');
@@ -571,6 +676,7 @@ function cancelEdit() {
 onBeforeUnmount(() => {
   window.clearTimeout(editToastTimer);
   cleanupPointerDrag();
+  cleanupDayPointerDrag();
 });
 </script>
 
@@ -625,16 +731,20 @@ onBeforeUnmount(() => {
           <input v-model="draftTitle" maxlength="48" placeholder="코스 제목" />
         </label>
       </section>
-<div class="all-day-edit-list">
+      <div class="all-day-edit-list">
         <section
           v-for="(day, dayIndex) in draftDays"
           :key="day.dayNumber"
           class="course-day-section"
+          :class="{ 'is-day-dragging': draggingDay === dayIndex, 'is-day-drag-over': isDayDragTarget(dayIndex) }"
           :data-day-index="dayIndex"
+          @pointerdown="startDayPointerDrag(dayIndex, $event)"
         >
           <div class="course-day-header">
-            <span>Day {{ day.dayNumber }}</span>
-            <small>{{ day.places.length }}곳</small>
+            <div class="course-day-title">
+              <span>Day {{ day.dayNumber }}</span>
+              <small>{{ day.places.length }}곳</small>
+            </div>
           </div>
 
           <div class="day-stop-list">
@@ -645,23 +755,15 @@ onBeforeUnmount(() => {
               :class="{ 'is-drag-over': isDragTarget(dayIndex, stopIndex), 'is-dragging': draggingStop?.dayIndex === dayIndex && draggingStop?.stopIndex === stopIndex }"
               :data-stop-day="dayIndex"
               :data-stop-index="stopIndex"
+              @pointerdown="startPointerDrag(dayIndex, stopIndex, $event)"
             >
               <div class="editable-stop-main">
-                <button
-                  type="button"
-                  class="drag-grip"
-                  aria-label="순서 변경"
-                  @pointerdown="startPointerDrag(dayIndex, stopIndex, $event)"
-                >
-                  ⋮⋮
-                </button>
-
                 <div class="editable-stop-copy">
                   <strong>{{ stop.placeName || placeName(stop.placeId) }}</strong>
                   <small>{{ stop.category || stop.reason }}</small>
                 </div>
 
-                <button type="button" class="remove-stop-button" aria-label="장소 제거" @click="removeStop(dayIndex, stopIndex)">×</button>
+                <button type="button" class="remove-stop-button" aria-label="장소 제거" @click.stop="removeStop(dayIndex, stopIndex)" @pointerdown.stop draggable="false">×</button>
               </div>
             </article>
           </div>

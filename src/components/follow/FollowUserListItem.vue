@@ -12,10 +12,6 @@ const props = defineProps({
     type: String,
     default: 'U',
   },
-  mutual: {
-    type: Boolean,
-    default: false,
-  },
   currentUserId: {
     type: [String, Number],
     default: '',
@@ -40,7 +36,6 @@ const emit = defineEmits(['toggle']);
       <span>
         <strong>
           {{ props.user.nickname }}
-          <em v-if="props.mutual" class="mutual-follow-badge">맞팔</em>
         </strong>
         <small>팔로워 {{ props.user.followerCount ?? 0 }} · 팔로잉 {{ props.user.followingCount ?? 0 }}</small>
       </span>

@@ -7,9 +7,6 @@ const props = defineProps({
   selected: { type: Boolean, default: false },
 });
 
-const placeCount = computed(() => props.content.placeCount
-  ?? props.content.relatedPlaceCount
-  ?? 0);
 const imageUrl = computed(() => getContentImageUrl(props.content));
 
 function useFallbackImage(event) {
@@ -25,6 +22,5 @@ function useFallbackImage(event) {
       <span v-if="selected" class="selected-check">✓</span>
     </div>
     <strong>{{ content.title }}</strong>
-    <p>장소 {{ placeCount }}곳</p>
   </article>
 </template>

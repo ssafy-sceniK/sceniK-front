@@ -147,6 +147,20 @@ body {
   background: rgba(219, 234, 254, 0.92);
 }
 
+
+/* Landing splash SVG brandmark turns red only in dark mode. */
+:root[data-theme="dark"] .splash-screen .splash-brandmark__word {
+  fill: #ef4444;
+  stroke: #ef4444;
+}
+
+:root[data-theme="dark"] .splash-screen .splash-brandmark__trail {
+  stroke: #ef4444;
+}
+
+:root[data-theme="dark"] .splash-screen .splash-brandmark__plane {
+  fill: #ef4444;
+}
 /* Dark is charcoal-first; red is reserved for actions and selected states. */
 :root[data-theme="dark"] body {
   background: var(--color-canvas);
@@ -628,14 +642,14 @@ body {
 }
 
 :root[data-theme="dark"] .budget-track {
-  background: rgba(255, 255, 255, 0.18);
-  z-index: 4;
+  background: #2a2a2a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  z-index: 1;
   pointer-events: none;
 }
 
 :root[data-theme="dark"] .budget-track span {
   background: #ef4444;
-  z-index: 1;
 }
 
 :root[data-theme="dark"] .budget-range-input::-webkit-slider-runnable-track {
@@ -670,6 +684,20 @@ body {
   box-shadow: none;
 }
 
+/* Dark budget range inputs stay transparent and sit above the visual track. */
+:root[data-theme="dark"] .budget-range-input {
+  top: 50%;
+  background: transparent;
+  z-index: 5;
+}
+
+:root[data-theme="dark"] .budget-range-input.min-range {
+  z-index: 6;
+}
+
+:root[data-theme="dark"] .budget-range-input.max-range {
+  z-index: 7;
+}
 /* Notification list uses dark cards instead of inherited light utility surfaces. */
 :root[data-theme="dark"] .notification-list {
   background: #2a2a2a;
@@ -763,4 +791,247 @@ body {
     background: var(--dark-soft-red-bg);
     border-color: rgba(239, 68, 68, 0.35);
   }
+}
+
+/* Dark profile avatar edit badge follows the red accent. */
+:root[data-theme="dark"] .profile-avatar-button .avatar-edit-badge {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: rgba(254, 226, 226, 0.95);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.24);
+}
+/* Dark-mode fixes for profile reviews, community board picker, and crop modal. */
+:root[data-theme="dark"] .activity-review-card {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .activity-review-card p,
+:root[data-theme="dark"] .activity-review-card small,
+:root[data-theme="dark"] .activity-review-card span {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .activity-review-card strong {
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .board-accordion-list,
+:root[data-theme="dark"] .board-accordion-option {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .board-accordion-list {
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.36);
+}
+
+:root[data-theme="dark"] .board-accordion-option {
+  border-bottom-color: var(--border);
+}
+
+:root[data-theme="dark"] .board-accordion-option:hover,
+:root[data-theme="dark"] .board-accordion-option:focus-visible {
+  background: #302a2a;
+}
+
+:root[data-theme="dark"] .board-option-copy small {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .board-accordion-toggle {
+  color: #d1d5db;
+  background: transparent;
+  border-color: transparent;
+}
+
+:root[data-theme="dark"] .profile-crop-backdrop {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+:root[data-theme="dark"] .profile-crop-sheet {
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.46);
+}
+
+:root[data-theme="dark"] .profile-crop-head h2 {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .profile-crop-head p,
+:root[data-theme="dark"] .profile-crop-help,
+:root[data-theme="dark"] .profile-crop-controls label {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .profile-crop-preview {
+  background: #302a2a;
+  border-color: #2a2a2a;
+  box-shadow: 0 0 0 1px var(--border), 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .profile-crop-controls input[type="range"] {
+  accent-color: #ef4444;
+}
+
+:root[data-theme="dark"] .profile-crop-rotate,
+:root[data-theme="dark"] .profile-crop-actions .button-ghost {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border-color: var(--dark-soft-red-border);
+}
+
+:root[data-theme="dark"] .profile-crop-actions .button-primary {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: none;
+}
+/* Final dark-mode polish for AI budget range and Course Edit surfaces. */
+:root[data-theme="dark"] .budget-dual-range {
+  height: 42px;
+  padding-inline: 10px;
+}
+
+:root[data-theme="dark"] .budget-range-card input.budget-range-input {
+  top: 50%;
+  inset-inline: 10px;
+  width: calc(100% - 20px);
+  height: 36px;
+  padding: 0;
+  color: transparent;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:root[data-theme="dark"] .budget-track {
+  height: 8px;
+  background: #3a3434;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+:root[data-theme="dark"] .budget-track span {
+  background: #ef4444;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.28);
+}
+
+:root[data-theme="dark"] .budget-range-input.min-range {
+  z-index: 8;
+}
+
+:root[data-theme="dark"] .budget-range-input.max-range {
+  z-index: 9;
+}
+
+:root[data-theme="dark"] .budget-range-card input.budget-range-input::-webkit-slider-runnable-track {
+  height: 8px;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-theme="dark"] .budget-range-card input.budget-range-input::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;
+  pointer-events: auto;
+  border: 3px solid #ef4444;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 4px 12px rgba(0, 0, 0, 0.36);
+  cursor: grab;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:root[data-theme="dark"] .budget-range-card input.budget-range-input::-moz-range-track {
+  height: 8px;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-theme="dark"] .budget-range-card input.budget-range-input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  pointer-events: auto;
+  border: 3px solid #ef4444;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 4px 12px rgba(0, 0, 0, 0.36);
+  cursor: grab;
+}
+
+:root[data-theme="dark"] .course-edit-entity-form,
+:root[data-theme="dark"] .course-day-section,
+:root[data-theme="dark"] .course-recommend-panel,
+:root[data-theme="dark"] .course-edit-toast,
+:root[data-theme="dark"] .time-menu {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .course-edit-screen .compact-intro p,
+:root[data-theme="dark"] .course-edit-screen .course-recommend-panel > p,
+:root[data-theme="dark"] .course-edit-toast span,
+:root[data-theme="dark"] .recommended-place-grid small,
+:root[data-theme="dark"] .editable-stop-copy small {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .editable-stop-card,
+:root[data-theme="dark"] .editable-stop-panel,
+:root[data-theme="dark"] .candidate-day-tabs button,
+:root[data-theme="dark"] .candidate-chip-grid button,
+:root[data-theme="dark"] .recommended-place-grid button,
+:root[data-theme="dark"] .time-menu button,
+:root[data-theme="dark"] .remove-stop-button {
+  color: var(--text);
+  background: var(--card-strong);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .editable-stop-card.is-drag-over,
+:root[data-theme="dark"] .course-day-section.is-day-drag-over {
+  border-color: rgba(239, 68, 68, 0.48);
+}
+
+:root[data-theme="dark"] .candidate-day-tabs button.active,
+:root[data-theme="dark"] .recommended-place-grid span {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+:root[data-theme="dark"] .time-menu button:hover,
+:root[data-theme="dark"] .time-menu button:focus-visible,
+:root[data-theme="dark"] .recommended-place-grid button:hover,
+:root[data-theme="dark"] .recommended-place-grid button:focus-visible {
+  background: #3a3030;
+}
+
+:root[data-theme="dark"] .course-edit-toast--success {
+  border-color: rgba(74, 222, 128, 0.36);
+}
+
+:root[data-theme="dark"] .course-edit-toast--warning {
+  border-color: rgba(251, 191, 36, 0.38);
+}
+
+:root[data-theme="dark"] .course-edit-toast--error {
+  border-color: rgba(239, 68, 68, 0.48);
+}
+
+:root[data-theme="dark"] .course-edit-toast--info {
+  border-color: rgba(148, 163, 184, 0.36);
 }

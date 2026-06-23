@@ -109,3 +109,9 @@ export async function uploadProfileImage(file) {
   const user = unwrapApiData(data);
   return normalizeUser(user?.user ?? user);
 }
+
+export async function deleteProfileImage() {
+  const { data } = await http.delete('/users/me/profile-image');
+  const user = unwrapApiData(data);
+  return normalizeUser(user?.user ?? user);
+}

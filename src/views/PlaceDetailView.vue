@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
-import FavoriteToggleStatus from '../components/common/FavoriteToggleStatus.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
@@ -42,6 +41,7 @@ const editReviewForm = ref({
   rating: 5,
   content: '',
 });
+const ratingOptions = [1, 2, 3, 4, 5];
 const placeId = computed(() => route.params.id || '');
 const placeImageUrl = computed(() => place.value?.imageUrl || '');
 const showPlaceImage = computed(() => Boolean(placeImageUrl.value) && !placeImageFailed.value);
@@ -75,6 +75,16 @@ const ratingSummary = computed(() => [5, 4, 3, 2, 1].map((score) => {
     percent: reviewCount.value ? Math.round((count / reviewCount.value) * 100) : 0,
   };
 }));
+
+function normalizeRating(value) {
+  const rating = Number(value);
+  if (!Number.isFinite(rating)) return 5;
+  return Math.min(5, Math.max(1, Math.round(rating)));
+}
+
+function setReviewRating(form, rating) {
+  form.rating = normalizeRating(rating);
+}
 
 function isReviewOwner(review) {
   return Boolean(uiStore.currentUser?.userId)
@@ -155,8 +165,8 @@ async function submitReview() {
     uiStore.notify(reviewError.value);
     return;
   }
-  if (Number(reviewForm.value.rating) < 0 || Number(reviewForm.value.rating) > 5) {
-    reviewError.value = '평점은 0점부터 5점까지 입력해 주세요.';
+  if (ratingOptions.includes(Number(reviewForm.value.rating)) === false) {
+    reviewError.value = '평점은 1점부터 5점까지 선택해 주세요.';
     reviewNotice.value = {
       tone: 'warning',
       title: '평점을 확인해 주세요.',
@@ -174,7 +184,7 @@ async function submitReview() {
   };
   try {
     const created = await createPlaceReview(place.value.placeId, {
-      rating: Number(reviewForm.value.rating),
+      rating: normalizeRating(reviewForm.value.rating),
       content: reviewForm.value.content,
     });
     reviews.value = [created, ...reviews.value.filter((review) => review.reviewId !== created.reviewId)];
@@ -200,7 +210,7 @@ async function submitReview() {
 function startEditReview(review) {
   editingReviewId.value = review.reviewId;
   editReviewForm.value = {
-    rating: Number(review.rating ?? 5),
+    rating: normalizeRating(review.rating ?? 5),
     content: review.content ?? '',
   };
   reviewError.value = '';
@@ -228,8 +238,8 @@ async function submitReviewEdit(review) {
     uiStore.notify(reviewError.value);
     return;
   }
-  if (Number(editReviewForm.value.rating) < 0 || Number(editReviewForm.value.rating) > 5) {
-    reviewError.value = '평점은 0점부터 5점까지 입력해 주세요.';
+  if (ratingOptions.includes(Number(editReviewForm.value.rating)) === false) {
+    reviewError.value = '평점은 1점부터 5점까지 선택해 주세요.';
     reviewNotice.value = {
       tone: 'warning',
       title: '평점을 확인해 주세요.',
@@ -247,7 +257,7 @@ async function submitReviewEdit(review) {
   };
   try {
     const updated = await updatePlaceReview(place.value.placeId, review.reviewId, {
-      rating: Number(editReviewForm.value.rating),
+      rating: normalizeRating(editReviewForm.value.rating),
       content: editReviewForm.value.content,
     });
     reviews.value = reviews.value.map((item) => (item.reviewId === updated.reviewId ? updated : item));
@@ -344,7 +354,7 @@ function markPlaceImageFailed() {
       list-to="/places"
       @retry="loadPlaceDetail"
     />
-    <section v-else-if="place" class="detail-screen">
+    <section v-else-if="place" class="detail-screen place-detail-screen">
       <div class="detail-hero place">
         <img
           v-if="showPlaceImage"
@@ -361,9 +371,8 @@ function markPlaceImageFailed() {
         </div>
       </div>
       <div class="detail-body place-detail-body">
-        <p>{{ place.description }}</p>
+        <p class="place-description-copy">{{ place.description }}</p>
         <p class="meta-line">{{ place.address }}</p>
-        <p class="meta-line">운영 시간: {{ place.openingHours }}</p>
         <MapPreview :route-places="[place]" :show-detail-link="false" />
         <div class="action-grid two">
           <BaseButton
@@ -381,13 +390,6 @@ function markPlaceImageFailed() {
             방문 완료
           </BaseButton>
         </div>
-        <FavoriteToggleStatus
-          :active="Boolean(liked)"
-          :pending="likePending"
-          active-text="좋아요 완료"
-          inactive-text="좋아요를 누르면 마이페이지 좋아한 장소에 저장됩니다."
-          pending-text="장소 좋아요 상태를 저장하는 중입니다."
-        />
       </div>
 
       <ReviewPanel :review-count="reviewCount" :average-rating="averageRating">
@@ -437,13 +439,26 @@ function markPlaceImageFailed() {
             <article v-for="review in reviews" :key="review.reviewId" class="review-row">
               <div class="review-row-head">
                 <strong>{{ review.nickname }}</strong>
-                <span>★ {{ review.rating }}</span>
+                <span class="review-rating-value">★ {{ normalizeRating(review.rating) }}</span>
               </div>
               <template v-if="editingReviewId === review.reviewId">
-                <label class="form-field compact">
-                  평점
-                  <input v-model.number="editReviewForm.rating" type="number" min="0" max="5" step="0.5" />
-                </label>
+                <div class="form-field compact star-rating-field">
+  <span>평점</span>
+  <div class="star-rating" role="radiogroup" aria-label="수정 평점 선택">
+    <button
+      v-for="score in ratingOptions"
+      :key="`edit-rating-${score}`"
+      type="button"
+      class="star-rating-button"
+      :class="{ selected: score <= normalizeRating(editReviewForm.rating) }"
+      :aria-pressed="score === normalizeRating(editReviewForm.rating)"
+      @click="setReviewRating(editReviewForm, score)"
+    >
+      ★
+    </button>
+  </div>
+  <small class="star-rating-text">{{ normalizeRating(editReviewForm.rating) }}점</small>
+</div>
                 <label class="form-field compact">
                   리뷰
                   <textarea
@@ -483,10 +498,23 @@ function markPlaceImageFailed() {
         </template>
         <template #form>
           <form v-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
-            <label class="form-field">
-              평점
-              <input v-model.number="reviewForm.rating" type="number" min="0" max="5" step="0.5" />
-            </label>
+            <div class="form-field star-rating-field">
+  <span>평점</span>
+  <div class="star-rating" role="radiogroup" aria-label="리뷰 평점 선택">
+    <button
+      v-for="score in ratingOptions"
+      :key="`new-rating-${score}`"
+      type="button"
+      class="star-rating-button"
+      :class="{ selected: score <= normalizeRating(reviewForm.rating) }"
+      :aria-pressed="score === normalizeRating(reviewForm.rating)"
+      @click="setReviewRating(reviewForm, score)"
+    >
+      ★
+    </button>
+  </div>
+  <small class="star-rating-text">{{ normalizeRating(reviewForm.rating) }}점</small>
+</div>
             <label class="form-field">
               리뷰
               <textarea v-model="reviewForm.content" maxlength="500" placeholder="장소 분위기, 이동 팁, 촬영지 느낌을 남겨주세요"></textarea>
@@ -498,6 +526,7 @@ function markPlaceImageFailed() {
           </form>
           <FormStatusNotice
             v-else-if="uiStore.currentUser"
+            class="review-duplicate-notice"
             tone="info"
             compact
             title="이미 이 장소에 리뷰를 작성했습니다."

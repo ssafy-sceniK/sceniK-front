@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import {
   clearAccessToken,
   exchangeOAuthCode,
+  deleteProfileImage as deleteProfileImageRequest,
   fetchMe,
   login as loginRequest,
   logout as logoutRequest,
@@ -66,6 +67,7 @@ import { contentPlaces, contents, courseTemplates, places } from '../data/mockDa
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
+import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
@@ -121,6 +123,8 @@ function defaultState() {
       startDate: dateAfter(7),
       endDate: dateAfter(7),
       transport: '대중교통',
+      transportModes: ['PUBLIC_TRANSIT'],
+      carDays: [],
       companion: '친구',
       style: '감성 여행',
       travelStyles: ['감성 여행'],
@@ -151,6 +155,9 @@ function readState() {
     const storedStyles = Array.isArray(state.courseConditions?.travelStyles)
       ? state.courseConditions.travelStyles.filter(Boolean)
       : String(state.courseConditions?.style ?? conditionDefaults.style).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
+    const normalizedDuration = getTripDurationDays({ ...state.courseConditions, ...dateRange });
+    const storedTransportModes = normalizeTransportModes(state.courseConditions?.transportModes, state.courseConditions?.transport ?? conditionDefaults.transport);
+    const storedCarDays = normalizeCarDays(state.courseConditions?.carDays, normalizedDuration, storedTransportModes);
     state.courseConditions = {
       ...conditionDefaults,
       ...state.courseConditions,
@@ -159,10 +166,13 @@ function readState() {
       region: (storedRegions.length ? storedRegions : conditionDefaults.regions).join(','),
       travelStyles: storedStyles.length ? storedStyles : conditionDefaults.travelStyles,
       style: (storedStyles.length ? storedStyles : conditionDefaults.travelStyles).join(', '),
+      transportModes: storedTransportModes,
+      carDays: storedCarDays,
+      transport: transportLabel(storedTransportModes, storedCarDays, normalizedDuration),
       budgetMin: normalizedBudgetMin,
       budgetMax: normalizedBudgetMax,
       budget: formatBudgetRange(normalizedBudgetMin, normalizedBudgetMax),
-      duration: getTripDurationDays({ ...state.courseConditions, ...dateRange }),
+      duration: normalizedDuration,
     };
     state.likedContent = [];
     state.likedPlaces = [];
@@ -403,6 +413,17 @@ function validateRoute(route) {
 
 function sameId(left, right) {
   return String(left) === String(right);
+}
+
+function followDisplayName(userId, fallbackName, ...userGroups) {
+  const directName = String(fallbackName ?? '').trim();
+  if (directName) return directName;
+  for (const users of userGroups) {
+    const matched = (users ?? []).find((user) => sameId(user?.userId, userId));
+    const nickname = String(matched?.nickname ?? '').trim();
+    if (nickname) return nickname;
+  }
+  return '\uC0AC\uC6A9\uC790';
 }
 
 function apiErrorMessage(error, fallback = '요청을 처리하지 못했습니다.') {
@@ -899,6 +920,26 @@ export const useUiStore = defineStore('ui', {
         return true;
       } catch (error) {
         this.authError = apiErrorMessage(error, '프로필 이미지를 저장하지 못했습니다.');
+        this.notify(this.authError);
+        return false;
+      }
+    },
+    async removeProfileImage() {
+      if (!this.currentUser || !readAccessToken()) {
+        this.authError = '로그인이 필요합니다.';
+        return false;
+      }
+      try {
+        const updated = await deleteProfileImageRequest();
+        this.currentUser = {
+          ...this.currentUser,
+          ...updated,
+          profileImageUrl: updated.profileImageUrl ?? '',
+        };
+        this.persist();
+        return true;
+      } catch (error) {
+        this.authError = apiErrorMessage(error, '프로필 이미지를 삭제하지 못했습니다.');
         this.notify(this.authError);
         return false;
       }
@@ -1411,7 +1452,7 @@ export const useUiStore = defineStore('ui', {
         this.followLoading = false;
       }
     },
-    async followUser(userId) {
+    async followUser(userId, nickname = '') {
       if (!this.requireAuth('로그인하면 작성자를 팔로우할 수 있습니다.')) return false;
       if (sameId(userId, this.currentUser.userId)) {
         this.notify('자기 자신은 팔로우할 수 없습니다.');
@@ -1422,7 +1463,8 @@ export const useUiStore = defineStore('ui', {
       try {
         await followUserRequest(userId);
         await this.loadFollowState();
-        this.notify('작성자를 팔로우했습니다.', 'success');
+        const displayName = followDisplayName(userId, nickname, this.followingUsers, this.followerUsers);
+        this.notify(displayName + '\uB2D8\uC744 \uD314\uB85C\uC6B0\uD588\uC2B5\uB2C8\uB2E4.', 'success');
         return true;
       } catch (error) {
         const message = apiErrorMessage(error, '팔로우하지 못했습니다.');
@@ -1433,14 +1475,15 @@ export const useUiStore = defineStore('ui', {
         this.followActionLoadingIds = this.followActionLoadingIds.filter((id) => !sameId(id, userId));
       }
     },
-    async unfollowUser(userId) {
+    async unfollowUser(userId, nickname = '') {
       if (!this.requireAuth('로그인하면 팔로우를 해제할 수 있습니다.')) return false;
       if (this.followActionLoadingIds.some((id) => sameId(id, userId))) return false;
       this.followActionLoadingIds = [...this.followActionLoadingIds, userId];
+      const displayName = followDisplayName(userId, nickname, this.followingUsers, this.followerUsers);
       try {
         await unfollowUserRequest(userId);
         this.followingUsers = this.followingUsers.filter((user) => !sameId(user.userId, userId));
-        this.notify('팔로우를 해제했습니다.', 'success');
+        this.notify(displayName + '\uB2D8 \uD314\uB85C\uC6B0\uB97C \uCDE8\uC18C\uD588\uC2B5\uB2C8\uB2E4.', 'success');
         return true;
       } catch (error) {
         this.notify(apiErrorMessage(error, '팔로우를 해제하지 못했습니다.'));

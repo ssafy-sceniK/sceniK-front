@@ -1148,3 +1148,117 @@
 .course-detail-menu__popover button.danger .result-menu-icon {
   color: var(--accent);
 }
+/* Course edit day reorder and drag handle polish */
+.course-day-section {
+  transition: border-color 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+
+.course-day-section.is-day-dragging {
+  opacity: 0.58;
+}
+
+.course-day-section.is-day-drag-over {
+  border-color: rgba(0, 82, 255, 0.42);
+  transform: translateY(1px);
+}
+
+.course-day-header {
+  justify-content: flex-start;
+}
+
+.course-day-title {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.course-day-title span {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.course-day-title small {
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.drag-grip {
+  min-width: 32px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: var(--color-surface-strong);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: grab;
+  letter-spacing: 0;
+  opacity: 0.78;
+  touch-action: none;
+  transform: none;
+}
+
+.day-drag-grip {
+  flex: 0 0 34px;
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+.drag-handle-icon {
+  width: 12px;
+  height: 18px;
+  display: block;
+  fill: currentColor;
+}
+
+.drag-grip:active {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+/* Course edit place cards drag from the whole card surface. */
+.editable-stop-card {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.editable-stop-card.is-dragging,
+.editable-stop-card:active {
+  cursor: grabbing;
+}
+
+.editable-stop-card .editable-stop-main {
+  grid-template-columns: minmax(0, 1fr) 32px;
+}
+
+.editable-stop-card .remove-stop-button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+/* Course edit day cards can be reordered from the card/header surface. */
+.course-day-section {
+  cursor: grab;
+  user-select: none;
+}
+
+.course-day-section.is-day-dragging,
+.course-day-section.is-day-dragging > .course-day-header {
+  cursor: grabbing;
+}
+
+.course-day-section > .course-day-header {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.course-day-section button,
+.course-day-section input,
+.course-day-section textarea,
+.course-day-section select,
+.course-day-section label {
+  user-select: auto;
+}

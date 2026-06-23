@@ -42,6 +42,14 @@ const routeItems = computed(() => routeTab.value === '지역별'
   : courseTemplates);
 const visibleRouteItems = computed(() => routeItems.value.slice(0, homePopularRouteLimit));
 function openCourse(course) {
+  if (!course?.routeId) {
+    uiStore.notify('코스 상세를 열 수 없습니다.');
+    return;
+  }
+  if (!uiStore.openCourse(course)) {
+    uiStore.notify('\uCF54\uC2A4 \uC0C1\uC138\uB97C \uC5F4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.');
+    return;
+  }
   router.push({ name: 'course-detail', params: { routeId: course.routeId } });
 }
 </script>

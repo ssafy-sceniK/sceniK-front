@@ -463,6 +463,12 @@
   border-radius: 0;
   padding: 16px 0;
 }
+/* Place detail information section follows the page surface in light mode. */
+.place-detail-body {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
 
 .detail-body--content {
   display: grid;
@@ -692,4 +698,101 @@
   border-top: 1px solid rgba(222, 225, 230, 0.86);
   box-shadow: 0 -10px 30px rgba(10, 11, 13, 0.05);
   backdrop-filter: blur(12px);
+}
+.review-duplicate-notice {
+  margin: 14px 0 4px;
+}
+
+/* Place detail UX polish */
+.place-description-copy {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.72;
+  word-break: keep-all;
+}
+
+.detail-body .place-description-copy + .meta-line {
+  margin-top: 10px;
+}
+
+.star-rating-field {
+  display: grid;
+  gap: 8px;
+}
+
+.star-rating-field > span {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.star-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-rating-button {
+  width: 30px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #c8ced8;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font-size: 25px;
+  line-height: 1;
+  box-shadow: none;
+  transition: color 120ms ease, transform 120ms ease;
+}
+
+.star-rating-button.selected {
+  color: #f59f00;
+  background: transparent;
+  border-color: transparent;
+}
+
+.star-rating-button:active {
+  transform: scale(0.94);
+}
+.star-rating-button:focus-visible {
+  outline: 3px solid rgba(245, 159, 0, 0.24);
+  outline-offset: 2px;
+}
+
+.star-rating-text {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.review-rating-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #f59f00;
+  font-weight: 900;
+}
+/* Place detail spacing polish: hero sits tight under the header, while the map breathes below the address. */
+.place-detail-screen {
+  margin-top: calc(-1 * var(--screen-top-gap));
+}
+
+.place-detail-screen .detail-hero.place {
+  margin-top: 0;
+}
+
+.place-detail-body .meta-line + .map-preview {
+  margin-top: 16px;
+}
+
+@media (max-width: 360px) {
+  .place-detail-body .meta-line + .map-preview {
+    margin-top: 14px;
+  }
 }

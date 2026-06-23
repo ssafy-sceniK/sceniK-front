@@ -41,8 +41,8 @@ async function loadProfile() {
 
 async function toggleFollow() {
   if (!user.value || isMe.value) return;
-  if (profile.value.followedByMe) await uiStore.unfollowUser(user.value.userId);
-  else await uiStore.followUser(user.value.userId);
+  if (profile.value.followedByMe) await uiStore.unfollowUser(user.value.userId, user.value.nickname);
+  else await uiStore.followUser(user.value.userId, user.value.nickname);
   await loadProfile();
 }
 

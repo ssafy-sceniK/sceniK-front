@@ -26,6 +26,20 @@ function routePlaceNames(course) {
   return '';
 }
 
+function courseDurationLabel(course) {
+  const value = course.durationDays ?? course.duration;
+  if (value === null || value === undefined || value === '') return '';
+  const text = String(value).trim();
+  if (!text) return '';
+  if (/\d+\s*일/.test(text)) return text.replace(/\s+/g, '');
+  const dayMatch = text.match(/\d+/);
+  if (dayMatch) return `${dayMatch[0]}\uC77C`;
+  return text;
+}
+
+function courseMeta(course) {
+  return [course.region, courseDurationLabel(course), `\uC7A5\uC18C ${routePlaceIds(course).length}\uACF3`].filter(Boolean).join(' \u00B7 ');
+}
 </script>
 
 <template>
@@ -34,7 +48,7 @@ function routePlaceNames(course) {
       <div class="card-row">
         <strong><span v-if="props.variant === 'text' && props.rank">{{ props.rank }}. </span>{{ course.title }}</strong>
       </div>
-      <p><span class="heart-mark">♥</span> {{ course.likes ?? 0 }} · 장소 {{ routePlaceIds(course).length }}곳</p>
+      <p>{{ courseMeta(course) }}</p>
       <small>{{ routePlaceNames(course) }}</small>
       <div class="tag-row">
         <span v-for="tag in (course.tags ?? [])" :key="tag">{{ tag }}</span>

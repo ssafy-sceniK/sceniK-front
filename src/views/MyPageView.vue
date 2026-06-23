@@ -103,7 +103,6 @@ async function logoutToLanding() {
         <div class="profile-copy">
           <div class="profile-name-row">
             <h1>{{ uiStore.currentUser.nickname }}</h1>
-            <span>Level 3 여행자</span>
           </div>
           <p>{{ profileBio }}</p>
           <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
@@ -183,7 +182,7 @@ async function logoutToLanding() {
           </RouterLink>
           <RouterLink class="my-menu-row" to="/my/followers">
             <span class="my-menu-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M18 9a3 3 0 1 0 0-6" /><path d="M17 14c2.3.4 4 2.1 4 4" /></svg>
+              <svg viewBox="0 0 24 24"><circle cx="8.5" cy="7.8" r="3.4" /><path d="M3.2 20.2v-1.1c0-3.5 2.4-6 5.3-6s5.3 2.5 5.3 6v1.1H3.2Z" /><circle cx="17.4" cy="8.5" r="2.8" /><path d="M14.9 14.2c.7-.4 1.5-.6 2.5-.6 2.5 0 4.5 2.1 4.5 4.9v1.7h-5.7" /></svg>
             </span>
             <span><strong>팔로워</strong><small>사용자 {{ uiStore.followerUsers.length }}명</small></span>
             <em>›</em>
@@ -226,7 +225,7 @@ async function logoutToLanding() {
           title="아직 방문 기록이 없어요"
           text="장소 상세에서 방문 예정이나 방문 완료를 눌러 여행 기록을 시작해보세요."
           action-label="장소 탐색하기"
-          action-to="/places"
+          action-to="/explore/map"
         />
       </div>
 

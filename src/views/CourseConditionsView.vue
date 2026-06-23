@@ -10,6 +10,7 @@ import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { dateAfter, ensureDateRange, formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { motionVariants } from '../utils/motion.js';
+import { TRANSPORT_MODE_OPTIONS, TRANSPORT_MODES, normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -100,6 +101,7 @@ const budgetRangeLabel = computed(() => formatBudgetRange(uiStore.courseConditio
 const budgetMinPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMin));
 const budgetMaxPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMax));
 const travelStyleOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '숨은 명소'];
+const transportModeOptions = TRANSPORT_MODE_OPTIONS;
 const selectedTravelStyles = computed(() => {
   const styles = Array.isArray(uiStore.courseConditions.travelStyles)
     ? uiStore.courseConditions.travelStyles.filter(Boolean)
@@ -107,15 +109,75 @@ const selectedTravelStyles = computed(() => {
   return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
 });
 const travelStyleLabel = computed(() => selectedTravelStyles.value.join(', ') || '선택 안 함');
+const selectedTransportModes = computed(() => normalizeTransportModes(uiStore.courseConditions.transportModes, uiStore.courseConditions.transport));
+const selectedCarDays = computed(() => normalizeCarDays(uiStore.courseConditions.carDays, tripDurationDays.value, selectedTransportModes.value));
+const carDayOptions = computed(() => Array.from({ length: tripDurationDays.value }, (_, index) => index + 1));
+const hasCarTransport = computed(() => selectedTransportModes.value.includes(TRANSPORT_MODES.CAR));
+const transportSummaryLabel = computed(() => transportLabel(selectedTransportModes.value, selectedCarDays.value, tripDurationDays.value));
 const aiContextRows = computed(() => [
   { label: '선택 콘텐츠', value: selectedSummaryTitle.value },
   { label: '지역', value: selectedRegionLabel.value },
   { label: '여행 기간', value: `${tripDateRangeLabel.value} · ${tripDurationDays.value}일` },
-  { label: '이동 수단', value: uiStore.courseConditions.transport },
+  { label: '이동 수단', value: transportSummaryLabel.value },
   { label: '예산/테마', value: `${budgetRangeLabel.value} · ${travelStyleLabel.value}` },
   { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
 ]);
 
+function sameNumberArray(left = [], right = []) {
+  return left.length === right.length && left.every((value, index) => Number(value) === Number(right[index]));
+}
+
+function sameStringArray(left = [], right = []) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function syncTransportCondition(modes = selectedTransportModes.value, carDays = selectedCarDays.value) {
+  const normalizedModes = normalizeTransportModes(modes, uiStore.courseConditions.transport);
+  const effectiveModes = normalizedModes.includes(TRANSPORT_MODES.CAR)
+    ? [TRANSPORT_MODES.PUBLIC_TRANSIT, TRANSPORT_MODES.CAR]
+    : [TRANSPORT_MODES.PUBLIC_TRANSIT];
+  const normalizedCarDays = normalizeCarDays(
+    effectiveModes.includes(TRANSPORT_MODES.CAR) ? carDays : [],
+    tripDurationDays.value,
+    effectiveModes,
+  );
+  const label = transportLabel(effectiveModes, normalizedCarDays, tripDurationDays.value);
+
+  if (!sameStringArray(uiStore.courseConditions.transportModes ?? [], effectiveModes)) {
+    uiStore.courseConditions.transportModes = [...effectiveModes];
+  }
+  if (!sameNumberArray(uiStore.courseConditions.carDays ?? [], normalizedCarDays)) {
+    uiStore.courseConditions.carDays = [...normalizedCarDays];
+  }
+  if (uiStore.courseConditions.transport !== label) {
+    uiStore.courseConditions.transport = label;
+  }
+}
+
+function toggleTransportMode(mode) {
+  if (mode === TRANSPORT_MODES.PUBLIC_TRANSIT) {
+    syncTransportCondition([TRANSPORT_MODES.PUBLIC_TRANSIT], []);
+    return;
+  }
+
+  if (selectedTransportModes.value.includes(TRANSPORT_MODES.CAR)) {
+    syncTransportCondition([TRANSPORT_MODES.PUBLIC_TRANSIT], []);
+    return;
+  }
+
+  syncTransportCondition([TRANSPORT_MODES.PUBLIC_TRANSIT, TRANSPORT_MODES.CAR], [selectedCarDays.value[0] ?? 1]);
+}
+
+function toggleCarDay(day) {
+  const current = new Set(selectedCarDays.value);
+  if (current.has(day)) {
+    if (current.size === 1) return;
+    current.delete(day);
+  } else {
+    current.add(day);
+  }
+  syncTransportCondition([TRANSPORT_MODES.PUBLIC_TRANSIT, TRANSPORT_MODES.CAR], [...current]);
+}
 function toggleTravelStyle(style) {
   const current = new Set(selectedTravelStyles.value);
   if (current.has(style)) current.delete(style);
@@ -184,6 +246,7 @@ watchEffect(() => {
     uiStore.courseConditions.travelStyles = [uiStore.courseConditions.style].filter(Boolean);
   }
   uiStore.courseConditions.style = uiStore.courseConditions.travelStyles.join(', ');
+  syncTransportCondition();
 });
 </script>
 
@@ -232,7 +295,38 @@ watchEffect(() => {
       </div>
       <div class="condition-block">
         <h2>이동 수단</h2>
-        <ChipGroup v-model="uiStore.courseConditions.transport" :items="['대중교통', '도보 중심', '차량']" />
+        <div class="chip-row wrap">
+          <button
+            v-for="option in transportModeOptions"
+            :key="option.value"
+            type="button"
+            class="chip"
+            :class="{ selected: selectedTransportModes.includes(option.value) }"
+            :aria-pressed="selectedTransportModes.includes(option.value)"
+            @click="toggleTransportMode(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <div v-if="hasCarTransport" class="car-day-card">
+          <div>
+            <strong>차량 이용일</strong>
+            <small>선택하지 않은 날은 대중교통으로 이동합니다.</small>
+          </div>
+          <div class="car-day-grid">
+            <button
+              v-for="day in carDayOptions"
+              :key="day"
+              type="button"
+              :class="{ selected: selectedCarDays.includes(day) }"
+              :aria-pressed="selectedCarDays.includes(day)"
+              @click="toggleCarDay(day)"
+            >
+              Day {{ day }}
+            </button>
+          </div>
+        </div>
+        <p class="condition-help">{{ transportSummaryLabel }}</p>
       </div>
       <div class="condition-block">
         <h2>동행 유형</h2>

@@ -29,6 +29,7 @@ const isSavedCourse = computed(() => isMyCourseRoute.value && detail.value?.sour
 const canManageCourse = computed(() => isSavedCourse.value);
 const shouldRequireLogin = computed(() => isMyCourseRoute.value && !uiStore.currentUser);
 const validationErrors = computed(() => detail.value?.validation?.errors ?? []);
+const displayValidationErrors = computed(() => validationErrors.value.filter((message) => !isMissingTravelTipMessage(message)));
 const routeCandidateMap = computed(() => new Map((course.value?.candidatePlaces ?? [])
   .filter((place) => place?.placeId)
   .map((place) => [place.placeId, place])));
@@ -97,6 +98,10 @@ function enrichStop(stop = {}) {
     longitude: firstText(stop.longitude, candidate.longitude),
     imageUrl: firstText(stop.imageUrl, stop.thumbnailUrl, candidate.imageUrl, candidate.thumbnailUrl),
   };
+}
+
+function isMissingTravelTipMessage(value) {
+  return /^Missing\s+travelTip\s+for\s+day\s+\d+\.?$/i.test(String(value ?? '').trim());
 }
 
 function isInternalCourseCopy(value) {
@@ -301,8 +306,8 @@ async function deleteCourse() {
         </div>
       </div>
 
-      <div v-if="validationErrors.length" class="trust-panel course-warning">
-        {{ validationErrors[0] }}
+      <div v-if="displayValidationErrors.length" class="trust-panel course-warning">
+        {{ displayValidationErrors[0] }}
       </div>
       <div v-else-if="courseTrustMessage" class="trust-panel">
         {{ courseTrustMessage }}

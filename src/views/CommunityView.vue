@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -43,6 +43,7 @@ const postEditHashtags = ref([]);
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 const failedPostImageKeys = ref(new Set());
+const boardSelectorOpen = ref(false);
 
 const boards = [
   { id: 'drama', icon: '🎬', name: '드라마 게시판', description: '드라마 촬영지 후기와 코스 공유', tag: '드라마' },
@@ -58,6 +59,7 @@ const isPostDetail = computed(() => route.name === 'community-post');
 const composeMode = computed(() => route.meta.compose);
 const activeBoard = computed(() => boards.find((board) => board.id === route.query.board) ?? boards[0]);
 const activeMode = computed(() => (isBoardList.value || isBoardFeed.value ? 'boards' : 'all'));
+const otherBoards = computed(() => boards.filter((board) => board.id !== activeBoard.value.id));
 
 async function loadCommunity() {
   const params = {
@@ -110,8 +112,16 @@ function syncQueryState() {
 onMounted(() => {
   restoreQueryState();
   void loadCommunity();
+  document.addEventListener('pointerdown', handleBoardSelectorPointerDown);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', handleBoardSelectorPointerDown);
 });
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
+watch(() => route.query.board, () => {
+  boardSelectorOpen.value = false;
+});
 watch(sort, () => {
   if (restoringQuery.value) return;
   visibleLimit.value = 8;
@@ -228,6 +238,27 @@ function boardPostCount(board) {
   return uiStore.communityPosts.filter((post) => (post.tags ?? []).some((tag) => tag.includes(board.tag))).length;
 }
 
+function toggleBoardSelector() {
+  boardSelectorOpen.value = !boardSelectorOpen.value;
+}
+
+function handleBoardSelectorPointerDown(event) {
+  if (!boardSelectorOpen.value || !(event.target instanceof Element)) return;
+  if (!event.target.closest('.board-selector')) boardSelectorOpen.value = false;
+}
+
+function selectBoard(board) {
+  boardSelectorOpen.value = false;
+  router.push({
+    name: 'community-drama-board',
+    query: {
+      ...route.query,
+      board: board.id,
+      sort: sort.value !== 'latest' ? sort.value : undefined,
+      size: undefined,
+    },
+  });
+}
 const postEditHashtagOptions = computed(() => {
   const currentBoard = boards.find((board) => board.id === postEditBoard.value) ?? boards[0];
   const tags = uiStore.communityPosts
@@ -400,6 +431,10 @@ function isAuthorFollowed(post) {
   return Boolean(authorId && uiStore.followingIds.some((id) => String(id) === String(authorId)));
 }
 
+function authorDisplayName(post) {
+  return post?.nickname || post?.user || post?.authorName || '';
+}
+
 function isAuthorFollowLoading(post) {
   const authorId = post?.userId;
   return Boolean(authorId && uiStore.followActionLoadingIds.some((id) => String(id) === String(authorId)));
@@ -407,8 +442,8 @@ function isAuthorFollowLoading(post) {
 
 async function toggleAuthorFollow(post) {
   if (!post?.userId) return;
-  if (isAuthorFollowed(post)) await uiStore.unfollowUser(post.userId);
-  else await uiStore.followUser(post.userId);
+  if (isAuthorFollowed(post)) await uiStore.unfollowUser(post.userId, authorDisplayName(post));
+  else await uiStore.followUser(post.userId, authorDisplayName(post));
 }
 
 async function createPost() {
@@ -731,7 +766,6 @@ async function nativeShare() {
           <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
           <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
         </div>
-        <p class="helper-text">관심 있는 K-content 카테고리를 선택해 실제 여행 후기와 코스를 확인하세요.</p>
         <div class="board-list">
           <RouterLink
             v-for="board in boards"
@@ -744,7 +778,6 @@ async function nativeShare() {
             </span>
             <span class="board-copy">
               <strong>{{ board.name }}</strong>
-              <small>{{ board.description }}</small>
             </span>
             <em>{{ boardPostCount(board) }}개</em>
             <span class="board-chevron" aria-hidden="true">›</span>
@@ -859,7 +892,7 @@ async function nativeShare() {
                 :class="{ 'is-active': isPostScrapped(selectedPost) }"
                 @click="uiStore.togglePostScrap(postKey(selectedPost))"
               >
-                {{ isPostScrapped(selectedPost) ? '스크랩됨' : '스크랩' }}
+                {{ isPostScrapped(selectedPost) ? '스크랩 취소' : '스크랩' }}
               </button>
               <button type="button" @click="openShareSheet(selectedPost)">공유</button>
             </div>
@@ -1145,7 +1178,7 @@ async function nativeShare() {
           <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
           <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
         </div>
-        <div class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
+        <div v-if="!isBoardFeed" class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
           <span class="list-control-label">정렬</span>
           <SortSegmentedControl
             v-model="sort"
@@ -1161,17 +1194,54 @@ async function nativeShare() {
           <BaseButton block>게시하기</BaseButton>
         </form>
 
-        <div v-if="isBoardFeed" class="board-banner">
-          <span :class="['board-icon', `board-${activeBoard.id}`]" aria-hidden="true">
-            <span class="board-icon-symbol">{{ activeBoard.icon }}</span>
-          </span>
-          <div>
-            <strong>{{ activeBoard.name }}</strong>
-            <small>{{ activeBoard.description }}</small>
+        <div v-if="isBoardFeed" class="board-selector">
+          <div class="board-banner board-banner--selector">
+            <span :class="['board-icon', `board-${activeBoard.id}`]" aria-hidden="true">
+              <span class="board-icon-symbol">{{ activeBoard.icon }}</span>
+            </span>
+            <div class="board-selector-copy">
+              <strong>{{ activeBoard.name }}</strong>
+            </div>
+            <button
+              type="button"
+              class="board-accordion-toggle"
+              :aria-expanded="boardSelectorOpen"
+              aria-label="게시판 선택 열기"
+              @click="toggleBoardSelector"
+            >
+              <span class="board-selector-chevron" :class="{ open: boardSelectorOpen }" aria-hidden="true">&#8964;</span>
+            </button>
+          </div>
+          <div v-if="boardSelectorOpen" class="board-accordion-list">
+            <button
+              v-for="board in otherBoards"
+              :key="board.id"
+              type="button"
+              class="board-accordion-option"
+              @click="selectBoard(board)"
+            >
+              <span :class="['board-icon', `board-${board.id}`]" aria-hidden="true">
+                <span class="board-icon-symbol">{{ board.icon }}</span>
+              </span>
+              <span class="board-option-copy">
+                <strong>{{ board.name }}</strong>
+                <small>{{ boardPostCount(board) }}개</small>
+              </span>
+            </button>
           </div>
         </div>
 
-        <div class="feed-summary">
+        <div v-if="isBoardFeed" class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
+          <span class="list-control-label">정렬</span>
+          <SortSegmentedControl
+            v-model="sort"
+            :options="sortOptions"
+            aria-label="커뮤니티 글 정렬"
+          />
+          <span class="list-result-count" aria-live="polite">{{ sortedPosts.length }}개 결과</span>
+        </div>
+
+        <div v-if="!isBoardFeed" class="feed-summary">
           <strong>{{ sortedPosts.length }}개의 이야기</strong>
         </div>
 
@@ -1243,7 +1313,7 @@ async function nativeShare() {
                 :class="{ 'is-active': isPostScrapped(post) }"
                 @click="uiStore.togglePostScrap(postKey(post))"
               >
-                {{ isPostScrapped(post) ? '스크랩됨' : '스크랩' }}
+                {{ isPostScrapped(post) ? '스크랩 취소' : '스크랩' }}
               </button>
             </div>
           </article>

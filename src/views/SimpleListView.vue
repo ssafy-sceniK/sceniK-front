@@ -9,7 +9,7 @@ import ContentCard from '../components/content/ContentCard.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import CourseCard from '../components/course/CourseCard.vue';
 import { useUiStore } from '../stores/uiStore.js';
-import { courseTemplates, notices } from '../data/mockData.js';
+import { courseTemplates, notices, places } from '../data/mockData.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -123,7 +123,7 @@ const emptyStateConfig = computed(() => {
       title: '방문 완료한 장소가 없어요',
       text: '다녀온 촬영지를 방문 완료로 표시하면 여행 기록이 쌓여요.',
       actionLabel: '장소 탐색하기',
-      actionTo: '/places',
+      actionTo: '/explore/map',
     },
     'saved-routes': {
       icon: 'AI',
@@ -233,6 +233,18 @@ function reviewDate(review) {
   return review.updatedAt?.slice?.(0, 10) || review.createdAt?.slice?.(0, 10) || '';
 }
 
+function reviewPlaceLabel(review) {
+  return review.placeName
+    ?? review.place?.placeName
+    ?? review.place?.name
+    ?? places.find((place) => String(place.placeId) === String(review.placeId))?.placeName
+    ?? '';
+}
+
+function reviewPlaceHelper(review) {
+  return reviewPlaceLabel(review);
+}
+
 function reviewPlaceTo(review) {
   return review.placeId ? `/places/${review.placeId}` : '/places';
 }
@@ -246,38 +258,25 @@ function isFollowActionPending(userId) {
 }
 
 const followingIdSet = computed(() => new Set(uiStore.followingUsers.map((user) => String(user.userId))));
-const followerIdSet = computed(() => new Set(uiStore.followerUsers.map((user) => String(user.userId))));
-
-function isMutualFollow(user) {
-  const userId = String(user.userId);
-  if (type.value === 'following') return followerIdSet.value.has(userId);
-  return followingIdSet.value.has(userId) || user.followedByMe;
+function isFollowingUser(user) {
+  return user.followedByMe || followingIdSet.value.has(String(user.userId));
 }
 
 function followButtonLabel(user) {
   if (isFollowActionPending(user.userId)) return '처리 중';
-  if (isMutualFollow(user)) return '맞팔';
-  return user.followedByMe || followingIdSet.value.has(String(user.userId)) ? '팔로잉' : '팔로우';
+  return isFollowingUser(user) ? '팔로잉' : '팔로우';
 }
 
 async function toggleFollowFromList(user) {
   if (!user?.userId || user.userId === uiStore.currentUser?.userId) return;
-  const following = user.followedByMe || followingIdSet.value.has(String(user.userId));
-  listNotice.value = {
-    tone: 'info',
-    title: following ? '팔로우를 취소하는 중입니다.' : '팔로우하는 중입니다.',
-    text: `${user.nickname}님의 팔로우 상태를 backend와 동기화하고 있습니다.`,
-  };
+  const following = isFollowingUser(user);
+  listNotice.value = null;
   const ok = following
-    ? await uiStore.unfollowUser(user.userId)
-    : await uiStore.followUser(user.userId);
+    ? await uiStore.unfollowUser(user.userId, user.nickname)
+    : await uiStore.followUser(user.userId, user.nickname);
   if (ok) {
     await uiStore.loadFollowState();
-    listNotice.value = {
-      tone: 'success',
-      title: following ? '팔로우를 취소했습니다.' : '팔로우했습니다.',
-      text: '팔로워/팔로잉 목록이 갱신되었습니다.',
-    };
+    listNotice.value = null;
     return;
   }
   listNotice.value = {
@@ -388,7 +387,7 @@ async function toggleFollowFromList(user) {
             <small>{{ reviewDate(review) }}</small>
           </div>
           <p>{{ review.content }}</p>
-          <span>{{ review.placeId }} 장소 상세에서 수정/삭제 가능</span>
+          <span v-if="reviewPlaceHelper(review)">{{ reviewPlaceHelper(review) }}</span>
         </RouterLink>
       </div>
 
@@ -405,7 +404,6 @@ async function toggleFollowFromList(user) {
           :key="user.userId"
           :user="user"
           :initial="followUserInitial(user)"
-          :mutual="isMutualFollow(user)"
           :current-user-id="uiStore.currentUser?.userId"
           :pending="isFollowActionPending(user.userId)"
           :button-label="followButtonLabel(user)"

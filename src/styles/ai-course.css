@@ -332,7 +332,7 @@
 .budget-range-input {
   position: absolute;
   inset-inline: 0;
-  top: 46%;
+  top: 50%;
   height: 44px;
   margin: 0;
   transform: translateY(-50%);
@@ -373,6 +373,7 @@
 .budget-range-card input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
+  margin-top: -6px;
   border: 3px solid #ffffff;
   border-radius: 999px;
   background: var(--color-primary);
@@ -1309,4 +1310,63 @@ box-shadow: 0 22px 48px rgba(15, 23, 42, 0.22);
 .condition-confirm-actions .button-ghost {
   border: 1px solid var(--border);
   background: #ffffff;
+}
+/* AI condition mixed transport */
+.condition-help {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.car-day-card {
+  margin-top: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.car-day-card > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.car-day-card strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.car-day-card small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.car-day-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.car-day-grid button {
+  min-height: 34px;
+  padding: 0 12px;
+  color: var(--muted);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.car-day-grid button.selected {
+  color: #ffffff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
