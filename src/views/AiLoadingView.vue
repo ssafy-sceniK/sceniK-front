@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue';
+import AiRunwayProgress from '../components/ai/AiRunwayProgress.vue';
 import { generateAiRoute } from '../api/aiApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useContentStore } from '../stores/contentStore.js';
@@ -16,34 +17,35 @@ const router = useRouter();
 const contentStore = useContentStore();
 const placeStore = usePlaceStore();
 const uiStore = useUiStore();
-const loadingProgress = ref(8);
+const loadingProgress = ref(0);
 const loadingSteps = [
   {
     label: '촬영지 데이터 검색',
     detail: '검증된 실제 장소 후보를 확인하고 있어요.',
     startAt: 0,
-    doneAt: 34,
+    doneAt: 20,
   },
   {
     label: '이동 동선 최적화',
     detail: '일정과 교통 조건에 맞춰 순서를 조정하고 있어요.',
-    startAt: 34,
-    doneAt: 70,
+    startAt: 20,
+    doneAt: 45,
   },
   {
     label: '추천 코스 구성',
     detail: '방문 시간, 이유, 여행 팁을 정리하고 있어요.',
-    startAt: 70,
+    startAt: 45,
     doneAt: 101,
   },
 ];
 let progressTimerId;
-let routeTimerId;
-let finishTimerId;
+let generationStartTime = 0;
+let progressAnimationFrameId;
 
-const loadingProgressStyle = computed(() => ({
-  '--loading-angle': `${Math.round(loadingProgress.value * 3.6)}deg`,
-}));
+const MIN_LOADING_DURATION = 2100;
+const COMPLETION_DURATION = 650;
+
+const runwayTheme = computed(() => (uiStore.theme === 'dark' ? 'dark' : 'light'));
 
 const activeStepIndex = computed(() => {
   let activeIndex = 0;
@@ -60,7 +62,13 @@ const loadingSummary = computed(() => {
   return `${selectedRegionLabel()} ${duration}일 코스 · ${title}`;
 });
 
-const loadingStatusText = computed(() => loadingSteps[activeStepIndex.value].detail);
+const loadingStatusText = computed(() => {
+  if (loadingProgress.value < 20) return '여행 조건을 확인하고 있어요.';
+  if (loadingProgress.value < 45) return '촬영지와 장소 데이터를 검색하고 있어요.';
+  if (loadingProgress.value < 75) return '이동 동선을 계산하고 있어요.';
+  if (loadingProgress.value < 100) return '추천 코스를 정리하고 있어요.';
+  return '코스 생성이 완료되었어요.';
+});
 const loadingContextRows = computed(() => [
   { label: '지역', value: selectedRegionLabel() },
   { label: '일수', value: `${getTripDurationDays(uiStore.courseConditions)}일` },
@@ -74,6 +82,39 @@ function loadingStepState(index, step) {
   if (loadingProgress.value >= step.doneAt) return 'done';
   if (index === activeStepIndex.value) return 'active';
   return 'waiting';
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function animateProgressTo(target, duration) {
+  const start = loadingProgress.value;
+  const startTime = performance.now();
+  window.cancelAnimationFrame(progressAnimationFrameId);
+
+  return new Promise((resolve) => {
+    const tick = (now) => {
+      const elapsed = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - ((1 - elapsed) ** 3);
+      loadingProgress.value = Math.round(start + (target - start) * eased);
+      if (elapsed < 1) {
+        progressAnimationFrameId = window.requestAnimationFrame(tick);
+      } else {
+        loadingProgress.value = target;
+        resolve();
+      }
+    };
+    progressAnimationFrameId = window.requestAnimationFrame(tick);
+  });
+}
+
+async function completeLoading() {
+  window.clearInterval(progressTimerId);
+  const minimumTimeRemaining = Math.max(0, MIN_LOADING_DURATION - (Date.now() - generationStartTime));
+  if (minimumTimeRemaining) await wait(minimumTimeRemaining);
+  await animateProgressTo(100, COMPLETION_DURATION);
+  await wait(140);
 }
 
 function selectedTransportModes() {
@@ -245,6 +286,7 @@ async function generateRoute() {
       hotelAddress: backendRoute.hotelAddress ?? uiStore.courseConditions.hotelAddress,
     };
     uiStore.persist();
+    await completeLoading();
     router.push('/ai/result');
     return;
   } catch (error) {
@@ -325,40 +367,35 @@ async function generateRoute() {
   }
   uiStore.generatedRoute = route;
   uiStore.persist();
+  await completeLoading();
   router.push('/ai/result');
 }
 
 onMounted(() => {
+  generationStartTime = Date.now();
   progressTimerId = window.setInterval(() => {
-    const step = loadingProgress.value < 62 ? 4 : 2;
-    loadingProgress.value = Math.min(96, loadingProgress.value + step);
-  }, 80);
-  routeTimerId = window.setTimeout(() => {
-    loadingProgress.value = 100;
-    finishTimerId = window.setTimeout(generateRoute, 220);
-  }, 1800);
+    const elapsed = Date.now() - generationStartTime;
+    let target = 0;
+    if (elapsed < 650) target = 20 * (elapsed / 650);
+    else if (elapsed < 1600) target = 20 + 25 * ((elapsed - 650) / 950);
+    else if (elapsed < 3400) target = 45 + 30 * ((elapsed - 1600) / 1800);
+    else if (elapsed < 5600) target = 75 + 17 * ((elapsed - 3400) / 2200);
+    else target = Math.min(95, 92 + (elapsed - 5600) / 6000);
+    loadingProgress.value = Math.max(loadingProgress.value, Math.floor(target));
+  }, 120);
+  void generateRoute();
 });
 
 onBeforeUnmount(() => {
   window.clearInterval(progressTimerId);
-  window.clearTimeout(routeTimerId);
-  window.clearTimeout(finishTimerId);
+  window.cancelAnimationFrame(progressAnimationFrameId);
 });
 </script>
 
 <template>
   <AppLayout title="AI 코스 생성" back hide-bottom>
-    <section class="loading-screen" :style="loadingProgressStyle">
-      <div
-        class="loading-orbit"
-        role="progressbar"
-        aria-label="AI 코스 생성 진행도"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        :aria-valuenow="loadingProgress"
-      >
-        <strong>{{ loadingProgress }}%</strong>
-      </div>
+    <section class="loading-screen" :class="{ 'loading-screen--light': runwayTheme === 'light' }">
+      <AiRunwayProgress :progress="loadingProgress" :theme="runwayTheme" />
 
       <div class="loading-copy">
         <span>{{ loadingSummary }}</span>

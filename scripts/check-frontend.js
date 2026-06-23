@@ -90,6 +90,7 @@ const shellCss = readFileSync('src/styles/shell.css', 'utf8');
 const baseCss = readFileSync('src/styles/base.css', 'utf8');
 const homeView = readFileSync('src/views/HomeView.vue', 'utf8');
 const aiLoadingView = readFileSync('src/views/AiLoadingView.vue', 'utf8');
+const aiRunwayProgress = readFileSync('src/components/ai/AiRunwayProgress.vue', 'utf8');
 const communityView = readFileSync('src/views/CommunityView.vue', 'utf8');
 const myPageView = readFileSync('src/views/MyPageView.vue', 'utf8');
 const contentCard = readFileSync('src/components/content/ContentCard.vue', 'utf8');
@@ -168,11 +169,11 @@ if (/v-for="course in routeItems"/m.test(homeView)) {
 
 if (
   !aiLoadingView.includes('loadingProgress')
-  || !aiLoadingView.includes('loading-orbit')
-  || !aiLoadingView.includes('role="progressbar"')
+  || !aiLoadingView.includes('AiRunwayProgress')
   || !aiLoadingView.includes('loading-steps')
+  || !aiRunwayProgress.includes('role="progressbar"')
 ) {
-  console.error('AI loading screen must use the circular progress loader with visible step progress.');
+  console.error('AI loading screen must use the runway progress loader with visible step progress.');
   process.exit(1);
 }
 
