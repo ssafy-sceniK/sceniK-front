@@ -2,16 +2,9 @@
 import { useRouter } from 'vue-router';
 import BaseButton from '../components/common/BaseButton.vue';
 import BrandLogo from '../components/brand/BrandLogo.vue';
-import SplashBrandMark from '../components/brand/SplashBrandMark.vue';
 import { GOOGLE_OAUTH_URL, KAKAO_OAUTH_URL } from '../api/authApi.js';
 
 const router = useRouter();
-
-// 동작을 불편해하는 사용자에게는 애니메이션 대신 공용 BrandLogo를 정적으로 보여준다.
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function continueWithOAuth(provider, url) {
   sessionStorage.setItem('scenik-oauth-return-to', '/home');
@@ -31,12 +24,11 @@ function continueWithKakao() {
 <template>
   <main class="splash-screen">
     <section class="splash-mark">
-      <BrandLogo v-if="prefersReducedMotion" size="splash" />
-      <SplashBrandMark v-else />
+      <BrandLogo size="splash" />
       <h1 class="sr-only">sceniK</h1>
-      <p class="splash-tagline">좋아하는 K-콘텐츠 장면을 여행 코스로 이어보세요.</p>
+      <p>좋아하는 K-콘텐츠 장면을 여행 코스로 이어보세요.</p>
     </section>
-    <section class="splash-actions splash-actions--enter">
+    <section class="splash-actions">
       <BaseButton block @click="router.push('/login')">로그인 / 회원가입</BaseButton>
       <button class="social-login-button social-login-button--google" type="button" @click="continueWithGoogle">
         <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -56,33 +48,3 @@ function continueWithKakao() {
     </section>
   </main>
 </template>
-
-<style scoped>
-/* 로고 애니메이션에 이어 태그라인과 버튼이 부드럽게 떠오른다 */
-.splash-tagline {
-  animation: splash-rise-up 0.6s 0.95s both ease-out;
-}
-
-.splash-actions--enter {
-  animation: splash-rise-up 0.6s 1.25s both ease-out;
-}
-
-@keyframes splash-rise-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 동작을 불편해하는 사용자: 이동/페이드 없이 즉시 표시 */
-@media (prefers-reduced-motion: reduce) {
-  .splash-tagline,
-  .splash-actions--enter {
-    animation: none;
-  }
-}
-</style>

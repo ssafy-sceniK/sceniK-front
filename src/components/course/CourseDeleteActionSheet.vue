@@ -1,7 +1,5 @@
 <script setup>
 import BaseButton from '../common/BaseButton.vue';
-import { motion } from 'motion-v';
-import { motionVariants } from '../../utils/motion.js';
 
 defineOptions({
   name: 'CourseDeleteActionSheet',
@@ -26,14 +24,13 @@ const emit = defineEmits(['confirm', 'cancel']);
 </script>
 
 <template>
-  <motion.div class="sheet-backdrop" v-bind="motionVariants.backdrop()" @click="emit('cancel')">
-    <motion.div
+  <div class="sheet-backdrop" @click="emit('cancel')">
+    <div
       class="bottom-sheet delete-course-sheet"
       role="dialog"
       aria-modal="true"
       aria-label="저장한 코스 삭제"
       @click.stop
-      v-bind="motionVariants.bottomSheet()"
     >
       <div class="sheet-handle"></div>
       <h2>{{ props.title }}</h2>
@@ -44,6 +41,6 @@ const emit = defineEmits(['confirm', 'cancel']);
           {{ props.loading ? '삭제 중...' : '삭제' }}
         </BaseButton>
       </div>
-    </motion.div>
-  </motion.div>
+    </div>
+  </div>
 </template>
