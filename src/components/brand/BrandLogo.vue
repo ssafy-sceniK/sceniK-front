@@ -14,7 +14,9 @@ const props = defineProps({
   <span
     class="scenik-logo"
     :class="`scenik-logo--${props.size}`"
+    :style="{ '--scenik-logo-mask': `url(${scenikLogoBlue})` }"
   >
     <img class="scenik-logo__image" :src="scenikLogoBlue" alt="sceniK" />
+    <span class="scenik-logo__dark-mark" aria-hidden="true"></span>
   </span>
 </template>

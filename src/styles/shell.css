@@ -279,8 +279,25 @@
   object-position: left center;
 }
 
+.scenik-logo__dark-mark {
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #dc2626;
+  -webkit-mask: var(--scenik-logo-mask) center / contain no-repeat;
+  mask: var(--scenik-logo-mask) center / contain no-repeat;
+}
+
 .scenik-logo--splash .scenik-logo__image {
   object-position: center;
+}
+
+:root[data-theme="dark"] .scenik-logo__image {
+  display: none;
+}
+
+:root[data-theme="dark"] .scenik-logo__dark-mark {
+  display: block;
 }
 
 .home-screen,

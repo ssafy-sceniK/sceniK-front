@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterView } from 'vue-router';
+import { AnimatePresence, motion } from 'motion-v';
 import { useUiStore } from './stores/uiStore.js';
+import { motionVariants } from './utils/motion.js';
 
 const uiStore = useUiStore();
 
@@ -13,8 +15,9 @@ onMounted(() => {
 <template>
   <RouterView />
 
-  <div v-if="uiStore.loginRequiredMessage" class="sheet-backdrop" @click="uiStore.loginRequiredMessage = ''">
-    <section class="bottom-sheet" @click.stop>
+  <AnimatePresence>
+    <motion.div v-if="uiStore.loginRequiredMessage" class="sheet-backdrop" v-bind="motionVariants.backdrop()" @click="uiStore.loginRequiredMessage = ''">
+    <motion.section class="bottom-sheet" v-bind="motionVariants.bottomSheet()" @click.stop>
       <div class="sheet-handle"></div>
       <h2>로그인이 필요해요</h2>
       <p>{{ uiStore.loginRequiredMessage }}</p>
@@ -24,15 +27,19 @@ onMounted(() => {
       <button class="button button-ghost" type="button" @click="uiStore.loginRequiredMessage = ''">
         나중에
       </button>
-    </section>
-  </div>
+    </motion.section>
+    </motion.div>
+  </AnimatePresence>
 
-  <div
+  <AnimatePresence>
+  <motion.div
     v-if="uiStore.toast"
     :class="['toast-message', `toast-message--${uiStore.toastTone || 'info'}`]"
     role="status"
     aria-live="polite"
+    v-bind="motionVariants.toast()"
   >
     {{ uiStore.toast }}
-  </div>
+  </motion.div>
+  </AnimatePresence>
 </template>

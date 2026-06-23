@@ -230,9 +230,9 @@
 }
 
 .settings-segment button.active {
-  color: var(--text);
-  background: #ffffff;
-  box-shadow: var(--shadow-sm);
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  box-shadow: none;
 }
 
 .fab {

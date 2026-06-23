@@ -360,7 +360,7 @@ function markPlaceImageFailed() {
           <p>{{ place.region }} · {{ place.district }} · {{ place.category }}</p>
         </div>
       </div>
-      <div class="detail-body">
+      <div class="detail-body place-detail-body">
         <p>{{ place.description }}</p>
         <p class="meta-line">{{ place.address }}</p>
         <p class="meta-line">운영 시간: {{ place.openingHours }}</p>

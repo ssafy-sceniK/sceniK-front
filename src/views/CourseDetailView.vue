@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { AnimatePresence, motion } from 'motion-v';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
@@ -9,6 +10,7 @@ import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import MapPreview from '../components/course/MapPreview.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
+import { motionVariants } from '../utils/motion.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -240,16 +242,17 @@ async function deleteCourse() {
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
         </button>
-        <div v-if="showActionMenu" class="result-menu-backdrop course-detail-menu__overlay" @click="closeActionMenu"></div>
-        <div v-if="showActionMenu" class="result-menu-popover course-detail-menu__popover" role="menu">
-          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">
-            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg></span>
-            수정
-          </button>
-          <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">
-            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
-            공유
-          </button>
+        <AnimatePresence>
+          <motion.div v-if="showActionMenu" class="result-menu-backdrop course-detail-menu__overlay" v-bind="motionVariants.backdrop()" @click="closeActionMenu"></motion.div>
+          <motion.div v-if="showActionMenu" class="result-menu-popover course-detail-menu__popover" role="menu" v-bind="motionVariants.popover()">
+            <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg></span>
+              수정
+            </button>
+            <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
+              공유
+            </button>
           <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
             <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>
             {{ uiStore.routeActionLoading ? '저장 중' : '저장' }}
@@ -262,7 +265,8 @@ async function deleteCourse() {
             <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m10 11 .4 6" /><path d="m14 11-.4 6" /><path d="M5 6l1 15h12l1-15" /></svg></span>
             삭제
           </button>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </template>
 
@@ -321,12 +325,14 @@ async function deleteCourse() {
 
       <Timeline :stops="stops" />
 
-      <CourseDeleteActionSheet
-        v-if="showDeleteSheet"
-        :loading="deleteLoading"
-        @cancel="showDeleteSheet = false"
-        @confirm="deleteCourse"
-      />
+      <AnimatePresence>
+        <CourseDeleteActionSheet
+          v-if="showDeleteSheet"
+          :loading="deleteLoading"
+          @cancel="showDeleteSheet = false"
+          @confirm="deleteCourse"
+        />
+      </AnimatePresence>
     </section>
 
     <section v-else class="course-detail-screen">

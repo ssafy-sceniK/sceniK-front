@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { motion } from 'motion-v';
 import { readAccessToken } from '../api/authApi.js';
 import { useUiStore } from '../stores/uiStore.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
+import { motionVariants } from '../utils/motion.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -61,12 +63,13 @@ onMounted(loadNotifications);
       />
 
       <div v-else-if="notifications.length" class="notification-list">
-        <button
-          v-for="notification in notifications"
+        <motion.button
+          v-for="(notification, index) in notifications"
           :key="notification.id"
           class="notification-row"
           :class="{ unread: !notification.read }"
           type="button"
+          v-bind="motionVariants.listItem(index)"
           @click="openNotification(notification)"
         >
           <span class="notification-icon">!</span>
@@ -75,7 +78,7 @@ onMounted(loadNotifications);
             <small>{{ notification.subtitle }}</small>
           </span>
           <em>{{ notification.time }}</em>
-        </button>
+        </motion.button>
       </div>
 
       <EmptyState

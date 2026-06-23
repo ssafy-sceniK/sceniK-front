@@ -1,0 +1,766 @@
+/*
+ * Final, shared theme layer.  It deliberately comes after page styles so
+ * existing layouts and component state remain intact while shared surfaces
+ * receive the softer blue treatment.
+ */
+
+body {
+  background:
+    radial-gradient(circle at 50% -20%, rgba(219, 234, 254, 0.75), transparent 34%),
+    var(--color-canvas);
+}
+
+.app-shell,
+.splash-screen {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 36%, #f8fbff 100%);
+  box-shadow: 0 0 0 1px rgba(219, 227, 239, 0.92);
+}
+
+.button-primary {
+  background: var(--color-primary);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.18);
+}
+
+.button-primary:not(:disabled):hover {
+  background: var(--color-primary-press);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
+}
+
+.button-secondary {
+  color: var(--color-primary-deep);
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-secondary) 100%);
+  border-color: #dbeafe;
+}
+
+.form-field input,
+.form-field textarea,
+.search-bar input,
+.comment-box input,
+.list-control-row {
+  border-color: var(--color-hairline-input);
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.search-bar input:focus,
+.comment-box input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(219, 234, 254, 0.96);
+}
+
+.chip,
+.segmented-sort {
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-secondary) 100%);
+  border-color: #dbe3ef;
+}
+
+.chip.selected,
+.segmented-sort__option.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+  filter: none;
+}
+
+/* Tab and filter selections should read as a solid state, never a glowing one. */
+.chip.selected,
+.chip.selected:hover,
+.segmented-sort__option.active,
+.segmented-sort__option.active:hover,
+.explore-screen > .mode-toggle button.active,
+.map-screen > .mode-toggle a.active,
+.admin-tabs button.active,
+.day-tabs button.active,
+.result-day-tabs button.active,
+.candidate-day-tabs button.active {
+  color: #ffffff;
+  background-image: none;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+  filter: none;
+}
+
+@media (hover: hover) {
+  .chip:not(.selected):hover,
+  .segmented-sort__option:not(.active):hover,
+  .explore-screen > .mode-toggle button:not(.active):hover,
+  .map-screen > .mode-toggle a:not(.active):hover {
+    box-shadow: none;
+    filter: none;
+    background-image: none;
+    background-color: rgba(219, 234, 254, 0.62);
+    border-color: rgba(37, 99, 235, 0.22);
+  }
+}
+
+.place-card,
+.place-wide .place-card,
+.course-card,
+.my-post-card,
+.panel-card,
+.notice-detail-card {
+  border-color: #dbe3ef;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-card--text,
+.panel-card.notice-detail-card,
+.empty-state {
+  background: var(--gradient-card);
+}
+
+.course-rank-badge,
+.tag-row span,
+.my-post-board,
+.selection-summary,
+.badge.ai,
+.badge.verified {
+  color: var(--color-primary-deep);
+  background: rgba(219, 234, 254, 0.76);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.course-visual,
+.place-thumb-placeholder {
+  background: var(--gradient-secondary);
+}
+
+@media (hover: hover) {
+  .place-card:hover,
+  .course-card:hover,
+  .my-post-card:hover,
+  .panel-card:hover {
+    border-color: rgba(37, 99, 235, 0.3);
+    background-image: var(--gradient-card);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12);
+  }
+}
+
+.top-nav,
+.bottom-nav {
+  border-color: rgba(219, 227, 239, 0.92);
+}
+
+.bottom-tab.active .tab-icon,
+.bottom-tab.primary.active .tab-icon {
+  background: rgba(219, 234, 254, 0.92);
+}
+
+/* Dark is charcoal-first; red is reserved for actions and selected states. */
+:root[data-theme="dark"] body {
+  background: var(--color-canvas);
+}
+
+:root[data-theme="dark"] .app-shell,
+:root[data-theme="dark"] .splash-screen {
+  background: linear-gradient(180deg, #212121 0%, #212121 42%, #292929 100%);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+:root[data-theme="dark"] .top-nav,
+:root[data-theme="dark"] .bottom-nav,
+:root[data-theme="dark"] .settings-card,
+:root[data-theme="dark"] .notification-list,
+:root[data-theme="dark"] .settings-card button,
+:root[data-theme="dark"] .settings-card a,
+:root[data-theme="dark"] .settings-session-card,
+:root[data-theme="dark"] .place-card,
+:root[data-theme="dark"] .place-wide .place-card,
+:root[data-theme="dark"] .course-card,
+:root[data-theme="dark"] .my-post-card,
+:root[data-theme="dark"] .panel-card,
+:root[data-theme="dark"] .bottom-sheet {
+  color: var(--text);
+  background-color: var(--card);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .course-card--text,
+:root[data-theme="dark"] .panel-card.notice-detail-card,
+:root[data-theme="dark"] .empty-state {
+  background: var(--gradient-card);
+}
+
+:root[data-theme="dark"] .form-field input,
+:root[data-theme="dark"] .form-field textarea,
+:root[data-theme="dark"] .search-bar input,
+:root[data-theme="dark"] .comment-box input,
+:root[data-theme="dark"] .list-control-row {
+  color: var(--text);
+  background: #292727;
+  border-color: var(--color-hairline-input);
+}
+
+:root[data-theme="dark"] .button-secondary,
+:root[data-theme="dark"] .chip,
+:root[data-theme="dark"] .segmented-sort {
+  color: var(--text);
+  background: #353030;
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .chip.selected,
+:root[data-theme="dark"] .segmented-sort__option.active,
+:root[data-theme="dark"] .settings-segment button.active {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .course-rank-badge,
+:root[data-theme="dark"] .tag-row span,
+:root[data-theme="dark"] .my-post-board,
+:root[data-theme="dark"] .selection-summary,
+:root[data-theme="dark"] .badge.ai,
+:root[data-theme="dark"] .badge.verified {
+  color: #fee2e2;
+  background: rgba(254, 226, 226, 0.10);
+  border-color: rgba(254, 226, 226, 0.22);
+}
+
+:root[data-theme="dark"] .bottom-tab.active .tab-icon,
+:root[data-theme="dark"] .bottom-tab.primary.active .tab-icon {
+  color: #fee2e2;
+  background: rgba(254, 226, 226, 0.12);
+}
+
+/* Remove remaining white surfaces from community, profile, and shared content UI. */
+:root[data-theme="dark"] .feed-card,
+:root[data-theme="dark"] .board-list,
+:root[data-theme="dark"] .board-banner,
+:root[data-theme="dark"] .community-post-card,
+:root[data-theme="dark"] .community-write-card,
+:root[data-theme="dark"] .comment-item,
+:root[data-theme="dark"] .comment-reply-box,
+:root[data-theme="dark"] .comment-reply-box--reply,
+:root[data-theme="dark"] .comment-box,
+:root[data-theme="dark"] .profile-card,
+:root[data-theme="dark"] .profile-preview-panel,
+:root[data-theme="dark"] .my-menu-row,
+:root[data-theme="dark"] .stats-grid,
+:root[data-theme="dark"] .stats-grid button,
+:root[data-theme="dark"] .visit-control-row a,
+:root[data-theme="dark"] .my-section-tabs,
+:root[data-theme="dark"] .my-section-tabs button.active,
+:root[data-theme="dark"] .public-profile-screen .my-section-tabs button.active,
+:root[data-theme="dark"] .review-form,
+:root[data-theme="dark"] .map-bottom-sheet,
+:root[data-theme="dark"] .map-search-panel,
+:root[data-theme="dark"] .admin-hero,
+:root[data-theme="dark"] .admin-list {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .board-row + .board-row::before,
+:root[data-theme="dark"] .settings-card button,
+:root[data-theme="dark"] .settings-card a,
+:root[data-theme="dark"] .stats-grid button {
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .board-icon,
+:root[data-theme="dark"] .board-drama,
+:root[data-theme="dark"] .board-movie,
+:root[data-theme="dark"] .board-idol,
+:root[data-theme="dark"] .board-variety,
+:root[data-theme="dark"] .feed-thumb,
+:root[data-theme="dark"] .feed-thumb span,
+:root[data-theme="dark"] .my-menu-icon,
+:root[data-theme="dark"] .my-tab-icon,
+:root[data-theme="dark"] .profile-edit-button,
+:root[data-theme="dark"] .heart-button,
+:root[data-theme="dark"] .mode-toggle,
+:root[data-theme="dark"] .community-screen .community-tabs,
+:root[data-theme="dark"] .community-screen .community-tabs a,
+:root[data-theme="dark"] .community-screen .community-tabs a.active {
+  color: var(--text);
+  background: var(--panel-soft);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-screen .community-tabs a.active,
+:root[data-theme="dark"] .my-section-tabs button.active {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+:root[data-theme="dark"] .profile-preference-chips span,
+:root[data-theme="dark"] .tag-row span,
+:root[data-theme="dark"] .board-region span,
+:root[data-theme="dark"] .feed-card .badge,
+:root[data-theme="dark"] .my-post-board {
+  color: #fee2e2;
+  background: rgba(254, 226, 226, 0.10);
+  border-color: rgba(254, 226, 226, 0.22);
+}
+
+:root[data-theme="dark"] .feed-card p,
+:root[data-theme="dark"] .feed-card small,
+:root[data-theme="dark"] .board-row small,
+:root[data-theme="dark"] .my-menu-row small,
+:root[data-theme="dark"] .my-section-tabs small,
+:root[data-theme="dark"] .settings-section h2,
+:root[data-theme="dark"] .meta-line {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .button-primary {
+  background: var(--color-primary);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .button-primary:not(:disabled):hover {
+  background: #f87171;
+  box-shadow: none;
+}
+
+/* Course detail and AI condition surfaces. */
+:root[data-theme="dark"] .timeline-card,
+:root[data-theme="dark"] .course-detail-screen .timeline-card,
+:root[data-theme="dark"] .course-meta-grid > div,
+:root[data-theme="dark"] .route-progress-summary > div,
+:root[data-theme="dark"] .course-detail-summary,
+:root[data-theme="dark"] .course-detail-chip,
+:root[data-theme="dark"] .course-detail-menu__popover,
+:root[data-theme="dark"] .course-detail-menu__popover button,
+:root[data-theme="dark"] .selected-summary,
+:root[data-theme="dark"] .ai-context-panel,
+:root[data-theme="dark"] .date-range-card,
+:root[data-theme="dark"] .budget-range-card,
+:root[data-theme="dark"] .condition-confirm-modal,
+:root[data-theme="dark"] .ai-result-card,
+:root[data-theme="dark"] .ai-result-topbar,
+:root[data-theme="dark"] .ai-result-lodging-card,
+:root[data-theme="dark"] .result-hero,
+:root[data-theme="dark"] .route-stop-info,
+:root[data-theme="dark"] .ai-result-footer {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+/* These only group labels and controls; keep them on the page canvas. */
+:root[data-theme="dark"] .condition-block,
+:root[data-theme="dark"] .preference-block,
+:root[data-theme="dark"] .community-screen > section,
+:root[data-theme="dark"] .community-sort-row,
+:root[data-theme="dark"] .explore-sort-row {
+  background: #212121;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .date-field input,
+:root[data-theme="dark"] .hotel-address-field input,
+:root[data-theme="dark"] .budget-range-card input,
+:root[data-theme="dark"] .condition-block input,
+:root[data-theme="dark"] .condition-block select,
+:root[data-theme="dark"] .condition-block textarea,
+:root[data-theme="dark"] .write-card input,
+:root[data-theme="dark"] .write-card textarea,
+:root[data-theme="dark"] .write-card select,
+:root[data-theme="dark"] .comment-edit-input,
+:root[data-theme="dark"] .comment-reply-box input {
+  color: #ffffff;
+  background: #252525;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .date-range-card p,
+:root[data-theme="dark"] .budget-range-note,
+:root[data-theme="dark"] .budget-range-values,
+:root[data-theme="dark"] .hotel-address-field input::placeholder,
+:root[data-theme="dark"] .timeline-card p,
+:root[data-theme="dark"] .timeline-card small,
+:root[data-theme="dark"] .course-detail-visit-note {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .course-warning,
+:root[data-theme="dark"] .course-detail-visit-note {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+/* Community detail, comments, and composing surfaces. */
+:root[data-theme="dark"] .post-detail-card,
+:root[data-theme="dark"] .comments-panel,
+:root[data-theme="dark"] .linked-course,
+:root[data-theme="dark"] .board-banner,
+:root[data-theme="dark"] .comment-box,
+:root[data-theme="dark"] .comment-row,
+:root[data-theme="dark"] .comment-row--reply,
+:root[data-theme="dark"] .comment-action-sheet,
+:root[data-theme="dark"] .write-intro,
+:root[data-theme="dark"] .write-card,
+:root[data-theme="dark"] .write-linked-course,
+:root[data-theme="dark"] .attachment-list span,
+:root[data-theme="dark"] .attachment-preview-list span {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .post-detail-card p,
+:root[data-theme="dark"] .comment-row p,
+:root[data-theme="dark"] .comment-meta small,
+:root[data-theme="dark"] .write-intro p,
+:root[data-theme="dark"] .write-helper,
+:root[data-theme="dark"] .course-select-field small,
+:root[data-theme="dark"] .attachment-field small {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .write-board-grid button,
+:root[data-theme="dark"] .write-hashtag-row .chip,
+:root[data-theme="dark"] .detail-actions button,
+:root[data-theme="dark"] .detail-actions a,
+:root[data-theme="dark"] .feed-actions button,
+:root[data-theme="dark"] .feed-actions a,
+:root[data-theme="dark"] .comment-reply-box button,
+:root[data-theme="dark"] .linked-course-cta {
+  color: #e5e7eb;
+  background: #302a2a;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .write-board-grid button.active,
+:root[data-theme="dark"] .detail-actions button.is-active,
+:root[data-theme="dark"] .detail-actions a.is-active,
+:root[data-theme="dark"] .feed-actions button.is-active,
+:root[data-theme="dark"] .feed-actions a.is-active {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Map popovers and fixed action areas. */
+:root[data-theme="dark"] .map-place-popover,
+:root[data-theme="dark"] .kakao-place-info,
+:root[data-theme="dark"] .kakao-place-info__close,
+:root[data-theme="dark"] .kakao-place-info__related-chip,
+:root[data-theme="dark"] .map-label,
+:root[data-theme="dark"] .sticky-actions {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .map-place-popover small,
+:root[data-theme="dark"] .kakao-place-info__address,
+:root[data-theme="dark"] .kakao-place-info__category {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .kakao-place-info__link {
+  color: #ffffff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .course-primary-cta,
+:root[data-theme="dark"] .result-actions .button-primary,
+:root[data-theme="dark"] .ai-result-footer .button-primary,
+:root[data-theme="dark"] .sticky-actions .button-primary,
+:root[data-theme="dark"] .community-write-screen .button-primary {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .course-primary-cta:hover,
+:root[data-theme="dark"] .result-actions .button-primary:hover,
+:root[data-theme="dark"] .ai-result-footer .button-primary:hover,
+:root[data-theme="dark"] .sticky-actions .button-primary:hover,
+:root[data-theme="dark"] .community-write-screen .button-primary:hover {
+  background: #f87171;
+  border-color: #f87171;
+  box-shadow: none;
+}
+
+/* Shared soft-red treatment for selected pills, badges, map tags, and soft destructive actions. */
+:root[data-theme="dark"] .dark-soft-red,
+:root[data-theme="dark"] .course-detail-badge,
+:root[data-theme="dark"] .result-date,
+:root[data-theme="dark"] .course-detail-chip,
+:root[data-theme="dark"] .kakao-place-info__related-chip,
+:root[data-theme="dark"] .post-owner-button,
+:root[data-theme="dark"] .comment-action-button.is-danger,
+:root[data-theme="dark"] .comment-row-actions .is-danger,
+:root[data-theme="dark"] .course-detail-menu__popover button.danger {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border-color: var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .dark-soft-red:hover,
+  :root[data-theme="dark"] .course-detail-badge:hover,
+  :root[data-theme="dark"] .result-date:hover,
+  :root[data-theme="dark"] .course-detail-chip:hover,
+  :root[data-theme="dark"] .kakao-place-info__related-chip:hover,
+  :root[data-theme="dark"] .post-owner-button:hover,
+  :root[data-theme="dark"] .comment-action-button.is-danger:hover,
+  :root[data-theme="dark"] .comment-row-actions .is-danger:hover,
+  :root[data-theme="dark"] .course-detail-menu__popover button.danger:hover {
+    color: #ffffff;
+    background: var(--dark-soft-red-hover-bg);
+    border-color: var(--dark-soft-red-hover-border);
+  }
+}
+
+/* Place detail: keep every information and review surface charcoal. */
+:root[data-theme="dark"] .detail-body,
+:root[data-theme="dark"] .detail-body--content,
+:root[data-theme="dark"] .review-row,
+:root[data-theme="dark"] .review-form,
+:root[data-theme="dark"] .review-summary-panel,
+:root[data-theme="dark"] .rating-distribution,
+:root[data-theme="dark"] .review-row-actions button,
+:root[data-theme="dark"] .action-grid .button-secondary,
+:root[data-theme="dark"] .day-tabs button {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .detail-body p,
+:root[data-theme="dark"] .review-summary-panel small,
+:root[data-theme="dark"] .review-row p,
+:root[data-theme="dark"] .review-helper,
+:root[data-theme="dark"] .rating-distribution em {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .review-summary-panel {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, #2a2a2a 55%, #252525 100%);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+:root[data-theme="dark"] .review-summary-panel strong,
+:root[data-theme="dark"] .rating-distribution b {
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .action-grid .button-primary,
+:root[data-theme="dark"] .day-tabs button.active {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .kakao-place-info__link,
+:root[data-theme="dark"] .kakao-place-info__link:hover,
+:root[data-theme="dark"] .kakao-place-info__link:focus-visible {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border-color: var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+/* Place information flows with the page canvas instead of looking like a card. */
+:root[data-theme="dark"] .place-detail-body,
+:root[data-theme="dark"] .place-detail-body .map-preview,
+:root[data-theme="dark"] .place-detail-body .action-grid,
+:root[data-theme="dark"] .place-detail-body .favorite-toggle-status {
+  background: #212121;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .place-detail-body > p,
+:root[data-theme="dark"] .place-detail-body .meta-line,
+:root[data-theme="dark"] .place-detail-body .favorite-toggle-status {
+  color: #d1d5db;
+}
+
+/* Course stop categories use the same reusable soft-red chip tone. */
+:root[data-theme="dark"] .timeline-card__meta span,
+:root[data-theme="dark"] .timeline-card__meta small {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border: 1px solid var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+/* AI budget range: provide a visible cross-browser track and white/red thumb. */
+:root[data-theme="dark"] .budget-range-card {
+  background: #2a2a2a;
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .budget-range-head span,
+:root[data-theme="dark"] .budget-range-values {
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .budget-range-head strong,
+:root[data-theme="dark"] .budget-range-card b {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .budget-range-note {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .budget-track {
+  background: rgba(255, 255, 255, 0.18);
+  z-index: 4;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] .budget-track span {
+  background: #ef4444;
+  z-index: 1;
+}
+
+:root[data-theme="dark"] .budget-range-input::-webkit-slider-runnable-track {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-theme="dark"] .budget-range-input::-moz-range-track {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-theme="dark"] .budget-range-input::-moz-range-progress {
+  background: transparent !important;
+}
+
+:root[data-theme="dark"] .budget-range-card input[type="range"]::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ef4444;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .budget-range-card input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #ef4444;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+/* Notification list uses dark cards instead of inherited light utility surfaces. */
+:root[data-theme="dark"] .notification-list {
+  background: #2a2a2a;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .notification-row {
+  color: #ffffff;
+  background: #2a2a2a;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .notification-icon {
+  color: #fca5a5;
+  background: #302a2a;
+  border: 1px solid var(--border);
+}
+
+:root[data-theme="dark"] .notification-row strong {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .notification-row small {
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .notification-row em {
+  color: #d1d5db;
+}
+
+:root[data-theme="dark"] .utility-header button {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border: 1px solid var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+/* Social brand buttons retain their readable light-surface text contrast. */
+:root[data-theme="dark"] .social-login-button,
+:root[data-theme="dark"] .social-login-button--kakao {
+  color: #111827;
+}
+
+/* Community feed actions should be readable before a user selects one. */
+:root[data-theme="dark"] .feed-actions button,
+:root[data-theme="dark"] .feed-actions a {
+  color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-bg);
+  border: 1px solid var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .feed-actions button:hover,
+  :root[data-theme="dark"] .feed-actions a:hover {
+    color: #ffffff;
+    background: var(--dark-soft-red-hover-bg);
+    border-color: var(--dark-soft-red-hover-border);
+  }
+}
+
+/* Global feedback keeps its position and motion, while matching the dark canvas. */
+:root[data-theme="dark"] .toast-message {
+  color: #ffffff;
+  background: #2a2a2a;
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .toast-message::before {
+  background: var(--dark-soft-red-text);
+  box-shadow: 0 0 0 3px var(--dark-soft-red-bg);
+}
+
+:root[data-theme="dark"] .toast-message--error::before {
+  background: var(--color-semantic-down);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+}
+
+/* Keep the destructive course-menu item visually aligned with its siblings. */
+:root[data-theme="dark"] .course-detail-menu__popover button.danger {
+  color: var(--dark-soft-red-text);
+  background: var(--card);
+  border-color: var(--border);
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .course-detail-menu__popover button.danger:hover {
+    color: #ffffff;
+    background: var(--dark-soft-red-bg);
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+}

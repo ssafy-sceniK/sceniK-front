@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
+import { AnimatePresence, motion } from 'motion-v';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
@@ -8,6 +9,7 @@ import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { dateAfter, ensureDateRange, formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
+import { motionVariants } from '../utils/motion.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -306,8 +308,9 @@ watchEffect(() => {
         </BaseButton>
       </div>
 
-      <div v-if="showGenerateConfirm" class="condition-confirm-backdrop" @click.self="showGenerateConfirm = false">
-        <section class="condition-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="condition-confirm-title">
+      <AnimatePresence>
+        <motion.div v-if="showGenerateConfirm" class="condition-confirm-backdrop" v-bind="motionVariants.backdrop()" @click.self="showGenerateConfirm = false">
+        <motion.section class="condition-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="condition-confirm-title" v-bind="motionVariants.dialog()">
           <div>
             <span class="badge ai">AI 코스 생성</span>
             <h2 id="condition-confirm-title">이 조건으로 AI 코스를 생성할까요?</h2>
@@ -322,8 +325,9 @@ watchEffect(() => {
             <BaseButton variant="ghost" block @click="showGenerateConfirm = false">취소</BaseButton>
             <BaseButton block @click="confirmGenerate">생성하기</BaseButton>
           </div>
-        </section>
-      </div>
+        </motion.section>
+        </motion.div>
+      </AnimatePresence>
     </section>
   </AppLayout>
 </template>

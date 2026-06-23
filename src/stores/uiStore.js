@@ -69,6 +69,11 @@ import { flattenPreferenceSelection, hasCompletePreferences, normalizePreference
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
+function applyColorTheme(theme) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+}
+
 function formatWon(value) {
   const amount = Number(value) || 0;
   if (amount >= 10000) return `${Math.round(amount / 10000)}만원`;
@@ -85,6 +90,7 @@ function flattenPreferences(preferences) {
 
 function defaultState() {
   return {
+    theme: 'light',
     onboardingSeen: false,
     currentUser: null,
     users: [],
@@ -503,6 +509,8 @@ export const useUiStore = defineStore('ui', {
   actions: {
     restore() {
       Object.assign(this, readState());
+      this.theme = this.theme === 'dark' ? 'dark' : 'light';
+      applyColorTheme(this.theme);
       this.users = [];
       if (!readAccessToken()) {
         this.currentUser = null;
@@ -557,6 +565,11 @@ export const useUiStore = defineStore('ui', {
         ...persisted
       } = this.$state;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+    },
+    setTheme(theme) {
+      this.theme = theme === 'dark' ? 'dark' : 'light';
+      applyColorTheme(this.theme);
+      this.persist();
     },
     notify(message, tone = 'info') {
       this.toast = message;

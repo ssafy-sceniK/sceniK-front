@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import AuthSessionPanel from '../components/auth/AuthSessionPanel.vue';
@@ -8,7 +8,10 @@ import { useUiStore } from '../stores/uiStore.js';
 const router = useRouter();
 const uiStore = useUiStore();
 const language = ref('ko');
-const theme = ref('light');
+const theme = computed({
+  get: () => uiStore.theme,
+  set: (value) => uiStore.setTheme(value),
+});
 const sessionNotice = ref(null);
 const notificationToggles = ref({
   route: true,
@@ -59,7 +62,7 @@ async function handleLogout() {
         <h2>테마</h2>
         <div class="settings-segment">
           <button type="button" :class="{ active: theme === 'light' }" @click="theme = 'light'">라이트</button>
-          <button type="button" :class="{ active: theme === 'dark' }" @click="theme = 'dark'">다크 준비중</button>
+          <button type="button" :class="{ active: theme === 'dark' }" @click="theme = 'dark'">다크</button>
         </div>
       </div>
 
