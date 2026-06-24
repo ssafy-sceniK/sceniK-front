@@ -217,7 +217,7 @@
   font-size: 12px;
   font-weight: 750;
   line-height: 1.35;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   white-space: normal;
 }
 
@@ -249,7 +249,7 @@
   font-weight: 850;
   line-height: 1.28;
   letter-spacing: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .course-edit-screen .compact-intro p {
@@ -928,7 +928,7 @@
   font-size: 22px;
   line-height: 1.26;
   letter-spacing: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .course-detail-screen .result-hero p {
@@ -957,7 +957,7 @@
   place-items: center;
   text-align: center;
   line-height: 1.3;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   white-space: normal;
 }
 
@@ -1028,7 +1028,9 @@
   font-size: 11px;
   font-weight: 750;
   line-height: 1.25;
-  overflow-wrap: anywhere;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .timeline-card__meta {
@@ -1121,7 +1123,7 @@
   white-space: normal;
   line-height: 1.35;
   word-break: keep-all;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .remove-stop-button {

@@ -13,7 +13,8 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
-import { courseTemplates, notices } from '../data/mockData.js';
+import { courseTemplates } from '../data/mockData.js';
+import { localizedNotices } from '../data/notices.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -50,6 +51,7 @@ const routeItems = computed(() => routeTab.value === 'region'
   ? [...courseTemplates].reverse()
   : courseTemplates);
 const visibleRouteItems = computed(() => routeItems.value.slice(0, homePopularRouteLimit));
+const noticeItems = computed(() => localizedNotices(t));
 
 function openCourse(course) {
   if (!course?.routeId) {
@@ -88,14 +90,14 @@ function openCourse(course) {
       <ChipGroup v-model="routeTab" :items="routeTabs" />
       <div class="stack-list">
         <button v-for="(course, index) in visibleRouteItems" :key="course.routeId" type="button" class="course-link-card" @click="openCourse(course)">
-          <CourseCard :course="course" variant="text" :rank="index + 1" />
+          <CourseCard :course="course" variant="text" :rank="index + 1" hide-generic-ai-tag />
         </button>
       </div>
 
       <div class="section-divider"></div>
       <SectionHeader :title="t('home.sections.notices')" to="/notice" />
       <div class="notice-list">
-        <RouterLink v-for="notice in notices" :key="notice.id" :to="`/notice/${notice.id}`" class="notice-row">
+        <RouterLink v-for="notice in noticeItems" :key="notice.id" :to="`/notice/${notice.id}`" class="notice-row">
           <span>{{ notice.title }}</span>
           <small>{{ notice.date }}</small>
         </RouterLink>

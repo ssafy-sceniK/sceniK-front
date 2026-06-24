@@ -197,7 +197,7 @@ if (!/html\s*\{[^}]*scrollbar-gutter:\s*stable both-edges\s*;[^}]*overflow-y:\s*
   process.exit(1);
 }
 
-if (!communityView.includes(':title="isPostDetail ? \'게시글\' : composeMode ? \'커뮤니티\' : \'\'"')) {
+if (!communityView.includes(`:title="isPostDetail ? t('community.postDetailTitle') : composeMode ? t('nav.community') : ''"`)) {
   console.error('Community main tabs must use the same logo-led header as the other primary tabs.');
   process.exit(1);
 }

@@ -5,6 +5,7 @@
     "ja": "日本語",
     "zh-CN": "简体中文",
     "selectorTitle": "Language",
+    "selectAria": "Select language",
     "selectorDescription": "Choose the app display language."
   },
   "nav": {
@@ -147,7 +148,8 @@
       "createFailedTitle": "Could not create post.",
       "createFailedText": "A temporary error occurred. Please try again soon.",
       "savedTitle": "Save",
-      "savedText": "The post was added to the community feed."
+      "savedText": "The post was added to the community feed.",
+      "addHashtag": "Add hashtag"
     },
     "a11y": {
       "postImageOpen": "Open post image {index}",
@@ -164,6 +166,29 @@
     },
     "share": {
       "courseReview": "{duration} course review"
+    },
+    "postDetailTitle": "Post",
+    "boardLabels": {
+      "drama": {
+        "short": "Drama",
+        "full": "Drama board"
+      },
+      "movie": {
+        "short": "Movie",
+        "full": "Movie board"
+      },
+      "idol": {
+        "short": "Idol",
+        "full": "Idol board"
+      },
+      "variety": {
+        "short": "Variety",
+        "full": "Variety board"
+      },
+      "region": {
+        "short": "Regional",
+        "full": "Regional board"
+      }
     }
   },
   "reviews": {
@@ -174,9 +199,9 @@
     "submit": "Submit review",
     "writeTitle": "Write review",
     "cleanup": {
-      "kb5ce265d40": "Visit reviews",
+      "kb5ce265d40": "Average rating",
       "k5f145dcdd7": "{count} reviews",
-      "k11e333b564": "Average {count}"
+      "k11e333b564": "Avg {count}"
     }
   },
   "translation": {
@@ -205,7 +230,7 @@
       "actor": "Actor",
       "touristAttraction": "Tourist attraction",
       "traditionalVillage": "Traditional village",
-      "hanokCultureSpace": "Hanok culture space",
+      "hanokCultureSpace": "Hanok cultural space",
       "cultureSpace": "Culture space",
       "palace": "Palace",
       "beach": "Beach",
@@ -224,16 +249,16 @@
       "library": "Library",
       "artMuseum": "Art museum",
       "gallery": "Gallery",
-      "sauna": "Sauna and jjimjilbang",
+      "sauna": "Sauna",
       "bookstore": "Bookstore",
       "island": "Island",
       "studio": "Studio",
-      "stationTransit": "Station and transit",
+      "stationTransit": "Transit",
       "historicSite": "Historic site",
       "natureSpot": "Nature spot",
       "temple": "Temple",
       "cafeFurniture": "Cafe and furniture shop",
-      "furniture": "Furniture shop"
+      "furniture": "Furniture"
     },
     "region": {
       "all": "All",
@@ -559,10 +584,10 @@
       "kdf98e5ff6f": "회원가입 완료"
     },
     "splash": {
-      "k1e373bd51e": "좋아하는 K-콘텐츠 장면을 여행 코스로 이어보세요.",
-      "kc223fc66fe": "로그인 / 회원가입",
-      "k743d8fac55": "Google 로그인",
-      "kb98181d829": "카카오 로그인"
+      "k1e373bd51e": "Turn your favorite K-content scenes into travel courses.",
+      "kc223fc66fe": "Log in / Sign up",
+      "k743d8fac55": "Continue with Google",
+      "kb98181d829": "Continue with Kakao"
     }
   },
   "preferences": {
@@ -1039,7 +1064,7 @@
     },
     "cleanup": {
       "k8288b1b5ca": "{count}곳",
-      "k9ea895ec86": "Open a place detail page and mark it as planned or completed to start your travel record."
+      "k9ea895ec86": "No visit places have been saved yet. Explore the map to find places you want to visit."
     }
   },
   "profile": {
@@ -1431,7 +1456,7 @@
     "k1k": "Could not complete sharing. Use copy link instead.",
     "k1l": " hashtag remove",
     "k1m": "Saving...",
-    "k1n": "Save changes",
+    "k1n": "Save",
     "k1o": "Processing",
     "k1p": "Following",
     "k1q": "Follow",
@@ -1688,8 +1713,8 @@
     "ui_1f458d0b46": "커뮤니티",
     "ui_4504f605c0": "작성한 게시글이 없습니다",
     "ui_bbade19ec7": "커뮤니티 활동이 생기면 여기에 표시됩니다.",
-    "ui_f346dce058": "Showing {value0} of {value1} places on the map",
-    "ui_37333dd7ed": "Showing {value0} places",
+    "ui_f346dce058": "{value0} of {value1} places mapped",
+    "ui_37333dd7ed": "{value0} places mapped",
     "ui_7d31290a71": "Place information",
     "ui_429f39711d": "Close place details",
     "ui_2976925371": "Open in Kakao Map",
@@ -1697,10 +1722,10 @@
     "ui_c70234a765": "View related content {value0}",
     "ui_b8d2758afe": "Course map",
     "ui_cf6c4fe1f6": "Loading map",
-    "ui_5a852b5a97": "Kakao Map key is required",
+    "ui_5a852b5a97": "Kakao Map",
     "ui_ceef3b8e8b": " environment variable must be set.",
     "ui_333724b276": "No coordinates to display",
-    "ui_74a3fd1bf9": "Check coordinates for {count} places.",
+    "ui_74a3fd1bf9": "{count} places cannot be displayed on the map.",
     "ui_caf0e366cc": "Add places to show them on the map.",
     "ui_e28793c8b2": "Could not load map",
     "ui_7eb34401bb": "Try again in a moment.",
@@ -1800,6 +1825,25 @@
     "cleanup": {
       "kd594d485f9": "공지사항",
       "k4bf64c7200": "sceniK MVP에서 제공하는 안내입니다. 실제 서비스에서는 백엔드 공지 API로 교체됩니다."
+    },
+    "title": "Notices",
+    "empty": "There are no notices to display.",
+    "backToList": "Back to notices",
+    "notFound": "Notice not found",
+    "notFoundText": "This notice may have been removed or does not exist.",
+    "items": {
+      "contentLocationUpdate": {
+        "title": "New K-content location data has been updated.",
+        "body": "New content and related place data has been updated. Some content details and place recommendations may now appear more accurately."
+      },
+      "verifiedAiCourse": {
+        "title": "AI courses are generated only from verified candidate places.",
+        "body": "AI courses are generated based on verified candidate places registered in the service. Before traveling, please also check the map and operating information."
+      },
+      "checkHours": {
+        "title": "Please check opening hours and closing days again before visiting.",
+        "body": "Opening hours, closing days, and admission availability may change depending on local conditions. Please check the latest information through official channels before visiting."
+      }
     }
   }
 }

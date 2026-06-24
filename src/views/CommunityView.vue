@@ -14,6 +14,7 @@ import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import TranslatableText from '../components/translation/TranslatableText.vue';
 import { useUiStore } from '../stores/uiStore.js';
+import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -55,11 +56,11 @@ const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 
 const boards = computed(() => [
-  { id: 'drama', icon: '🎬', name: t('communityAuto.kjhjuxb'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
-  { id: 'movie', icon: '🎞️', name: t('communityAuto.k149wfw0'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
-  { id: 'idol', icon: '🎤', name: t('communityAuto.k1dgfzgj'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
-  { id: 'variety', icon: '📺', name: t('communityAuto.k11z8e9i'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
-  { id: 'region', icon: '📍', name: t('communityAuto.k46uety'), description: t('communityAuto.k2glxru'), tag: 'AI \ucf54\uc2a4' },
+  { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
+  { id: 'movie', icon: 'MV', name: t('community.boardLabels.movie.short'), fullName: t('community.boardLabels.movie.full'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
+  { id: 'idol', icon: 'ID', name: t('community.boardLabels.idol.short'), fullName: t('community.boardLabels.idol.full'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
+  { id: 'variety', icon: 'TV', name: t('community.boardLabels.variety.short'), fullName: t('community.boardLabels.variety.full'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
+  { id: 'region', icon: 'RG', name: t('community.boardLabels.region.short'), fullName: t('community.boardLabels.region.full'), description: t('communityAuto.k2glxru'), tag: '\uc9c0\uc5ed' },
 ]);
 
 const isBoardList = computed(() => route.name === 'community-boards');
@@ -289,7 +290,7 @@ function isBoardTag(tag) {
 }
 
 function isSystemPostTag(tag) {
-  return isBoardTag(tag) || tag === 'AI \ucf54\uc2a4';
+  return isBoardTag(tag) || isGenericAiCourseTag(tag);
 }
 
 function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
@@ -318,11 +319,10 @@ function removePostEditHashtag(tag) {
   postEditHashtags.value = postEditHashtags.value.filter((item) => item !== tag);
 }
 
-function buildPostEditTags(target) {
+function buildPostEditTags() {
   return uniqueValues([
     boards.value.find((board) => board.id === postEditBoard.value)?.tag,
     ...postEditHashtags.value,
-    target?.routeId ? t('communityAuto2.kj') : '',
   ]);
 }
 
@@ -428,6 +428,11 @@ function linkedCourseTo(post) {
 
 function hasLinkedCourse(post) {
   return Boolean(post?.routeId);
+}
+
+function displayPostTags(post) {
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  return hasLinkedCourse(post) ? filterGenericAiCourseTags(tags) : tags;
 }
 
 function attachmentImageUrl(attachment) {
@@ -536,7 +541,7 @@ async function createPost() {
   const created = await uiStore.createPost({
     title: title.value,
     body: body.value,
-    tags: [activeBoard.value.tag, 'AI \ucf54\uc2a4'].filter(Boolean),
+    tags: [activeBoard.value.tag].filter(Boolean),
   });
   if (created) {
     title.value = '';
@@ -556,11 +561,7 @@ function startPostEdit() {
     .map(normalizeHashtag)
     .filter((tag) => tag && !isSystemPostTag(tag)))
     .slice(0, MAX_HASHTAGS);
-  postNotice.value = {
-    tone: 'info',
-    title: t('communityAuto2.km'),
-    text: t('communityAuto2.kn'),
-  };
+  postNotice.value = null;
 }
 
 function cancelPostEdit() {
@@ -591,7 +592,7 @@ async function savePostEdit() {
   const updated = await uiStore.editPost(postKey(target), {
     title: postEditTitle.value.trim(),
     body: postEditBody.value.trim(),
-    tags: buildPostEditTags(target),
+    tags: buildPostEditTags(),
     region: target.region,
     duration: target.duration,
     routeId: target.routeId,
@@ -850,7 +851,7 @@ async function nativeShare() {
 </script>
 
 <template>
-  <AppLayout :title="isPostDetail ? '게시글' : composeMode ? '커뮤니티' : ''" :back="isPostDetail || composeMode">
+  <AppLayout :title="isPostDetail ? t('community.postDetailTitle') : composeMode ? t('nav.community') : ''" :back="isPostDetail || composeMode">
     <section class="community-screen">
       <template v-if="isBoardList">
         <SearchBar v-model="query" :placeholder="t('communityAuto.kdbrluq')" @focus="router.push('/community/search')" />
@@ -869,7 +870,7 @@ async function nativeShare() {
               <span class="board-icon-symbol">{{ board.icon }}</span>
             </span>
             <span class="board-copy">
-              <strong>{{ board.name }}</strong>
+              <strong>{{ board.fullName }}</strong>
             </span>
             <em>{{ t('communityAuto2.k1s', { count: boardPostCount(board) }) }}</em>
             <span class="board-chevron" aria-hidden="true">›</span>
@@ -903,10 +904,20 @@ async function nativeShare() {
               :text="postNotice.text"
             />
             <template v-if="editingPost">
-              <label class="form-field compact">{{ t('communityAuto.k7vl8in') }}<select v-model="postEditBoard">
-                  <option v-for="board in boards" :key="board.id" :value="board.id">{{ board.name }}</option>
-                </select>
-              </label>
+              <div class="form-field compact post-edit-board-field">
+                <span>{{ t('communityAuto.k7vl8in') }}</span>
+                <div class="write-board-grid write-board-grid--edit">
+                  <button
+                    v-for="board in boards"
+                    :key="board.id"
+                    type="button"
+                    :class="{ active: postEditBoard === board.id }"
+                    @click="postEditBoard = board.id"
+                  >
+                    <span>{{ board.name }}</span>
+                  </button>
+                </div>
+              </div>
               <div class="form-field compact">
                 <span>{{ t('communityAuto.k1e5ef9d') }}</span>
                 <div class="hashtag-input-row">
@@ -919,7 +930,7 @@ async function nativeShare() {
                     @keydown="handlePostEditHashtagKeydown"
                     @blur="addPostEditHashtag()"
                   />
-                  <button type="button" @click="addPostEditHashtag()">{{ t('communityAuto.k7836ex') }}</button>
+                  <button type="button" :aria-label="t('community.write.addHashtag')" :title="t('community.write.addHashtag')" @click="addPostEditHashtag()">+</button>
                 </div>
                 <div v-if="postEditHashtags.length" class="chip-row wrap write-hashtag-row selected-hashtag-row">
                   <button
@@ -939,9 +950,9 @@ async function nativeShare() {
               </label>
               <label class="form-field compact">{{ t('communityAuto.k1supta6') }}<textarea v-model="postEditBody" maxlength="500" :placeholder="t('communityAuto.k99wxgm')"></textarea>
               </label>
-              <div class="post-owner-actions">
+              <div class="post-owner-actions post-edit-actions">
                 <BaseButton :disabled="postActionLoading || postEditTitle.trim().length < 2 || postEditBody.trim().length < 5" @click="savePostEdit">
-                  {{ postActionLoading ? t('communityAuto2.k1m') : t('communityAuto2.k1n') }}
+                  {{ postActionLoading ? t('communityAuto2.k1m') : t('common.save') }}
                 </BaseButton>
                 <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">{{ t('communityAuto.kjiry9t') }}</BaseButton>
               </div>
@@ -967,7 +978,7 @@ async function nativeShare() {
                 {{ attachment.type === 'video' ? t('communityAuto.k1w2zrd6') : t('communityAuto.k46x8nx') }} · {{ attachment.name }}
               </span>
             </div>
-            <div class="tag-row"><span v-for="tag in selectedPost.tags" :key="tag">{{ tag }}</span></div>
+            <div v-if="displayPostTags(selectedPost).length" class="tag-row"><span v-for="tag in displayPostTags(selectedPost)" :key="tag">{{ tag }}</span></div>
             <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
               <span class="course-dot">AI</span>
               <div>
@@ -1376,7 +1387,7 @@ async function nativeShare() {
               <div class="feed-body">
                 <h2>{{ post.title }}</h2>
                 <p>{{ post.body }}</p>
-                <div class="tag-row"><span v-for="tag in post.tags" :key="tag">{{ tag }}</span></div>
+                <div v-if="displayPostTags(post).length" class="tag-row"><span v-for="tag in displayPostTags(post)" :key="tag">{{ tag }}</span></div>
               </div>
             </RouterLink>
             <div class="feed-actions compact-actions">

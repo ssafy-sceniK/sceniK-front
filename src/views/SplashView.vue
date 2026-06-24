@@ -1,20 +1,27 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import AppLanguageSelector from '../components/common/AppLanguageSelector.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import BrandLogo from '../components/brand/BrandLogo.vue';
 import SplashBrandMark from '../components/brand/SplashBrandMark.vue';
 import { GOOGLE_OAUTH_URL, KAKAO_OAUTH_URL } from '../api/authApi.js';
+import { useUiStore } from '../stores/uiStore.js';
 
 const { t } = useI18n();
 
 const router = useRouter();
+const uiStore = useUiStore();
 
 // \ub3d9\uc791\uc744 \ubd88\ud3b8\ud574\ud558\ub294 \uc0ac\uc6a9\uc790\uc5d0\uac8c\ub294 \uc560\ub2c8\uba54\uc774\uc158 \ub300\uc2e0 \uacf5\uc6a9 BrandLogo\ub97c \uc815\uc801\uc73c\ub85c \ubcf4\uc5ec\uc900\ub2e4.
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function handleLanguageChange(language) {
+  void uiStore.updateLanguage(language);
+}
 
 function continueWithOAuth(provider, url) {
   sessionStorage.setItem('scenik-oauth-return-to', '/home');
@@ -33,6 +40,7 @@ function continueWithKakao() {
 
 <template>
   <main class="splash-screen">
+    <AppLanguageSelector variant="splash" @change="handleLanguageChange" />
     <section class="splash-mark">
       <BrandLogo v-if="prefersReducedMotion" size="splash" />
       <SplashBrandMark v-else />

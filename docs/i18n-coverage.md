@@ -362,3 +362,85 @@ Validated with Playwright + local Chrome on `http://127.0.0.1:5176` using `VITE_
 - npm run lint passed.
 - npm run i18n:audit passed with 4 candidates and 0 missing locale entries.
 - git diff --check passed after this document update.
+
+## Place system content localization pass on 2026-06-24
+
+| Item | Result |
+| --- | ---: |
+| Seeded places checked | 281 |
+| Place categories covered | 40 |
+| Place regions covered | 15 |
+| Place districts covered | 89 |
+| CSV rows with image_url | 281 |
+| data.sql image_url matches | 281 |
+
+### Coverage added
+
+- Place display now has a generated localized description fallback for non-Korean locales when an explicit localized description is unavailable.
+- The fallback uses localized category, district, region, and content title when the source description starts with a system content title in brackets.
+- Content title lookup now derives known titles from mock system content data instead of a hand-written translated language-name map.
+- Korean UI keeps Korean category and region labels. English uses translated/romanized labels. Japanese and Chinese use available native labels, with district names falling back to romanized labels where no verified localized district label exists.
+- Language selector native names remain fixed and are not translated through vue-i18n.
+
+### Remaining place-name policy
+
+Full official localized names for all 281 places are still not asserted. Place names keep the original Korean name unless a safe explicit mapping exists, while category, region, district, and generated description are localized where available.
+
+## Landing language selector and Settings cleanup on 2026-06-24
+
+- Settings now keeps the normal account logout row but removes the redundant session-management card from the page.
+- The landing splash screen now renders the shared language selector before login, using the existing `setLocale()` persistence path and the fixed native language names.
+- Splash copy is localized in `ko`, `en`, `ja`, and `zh-CN`; language names remain `한국어`, `English`, `日本語`, and `简体中文` in every locale.
+- Browser QA used a local production-build static server and Chrome at a 430px mobile viewport. Splash language switching persisted across reload, and the selector labels remained fixed native names.
+
+## Community edit, notices, and empty-state QA pass on 2026-06-24
+
+- Community post edit now uses the same pill-style board selector pattern as post creation instead of a native select.
+- Hashtag add buttons in create and edit use the compact visible `+` control with localized accessible labels.
+- Linked AI courses are shown through the dedicated linked-course UI; generic `AI course` tags are filtered from display for linked-course posts and course cards.
+- Notice list/detail rendering now uses stable notice IDs and localized notice title/body keys for all supported locales.
+- Empty-state copy uses wider text bounds and Korean-friendly line breaking to avoid awkward final-syllable wraps.
+
+## Place name romanization fallback - 2026-06-24
+
+- Place names now follow a centralized fallback order in `src/i18n/systemContent.js`: official/system mapping, localized API field, romanized Korean fallback, then original Korean fallback.
+- The romanization fallback is implemented in `src/i18n/placeNameRomanization.js` and is shared by English, Japanese, and Simplified Chinese when no verified localized name is available.
+- Official-looking translations are not invented. Known overrides remain explicit, while unmapped Korean names use romanized display text to avoid broken placeholders such as `???`.
+- Place category, region, district, tags, and generated descriptions still use existing i18n/system label localization separately from place-name fallback.
+- Verification added: `node scripts/check-place-localization.js` checks all seeded places for non-empty, non-broken place-name fallback in `en`, `ja`, and `zh-CN`.
+
+## Landing globe language selector persistence pass on 2026-06-24
+
+| Item | Result |
+| --- | --- |
+| Git sync | frontend and backend main branches; origin/main had no new commits after git fetch |
+| Audit after this pass | 3 likely hardcoded Korean UI lines / 3 files |
+| Literal i18n key check | 945 keys, 0 missing locale entries |
+
+### Coverage added
+
+- Landing/Splash now uses the shared language selector as a compact top-right globe button instead of a full-width language bar.
+- The splash language menu displays only fixed native language names: Korean endonym, English, Japanese endonym, and Simplified Chinese endonym.
+- Pre-login language changes now write through the existing app locale path and the existing `scenik-locale` storage key. No second locale storage key was added.
+- Auth user normalization no longer invents a Korean profile language when the API response has no valid language field, so the current pre-login locale is not reset to Korean during signup/login flows.
+- uiStore restore ignores stale logged-out user language values when no access token exists, preserving the saved device locale across refreshes.
+- A pending pre-auth locale selection is kept in the existing app state until it can be associated with the authenticated profile or saved through preferences/settings.
+
+### Browser QA
+
+Validated against the production build with Playwright at a 430px mobile viewport.
+
+- Landing globe button was visible and compact; the language menu was closed by default.
+- Language menu labels stayed fixed native names.
+- Selecting English on Landing persisted after refresh and Login remained English.
+- Selecting Japanese on Landing kept Signup in Japanese.
+- Selecting Simplified Chinese on Landing kept Preferences and Settings in Simplified Chinese.
+- Settings still displayed the same fixed native language names.
+- Home and Community rendered nonblank with no captured page errors.
+
+### Verification
+
+- npm run build passed after rerunning with elevated permissions because sandboxed esbuild spawn returned EPERM.
+- npm run lint passed.
+- npm run i18n:audit passed with 3 candidates and 0 missing locale entries.
+- git diff --check should be repeated after this document update.

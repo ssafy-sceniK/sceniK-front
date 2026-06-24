@@ -8,6 +8,7 @@ import { useUiStore } from '../../stores/uiStore.js';
 const props = defineProps({
   title: { type: String, default: '' },
   back: { type: Boolean, default: false },
+  backTo: { type: String, default: '' },
 });
 
 const router = useRouter();
@@ -22,12 +23,26 @@ onMounted(() => {
 watch(() => uiStore.currentUser?.userId, (userId) => {
   if (userId) void uiStore.loadNotifications();
 });
+
+function handleBack() {
+  if (props.backTo) {
+    router.push(props.backTo);
+    return;
+  }
+  if (window.history.state?.back) {
+    router.back();
+    return;
+  }
+  router.push('/home');
+}
 </script>
 
 <template>
   <header class="top-nav">
-    <button v-if="props.back" class="icon-button" type="button" :aria-label="t('nav.back')" @click="router.back()">
-      ←
+    <button v-if="props.back" class="icon-button" type="button" :aria-label="t('nav.back')" @click="handleBack">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
     </button>
     <RouterLink v-else-if="!props.title" to="/home" class="brand-mark" aria-label="sceniK home">
       <BrandLogo size="nav" />

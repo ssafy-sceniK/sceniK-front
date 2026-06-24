@@ -801,3 +801,16 @@
 .content-detail-screen {
   margin-top: calc(-1 * var(--screen-top-gap));
 }
+
+/* multilingual detail text wrapping guard */
+.detail-hero > div h1,
+.detail-hero > div p,
+.detail-body p,
+.detail-body li,
+.result-hero p,
+.review-text,
+.review-row p {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}

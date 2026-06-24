@@ -10,8 +10,10 @@ import ContentCard from '../components/content/ContentCard.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import CourseCard from '../components/course/CourseCard.vue';
 import { useUiStore } from '../stores/uiStore.js';
-import { courseTemplates, notices, places } from '../data/mockData.js';
+import { courseTemplates, places } from '../data/mockData.js';
+import { localizedNotices } from '../data/notices.js';
 import { localizeSystemLabel } from '../i18n/systemContent.js';
+import { filterGenericAiCourseTags } from '../utils/tags.js';
 
 const LIST_CONFIG = {
   'liked-content': {
@@ -80,6 +82,7 @@ const type = computed(() => route.meta.type);
 const listNotice = ref(null);
 const listConfig = computed(() => LIST_CONFIG[type.value] ?? LIST_CONFIG.default);
 const title = computed(() => route.meta.titleKey ? t(route.meta.titleKey) : t(listConfig.value.titleKey));
+const noticeItems = computed(() => localizedNotices(t));
 
 onMounted(async () => {
   if (type.value === 'saved-routes') await uiStore.loadSavedCourses();
@@ -129,7 +132,7 @@ const visibleCount = computed(() => {
   if (type.value === 'reviews') return uiStore.myReviews.length;
   if (type.value === 'following') return uiStore.followingUsers.length;
   if (type.value === 'followers') return uiStore.followerUsers.length;
-  return notices.length;
+  return noticeItems.value.length;
 });
 const isLoading = computed(() => {
   if (type.value === 'saved-routes') return uiStore.savedCoursesLoading;
@@ -181,8 +184,13 @@ function containsAny(value, terms) {
   return terms.some((term) => lower.includes(term));
 }
 
+function displayPostTags(post) {
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
+}
+
 function boardLabel(post) {
-  const tagText = (post.tags ?? []).join(' ');
+  const tagText = displayPostTags(post).join(' ');
   if (containsAny(tagText, ['drama', '\ub4dc\ub77c\ub9c8'])) return t('my.activity.boards.drama');
   if (containsAny(tagText, ['movie', 'film', '\uc601\ud654'])) return t('my.activity.boards.movie');
   if (containsAny(tagText, ['idol', 'k-pop', 'kpop', '\uc544\uc774\ub3cc'])) return t('my.activity.boards.idol');
@@ -325,7 +333,7 @@ async function toggleFollowFromList(user) {
           class="course-link-card"
           @click="openCourse(course)"
         >
-          <CourseCard :course="course" />
+          <CourseCard :course="course" hide-generic-ai-tag />
         </button>
       </div>
 
@@ -346,7 +354,7 @@ async function toggleFollowFromList(user) {
             {{ t('my.activity.commentPreview') }} / {{ postCommentPreview(post) }}
           </blockquote>
           <div class="tag-row">
-            <span v-for="tag in (post.tags ?? []).slice(0, 3)" :key="tag">{{ tag }}</span>
+            <span v-for="tag in displayPostTags(post).slice(0, 3)" :key="tag">{{ tag }}</span>
           </div>
           <div class="my-post-meta">
             <span>{{ t('my.activity.likes', { count: post.likes ?? 0 }) }}</span>
@@ -393,7 +401,7 @@ async function toggleFollowFromList(user) {
       </div>
 
       <div v-else class="stack-list">
-        <RouterLink v-for="notice in notices" :key="notice.id" class="notice-row" :to="'/notice/' + notice.id">
+        <RouterLink v-for="notice in noticeItems" :key="notice.id" class="notice-row" :to="'/notice/' + notice.id">
           <span>{{ notice.title }}</span>
           <small>{{ notice.date }}</small>
         </RouterLink>

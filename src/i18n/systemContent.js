@@ -1,4 +1,6 @@
-import { getCurrentLocale } from './index.js';
+import { getCurrentLocale, i18n } from './index.js';
+import { hasKoreanSyllable, isBrokenLocalizedPlaceName, placeNameFallbackForLocale } from './placeNameRomanization.js';
+import { contents } from '../data/mockData.js';
 
 const CATEGORY_KEYS = new Map([
   ['드라마', 'drama'], ['Drama', 'drama'], ['ドラマ', 'drama'], ['电视剧', 'drama'],
@@ -102,6 +104,80 @@ const TAG_KEYS = new Map([
   ['충주', 'chungju'], ['카페', 'cafe'], ['카페감성', 'cafeMood'], ['코미디', 'comedy'], ['타임슬립', 'timeSlip'], ['토크', 'talk'],
   ['통역', 'translation'], ['판타지', 'fantasy'], ['포항', 'pohang'], ['풍수', 'fengShui'], ['해녀', 'haenyeo'], ['해외촬영', 'overseasFilming'],
   ['행궁동', 'haenggungDong'], ['현대도시', 'modernCity'], ['형사', 'detective'], ['화성행궁', 'hwaseongHaenggung'], ['화홍문', 'hwahongmun'], ['흥행작', 'boxOfficeHit'], ['힐링', 'healing'],
+]);
+
+const SUPPLEMENTAL_CATEGORY_KEYS = new Map([
+  ['\uC804\uCCB4', 'all'],
+  ['\uB4DC\uB77C\uB9C8', 'drama'],
+  ['\uC601\uD654', 'movie'],
+  ['\uC608\uB2A5', 'variety'],
+  ['\uC544\uC774\uB3CC', 'idol'],
+  ['\uBC30\uC6B0', 'actor'],
+  ['\uCD2C\uC601\uC9C0', 'filmingLocation'],
+  ['\uCE74\uD398', 'cafe'],
+  ['\uB9DB\uC9D1', 'restaurant'],
+  ['\uACF5\uC6D0', 'park'],
+  ['\uAC70\uB9AC', 'street'],
+  ['\uD559\uAD50', 'school'],
+  ['\uD638\uD154', 'hotel'],
+  ['\uAD00\uAD11\uC9C0', 'touristAttraction'],
+  ['\uC804\uD1B5\uB9C8\uC744', 'traditionalVillage'],
+  ['\uD55C\uC625/\uBB38\uD654\uACF5\uAC04', 'hanokCultureSpace'],
+  ['\uBB38\uD654\uACF5\uAC04', 'cultureSpace'],
+  ['\uAC00\uAD6C', 'furniture'],
+  ['\uAC24\uB7EC\uB9AC', 'gallery'],
+  ['\uACE8\uD504\uC7A5', 'golfCourse'],
+  ['\uACF5\uC5F0\uC7A5', 'performanceHall'],
+  ['\uAD6D\uAC00 \uC720\uC0B0', 'heritage'],
+  ['\uAD6D\uAC00\uC720\uC0B0', 'heritage'],
+  ['\uAD7F\uC988\uC0F5', 'goodsShop'],
+  ['\uAE30\uB150\uBB3C', 'monument'],
+  ['\uB3C4\uC11C\uAD00', 'library'],
+  ['\uB9AC\uC870\uD2B8', 'lodging'],
+  ['\uBBF8\uC220\uAD00', 'artMuseum'],
+  ['\uC0B0', 'mountain'],
+  ['\uC11C\uC810', 'bookstore'],
+  ['\uC12C', 'island'],
+  ['\uC1FC\uD551\uC13C\uD130', 'shoppingCenter'],
+  ['\uC2A4\uD29C\uB514\uC624', 'studio'],
+  ['\uC2DC\uC7A5', 'market'],
+  ['\uC720\uC801\uC9C0', 'historicSite'],
+  ['\uC804\uB9DD\uB300', 'observatory'],
+  ['\uC808', 'temple'],
+  ['\uCF00\uC774\uBE14\uCE74', 'cableCar'],
+  ['\uD14C\uB9C8\uD30C\uD06C', 'themePark'],
+  ['\uD574\uBCC0', 'beach'],
+]);
+
+const SUPPLEMENTAL_REGION_KEYS = new Map([
+  ['\uC804\uCCB4', 'all'],
+  ['\uC11C\uC6B8', 'seoul'],
+  ['\uBD80\uC0B0', 'busan'],
+  ['\uC778\uCC9C', 'incheon'],
+  ['\uACBD\uAE30', 'gyeonggi'],
+  ['\uAC15\uC6D0', 'gangwon'],
+  ['\uC81C\uC8FC', 'jeju'],
+  ['\uACBD\uB0A8', 'gyeongnam'],
+  ['\uC131\uBD81\uAD6C', 'seongbukGu'],
+  ['\uCC3D\uC6D0\uC2DC', 'changwonSi'],
+  ['\uC218\uC6D0\uC2DC', 'suwonSi'],
+]);
+
+const SUPPLEMENTAL_TAG_KEYS = new Map([
+  ['\uB85C\uB9E8\uC2A4', 'romance'],
+  ['\uD0C0\uC784\uC2AC\uB9BD', 'timeSlip'],
+  ['\uD1B5\uC5ED', 'translation'],
+  ['\uAE00\uB85C\uBC8C', 'global'],
+  ['\uD574\uC678\uCD2C\uC601', 'overseasFilming'],
+  ['\uB3C4\uCFC4', 'tokyo'],
+  ['\uC2A4\uD0C0\uBC30\uC6B0', 'starActor'],
+  ['\uCD2C\uC601\uC9C0\uB370\uC774\uD130', 'filmingData'],
+  ['\uC544\uC774\uB3CC', 'idol'],
+  ['\uCE74\uD398', 'cafe'],
+  ['\uC11C\uC6B8', 'seoul'],
+  ['\uC218\uC6D0', 'suwon'],
+  ['\uD589\uAD81\uB3D9', 'haenggungDong'],
+  ['\uD654\uD64D\uBB38', 'hwahongmun'],
 ]);
 
 const CONTENT_TRANSLATIONS = {
@@ -217,52 +293,207 @@ const CONTENT_TRANSLATIONS = {
   },
 };
 
+const CAST_TRANSLATIONS = {
+  C_DRAMA_001: { en: 'Byeon Woo-seok, Kim Hye-yoon, Song Geon-hee, Lee Seung-hyub' },
+  C_DRAMA_002: { en: 'Kim Soo-hyun, Kim Ji-won, Park Sung-hoon, Kwak Dong-yeon' },
+  C_DRAMA_003: { en: 'IU, Park Bo-gum, Moon So-ri, Park Hae-joon' },
+  C_DRAMA_004: { en: 'Lee Jung-jae, Park Hae-soo, Jung Ho-yeon, Wi Ha-joon, Oh Young-soo' },
+  C_DRAMA_005: { en: 'Gong Yoo, Kim Go-eun, Lee Dong-wook, Yoo In-na, Yook Sung-jae' },
+  C_DRAMA_006: { en: 'Shin Min-a, Kim Seon-ho, Lee Sang-yi' },
+  C_DRAMA_007: { en: 'Choi Woo-shik, Kim Da-mi, Kim Sung-cheol, Roh Jeong-eui' },
+  C_DRAMA_008: { en: 'Hyun Bin, Son Ye-jin, Seo Ji-hye, Kim Jung-hyun' },
+  C_DRAMA_009: { en: 'Kim Seon-ho, Go Youn-jung, Sota Fukushi' },
+  C_DRAMA_010: { en: 'IU, Byeon Woo-seok, Noh Sang-hyun, Gong Seung-yeon' },
+  C_DRAMA_011: { en: 'Kim Hee-ae, Park Hae-joon, Han So-hee, Kim Young-min' },
+  C_DRAMA_012: { en: 'Shin Hye-sun, Kim Jung-hyun, Bae Jong-ok, Kim Tae-woo' },
+  C_MOVIE_001: { en: 'Choi Min-sik, Kim Go-eun, Yoo Hae-jin, Lee Do-hyun' },
+  C_MOVIE_002: { en: 'Ma Dong-seok, Kim Mu-yeol, Park Ji-hwan, Lee Dong-hwi' },
+  C_MOVIE_003: { en: 'Yoo Hae-jin, Park Ji-hoon, Yoo Ji-tae, Jeon Mi-do' },
+  C_MOVIE_004: { en: 'Arden Cho, Ahn Hyo-seop, May Hong, Ji-young Yoo, Yunjin Kim, Daniel Dae Kim' },
+  C_MOVIE_005: { en: 'Park Hae-il, Tang Wei, Lee Jung-hyun, Go Kyung-pyo' },
+  C_VARIETY_001: { en: 'Simon Dominic, Lee Yong-jin, Kim Ye-won, Yura' },
+  C_VARIETY_002: { en: 'Yoo Jae-suk, Jee Seok-jin, Kim Jong-kook, Haha, Song Ji-hyo, Yang Se-chan, Ji Ye-eun' },
+  C_VARIETY_003: { en: 'Kian84, Jin, Ji Ye-eun' },
+  C_VARIETY_004: { en: 'Yoo Jae-suk and guests' },
+  C_VARIETY_005: { en: 'Hong Jin-kyung, Lee Da-hee, Kyuhyun, Hanhae, Dex' },
+};
+
 const PLACE_TRANSLATIONS = {
   P_0257: {
-    en: { description: "[The 21st Century Grand Prince's Wife] A Seongbuk-dong cultural space preserving the aesthetics of a 1930s hanok." },
-    ja: { description: '［21世紀の大君夫人］1930年代の韓屋の美しさが残る城北洞の文化空間。' },
-    'zh-CN': { description: '【21世纪大君夫人】保留1930年代韩屋美感的城北洞文化空间。' },
+    en: {
+      name: 'Choi Sunu House',
+      placeName: 'Choi Sunu House',
+      description: "[The 21st Century Grand Prince's Wife] A Seongbuk-dong cultural space preserving the aesthetics of a 1930s hanok.",
+    },
+    ja: {
+      name: 'Choi Sunu House',
+      placeName: 'Choi Sunu House',
+      description: "[The 21st Century Grand Prince's Wife] Seongbuk-dong hanok culture space.",
+    },
+    'zh-CN': {
+      name: 'Choi Sunu House',
+      placeName: 'Choi Sunu House',
+      description: "[The 21st Century Grand Prince's Wife] Seongbuk-dong hanok culture space.",
+    },
   },
   P_0261: {
-    en: { description: '[Can This Love Be Translated?] A Changwon campus known as one of the drama filming locations.' },
-    ja: { description: '［この恋、通訳できますか？］昌原のロケ地として知られるキャンパス。' },
-    'zh-CN': { description: '【这段恋爱可以翻译吗？】位于昌原、以剧集拍摄地闻名的校园。' },
+    en: {
+      name: 'Kyungnam University',
+      placeName: 'Kyungnam University',
+      description: '[Can This Love Be Translated?] A Changwon campus known as one of the drama filming locations.',
+    },
+    ja: {
+      name: 'Kyungnam University',
+      placeName: 'Kyungnam University',
+      description: '[Can This Love Be Translated?] Changwon filming-location campus.',
+    },
+    'zh-CN': {
+      name: 'Kyungnam University',
+      placeName: 'Kyungnam University',
+      description: '[Can This Love Be Translated?] Changwon filming-location campus.',
+    },
   },
 };
 
+
 function translateOrFallback(path, fallback, t, locale) {
-  void locale;
   if (!path || !t) return fallback;
-  const translated = t(path);
-  return translated === path ? fallback : translated;
+  const targetLocale = locale || getCurrentLocale();
+  const translated = i18n.global.t(path, {}, { locale: targetLocale });
+  if (translated === path || isLikelyBrokenLocalizedText(translated, targetLocale)) return fallback;
+  return translated;
 }
 
 function textValue(value) {
   return String(value ?? '').trim();
 }
 
+function normalizeContentSourceTitle(value) {
+  return textValue(value).replace(/\s+/g, '');
+}
+
+const CONTENT_ID_BY_SOURCE_TITLE = new Map(
+  contents.map((content) => [normalizeContentSourceTitle(content.title), content.contentId])
+);
+
+const CONTENT_TITLE_ALIASES = new Map([
+  ['\uC624\uC9D5\uC5B4\uAC8C\uC7842', { en: 'Squid Game 2', ja: '\u30A4\u30AB\u30B2\u30FC\u30E02', 'zh-CN': '\u9C7F\u9C7C\u6E38\u620F2' }],
+  ['BTS', { en: 'BTS', ja: 'BTS', 'zh-CN': 'BTS' }],
+]);
+
+function isLikelyBrokenLocalizedText(value, locale) {
+  const source = textValue(value);
+  if (!source) return false;
+  if (/\uFFFD|\?{2,}/.test(source) || /^\?+$/.test(source)) return true;
+  return (locale === 'ja' || locale === 'zh-CN') && /[\uAC00-\uD7A3]/.test(source);
+}
+
+function usableTranslation(translation, locale) {
+  if (!translation) return null;
+  return Object.values(translation).some((value) => isLikelyBrokenLocalizedText(value, locale)) ? null : translation;
+}
+
 function fieldForLocale(item, baseName, locale) {
   const normalized = locale === 'zh-CN' ? 'ZhCn' : locale.charAt(0).toUpperCase() + locale.slice(1);
   const candidates = [
-    item?.[`${baseName}${normalized}`],
-    item?.[`${baseName}_${locale}`],
+    item?.[baseName + normalized],
+    item?.[baseName + '_' + locale],
     item?.localized?.[baseName],
     item?.localizedFields?.[baseName],
     item?.translations?.[locale]?.[baseName],
   ];
-  return candidates.find((value) => textValue(value));
+  return candidates.find((value) => textValue(value) && !isLikelyBrokenLocalizedText(value, locale));
 }
 
 function sourceValue(item, fieldName, originalFieldName) {
   return textValue(item?.[originalFieldName]) || textValue(item?.[fieldName]);
 }
 
+function sourcePlaceName(place, fieldName) {
+  const originalFieldName = fieldName === 'placeName' ? 'originalPlaceName' : 'originalName';
+  return textValue(place?.[originalFieldName])
+    || textValue(place?.[fieldName])
+    || textValue(place?.placeName)
+    || textValue(place?.name);
+}
+
+function fieldForPlaceName(place, translated, fieldName, locale) {
+  const source = sourcePlaceName(place, fieldName);
+  const candidate = translated?.[fieldName]
+    ?? translated?.placeName
+    ?? translated?.name
+    ?? fieldForLocale(place, fieldName, locale);
+
+  if (candidate && !isBrokenLocalizedPlaceName(candidate, locale)) {
+    const candidateText = textValue(candidate);
+    const shouldPreferRomanization = locale !== 'ko'
+      && hasKoreanSyllable(candidateText)
+      && hasKoreanSyllable(source);
+    if (!shouldPreferRomanization) return candidateText;
+  }
+
+  return placeNameFallbackForLocale(source, locale) || source;
+}
+
+function contentTitleFromDescription(description, locale) {
+  const source = textValue(description);
+  if (!source.startsWith('[')) return '';
+  const endIndex = source.indexOf(']');
+  if (endIndex <= 1) return '';
+  const title = source.slice(1, endIndex).trim();
+  const alias = CONTENT_TITLE_ALIASES.get(normalizeContentSourceTitle(title));
+  if (alias?.[locale]) return alias[locale];
+  const contentId = CONTENT_ID_BY_SOURCE_TITLE.get(normalizeContentSourceTitle(title));
+  return CONTENT_TRANSLATIONS[contentId]?.[locale]?.title ?? title;
+}
+
+function generatedPlaceDescription(place, locale, t) {
+  if (!place || locale === 'ko') return '';
+  const sourceDescription = sourceValue(place, 'description', 'originalDescription');
+  const sourceCategory = sourceValue(place, 'category', 'originalCategory');
+  const sourceRegion = sourceValue(place, 'region', 'originalRegion');
+  const sourceDistrict = sourceValue(place, 'district', 'originalDistrict');
+  const category = t ? localizeSystemLabel(sourceCategory, 'category', t, locale) : sourceCategory;
+  const region = t ? localizeSystemLabel(sourceRegion, 'region', t, locale) : sourceRegion;
+  const district = t ? localizeSystemLabel(sourceDistrict, 'region', t, locale) : sourceDistrict;
+  const contentTitle = contentTitleFromDescription(sourceDescription, locale);
+  const location = [district, region].filter(Boolean).join(locale === 'en' ? ', ' : '\u3001');
+  const categoryLabel = category || (locale === 'en' ? 'place' : locale === 'ja' ? '\u5834\u6240' : '\u5730\u70B9');
+  if (locale === 'en') {
+    const lowerCategory = categoryLabel.toLowerCase();
+    return contentTitle
+      ? 'A verified ' + lowerCategory + (location ? ' in ' + location : '') + ' connected to ' + contentTitle + '.'
+      : 'A verified ' + lowerCategory + (location ? ' in ' + location : '') + '.';
+  }
+  if (locale === 'ja') {
+    const placeLabel = (location ? location + '\u306E' : '') + categoryLabel;
+    return contentTitle
+      ? contentTitle + '\u306B\u95A2\u9023\u3059\u308B' + placeLabel + '\u3067\u3059\u3002'
+      : placeLabel + '\u3067\u3059\u3002';
+  }
+  if (locale === 'zh-CN') {
+    const locationText = location ? '\u4F4D\u4E8E' + location + '\uFF0C' : '';
+    const contentText = contentTitle ? '\u4E0E' + contentTitle + '\u76F8\u5173\u7684' : '';
+    return locationText + contentText + categoryLabel + '\u3002';
+  }
+  return '';
+}
+
 function keyForSystemLabel(value, kind) {
   const source = textValue(value);
   if (!source) return '';
-  if (kind === 'region') return REGION_KEYS.get(source) ?? '';
-  if (kind === 'tag') return TAG_KEYS.get(source) ?? PREFERENCE_THEME_KEYS.get(source) ?? CATEGORY_KEYS.get(source) ?? REGION_KEYS.get(source) ?? '';
-  return CATEGORY_KEYS.get(source) ?? '';
+  if (kind === 'region') return SUPPLEMENTAL_REGION_KEYS.get(source) ?? REGION_KEYS.get(source) ?? '';
+  if (kind === 'tag') {
+    return SUPPLEMENTAL_TAG_KEYS.get(source)
+      ?? TAG_KEYS.get(source)
+      ?? PREFERENCE_THEME_KEYS.get(source)
+      ?? SUPPLEMENTAL_CATEGORY_KEYS.get(source)
+      ?? CATEGORY_KEYS.get(source)
+      ?? SUPPLEMENTAL_REGION_KEYS.get(source)
+      ?? REGION_KEYS.get(source)
+      ?? '';
+  }
+  return SUPPLEMENTAL_CATEGORY_KEYS.get(source) ?? CATEGORY_KEYS.get(source) ?? '';
 }
 
 export function localizeSystemLabel(value, kind, t, locale = getCurrentLocale()) {
@@ -293,7 +524,9 @@ export function localizePreferenceOption(group, value, t, locale = getCurrentLoc
 
 export function localizeContent(content, locale = getCurrentLocale(), t) {
   if (!content) return content;
-  const translated = locale === 'ko' ? null : CONTENT_TRANSLATIONS[content.contentId]?.[locale];
+  const contentId = textValue(content.contentId);
+  const translated = locale === 'ko' ? null : usableTranslation(CONTENT_TRANSLATIONS[contentId]?.[locale], locale) ?? CONTENT_TRANSLATIONS[contentId]?.en;
+  const translatedCastNames = locale === 'ko' ? null : CAST_TRANSLATIONS[contentId]?.[locale] ?? CAST_TRANSLATIONS[contentId]?.en;
   const sourceTags = Array.isArray(content.originalTags) && content.originalTags.length ? content.originalTags : (content.tags ?? []);
   const sourceCategory = sourceValue(content, 'category', 'originalCategory');
   const sourceSubcategory = sourceValue(content, 'subcategory', 'originalSubcategory');
@@ -303,30 +536,35 @@ export function localizeContent(content, locale = getCurrentLocale(), t) {
     description: translated?.description ?? fieldForLocale(content, 'description', locale) ?? content.description,
     category: t ? localizeSystemLabel(sourceCategory, 'category', t, locale) : content.category,
     subcategory: t ? localizeSystemTag(sourceSubcategory, t, locale) : content.subcategory,
-    castNames: translated?.castNames ?? fieldForLocale(content, 'castNames', locale) ?? content.castNames,
+    castNames: translated?.castNames ?? translatedCastNames ?? fieldForLocale(content, 'castNames', locale) ?? content.castNames,
     tags: t ? sourceTags.map((tag) => localizeSystemTag(tag, t, locale)) : (content.tags ?? []),
   };
 }
 
 export function localizePlace(place, locale = getCurrentLocale(), t) {
   if (!place) return place;
-  const translated = locale === 'ko' ? null : PLACE_TRANSLATIONS[place.placeId]?.[locale];
+  const placeId = textValue(place.placeId);
+  const translated = locale === 'ko' ? null : usableTranslation(PLACE_TRANSLATIONS[placeId]?.[locale], locale) ?? PLACE_TRANSLATIONS[placeId]?.en;
   const sourceRegion = sourceValue(place, 'region', 'originalRegion');
   const sourceDistrict = sourceValue(place, 'district', 'originalDistrict');
   const sourceCategory = sourceValue(place, 'category', 'originalCategory');
+  const sourceTags = Array.isArray(place.originalTags) && place.originalTags.length ? place.originalTags : (place.tags ?? []);
   return {
     ...place,
-    name: translated?.name ?? fieldForLocale(place, 'name', locale) ?? place.name,
-    placeName: translated?.placeName ?? fieldForLocale(place, 'placeName', locale) ?? place.placeName,
+    name: fieldForPlaceName(place, translated, 'name', locale),
+    placeName: fieldForPlaceName(place, translated, 'placeName', locale),
     region: t ? localizeSystemLabel(sourceRegion, 'region', t, locale) : place.region,
     district: t ? localizeSystemLabel(sourceDistrict, 'region', t, locale) : place.district,
     category: t ? localizeSystemLabel(sourceCategory, 'category', t, locale) : place.category,
-    description: translated?.description ?? fieldForLocale(place, 'description', locale) ?? place.description,
+    tags: t ? sourceTags.map((tag) => localizeSystemTag(tag, t, locale)) : (place.tags ?? []),
+    description: translated?.description ?? fieldForLocale(place, 'description', locale) ?? (generatedPlaceDescription(place, locale, t) || place.description),
   };
 }
 
 export const systemContentCoverage = {
   localizedContentCount: Object.keys(CONTENT_TRANSLATIONS).length,
   localizedPlaceCount: Object.keys(PLACE_TRANSLATIONS).length,
-  localizedCategoryTagCount: CATEGORY_KEYS.size + REGION_KEYS.size + PREFERENCE_THEME_KEYS.size + TAG_KEYS.size,
+  localizedCastCount: Object.keys(CAST_TRANSLATIONS).length,
+  localizedCategoryTagCount: CATEGORY_KEYS.size + REGION_KEYS.size + PREFERENCE_THEME_KEYS.size + TAG_KEYS.size
+    + SUPPLEMENTAL_CATEGORY_KEYS.size + SUPPLEMENTAL_REGION_KEYS.size + SUPPLEMENTAL_TAG_KEYS.size,
 };

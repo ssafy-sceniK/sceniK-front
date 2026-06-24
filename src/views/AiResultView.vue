@@ -149,7 +149,7 @@ function post() {
     region: selectedRegion.value,
     duration: `${route.value.durationDays}\uc77c`,
     routeId: isSaved.value ? route.value.routeId : '',
-    tags: ['AI \ucf54\uc2a4', selectedRegion.value, route.value.style].filter(Boolean),
+    tags: [selectedRegion.value, route.value.style].filter(Boolean),
   }));
   router.push({ name: 'community-write', query: { from: 'ai', routeId: isSaved.value ? route.value.routeId : undefined } });
 }

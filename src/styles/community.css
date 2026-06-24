@@ -1878,7 +1878,9 @@
 .board-option-copy small,
 .feed-body h2,
 .feed-body p {
-  overflow-wrap: anywhere;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 @media (min-width: 430px) {
@@ -1906,4 +1908,38 @@
   .comment-box button {
     font-size: 11px;
   }
+}
+
+
+.write-board-grid--edit {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.post-edit-board-field {
+  margin-top: 14px;
+}
+
+.post-edit-actions {
+  margin-top: 16px;
+  padding-top: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.post-edit-actions .button {
+  box-shadow: none !important;
+}
+
+.post-detail-topline + .form-status-notice + .post-edit-board-field,
+.post-detail-topline + .post-edit-board-field {
+  margin-top: 14px;
+}
+
+.post-edit-actions + .post-gallery,
+.post-edit-actions + .attachment-preview-list {
+  margin-top: 12px;
+}
+
+.post-gallery + .attachment-preview-list {
+  margin-top: 10px;
 }

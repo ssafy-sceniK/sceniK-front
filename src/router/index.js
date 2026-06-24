@@ -92,7 +92,7 @@ const routes = [
   { path: '/notifications', name: 'notifications', component: NotificationsView },
   { path: '/settings', name: 'settings', component: SettingsView },
   { path: '/notice', name: 'notice', component: NoticeListView },
-  { path: '/notice/:id', name: 'notice-detail', component: NoticeListView },
+  { path: '/notice/:noticeId', name: 'notice-detail', component: NoticeListView },
   { path: '/admin', redirect: '/admin/contents' },
   { path: '/admin/contents', name: 'admin-contents', component: AdminView },
   { path: '/admin/places', name: 'admin-places', component: AdminView },

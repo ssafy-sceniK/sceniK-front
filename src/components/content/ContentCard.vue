@@ -11,8 +11,8 @@ const props = defineProps({
 
 const { locale, t } = useI18n();
 const imageUrl = computed(() => getContentImageUrl(props.content));
-const displayContent = computed(() => localizeContent(props.content, locale.value));
-const categoryLabel = computed(() => localizeSystemLabel(props.content.category, 'category', t, locale.value));
+const displayContent = computed(() => localizeContent(props.content, locale.value, t));
+const categoryLabel = computed(() => displayContent.value?.category || localizeSystemLabel(props.content.category, 'category', t, locale.value));
 
 function useFallbackImage(event) {
   applyNeutralContentImageFallback(event);

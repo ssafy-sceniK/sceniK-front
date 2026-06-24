@@ -9,6 +9,7 @@ import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { isGenericAiCourseTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
@@ -20,11 +21,11 @@ const uiStore = useUiStore();
 const { t } = useI18n();
 
 const boards = [
-  { id: 'drama', labelKey: 'content.category.drama', tagKey: 'content.category.drama' },
-  { id: 'movie', labelKey: 'content.category.movie', tagKey: 'content.category.movie' },
-  { id: 'idol', labelKey: 'content.category.idol', tagKey: 'content.category.idol' },
-  { id: 'variety', labelKey: 'content.category.variety', tagKey: 'content.category.variety' },
-  { id: 'region', labelKey: 'community.write.boards.region', tagKey: 'my.activity.aiCourse' },
+  { id: 'drama', labelKey: 'community.boardLabels.drama.short', tagKey: 'content.category.drama' },
+  { id: 'movie', labelKey: 'community.boardLabels.movie.short', tagKey: 'content.category.movie' },
+  { id: 'idol', labelKey: 'community.boardLabels.idol.short', tagKey: 'content.category.idol' },
+  { id: 'variety', labelKey: 'community.boardLabels.variety.short', tagKey: 'content.category.variety' },
+  { id: 'region', labelKey: 'community.boardLabels.region.short', tagKey: 'community.write.boards.region' },
 ];
 
 const selectedBoard = ref('drama');
@@ -83,7 +84,7 @@ function uniqueValues(values) {
 
 function isSystemTag(tag) {
   const systemTags = boards.map((board) => t(board.tagKey));
-  return systemTags.includes(tag) || tag === t('my.activity.aiCourse');
+  return systemTags.includes(tag) || isGenericAiCourseTag(tag);
 }
 
 function normalizeHashtag(value) {
@@ -244,7 +245,6 @@ function buildTags() {
   return uniqueValues([
     selectedBoardTag.value,
     ...selectedHashtags.value,
-    selectedCourse.value ? t('my.activity.aiCourse') : '',
     selectedCourse.value?.region ?? uiStore.courseConditions.region,
   ]);
 }
@@ -355,7 +355,7 @@ async function createPost() {
               :placeholder="t('community.write.tagPlaceholder')"
               @keydown="handleHashtagKeydown"
             />
-            <button type="button" @click="addHashtag()">{{ t('community.write.add') }}</button>
+            <button type="button" :aria-label="t('community.write.addHashtag')" :title="t('community.write.addHashtag')" @click="addHashtag()">+</button>
           </div>
           <div v-if="selectedHashtags.length" class="chip-row wrap write-hashtag-row selected-hashtag-row">
             <button

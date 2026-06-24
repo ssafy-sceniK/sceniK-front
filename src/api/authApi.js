@@ -35,7 +35,7 @@ export function normalizeUser(user = {}) {
     preferences,
     authProvider,
     loginProvider: authProvider,
-    language: normalizeLocale(user.language) || 'ko',
+    language: normalizeLocale(user.language),
     preferencesCompleted: Boolean(user.preferencesCompleted ?? hasCompletePreferences(preferences)),
     password: undefined,
   };

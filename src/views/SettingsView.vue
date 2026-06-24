@@ -3,9 +3,9 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
-import AuthSessionPanel from '../components/auth/AuthSessionPanel.vue';
+import AppLanguageSelector from '../components/common/AppLanguageSelector.vue';
 import { useUiStore } from '../stores/uiStore.js';
-import { languageOptions, normalizeLocale, setLocale } from '../i18n/index.js';
+import { normalizeLocale, setLocale } from '../i18n/index.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -16,7 +16,6 @@ const theme = computed({
   get: () => uiStore.theme,
   set: (value) => uiStore.setTheme(value),
 });
-const sessionNotice = ref(null);
 const notificationToggles = ref({
   route: true,
   like: true,
@@ -30,34 +29,27 @@ watch(() => uiStore.currentUser?.language, (language) => {
   }
 }, { immediate: true });
 
-async function changeLanguage(language) {
-  const normalized = setLocale(language);
+async function saveLanguagePreference(language) {
+  const normalized = normalizeLocale(language) || 'ko';
   languageSaving.value = true;
-  const saved = await uiStore.updateLanguage(normalized);
-  languageSaving.value = false;
-  uiStore.notify(saved ? t('settings.languageSaved') : t('settings.languageSaveFailed'), saved ? 'success' : 'info');
+
+  try {
+    const saved = await uiStore.updateLanguage(normalized);
+    uiStore.notify(saved ? t('settings.languageSaved') : t('settings.languageSaveFailed'), saved ? 'success' : 'info');
+  } catch {
+    uiStore.notify(t('settings.languageSaveFailed'), 'info');
+  } finally {
+    languageSaving.value = false;
+  }
 }
 
 async function handleLogout() {
-  sessionNotice.value = {
-    tone: 'info',
-    title: t('settings.cleanup.kdd4e763b65'),
-    text: t('settings.cleanup.kfbcad8ad24'),
-  };
   try {
     await uiStore.logout();
-    sessionNotice.value = {
-      tone: 'success',
-      title: t('settings.cleanup.kc86f11a43e'),
-      text: t('settings.cleanup.k97b4fb7567'),
-    };
+    uiStore.notify(t('settings.cleanup.kc86f11a43e'), 'success');
     await router.replace('/');
   } catch {
-    sessionNotice.value = {
-      tone: 'error',
-      title: t('settings.cleanup.k8ca345a8bc'),
-      text: t('settings.cleanup.k03215b6cf5'),
-    };
+    uiStore.notify(t('settings.cleanup.k03215b6cf5'), 'info');
   }
 }
 </script>
@@ -68,18 +60,7 @@ async function handleLogout() {
       <div class="settings-section">
         <h2>{{ t('language.selectorTitle') }}</h2>
         <p class="settings-helper">{{ t('language.selectorDescription') }}</p>
-        <div class="settings-card">
-          <button
-            v-for="option in languageOptions"
-            :key="option.value"
-            type="button"
-            :class="{ selected: activeLanguage === option.value }"
-            :disabled="languageSaving"
-            @click="changeLanguage(option.value)"
-          >
-            <span>{{ option.label }}</span><b></b>
-          </button>
-        </div>
+        <AppLanguageSelector variant="settings" :disabled="languageSaving" @change="saveLanguagePreference" />
       </div>
 
       <div class="settings-section">
@@ -126,15 +107,6 @@ async function handleLogout() {
             <em aria-hidden="true">›</em>
           </RouterLink>
         </div>
-      </div>
-
-      <div class="settings-section">
-        <h2>{{ t('settings.session') }}</h2>
-        <AuthSessionPanel
-          :user="uiStore.currentUser"
-          :notice="sessionNotice"
-          @logout="handleLogout"
-        />
       </div>
     </section>
   </AppLayout>

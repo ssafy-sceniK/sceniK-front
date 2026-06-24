@@ -1,20 +1,17 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
+import { filterGenericAiCourseTags } from '../../utils/tags.js';
 
-const { t } = useI18n();
 const props = defineProps({
   course: { type: Object, required: true },
   variant: { type: String, default: 'visual' },
   rank: { type: Number, default: 0 },
-  hideGenericAiTag: { type: Boolean, default: false },
+  hideGenericAiTag: { type: Boolean, default: true },
 });
 
-const genericAiCourseTags = new Set(['AI Course', 'AI \ucf54\uc2a4']);
 const visibleTags = computed(() => {
   const tags = Array.isArray(props.course.tags) ? props.course.tags : [];
-  if (!props.hideGenericAiTag) return tags;
-  return tags.filter((tag) => !genericAiCourseTags.has(String(tag).trim()));
+  return props.hideGenericAiTag ? filterGenericAiCourseTags(tags) : tags;
 });
 
 function routePlaceIds(course) {

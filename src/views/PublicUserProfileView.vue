@@ -9,6 +9,7 @@ import CourseCard from '../components/course/CourseCard.vue';
 import { fetchPublicProfile } from '../api/followApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { filterGenericAiCourseTags } from '../utils/tags.js';
 
 const { t } = useI18n();
 
@@ -51,6 +52,15 @@ async function toggleFollow() {
 
 function openCourse(course) {
   router.push({ name: 'course-detail', params: { routeId: course.routeId } });
+}
+
+function displayPostTags(post) {
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
+}
+
+function publicPostBoardLabel(post) {
+  return displayPostTags(post)[0] || post.region || t('autoPass.ui_1f458d0b46');
 }
 
 onMounted(loadProfile);
@@ -115,7 +125,7 @@ watch(() => route.params.userId, loadProfile);
             class="course-link-card"
             @click="openCourse(course)"
           >
-            <CourseCard :course="course" />
+            <CourseCard :course="course" hide-generic-ai-tag />
           </button>
           <EmptyState
             v-if="!profile.savedCourses.length"
@@ -135,7 +145,7 @@ watch(() => route.params.userId, loadProfile);
             :to="`/community/post/${post.postId}`"
           >
             <div class="my-post-top">
-              <span class="my-post-board">{{ (post.tags ?? [])[0] || post.region || t('autoPass.ui_1f458d0b46') }}</span>
+              <span class="my-post-board">{{ publicPostBoardLabel(post) }}</span>
               <small>{{ post.date }}</small>
             </div>
             <h2>{{ post.title }}</h2>

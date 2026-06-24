@@ -68,7 +68,7 @@ import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/r
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
-import { i18n, normalizeLocale, setLocale } from '../i18n/index.js';
+import { getCurrentLocale, i18n, normalizeLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
@@ -85,6 +85,12 @@ function applyLanguage(language) {
   const normalized = normalizeLocale(language) || 'ko';
   setLocale(normalized);
   return normalized;
+}
+
+function resolveSessionLanguage(userLanguage, currentLanguage, pendingAuthLanguage) {
+  const localLanguage = normalizeLocale(currentLanguage || getCurrentLocale()) || 'ko';
+  const remoteLanguage = normalizeLocale(userLanguage);
+  return pendingAuthLanguage ? localLanguage : (remoteLanguage || localLanguage);
 }
 
 function formatWon(value) {
@@ -105,6 +111,7 @@ function defaultState() {
   return {
     theme: 'light',
     language: 'ko',
+    languagePendingAuth: false,
     onboardingSeen: false,
     currentUser: null,
     users: [],
@@ -155,7 +162,8 @@ function readState() {
     const state = raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
     state.selectedContentId = '';
     state.selectedContentIds = [];
-    state.language = normalizeLocale(state.currentUser?.language || state.language) || 'ko';
+    const hasStoredToken = Boolean(readAccessToken());
+    state.language = normalizeLocale((hasStoredToken ? state.currentUser?.language : '') || state.language) || 'ko';
     const dateRange = ensureDateRange(state.courseConditions);
     const conditionDefaults = defaultState().courseConditions;
     const budgetMin = Number(state.courseConditions?.budgetMin ?? conditionDefaults.budgetMin);
@@ -545,10 +553,12 @@ export const useUiStore = defineStore('ui', {
       Object.assign(this, readState());
       this.theme = this.theme === 'dark' ? 'dark' : 'light';
       applyColorTheme(this.theme);
-      this.language = applyLanguage(this.currentUser?.language || this.language);
+      const hasToken = Boolean(readAccessToken());
+      this.language = applyLanguage((hasToken ? this.currentUser?.language : '') || getCurrentLocale() || this.language);
       this.users = [];
-      if (!readAccessToken()) {
+      if (!hasToken) {
         this.currentUser = null;
+        this.persist();
         return;
       }
       this.syncSessionFromServer();
@@ -608,12 +618,14 @@ export const useUiStore = defineStore('ui', {
     },
     async updateLanguage(language) {
       const normalized = applyLanguage(language);
+      const hasAuthenticatedSession = Boolean(this.currentUser && readAccessToken());
       this.language = normalized;
+      this.languagePendingAuth = !hasAuthenticatedSession || this.languagePendingAuth;
       if (this.currentUser) {
         this.currentUser = { ...this.currentUser, language: normalized };
       }
       this.persist();
-      if (!this.currentUser || !readAccessToken()) return true;
+      if (!hasAuthenticatedSession) return true;
       try {
         const normalizedPreferences = normalizePreferenceSelection(this.currentUser.preferences);
         const updated = await updateMe({
@@ -629,10 +641,12 @@ export const useUiStore = defineStore('ui', {
           preferences: normalizePreferenceSelection(updated.preferences ?? normalizedPreferences),
         };
         this.language = applyLanguage(this.currentUser.language);
+        this.languagePendingAuth = false;
         this.persist();
         return true;
       } catch (error) {
         this.authError = apiErrorMessage(error, storeT('errors.store.k2'));
+        this.languagePendingAuth = true;
         this.persist();
         return false;
       }
@@ -656,8 +670,10 @@ export const useUiStore = defineStore('ui', {
       if (!readAccessToken()) return;
       this.authLoading = true;
       try {
-        this.currentUser = await fetchMe();
-        this.language = applyLanguage(this.currentUser.language || this.language);
+        const user = await fetchMe();
+        const resolvedLanguage = resolveSessionLanguage(user.language, this.language, this.languagePendingAuth);
+        this.currentUser = { ...user, language: resolvedLanguage };
+        this.language = applyLanguage(resolvedLanguage);
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -838,10 +854,13 @@ export const useUiStore = defineStore('ui', {
       this.authLoading = true;
       this.authError = '';
       try {
-        const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname });
+        const requestedLanguage = normalizeLocale(this.language || getCurrentLocale()) || 'ko';
+        const session = await signupRequest({ email: safeEmail, password, nickname: safeNickname, language: requestedLanguage });
         saveAccessToken(session.accessToken, session.refreshToken);
-        this.currentUser = session.user;
-        this.language = applyLanguage(this.currentUser.language || this.language);
+        const resolvedLanguage = resolveSessionLanguage(session.user.language, requestedLanguage, true);
+        this.currentUser = { ...session.user, language: resolvedLanguage };
+        this.language = applyLanguage(resolvedLanguage);
+        this.languagePendingAuth = true;
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -867,8 +886,9 @@ export const useUiStore = defineStore('ui', {
       try {
         const session = await loginRequest({ email: safeEmail, password });
         saveAccessToken(session.accessToken, session.refreshToken);
-        this.currentUser = session.user;
-        this.language = applyLanguage(this.currentUser.language || this.language);
+        const resolvedLanguage = resolveSessionLanguage(session.user.language, this.language, this.languagePendingAuth);
+        this.currentUser = { ...session.user, language: resolvedLanguage };
+        this.language = applyLanguage(resolvedLanguage);
         this.onboardingSeen = this.preferencesCompleted;
         await this.loadSavedCourses();
         await this.loadEngagementState();
@@ -890,8 +910,9 @@ export const useUiStore = defineStore('ui', {
         const session = await exchangeOAuthCode(code);
         if (!session.accessToken) throw new Error(storeT('errors.store.kl'));
         saveAccessToken(session.accessToken, session.refreshToken);
-        this.currentUser = session.user;
-        this.language = applyLanguage(this.currentUser.language || this.language);
+        const resolvedLanguage = resolveSessionLanguage(session.user.language, this.language, this.languagePendingAuth);
+        this.currentUser = { ...session.user, language: resolvedLanguage };
+        this.language = applyLanguage(resolvedLanguage);
         this.onboardingSeen = this.preferencesCompleted;
         await Promise.all([
           this.loadSavedCourses(),
@@ -940,12 +961,16 @@ export const useUiStore = defineStore('ui', {
                 language: this.currentUser.language || this.language,
               })
             : {};
+          const savedLanguage = normalizeLocale(updated.language) || this.currentUser.language || this.language;
           this.currentUser = {
             ...this.currentUser,
             ...updated,
+            language: savedLanguage,
             preferences: normalized,
             preferencesCompleted: hasCompletePreferences(normalized),
           };
+          this.language = applyLanguage(savedLanguage);
+          this.languagePendingAuth = false;
         } catch (error) {
           this.currentUser.preferences = normalized;
           this.currentUser.preferencesCompleted = hasCompletePreferences(normalized);
@@ -1006,7 +1031,7 @@ export const useUiStore = defineStore('ui', {
       this.authError = '';
       try {
         const normalizedPreferences = normalizePreferenceSelection(preferences ?? this.currentUser.preferences);
-        const normalizedLanguage = normalizeLocale(language ?? this.currentUser.language ?? this.language) || 'ko';
+        const normalizedLanguage = normalizeLocale(language || this.currentUser.language || this.language) || 'ko';
         const updated = await updateMe({
           nickname: safeNickname,
           bio: bio?.trim() ?? '',
@@ -1022,6 +1047,8 @@ export const useUiStore = defineStore('ui', {
           preferences: normalizePreferenceSelection(updated.preferences ?? normalizedPreferences),
           preferencesCompleted: hasCompletePreferences(updated.preferences ?? normalizedPreferences),
         };
+        this.language = applyLanguage(this.currentUser.language);
+        this.languagePendingAuth = false;
         this.persist();
         this.notify(storeT('toast.store.kx'));
         return true;
@@ -1152,7 +1179,7 @@ export const useUiStore = defineStore('ui', {
           ...normalized,
           duration: normalized.duration ?? normalized.durationDays,
           places: placeIds,
-          tags: normalized.tags ?? ['AI \ucf54\uc2a4', normalized.region, normalized.style].filter(Boolean),
+          tags: normalized.tags ?? [normalized.region, normalized.style].filter(Boolean),
         };
         console.info('AI route save request payload', summarizeRoutePayload(serializeRoutePayload(requestPayload)));
         const saved = normalizeCourseToRoute(await createRoute(requestPayload));
@@ -1283,7 +1310,7 @@ export const useUiStore = defineStore('ui', {
           imageUrl: payload.imageUrl ?? null,
           prefix: payload.prefix ?? '',
           attachments: payload.attachments ?? [],
-          tags: payload.tags || ['AI \ucf54\uc2a4', this.courseConditions.region],
+          tags: payload.tags || [this.courseConditions.region].filter(Boolean),
         });
         this.communityPosts = mergeCommunityPost(this.communityPosts, post);
         this.notify(storeT('toast.store.k1l'));

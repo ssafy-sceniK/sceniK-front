@@ -824,3 +824,12 @@
   font-weight: 600;
   text-align: center;
 }
+
+/* multilingual notice wrapping guard */
+.notice-row span,
+.notice-detail-card h2,
+.notice-detail-card p {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}

@@ -571,3 +571,47 @@
 .translation-error {
   color: var(--color-danger, #d64545);
 }
+
+/* multilingual compact controls guard */
+.button,
+.chip,
+.segmented-sort__option,
+.mode-toggle button,
+.list-control-label,
+.list-result-count {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.button,
+.chip,
+.segmented-sort__option,
+.mode-toggle button {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.chip,
+.page-intro h1,
+.page-intro p,
+.login-intro h1,
+.login-intro p,
+.list-control-label,
+.list-result-count {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+@media (max-width: 380px) {
+  .button {
+    padding-inline: 16px;
+  }
+
+  .chip,
+  .segmented-sort__option,
+  .mode-toggle button {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}

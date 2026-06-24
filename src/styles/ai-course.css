@@ -182,7 +182,7 @@
   font-size: 12px;
   font-weight: 750;
   line-height: 1.35;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 
@@ -191,13 +191,17 @@
 }
 
 .preference-intro h1 {
-  max-width: 330px;
+  max-width: 100%;
   margin: 0 0 9px;
   color: var(--text);
-  font-size: 25px;
+  font-size: clamp(20px, 5.35vw, 23px);
   font-weight: 800;
-  line-height: 1.28;
+  line-height: 1.22;
   letter-spacing: 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .preference-intro p {
@@ -208,6 +212,20 @@
   font-weight: 500;
   line-height: 1.55;
   letter-spacing: 0;
+}
+
+
+@media (max-width: 390px) {
+  .preference-intro h1 {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 360px) {
+  .preference-intro h1 {
+    font-size: 20px;
+    white-space: normal;
+  }
 }
 
 .preference-screen .sticky-actions {
@@ -891,7 +909,7 @@
   font-size: 19px;
   line-height: 1.35;
   letter-spacing: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .ai-result-meta {
@@ -907,7 +925,7 @@
 
 .ai-result-scroll .course-save-status-panel dd {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .ai-result-lodging-card {
@@ -1404,7 +1422,7 @@ box-shadow: 0 22px 48px rgba(15, 23, 42, 0.22);
   min-width: 0;
   color: var(--text);
   font-weight: 700;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .condition-confirm-actions {

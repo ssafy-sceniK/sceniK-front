@@ -189,6 +189,7 @@ const bodyText = computed(() => props.description || props.text);
 }
 
 .empty-state__copy {
+  width: min(100%, 360px);
   display: grid;
   gap: 5px;
   min-width: 0;
@@ -203,16 +204,20 @@ const bodyText = computed(() => props.description || props.text);
 }
 
 .empty-state p {
-  max-width: 296px;
+  width: 100%;
+  max-width: 360px;
   margin: 0 auto;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .empty-state__actions {
   width: 100%;
-  max-width: 276px;
+  max-width: 320px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -258,7 +263,7 @@ const bodyText = computed(() => props.description || props.text);
   }
 
   .empty-state p {
-    max-width: 248px;
+    max-width: 100%;
   }
 
   .empty-state__actions {
