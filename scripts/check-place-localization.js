@@ -63,10 +63,14 @@ function isSuspiciousFullRomanization(value) {
   const text = String(value ?? '').trim();
   const compact = text.replace(/\s+/g, '');
   const romanizedSuffix = /(bakmulgwan|misulgwan|munhwagonggan|gongwon|haebyeon|haesuyokjang|yeok|hakgyo|daehakgyo|gung|maeul|geori|sijang|seongdang|gyohoe|dosogwan|daegyo|seom|teowo|seukai)$/i;
+  const brokenBrandOrFacilityToken = /(rotde|ekowoldeu|beoseu|jeongryujang|syupeo|sypeo|seteu|seukaiwokeu|wokeohil|aeseuton|hauseu|okeu|seuteikeu)/i;
   const longUnsegmentedToken = text
     .split(/\s+/)
     .some((token) => /^[A-Z][a-z]{23,}$/.test(token));
-  return romanizedSuffix.test(compact) || longUnsegmentedToken || /Rotdewoldeutawo|Bukchondongyangmunhwabakmulgwan/i.test(text);
+  return romanizedSuffix.test(compact)
+    || brokenBrandOrFacilityToken.test(text)
+    || longUnsegmentedToken
+    || /Rotdewoldeutawo|Bukchondongyangmunhwabakmulgwan/i.test(text);
 }
 
 function placeById(places, placeId) {
@@ -85,6 +89,20 @@ const expectedSamples = [
   ['P_0255', 'en', "BaekInje's House Museum"],
   ['P_0257', 'en', 'Choi Sunu House'],
   ['P_0267', 'en', 'Korea Furniture Museum'],
+  ['P_0020', 'en', 'Grand Walkerhill Seoul'],
+  ['P_0039', 'en', 'Gyeongwonjae Ambassador Incheon'],
+  ['P_0064', 'en', 'Lotte Department Store Gangnam Branch'],
+  ['P_0083', 'en', "Wolfgang's Steakhouse"],
+  ['P_0114', 'en', 'Oakwood Premier Incheon'],
+  ['P_0138', 'en', 'Oryukdo Skywalk'],
+  ['P_0167', 'en', 'Mungyeong Yongdu-ri Super Set'],
+  ['P_0169', 'en', 'Mungyeong Eco World'],
+  ['P_0170', 'en', 'Grand Walkerhill Seoul Aston House'],
+  ['P_0168', 'en', 'Mungyeong Rail Bike Gurang-ri Station'],
+  ['P_0171', 'en', 'Aqua Planet Ilsan'],
+  ['P_0172', 'en', 'Sayuwon'],
+  ['P_0173', 'en', 'Chungju Geonji Village'],
+  ['P_0262', 'en', 'BTS Bus Stop'],
 ];
 
 for (const [placeId, locale, expected] of expectedSamples) {
@@ -139,9 +157,9 @@ if (process.argv.includes('--report')) {
       `- Total CSV rows: ${summary.totalRows}`,
       `- Rows with image_url: ${summary.rowsWithImages}`,
       `- Suspicious full romanization: ${summary.suspiciousFullRomanization}`,
-      '- Required samples checked: Lotte World Tower Seoul Sky, Bukchon Asian Cultural Art Museum, Korean Stone Art Museum, BaekInje\'s House Museum, Choi Sunu House, Korea Furniture Museum',
+      '- Required samples checked: Lotte World Tower Seoul Sky, Bukchon Asian Cultural Art Museum, Korean Stone Art Museum, BaekInje\'s House Museum, Choi Sunu House, Korea Furniture Museum, Mungyeong Eco World, BTS Bus Stop, Oakwood Premier Incheon, Wolfgang\'s Steakhouse, Oryukdo Skywalk, Grand Walkerhill Seoul Aston House, Mungyeong Rail Bike Gurang-ri Station, Aqua Planet Ilsan, Sayuwon, Chungju Geonji Village',
       '',
-      'This audit flags long concatenated romanization and romanized Korean facility suffixes such as bakmulgwan, gongwon, gung, hakgyo, haebyeon, yeok, maeul, and geori.',
+      'This audit flags long concatenated romanization, romanized Korean facility suffixes, and broken brand/facility tokens such as ekowoldeu, beoseujeongryujang, syupeo seteu, seukaiwokeu, wokeohil, hauseu, okeu, bakmulgwan, gongwon, hakgyo, haebyeon, yeok, maeul, and geori.',
     ].join('\n'),
     'utf8',
   );
