@@ -129,8 +129,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleBoardSelectorPointerDown);
   document.removeEventListener('keydown', handleImageViewerKeydown);
+  if (editingPost.value) resetPostEditState();
 });
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
+watch(() => `${route.name ?? ''}:${route.params.id ?? ''}`, (nextRouteKey, previousRouteKey) => {
+  if (editingPost.value && nextRouteKey !== previousRouteKey) resetPostEditState();
+});
 watch(() => route.query.board, () => {
   boardSelectorOpen.value = false;
 });
@@ -564,12 +568,17 @@ function startPostEdit() {
   postNotice.value = null;
 }
 
-function cancelPostEdit() {
+function resetPostEditState() {
   editingPost.value = false;
   postEditTitle.value = '';
   postEditBody.value = '';
   postEditHashtags.value = [];
   postEditHashtagInput.value = '';
+  postNotice.value = null;
+}
+
+function cancelPostEdit() {
+  resetPostEditState();
 }
 
 async function savePostEdit() {
@@ -602,12 +611,7 @@ async function savePostEdit() {
   });
   postActionLoading.value = false;
   if (updated) {
-    cancelPostEdit();
-    postNotice.value = {
-      tone: 'success',
-      title: t('communityAuto2.ks'),
-      text: t('communityAuto2.kt'),
-    };
+    resetPostEditState();
     return;
   }
   postNotice.value = {
@@ -1024,7 +1028,7 @@ async function nativeShare() {
             </div>
           </article>
 
-          <CommentThread :count="selectedCommentCount">
+          <CommentThread v-if="!editingPost" :count="selectedCommentCount">
             <FormStatusNotice
               v-if="commentNotice"
               compact

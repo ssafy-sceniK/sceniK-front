@@ -27,7 +27,7 @@ function goBackToList() {
 </script>
 
 <template>
-  <AppLayout :title="t('notice.title')" back :back-to="isDetail ? '/notice' : ''">
+  <AppLayout :title="t('notice.title')" back :back-to="isDetail ? '/notice' : '/home'">
     <section v-if="!isDetail" class="list-screen notice-screen">
       <RouterLink v-for="notice in noticeItems" :key="notice.id" :to="`/notice/${noticeRouteId(notice.id)}`" class="notice-row">
         <span>{{ notice.title }}</span>
