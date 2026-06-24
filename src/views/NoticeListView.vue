@@ -1,15 +1,18 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import { notices } from '../data/mockData.js';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const selectedNotice = computed(() => notices.find((item) => item.id === route.params.id));
 </script>
 
 <template>
-  <AppLayout title="공지사항" back>
+  <AppLayout :title="t('notice.cleanup.kd594d485f9')" back>
     <section class="list-screen notice-screen">
       <RouterLink v-for="notice in notices" :key="notice.id" :to="`/notice/${notice.id}`" class="notice-row">
         <span>{{ notice.title }}</span>
@@ -18,7 +21,7 @@ const selectedNotice = computed(() => notices.find((item) => item.id === route.p
       <article v-if="selectedNotice" class="panel-card notice-detail-card">
         <small>{{ selectedNotice.date }}</small>
         <h2>{{ selectedNotice.title }}</h2>
-        <p>sceniK MVP에서 제공하는 안내입니다. 실제 서비스에서는 백엔드 공지 API로 교체됩니다.</p>
+        <p>{{ t('notice.cleanup.k4bf64c7200') }}</p>
       </article>
     </section>
   </AppLayout>

@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -9,9 +10,11 @@ import { fetchPlaces } from '../api/placeApi.js';
 import { contentPlaces, places as catalogPlaces } from '../data/mockData.js';
 import { useUiStore } from '../stores/uiStore.js';
 
-const VISIT_WORTHY_KEYWORDS = ['촬영', '관광', '궁궐', '전통', '마을', '거리', '카페', '공원', '문화', '시장', '전망', '해변', '미술관', '박물관'];
-const REST_KEYWORDS = ['맛집', '공연', '서점', '갤러리'];
-const WEAK_STOP_KEYWORDS = ['학교', '호텔', '모텔', '리조트', '상점', '매장', '회사', '병원'];
+const { t } = useI18n();
+
+const VISIT_WORTHY_KEYWORDS = ['\ucd2c\uc601', '\uad00\uad11', '\uad81\uad90', '\uc804\ud1b5', '\ub9c8\uc744', '\uac70\ub9ac', '\uce74\ud398', '\uacf5\uc6d0', '\ubb38\ud654', '\uc2dc\uc7a5', '\uc804\ub9dd', '\ud574\ubcc0', '\ubbf8\uc220\uad00', '\ubc15\ubb3c\uad00'];
+const REST_KEYWORDS = ['\ub9db\uc9d1', '\uacf5\uc5f0', '\uc11c\uc810', '\uac24\ub7ec\ub9ac'];
+const WEAK_STOP_KEYWORDS = ['\ud559\uad50', '\ud638\ud154', '\ubaa8\ud154', '\ub9ac\uc870\ud2b8', '\uc0c1\uc810', '\ub9e4\uc7a5', '\ud68c\uc0ac', '\ubcd1\uc6d0'];
 
 const route = useRoute();
 const router = useRouter();
@@ -136,7 +139,7 @@ function cloneDays(value) {
         ...candidate,
         ...stop,
         placeName: stop.placeName ?? stop.name ?? candidate.placeName ?? candidate.name,
-        category: stop.category ?? stop.placeCategory ?? stop.type ?? candidate.category ?? '장소',
+        category: stop.category ?? stop.placeCategory ?? stop.type ?? candidate.category ?? '\uc7a5\uc18c',
         address: stop.address ?? candidate.address,
         latitude: stop.latitude ?? candidate.latitude,
         longitude: stop.longitude ?? candidate.longitude,
@@ -188,7 +191,7 @@ function renumberDays(days) {
 function placeName(placeId) {
   return candidateById.value.get(placeId)?.name
     ?? candidateById.value.get(placeId)?.placeName
-    ?? '검증 장소';
+    ?? t('autoPass.ui_46de3a5a60');
 }
 
 function stopKey(dayIndex, stopIndex) {
@@ -216,7 +219,7 @@ function normalizeCatalogCandidate(place, relatedContentId = '') {
     longitude: place.longitude,
     relatedContentId: contentId,
     relatedContentIds: place.relatedContentIds ?? (contentId ? [contentId] : []),
-    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '선택 콘텐츠',
+    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '\uc120\ud0dd \ucf58\ud150\uce20',
     sceneDescription: place.description,
     verified: place.verified !== false,
     imageUrl: place.imageUrl,
@@ -238,8 +241,8 @@ function normalizeSearchPlace(place) {
     latitude: place.latitude,
     longitude: place.longitude,
     relatedContentId: course.value?.contentId ?? course.value?.contentIds?.[0] ?? 'db-place-search',
-    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '저장 코스',
-    sceneDescription: place.description ?? '검증된 장소입니다.',
+    relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '\uc800\uc7a5 \ucf54\uc2a4',
+    sceneDescription: place.description ?? '\uac80\uc99d\ub41c \uc7a5\uc18c\uc785\ub2c8\ub2e4.',
     verified: place.verified !== false,
     imageUrl: place.imageUrl,
   };
@@ -295,9 +298,9 @@ function sortCandidatePlaces(list = []) {
 
 function candidateReason(candidate = {}) {
   if (isSelectedContentCandidate(candidate)) {
-    return `${candidate.relatedContentTitle ?? '선택 콘텐츠'} 분위기와 연결된 장소입니다.`;
+    return t('autoPass.ui_c236ae5460', { value0: candidate.relatedContentTitle ?? t('autoPass.ui_11b6b0909a') });
   }
-  return `${candidate.region ?? '같은 지역'}에서 함께 들르기 좋은 ${candidate.category ?? '장소'}입니다.`;
+  return t('autoPass.ui_c613d01caf', { value0: candidate.region ?? t('autoPass.ui_476d4b9ddd'), value1: candidate.category ?? t('autoPass.ui_6efb3787d7') });
 }
 
 async function searchVerifiedPlaces() {
@@ -315,8 +318,8 @@ async function searchVerifiedPlaces() {
     const query = placeSearchKeyword.value.trim().toLowerCase();
     searchedPlaces.value = [];
     placeSearchError.value = getUserMessage(error, query
-      ? '장소 검색에 연결하지 못했습니다. 검색어를 바꿔 다시 시도해 주세요.'
-      : '장소 검색에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      ? t('autoPass.ui_d9176c2e57')
+      : t('autoPass.ui_f8f5a64bec'));
   } finally {
     placeSearchLoading.value = false;
   }
@@ -413,8 +416,8 @@ function moveDraggedDay(targetDayIndex) {
   candidateTargetDay.value = Math.min(candidateTargetDay.value, draftDays.value.length) || 1;
   editToast.value = {
     tone: 'success',
-    title: 'Day 순서를 변경했습니다.',
-    text: '저장하면 변경한 Day 순서가 코스에 반영됩니다.',
+    title: t('autoPass.ui_319c625989'),
+    text: t('autoPass.ui_ebe2950a2a'),
   };
   finishDayDrag();
 }
@@ -499,7 +502,7 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
   if (!sourceDay || !targetDay) return;
 
   if (sourceDay.places.length <= 1 && source.dayIndex !== targetDayIndex) {
-    uiStore.notify('각 Day에는 최소 1개 장소가 필요합니다.');
+    uiStore.notify(t('autoPass.ui_589f804359'));
     finishDrag();
     return;
   }
@@ -513,7 +516,7 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
   draftDays.value = renumberDays(days);
   editToast.value = {
     tone: 'success',
-    title: '순서를 변경했습니다.',
+    title: t('autoPass.ui_d30810f617'),
     text: '',
   };
   finishDrag();
@@ -522,10 +525,10 @@ function moveDraggedStop(targetDayIndex, targetStopIndex) {
 function addCandidateToDay(dayIndex, candidate) {
   if (!candidate || !draftDays.value[dayIndex]) return;
   if (usedPlaceIds.value.has(candidate.placeId)) {
-    saveError.value = `${candidate.name ?? candidate.placeName}는 이미 코스에 포함되어 있습니다.`;
+    saveError.value = t('autoPass.ui_51d13ab7ee', { value0: candidate.name ?? candidate.placeName });
     editToast.value = {
       tone: 'warning',
-      title: '이미 추가된 장소입니다.',
+      title: t('autoPass.ui_778303e2d4'),
       text: saveError.value,
     };
     uiStore.notify(saveError.value);
@@ -535,7 +538,7 @@ function addCandidateToDay(dayIndex, candidate) {
   days[dayIndex].places.push({
     placeId: candidate.placeId,
     placeName: candidate.name ?? candidate.placeName,
-    category: candidate.category ?? '장소',
+    category: candidate.category ?? '\uc7a5\uc18c',
     address: candidate.address,
     latitude: candidate.latitude,
     longitude: candidate.longitude,
@@ -548,8 +551,8 @@ function addCandidateToDay(dayIndex, candidate) {
   draftDays.value = renumberDays(days);
   editToast.value = {
     tone: 'success',
-    title: '장소를 추가했습니다.',
-    text: `${candidate.name ?? candidate.placeName}을 Day ${dayIndex + 1}에 추가했습니다.`,
+    title: t('autoPass.ui_a40b1983a5'),
+    text: t('autoPass.ui_6efc7d43e6', { value0: candidate.name ?? candidate.placeName, value1: dayIndex + 1 }),
   };
 }
 
@@ -568,10 +571,10 @@ function removeStop(dayIndex, stopIndex) {
   if (day.places.length <= 1) {
     editToast.value = {
       tone: 'warning',
-      title: '삭제할 수 없습니다.',
-      text: '각 Day에는 최소 1개 장소가 필요합니다.',
+      title: t('autoPass.ui_a46109112e'),
+      text: t('autoPass.ui_589f804359'),
     };
-    uiStore.notify('각 Day에는 최소 1개 장소가 필요합니다.');
+    uiStore.notify(t('autoPass.ui_589f804359'));
     return;
   }
   const days = cloneDraftDays();
@@ -579,7 +582,7 @@ function removeStop(dayIndex, stopIndex) {
   draftDays.value = renumberDays(days);
   editToast.value = {
     tone: 'success',
-    title: '장소를 제거했습니다.',
+    title: t('autoPass.ui_28f659a76b'),
     text: '',
   };
 }
@@ -603,45 +606,45 @@ async function saveEdit() {
   if (!course.value) return;
   saveError.value = '';
   if (!draftTitle.value.trim()) {
-    saveError.value = '코스 제목을 입력해 주세요.';
+    saveError.value = t('autoPass.ui_f8d75bf3ea');
     editToast.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
+      title: t('autoPass.ui_4817c4caf4'),
       text: saveError.value,
     };
     return;
   }
   if (!currentPlaceCount.value) {
-    saveError.value = '장소를 1개 이상 포함해 주세요.';
+    saveError.value = t('autoPass.ui_559f07aa49');
     editToast.value = {
       tone: 'warning',
-      title: '코스 구성을 확인해 주세요.',
+      title: t('autoPass.ui_59b9e0e419'),
       text: saveError.value,
     };
     return;
   }
   editToast.value = {
     tone: 'info',
-    title: '저장 중입니다.',
-    text: '변경한 코스를 저장하고 있습니다.',
+    title: t('autoPass.ui_2aea48a05b'),
+    text: t('autoPass.ui_15335d29ca'),
   };
   const editedRoute = buildEditedRoute();
 
   if (isAiEdit.value) {
     const updated = uiStore.updateGeneratedRoute(editedRoute);
     if (!updated) {
-      saveError.value = uiStore.toast || 'AI 코스를 저장하지 못했습니다.';
+      saveError.value = uiStore.toast || t('autoPass.ui_d3728ac3ae');
       editToast.value = {
         tone: 'error',
-        title: '저장하지 못했습니다.',
+        title: t('autoPass.ui_3126a73522'),
         text: saveError.value,
       };
       return;
     }
     editToast.value = {
       tone: 'success',
-      title: '수정되었습니다.',
-      text: 'AI 코스 편집 결과가 반영되었습니다.',
+      title: t('autoPass.ui_b51f3b3121'),
+      text: t('autoPass.ui_46b501361e'),
     };
     window.setTimeout(() => router.push('/ai/result'), 450);
     return;
@@ -649,18 +652,18 @@ async function saveEdit() {
 
   const updated = await uiStore.updateSavedCourse(editedRoute);
   if (!updated) {
-    saveError.value = uiStore.toast || '저장 코스를 수정하지 못했습니다.';
+    saveError.value = uiStore.toast || t('autoPass.ui_52e0bcc598');
     editToast.value = {
       tone: 'error',
-      title: '수정하지 못했습니다.',
+      title: t('autoPass.ui_0ebd2445e8'),
       text: saveError.value,
     };
     return;
   }
   editToast.value = {
     tone: 'success',
-    title: '수정되었습니다.',
-    text: '저장한 코스가 업데이트되었습니다.',
+    title: t('autoPass.ui_b51f3b3121'),
+    text: t('autoPass.ui_99a63996fa'),
   };
   window.setTimeout(() => router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
 }
@@ -681,14 +684,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <AppLayout title="코스 편집" back>
+  <AppLayout :title="t('autoPass.ui_cfd9b718b1')" back>
     <section v-if="!uiStore.currentUser && !isAiEdit" class="course-edit-screen">
       <EmptyState
         icon="K"
         tone="login"
-        title="로그인이 필요합니다"
-        text="저장한 코스 편집은 로그인 후 사용할 수 있습니다."
-        action-label="로그인하기"
+        :title="t('autoPass.ui_d81760e635')"
+        :text="t('autoPass.ui_a4c3989ca8')"
+        :action-label="t('autoPass.ui_f7b621a901')"
         action-to="/login"
       />
     </section>
@@ -697,9 +700,9 @@ onBeforeUnmount(() => {
       <EmptyState
         icon="AI"
         tone="route"
-        title="편집할 코스를 찾을 수 없습니다"
-        text="AI 코스를 생성하거나 저장 코스 목록에서 다시 선택해 주세요."
-        :action-label="isAiEdit ? 'AI Course 만들기' : '저장 코스 보기'"
+        :title="t('autoPass.ui_2a8ed33f41')"
+        :text="t('autoPass.ui_b9f7c9f3e1')"
+        :action-label="isAiEdit ? t('autoPass.ui_26c24120b7') : t('autoPass.ui_d79a64cd04')"
         :action-to="isAiEdit ? '/ai' : '/my/activity/saved-routes'"
       />
     </section>
@@ -708,27 +711,27 @@ onBeforeUnmount(() => {
       <EmptyState
         icon="AI"
         tone="route"
-        title="먼저 저장이 필요합니다"
-        text="인기 코스나 추천 코스는 저장한 뒤 편집할 수 있습니다."
+        :title="t('autoPass.ui_f98ba8e4f5')"
+        :text="t('autoPass.ui_8ea85068e8')"
       />
-      <BaseButton block @click="uiStore.saveCourse(course)">코스 저장</BaseButton>
+      <BaseButton block @click="uiStore.saveCourse(course)">{{ t('autoPass.ui_23a85365d8') }}</BaseButton>
     </section>
 
     <section v-else class="course-edit-screen">
       <div class="page-intro compact-intro">
-        <span class="badge ai">{{ isAiEdit ? 'AI 결과 편집' : '저장 코스 편집' }}</span>
+        <span class="badge ai">{{ isAiEdit ? t('autoPass.ui_2347e74e06') : t('autoPass.ui_ebf0f22f10') }}</span>
         <h1>{{ course.title }}</h1>
-        <p>날짜별 장소 순서와 구성을 다듬어 보세요.</p>
+        <p>{{ t('autoPass.ui_b54d6a6174') }}</p>
       </div>
 
       <section class="course-edit-entity-form" aria-labelledby="course-edit-form-title">
         <div class="section-mini-header">
-          <h2 id="course-edit-form-title">코스 수정</h2>
-          <span>{{ isAiEdit ? '생성 결과' : '저장 코스' }}</span>
+          <h2 id="course-edit-form-title">{{ t('autoPass.ui_ad89e26754') }}</h2>
+          <span>{{ isAiEdit ? t('autoPass.ui_f1b45f05e1') : t('autoPass.ui_d91f63e6be') }}</span>
         </div>
         <label class="form-field">
-          코스 제목
-          <input v-model="draftTitle" maxlength="48" placeholder="코스 제목" />
+          {{ t('autoPass.ui_e13bbd67a4') }}
+          <input v-model="draftTitle" maxlength="48" :placeholder="t('autoPass.ui_e13bbd67a4')" />
         </label>
       </section>
       <div class="all-day-edit-list">
@@ -743,7 +746,7 @@ onBeforeUnmount(() => {
           <div class="course-day-header">
             <div class="course-day-title">
               <span>Day {{ day.dayNumber }}</span>
-              <small>{{ day.places.length }}곳</small>
+              <small>{{ t('autoPass.ui_de7f33f31f', { count: day.places.length }) }}</small>
             </div>
           </div>
 
@@ -763,7 +766,7 @@ onBeforeUnmount(() => {
                   <small>{{ stop.category || stop.reason }}</small>
                 </div>
 
-                <button type="button" class="remove-stop-button" aria-label="장소 제거" @click.stop="removeStop(dayIndex, stopIndex)" @pointerdown.stop draggable="false">×</button>
+                <button type="button" class="remove-stop-button" :aria-label="t('autoPass.ui_683a5ca835')" @click.stop="removeStop(dayIndex, stopIndex)" @pointerdown.stop draggable="false">×</button>
               </div>
             </article>
           </div>
@@ -772,11 +775,11 @@ onBeforeUnmount(() => {
 
       <section class="candidate-panel course-recommend-panel">
         <div class="section-mini-header">
-          <h2>추천 장소</h2>
-          <span>{{ recommendedCandidates.length }}곳</span>
+          <h2>{{ t('autoPass.ui_cb3ee035c5') }}</h2>
+          <span>{{ t('autoPass.ui_de7f33f31f', { count: recommendedCandidates.length }) }}</span>
         </div>
-        <p>선택한 콘텐츠와 연결된 장소를 먼저 보여주고, 이미 포함된 장소는 제외합니다.</p>
-        <div v-if="draftDays.length" class="candidate-day-tabs" aria-label="추천 장소를 추가할 Day 선택">
+        <p>{{ t('autoPass.ui_e96cfd2639') }}</p>
+        <div v-if="draftDays.length" class="candidate-day-tabs" :aria-label="t('autoPass.ui_b5d403ffb8')">
           <button
             v-for="day in draftDays"
             :key="day.dayNumber"
@@ -789,15 +792,15 @@ onBeforeUnmount(() => {
         </div>
         <form class="auth-form" @submit.prevent="searchVerifiedPlaces">
           <label class="form-field">
-            검증 장소 검색
-            <input v-model="placeSearchKeyword" placeholder="장소명 또는 키워드" />
+            {{ t('autoPass.ui_1aac866a94') }}
+            <input v-model="placeSearchKeyword" :placeholder="t('autoPass.ui_d25be4db0b')" />
           </label>
           <label class="form-field">
-            지역
-            <input v-model="placeSearchRegion" placeholder="서울, 부산..." />
+            {{ t('autoPass.ui_1745c23c9e') }}
+            <input v-model="placeSearchRegion" :placeholder="t('autoPass.ui_01bacf204e')" />
           </label>
           <BaseButton block type="submit" :disabled="placeSearchLoading">
-            {{ placeSearchLoading ? '검색 중...' : '장소 검색' }}
+            {{ placeSearchLoading ? t('autoPass.ui_9421e1e7ff') : t('autoPass.ui_9c44225b7c') }}
           </BaseButton>
           <p v-if="placeSearchError" class="form-help">{{ placeSearchError }}</p>
         </form>
@@ -810,7 +813,7 @@ onBeforeUnmount(() => {
           >
             <strong>{{ candidate.name }}</strong>
             <small>{{ candidate.region }} · {{ candidate.category }}</small>
-            <span>추가</span>
+            <span>{{ t('autoPass.ui_dfb43dcf27') }}</span>
           </button>
         </div>
         <div v-if="recommendedCandidates.length" class="candidate-chip-grid recommended-place-grid">
@@ -822,7 +825,7 @@ onBeforeUnmount(() => {
           >
             <strong>{{ candidate.name }}</strong>
             <small>{{ candidate.region }} · {{ candidate.category }}</small>
-            <span>추가</span>
+            <span>{{ t('autoPass.ui_dfb43dcf27') }}</span>
           </button>
         </div>
         <EmptyState
@@ -830,8 +833,8 @@ onBeforeUnmount(() => {
           icon="P"
           tone="search"
           compact
-          title="추가할 추천 장소가 없습니다"
-          text="현재 코스에 연결된 후보 장소가 모두 포함되어 있습니다. 검색으로 다른 검증 장소를 찾아보세요."
+          :title="t('autoPass.ui_c1dc163a19')"
+          :text="t('autoPass.ui_bf6141bc87')"
         />
       </section>
 
@@ -849,9 +852,9 @@ onBeforeUnmount(() => {
 
       <div class="sticky-actions">
         <BaseButton block :disabled="uiStore.routeActionLoading" @click="saveEdit">
-          {{ uiStore.routeActionLoading ? '저장 중입니다.' : '변경사항 저장' }}
+          {{ uiStore.routeActionLoading ? t('autoPass.ui_2aea48a05b') : t('autoPass.ui_699133f6ff') }}
         </BaseButton>
-        <BaseButton variant="ghost" block :disabled="uiStore.routeActionLoading" @click="cancelEdit">취소</BaseButton>
+        <BaseButton variant="ghost" block :disabled="uiStore.routeActionLoading" @click="cancelEdit">{{ t('autoPass.ui_0b8441a434') }}</BaseButton>
       </div>
     </section>
   </AppLayout>

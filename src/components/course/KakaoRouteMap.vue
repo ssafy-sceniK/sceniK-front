@@ -1,6 +1,9 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { loadKakaoMaps } from '../../utils/kakaoMaps.js';
+
+const { t } = useI18n();
 
 const props = defineProps({
   stops: {
@@ -35,23 +38,23 @@ const hasHiddenStops = computed(() => props.stops.length > mapStops.value.length
 
 function normalizeRegion(value) {
   const normalized = String(value ?? '').replace(/\s+/g, '');
-  if (normalized.startsWith('서울')) return '서울';
-  if (normalized.startsWith('부산')) return '부산';
-  if (normalized.startsWith('인천')) return '인천';
-  if (normalized.startsWith('대구')) return '대구';
-  if (normalized.startsWith('대전')) return '대전';
-  if (normalized.startsWith('광주')) return '광주';
-  if (normalized.startsWith('울산')) return '울산';
-  if (normalized.startsWith('세종')) return '세종';
-  if (normalized.startsWith('경기')) return '경기';
-  if (normalized.startsWith('강원')) return '강원';
-  if (normalized.startsWith('충북') || normalized.startsWith('충청북도')) return '충북';
-  if (normalized.startsWith('충남') || normalized.startsWith('충청남도')) return '충남';
-  if (normalized.startsWith('전북') || normalized.startsWith('전라북도')) return '전북';
-  if (normalized.startsWith('전남') || normalized.startsWith('전라남도')) return '전남';
-  if (normalized.startsWith('경북') || normalized.startsWith('경상북도')) return '경북';
-  if (normalized.startsWith('경남') || normalized.startsWith('경상남도')) return '경남';
-  if (normalized.startsWith('제주')) return '제주';
+  if (normalized.startsWith('\uc11c\uc6b8')) return '\uc11c\uc6b8';
+  if (normalized.startsWith('\ubd80\uc0b0')) return '\ubd80\uc0b0';
+  if (normalized.startsWith('\uc778\ucc9c')) return '\uc778\ucc9c';
+  if (normalized.startsWith('\ub300\uad6c')) return '\ub300\uad6c';
+  if (normalized.startsWith('\ub300\uc804')) return '\ub300\uc804';
+  if (normalized.startsWith('\uad11\uc8fc')) return '\uad11\uc8fc';
+  if (normalized.startsWith('\uc6b8\uc0b0')) return '\uc6b8\uc0b0';
+  if (normalized.startsWith('\uc138\uc885')) return '\uc138\uc885';
+  if (normalized.startsWith('\uacbd\uae30')) return '\uacbd\uae30';
+  if (normalized.startsWith('\uac15\uc6d0')) return '\uac15\uc6d0';
+  if (normalized.startsWith('\ucda9\ubd81') || normalized.startsWith('\ucda9\uccad\ubd81\ub3c4')) return '\ucda9\ubd81';
+  if (normalized.startsWith('\ucda9\ub0a8') || normalized.startsWith('\ucda9\uccad\ub0a8\ub3c4')) return '\ucda9\ub0a8';
+  if (normalized.startsWith('\uc804\ubd81') || normalized.startsWith('\uc804\ub77c\ubd81\ub3c4')) return '\uc804\ubd81';
+  if (normalized.startsWith('\uc804\ub0a8') || normalized.startsWith('\uc804\ub77c\ub0a8\ub3c4')) return '\uc804\ub0a8';
+  if (normalized.startsWith('\uacbd\ubd81') || normalized.startsWith('\uacbd\uc0c1\ubd81\ub3c4')) return '\uacbd\ubd81';
+  if (normalized.startsWith('\uacbd\ub0a8') || normalized.startsWith('\uacbd\uc0c1\ub0a8\ub3c4')) return '\uacbd\ub0a8';
+  if (normalized.startsWith('\uc81c\uc8fc')) return '\uc81c\uc8fc';
   return normalized;
 }
 
@@ -70,7 +73,7 @@ function closeInfoOverlay() {
 }
 
 function placeName(stop) {
-  return stop.placeName ?? stop.name ?? '장소';
+  return stop.placeName ?? stop.name ?? t('autoPass.ui_6efb3787d7');
 }
 
 function createStopInfo(stop) {
@@ -80,7 +83,7 @@ function createStopInfo(stop) {
   closeButton.type = 'button';
   closeButton.className = 'route-stop-info__close';
   closeButton.textContent = '×';
-  closeButton.setAttribute('aria-label', '장소 정보 닫기');
+  closeButton.setAttribute('aria-label', t('autoPass.ui_306e06b238'));
   closeButton.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -128,11 +131,11 @@ async function renderMap() {
   clearMapObjects();
   if (!mapElement.value) return;
   if (!appKey) {
-    statusMessage.value = '카카오맵 JavaScript 키를 설정하면 지도가 표시됩니다.';
+    statusMessage.value = t('autoPass.ui_bd7f476fcf');
     return;
   }
   if (!mapStops.value.length) {
-    statusMessage.value = '좌표가 있는 선택 지역 장소만 지도에 표시됩니다.';
+    statusMessage.value = t('autoPass.ui_93eb87ab9d');
     return;
   }
 
@@ -172,10 +175,10 @@ async function renderMap() {
     }
 
     map.setBounds(bounds);
-    statusMessage.value = hasHiddenStops.value ? '좌표가 있는 선택 지역 장소만 지도에 표시됩니다.' : '';
+    statusMessage.value = hasHiddenStops.value ? t('autoPass.ui_93eb87ab9d') : '';
   } catch (error) {
     console.warn('Kakao route map render failed', error);
-    statusMessage.value = '지도를 불러오지 못했습니다.';
+    statusMessage.value = t('autoPass.ui_2d729d0faa');
   }
 }
 

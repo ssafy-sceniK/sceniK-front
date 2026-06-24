@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { fetchIntegratedSearch } from '../api/searchApi.js';
+import { i18n } from '../i18n/index.js';
 
 export const useSearchStore = defineStore('search', {
   state: () => ({
@@ -17,7 +18,7 @@ export const useSearchStore = defineStore('search', {
         this.results = await fetchIntegratedSearch({ keyword });
       } catch (error) {
         this.results = { contents: [], places: [] };
-        this.error = error.userMessage ?? '검색 결과를 불러오지 못했습니다.';
+        this.error = error.userMessage ?? i18n.global.t('errors.searchResultsLoadFailed');
       } finally {
         this.loading = false;
       }

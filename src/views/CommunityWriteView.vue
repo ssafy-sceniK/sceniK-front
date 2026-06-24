@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -16,13 +17,14 @@ const COURSE_PICKER_PAGE_SIZE = 5;
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
+const { t } = useI18n();
 
 const boards = [
-  { id: 'drama', label: '드라마', tag: '드라마' },
-  { id: 'movie', label: '영화', tag: '영화' },
-  { id: 'idol', label: '아이돌', tag: '아이돌' },
-  { id: 'variety', label: '예능', tag: '예능' },
-  { id: 'region', label: '지역별', tag: 'AI 코스' },
+  { id: 'drama', labelKey: 'content.category.drama', tagKey: 'content.category.drama' },
+  { id: 'movie', labelKey: 'content.category.movie', tagKey: 'content.category.movie' },
+  { id: 'idol', labelKey: 'content.category.idol', tagKey: 'content.category.idol' },
+  { id: 'variety', labelKey: 'content.category.variety', tagKey: 'content.category.variety' },
+  { id: 'region', labelKey: 'community.write.boards.region', tagKey: 'my.activity.aiCourse' },
 ];
 
 const selectedBoard = ref('drama');
@@ -40,6 +42,8 @@ const posting = ref(false);
 const statusNotice = ref(null);
 
 const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
+const selectedBoardLabel = computed(() => t(selectedBoardMeta.value.labelKey));
+const selectedBoardTag = computed(() => t(selectedBoardMeta.value.tagKey));
 const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5);
 const courseOptions = computed(() => uiStore.savedCourses.filter((course) => course?.routeId));
 const selectedCourse = computed(() => courseOptions.value.find((course) => course.routeId === selectedRouteId.value) ?? null);
@@ -49,12 +53,19 @@ const selectedAttachmentMetas = computed(() => selectedImageFiles.value.map((fil
   id: imageFileId(file),
   name: file.name,
   type: 'image',
-  sizeLabel: `${Math.max(1, Math.round(file.size / 1024))}KB`,
+  sizeLabel: Math.max(1, Math.round(file.size / 1024)) + 'KB',
 })));
 const imagePreviewSources = computed(() => {
   if (imagePreviewItems.value.length) return imagePreviewItems.value;
   const manualUrl = imageUrl.value.trim();
-  return manualUrl ? [{ id: 'manual-url', url: manualUrl, name: '이미지 URL', manual: true }] : [];
+  return manualUrl ? [{ id: 'manual-url', url: manualUrl, name: t('community.write.imageUrl'), manual: true }] : [];
+});
+const selectedCourseSummary = computed(() => {
+  if (!selectedCourse.value) return t('community.write.courseLinkEmptyHelp');
+  return [
+    selectedCourse.value.region,
+    selectedCourse.value.durationDays || selectedCourse.value.duration || t('community.write.scheduleFallback'),
+  ].filter(Boolean).join(' / ');
 });
 
 onMounted(() => {
@@ -71,7 +82,8 @@ function uniqueValues(values) {
 }
 
 function isSystemTag(tag) {
-  return boards.some((board) => board.tag === tag) || tag === 'AI 코스';
+  const systemTags = boards.map((board) => t(board.tagKey));
+  return systemTags.includes(tag) || tag === t('my.activity.aiCourse');
 }
 
 function normalizeHashtag(value) {
@@ -90,8 +102,8 @@ function addHashtag(rawValue = hashtagInput.value) {
   if (selectedHashtags.value.length >= MAX_HASHTAGS) {
     statusNotice.value = {
       tone: 'warning',
-      title: '해시태그는 최대 10개까지 추가할 수 있습니다.',
-      text: '불필요한 태그를 삭제한 뒤 다시 추가해 주세요.',
+      title: t('community.write.hashtagLimitTitle'),
+      text: t('community.write.hashtagLimitText'),
     };
     return;
   }
@@ -99,7 +111,7 @@ function addHashtag(rawValue = hashtagInput.value) {
 }
 
 function handleHashtagKeydown(event) {
-  if (event.key === 'Enter' || event.key === ',' || event.key === ' ') {
+  if (event.key === 'Enter' || event.key === ',') {
     event.preventDefault();
     addHashtag();
   }
@@ -153,9 +165,8 @@ function loadMoreCourseOptions() {
 }
 
 function imageFileId(file) {
-  return `${file.name}-${file.size}-${file.lastModified}`;
+  return file.name + '-' + file.size + '-' + file.lastModified;
 }
-
 
 function handleAttachments(event) {
   const incomingFiles = [...(event.target.files ?? [])]
@@ -171,8 +182,8 @@ function handleAttachments(event) {
   if (uniqueIncoming.length > availableSlots) {
     statusNotice.value = {
       tone: 'warning',
-      title: '이미지는 최대 10개까지 첨부할 수 있습니다.',
-      text: '먼저 선택된 이미지를 삭제한 뒤 추가해 주세요.',
+      title: t('community.write.imageLimitTitle'),
+      text: t('community.write.imageLimitText'),
     };
   }
   if (!acceptedFiles.length) return;
@@ -209,7 +220,7 @@ async function resolveImagePayload() {
     const manualUrl = imageUrl.value.trim();
     return {
       imageUrl: manualUrl || null,
-      attachments: manualUrl ? [{ url: manualUrl, imageUrl: manualUrl, thumbnailUrl: manualUrl, type: 'image', name: '이미지 URL' }] : [],
+      attachments: manualUrl ? [{ url: manualUrl, imageUrl: manualUrl, thumbnailUrl: manualUrl, type: 'image', name: t('community.write.imageUrl') }] : [],
     };
   }
 
@@ -220,7 +231,7 @@ async function resolveImagePayload() {
       imageUrl: url,
       thumbnailUrl: url,
       type: 'image',
-      name: selectedImageFiles.value[index]?.name || `image-${index + 1}`,
+      name: selectedImageFiles.value[index]?.name || 'image-' + (index + 1),
     }))
     .filter((attachment) => attachment.imageUrl);
   return {
@@ -231,9 +242,9 @@ async function resolveImagePayload() {
 
 function buildTags() {
   return uniqueValues([
-    selectedBoardMeta.value.tag,
+    selectedBoardTag.value,
     ...selectedHashtags.value,
-    selectedCourse.value ? 'AI 코스' : '',
+    selectedCourse.value ? t('my.activity.aiCourse') : '',
     selectedCourse.value?.region ?? uiStore.courseConditions.region,
   ]);
 }
@@ -243,8 +254,8 @@ async function createPost() {
   if (!canSubmit.value) {
     statusNotice.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
-      text: '제목은 2자 이상, 내용은 5자 이상 입력해야 게시할 수 있습니다.',
+      title: t('community.write.validationTitle'),
+      text: t('community.write.validationText'),
     };
     return;
   }
@@ -252,8 +263,8 @@ async function createPost() {
   posting.value = true;
   statusNotice.value = {
     tone: 'info',
-    title: '게시글을 저장하는 중입니다.',
-    text: '커뮤니티 피드에 등록할 내용을 backend에 전송하고 있습니다.',
+    title: t('community.write.saveProgressTitle'),
+    text: t('community.write.saveProgressText'),
   };
 
   let imagePayload;
@@ -263,8 +274,8 @@ async function createPost() {
     posting.value = false;
     statusNotice.value = {
       tone: 'error',
-      title: '이미지를 업로드하지 못했습니다.',
-      text: getUserMessage(error, '이미지를 업로드하지 못했습니다. 5MB 이하의 JPG, PNG, WEBP, GIF 이미지를 선택해 주세요.'),
+      title: t('community.write.uploadFailedTitle'),
+      text: getUserMessage(error, t('community.write.uploadFailedText')),
     };
     return;
   }
@@ -284,42 +295,42 @@ async function createPost() {
   if (!created) {
     statusNotice.value = {
       tone: 'error',
-      title: '게시글을 작성하지 못했습니다.',
-      text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      title: t('community.write.createFailedTitle'),
+      text: uiStore.communityError || t('community.write.createFailedText'),
     };
     return;
   }
   statusNotice.value = {
     tone: 'success',
-    title: '저장되었습니다.',
-    text: '게시글이 커뮤니티 피드에 등록되었습니다.',
+    title: t('community.write.savedTitle'),
+    text: t('community.write.savedText'),
   };
   window.setTimeout(() => router.push('/community'), 450);
 }
 </script>
 
 <template>
-  <AppLayout title="글 작성" back>
+  <AppLayout :title="t('community.write.pageTitle')" back>
     <section v-if="!uiStore.currentUser" class="community-write-screen">
       <EmptyState
         icon="K"
         tone="login"
-        title="로그인이 필요합니다"
-        text="커뮤니티에 여행 후기를 남기려면 먼저 로그인해 주세요."
-        action-label="로그인하기"
+        :title="t('common.loginRequired')"
+        :text="t('community.write.loginText')"
+        :action-label="t('auth.login.title')"
         action-to="/login"
       />
     </section>
 
     <form v-else class="community-write-screen" @submit.prevent="createPost">
       <div class="write-intro">
-        <h1>커뮤니티 글 작성</h1>
-        <p>게시판과 해시태그를 고르고 방문 기록과 이동 팁을 다른 여행자에게 공유해 주세요.</p>
+        <h1>{{ t('community.write.heading') }}</h1>
+        <p>{{ t('community.write.description') }}</p>
       </div>
 
       <div class="write-card">
         <label class="form-field">
-          게시판
+          {{ t('community.write.board') }}
           <div class="write-board-grid">
             <button
               v-for="board in boards"
@@ -328,24 +339,23 @@ async function createPost() {
               :class="{ active: selectedBoard === board.id }"
               @click="selectedBoard = board.id"
             >
-              <span>{{ board.label }}</span>
+              <span>{{ t(board.labelKey) }}</span>
             </button>
           </div>
         </label>
 
         <div class="form-field hashtag-editor-field">
-          <span>해시태그</span>
+          <span>{{ t('community.write.hashtag') }}</span>
           <div class="hashtag-input-row">
             <span aria-hidden="true">#</span>
             <input
               v-model="hashtagInput"
               type="text"
               maxlength="24"
-              placeholder="태그 입력"
+              :placeholder="t('community.write.tagPlaceholder')"
               @keydown="handleHashtagKeydown"
-              @blur="addHashtag()"
             />
-            <button type="button" @click="addHashtag()">추가</button>
+            <button type="button" @click="addHashtag()">{{ t('community.write.add') }}</button>
           </div>
           <div v-if="selectedHashtags.length" class="chip-row wrap write-hashtag-row selected-hashtag-row">
             <button
@@ -353,77 +363,77 @@ async function createPost() {
               :key="tag"
               type="button"
               class="chip selected"
-              :aria-label="`${tag} 해시태그 삭제`"
+              :aria-label="t('community.write.removeHashtagAria', { tag })"
               @click="removeHashtag(tag)"
             >
-              #{{ tag }} <span aria-hidden="true">×</span>
+              #{{ tag }} <span aria-hidden="true">x</span>
             </button>
           </div>
           <small>{{ selectedHashtags.length }}/{{ MAX_HASHTAGS }}</small>
         </div>
 
         <div class="form-field course-select-field">
-          <span>AI 코스 연결</span>
+          <span>{{ t('community.write.courseLink') }}</span>
           <button type="button" class="course-picker-trigger" @click="openCoursePicker">
             <span class="course-picker-copy">
-              <strong>{{ selectedCourse ? selectedCourse.title : '선택 안 함' }}</strong>
-              <small>{{ selectedCourse ? `${selectedCourse.region} · ${selectedCourse.durationDays || selectedCourse.duration || '일정'}` : '저장한 AI 코스를 게시글에 연결할 수 있습니다.' }}</small>
+              <strong>{{ selectedCourse ? selectedCourse.title : t('community.write.noneSelected') }}</strong>
+              <small>{{ selectedCourseSummary }}</small>
             </span>
-            <span class="course-picker-chevron" aria-hidden="true">›</span>
+            <span class="course-picker-chevron" aria-hidden="true">&rsaquo;</span>
           </button>
-          <small>선택한 코스는 게시글 상세에서 바로 열 수 있습니다.</small>
+          <small>{{ t('community.write.courseLinkHelp') }}</small>
         </div>
 
         <div v-if="selectedCourse" class="linked-course write-linked-course">
           <span class="course-dot">AI</span>
           <div>
-            <small class="course-kicker">선택한 AI 코스</small>
+            <small class="course-kicker">{{ t('community.write.selectedCourse') }}</small>
             <strong>{{ selectedCourse.title }}</strong>
-            <small>{{ selectedCourse.region }} · {{ selectedCourse.durationDays || selectedCourse.duration }}</small>
+            <small>{{ selectedCourseSummary }}</small>
           </div>
-          <button type="button" class="linked-course-clear" @click="clearSelectedCourse">해제</button>
+          <button type="button" class="linked-course-clear" @click="clearSelectedCourse">{{ t('community.write.clear') }}</button>
         </div>
 
         <label class="form-field">
-          제목
-          <input v-model="title" maxlength="50" placeholder="여행 후기 제목" />
+          {{ t('community.write.titleLabel') }}
+          <input v-model="title" maxlength="50" :placeholder="t('community.write.titlePlaceholder')" />
         </label>
 
         <label class="form-field">
-          내용
-          <textarea v-model="body" maxlength="500" placeholder="코스 경험을 공유해 주세요."></textarea>
+          {{ t('community.write.bodyLabel') }}
+          <textarea v-model="body" maxlength="500" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
         </label>
 
         <label class="form-field">
-          이미지 URL
+          {{ t('community.write.imageUrl') }}
           <input v-model="imageUrl" type="url" placeholder="https://example.com/photo.jpg" />
-          <small>이미지 파일을 선택하면 업로드된 이미지가 URL보다 우선 적용됩니다.</small>
+          <small>{{ t('community.write.imageUrlHelp') }}</small>
         </label>
 
         <label class="form-field attachment-field">
-          이미지 파일
+          {{ t('community.write.imageFile') }}
           <input type="file" accept="image/*" multiple @change="handleAttachments" />
-          <small>JPG, PNG, WEBP, GIF 이미지를 최대 10개까지 업로드할 수 있습니다.</small>
+          <small>{{ t('community.write.imageFileHelp') }}</small>
         </label>
 
-        <div v-if="selectedAttachmentMetas.length" class="attachment-list" aria-label="선택한 첨부 파일">
+        <div v-if="selectedAttachmentMetas.length" class="attachment-list" :aria-label="t('community.write.attachmentListAria')">
           <span v-for="attachment in selectedAttachmentMetas" :key="attachment.id">
-            <b>사진</b>
+            <b>{{ t('community.write.photo') }}</b>
             {{ attachment.name }}
             <small>{{ attachment.sizeLabel }}</small>
           </span>
         </div>
 
-        <div v-if="imagePreviewSources.length" class="post-image-preview post-image-preview-grid" aria-label="게시글 이미지 미리보기">
+        <div v-if="imagePreviewSources.length" class="post-image-preview post-image-preview-grid" :aria-label="t('community.write.previewAria')">
           <figure v-for="preview in imagePreviewSources" :key="preview.id">
             <img :src="preview.url" :alt="preview.name" />
-            <button type="button" @click="preview.manual ? clearManualImageUrl() : removeSelectedImage(preview.id)">선택 해제</button>
+            <button type="button" @click="preview.manual ? clearManualImageUrl() : removeSelectedImage(preview.id)">{{ t('community.write.removeSelection') }}</button>
           </figure>
         </div>
 
         <div class="write-helper">
           <span>{{ body.length }}/500</span>
-          <span>{{ selectedBoardMeta.label }}{{ selectedHashtags.length ? ` · #${selectedHashtags.join(' #')}` : '' }}</span>
+          <span>{{ selectedBoardLabel }}{{ selectedHashtags.length ? ' / #' + selectedHashtags.join(' #') : '' }}</span>
         </div>
       </div>
 
@@ -436,8 +446,8 @@ async function createPost() {
 
       <div class="sticky-actions">
         <BaseButton class="course-primary-cta" block :disabled="!canSubmit || posting">
-          <span>{{ posting ? '게시 중...' : '게시하기' }}</span>
-          <small>{{ canSubmit ? '커뮤니티 피드에 바로 등록합니다.' : '제목 2자, 내용 5자 이상 입력해 주세요.' }}</small>
+          <span>{{ posting ? t('community.write.submitting') : t('community.write.submit') }}</span>
+          <small>{{ canSubmit ? t('community.write.submitReady') : t('community.write.submitDisabled') }}</small>
         </BaseButton>
       </div>
 
@@ -445,10 +455,10 @@ async function createPost() {
         <section class="course-picker-modal" role="dialog" aria-modal="true" aria-labelledby="course-picker-title" @click.stop>
           <header>
             <div>
-              <h2 id="course-picker-title">AI 코스 선택</h2>
-              <p>게시글에 연결할 저장 코스를 선택해 주세요.</p>
+              <h2 id="course-picker-title">{{ t('community.write.coursePickerTitle') }}</h2>
+              <p>{{ t('community.write.coursePickerDescription') }}</p>
             </div>
-            <button type="button" aria-label="닫기" @click="closeCoursePicker">×</button>
+            <button type="button" :aria-label="t('common.close')" @click="closeCoursePicker">x</button>
           </header>
           <div v-if="courseOptions.length" class="course-picker-list">
             <button
@@ -460,21 +470,21 @@ async function createPost() {
               @click="selectCourse(course.routeId)"
             >
               <strong>{{ course.title }}</strong>
-              <small>{{ course.region }} · {{ course.durationDays || course.duration || '일정' }}</small>
+              <small>{{ [course.region, course.durationDays || course.duration || t('community.write.scheduleFallback')].filter(Boolean).join(' / ') }}</small>
             </button>
             <button v-if="hasMoreCourseOptions" type="button" class="course-picker-load-more" @click="loadMoreCourseOptions">
-              더 보기
+              {{ t('common.loadMore') }}
             </button>
           </div>
           <EmptyState
             v-else
             compact
-            title="저장한 AI 코스가 없습니다"
-            text="AI 코스를 만든 뒤 저장하면 게시글에 연결할 수 있습니다."
+            :title="t('community.write.noSavedCourseTitle')"
+            :text="t('community.write.noSavedCourseText')"
           />
           <footer>
-            <button type="button" class="button button-secondary" :disabled="!selectedRouteId" @click="clearSelectedCourse">선택 해제</button>
-            <button type="button" class="button button-secondary" @click="closeCoursePicker">닫기</button>
+            <button type="button" class="button button-secondary" :disabled="!selectedRouteId" @click="clearSelectedCourse">{{ t('community.write.clear') }}</button>
+            <button type="button" class="button button-secondary" @click="closeCoursePicker">{{ t('common.close') }}</button>
           </footer>
         </section>
       </div>

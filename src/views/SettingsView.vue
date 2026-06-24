@@ -41,22 +41,22 @@ async function changeLanguage(language) {
 async function handleLogout() {
   sessionNotice.value = {
     tone: 'info',
-    title: '세션 종료 중',
-    text: '이 기기의 로그인 세션을 안전하게 종료하고 있습니다.',
+    title: t('settings.cleanup.kdd4e763b65'),
+    text: t('settings.cleanup.kfbcad8ad24'),
   };
   try {
     await uiStore.logout();
     sessionNotice.value = {
       tone: 'success',
-      title: '로그아웃되었습니다',
-      text: '이 기기에서 세션이 종료되었습니다. 다시 이용하려면 로그인해 주세요.',
+      title: t('settings.cleanup.kc86f11a43e'),
+      text: t('settings.cleanup.k97b4fb7567'),
     };
     await router.replace('/');
   } catch {
     sessionNotice.value = {
       tone: 'error',
-      title: '로그아웃 상태를 확인해 주세요',
-      text: '로컬 세션은 정리했습니다. 화면이 갱신되지 않으면 다시 로그인해 주세요.',
+      title: t('settings.cleanup.k8ca345a8bc'),
+      text: t('settings.cleanup.k03215b6cf5'),
     };
   }
 }
@@ -77,7 +77,7 @@ async function handleLogout() {
             :disabled="languageSaving"
             @click="changeLanguage(option.value)"
           >
-            <span>{{ t(option.labelKey) }}</span><b></b>
+            <span>{{ option.label }}</span><b></b>
           </button>
         </div>
       </div>

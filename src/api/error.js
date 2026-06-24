@@ -1,6 +1,6 @@
-const SERVER_UNAVAILABLE_MESSAGE = '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해 주세요.';
-const TEMPORARY_ERROR_MESSAGE = '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
-const DEFAULT_ERROR_MESSAGE = '요청 처리 중 오류가 발생했습니다.';
+const SERVER_UNAVAILABLE_MESSAGE = '\uc11c\ubc84\uc5d0 \uc5f0\uacb0\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. \ubc31\uc5d4\ub4dc \uc11c\ubc84\uac00 \uc2e4\ud589 \uc911\uc778\uc9c0 \ud655\uc778\ud574 \uc8fc\uc138\uc694.';
+const TEMPORARY_ERROR_MESSAGE = '\uc77c\uc2dc\uc801\uc778 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4. \uc7a0\uc2dc \ud6c4 \ub2e4\uc2dc \uc2dc\ub3c4\ud574 \uc8fc\uc138\uc694.';
+const DEFAULT_ERROR_MESSAGE = '\uc694\uccad \ucc98\ub9ac \uc911 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4.';
 const TECHNICAL_MESSAGE_PATTERNS = [
   /^Request failed/i,
   /^Network Error$/i,
@@ -79,11 +79,11 @@ export function getUserMessage(error, fallback = DEFAULT_ERROR_MESSAGE) {
     return SERVER_UNAVAILABLE_MESSAGE;
   }
 
-  if (status === 401) return '로그인이 필요하거나 로그인 정보가 올바르지 않습니다.';
-  if (status === 403) return '권한이 없습니다.';
-  if (status === 404) return '요청한 정보를 찾을 수 없습니다.';
-  if (status === 409) return '이미 처리된 요청이거나 중복된 데이터입니다.';
-  if (status === 400) return '입력값을 확인해 주세요.';
+  if (status === 401) return '\ub85c\uadf8\uc778\uc774 \ud544\uc694\ud558\uac70\ub098 \ub85c\uadf8\uc778 \uc815\ubcf4\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.';
+  if (status === 403) return '\uad8c\ud55c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.';
+  if (status === 404) return '\uc694\uccad\ud55c \uc815\ubcf4\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.';
+  if (status === 409) return '\uc774\ubbf8 \ucc98\ub9ac\ub41c \uc694\uccad\uc774\uac70\ub098 \uc911\ubcf5\ub41c \ub370\uc774\ud130\uc785\ub2c8\ub2e4.';
+  if (status === 400) return '\uc785\ub825\uac12\uc744 \ud655\uc778\ud574 \uc8fc\uc138\uc694.';
 
   if (!response && isSafePlainMessage(error?.message)) {
     return error.message.trim();

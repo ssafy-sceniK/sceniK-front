@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import FormStatusNotice from '../common/FormStatusNotice.vue';
+
+const { t } = useI18n();
 
 defineOptions({
   name: 'CourseSaveStatusPanel',
@@ -8,15 +11,15 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: '생성된 AI 코스',
+    default: '',
   },
   eyebrow: {
     type: String,
-    default: '저장 전 확인',
+    default: '',
   },
   description: {
     type: String,
-    default: '저장 전 검증된 장소와 코스 조건을 확인합니다.',
+    default: '',
   },
   rows: {
     type: Array,
@@ -32,11 +35,11 @@ const props = defineProps({
 <template>
   <section class="course-save-status-panel" aria-labelledby="course-save-status-title">
     <div>
-      <span v-if="props.eyebrow">{{ props.eyebrow }}</span>
-      <h2 id="course-save-status-title">{{ props.title }}</h2>
-      <p v-if="props.description">{{ props.description }}</p>
+      <span>{{ props.eyebrow || t('course.cleanup.kd97a76eb1c') }}</span>
+      <h2 id="course-save-status-title">{{ props.title || t('course.cleanup.kcbd04b451d') }}</h2>
+      <p>{{ props.description || t('course.cleanup.k30ff523c4c') }}</p>
     </div>
-    <dl v-if="props.rows.length" aria-label="AI 코스 저장 정보">
+    <dl v-if="props.rows.length" :aria-label="t('course.cleanup.k9f2b9841d5')">
       <template v-for="row in props.rows" :key="row.label">
         <dt>{{ row.label }}</dt>
         <dd>{{ row.value }}</dd>

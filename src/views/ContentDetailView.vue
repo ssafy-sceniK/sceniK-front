@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -10,11 +11,13 @@ import PlaceCard from '../components/place/PlaceCard.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { applyNeutralContentImageFallback, getContentImageUrl } from '../utils/contentImages.js';
+import { localizeContent, localizePlace } from '../i18n/systemContent.js';
 
 const route = useRoute();
 const router = useRouter();
 const contentStore = useContentStore();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 const content = ref(null);
 const relatedPlaces = ref([]);
 const loading = ref(false);
@@ -24,10 +27,14 @@ const contentId = computed(() => route.params.id || '');
 const liked = computed(() => content.value && uiStore.likedContent.includes(content.value.contentId));
 const likePending = computed(() => Boolean(content.value)
   && uiStore.pendingContentLikes.some((id) => String(id) === String(content.value.contentId)));
+const displayContent = computed(() => localizeContent(content.value, locale.value, t) ?? content.value);
+const categoryLabel = computed(() => displayContent.value?.category ?? '');
 const contentMeta = computed(() => [
-  content.value?.releaseYear,
-  content.value?.ottPlatform,
-].filter(Boolean).join(' · '));
+  displayContent.value?.releaseYear,
+  displayContent.value?.ottPlatform,
+].filter(Boolean).join(' / '));
+const localizedTags = computed(() => displayContent.value?.tags ?? []);
+const localizedRelatedPlaces = computed(() => relatedPlaces.value.map((place) => localizePlace(place, locale.value, t)));
 const contentImageUrl = computed(() => getContentImageUrl(content.value ?? {}));
 const contentHeroStyle = computed(() => ({
   '--detail-hero-image': `url("${String(contentImageUrl.value).replaceAll('"', '\\"')}")`,
@@ -35,7 +42,7 @@ const contentHeroStyle = computed(() => ({
 
 async function loadContentDetail() {
   if (!contentId.value) {
-    errorMessage.value = '콘텐츠 정보를 찾을 수 없습니다.';
+    errorMessage.value = t('content.detail.notFoundMessage');
     return;
   }
   loading.value = true;
@@ -43,7 +50,7 @@ async function loadContentDetail() {
   content.value = await contentStore.getById(contentId.value);
   if (!content.value) {
     relatedPlaces.value = [];
-    errorMessage.value = contentStore.error || '콘텐츠 정보를 불러오지 못했습니다.';
+    errorMessage.value = contentStore.error || t('content.detail.loadFailedMessage');
     loading.value = false;
     return;
   }
@@ -65,13 +72,13 @@ function useFallbackImage(event) {
 </script>
 
 <template>
-  <AppLayout title="콘텐츠 상세" back>
+  <AppLayout :title="t('content.detail.title')" back>
     <template #actions>
       <button
         class="icon-button heart-button"
         :class="{ active: liked }"
         type="button"
-        aria-label="좋아요"
+        :aria-label="t('content.detail.likeAria')"
         :aria-pressed="liked"
         :disabled="likePending"
         @click="content && uiStore.toggleContentLike(content.contentId)"
@@ -84,32 +91,32 @@ function useFallbackImage(event) {
       v-if="loading"
       tone="loading"
       compact
-      title="콘텐츠를 불러오는 중입니다"
-      text="검증된 촬영지 정보를 함께 확인하고 있어요."
+      :title="t('content.detail.loadingTitle')"
+      :text="t('content.detail.loadingText')"
     />
     <DetailNotFoundPanel
       v-else-if="errorMessage"
-      title="콘텐츠를 불러오지 못했습니다"
+      :title="t('content.detail.errorTitle')"
       :text="errorMessage"
-      list-label="콘텐츠 목록으로 돌아가기"
+      :list-label="t('content.detail.backToList')"
       list-to="/contents"
       @retry="loadContentDetail"
     />
-    <section v-else-if="content" class="detail-screen">
+    <section v-else-if="content" class="detail-screen content-detail-screen">
       <div class="detail-hero detail-hero--content" :style="contentHeroStyle">
-        <img class="detail-hero-poster" :key="contentImageUrl" :src="contentImageUrl" :alt="content.title" @error="useFallbackImage" />
+        <img class="detail-hero-poster" :key="contentImageUrl" :src="contentImageUrl" :alt="displayContent.title" @error="useFallbackImage" />
         <div>
-          <span class="badge dark">{{ content.category }}</span>
-          <h1>{{ content.title }}</h1>
+          <span class="badge dark">{{ categoryLabel }}</span>
+          <h1>{{ displayContent.title }}</h1>
           <p>{{ contentMeta }}</p>
         </div>
       </div>
       <div class="detail-body detail-body--content">
-        <p class="content-description">{{ content.description }}</p>
-        <p class="meta-line content-cast-line">출연: {{ content.castNames }}</p>
-        <div class="tag-row"><span v-for="tag in content.tags" :key="tag">{{ tag }}</span></div>
+        <p class="content-description">{{ displayContent.description }}</p>
+        <p v-if="displayContent.castNames" class="meta-line content-cast-line">{{ t('content.detail.cast', { cast: displayContent.castNames }) }}</p>
+        <div v-if="localizedTags.length" class="tag-row"><span v-for="tag in localizedTags" :key="tag">{{ tag }}</span></div>
         <div class="action-grid single">
-          <BaseButton @click="startCourse">AI Course 만들기</BaseButton>
+          <BaseButton @click="startCourse">{{ t('content.detail.createCourse') }}</BaseButton>
         </div>
         <FavoriteToggleStatus
           v-if="likePending"
@@ -117,19 +124,19 @@ function useFallbackImage(event) {
           :pending="likePending"
           active-text=""
           inactive-text=""
-          pending-text="콘텐츠 좋아요 상태를 저장하는 중입니다."
+          :pending-text="t('content.detail.likeSaving')"
         />
       </div>
 
-      <div class="section-header content-related-header"><h2>관련 장소</h2></div>
+      <div class="section-header content-related-header"><h2>{{ t('content.detail.relatedPlaces') }}</h2></div>
       <EmptyState
         v-if="!relatedPlaces.length"
         compact
-        title="연결된 촬영지가 아직 없어요"
-        text="관련 장소 데이터가 비어 있어도 상세 화면은 그대로 유지됩니다."
+        :title="t('content.detail.relatedEmptyTitle')"
+        :text="t('content.detail.relatedEmptyText')"
       />
       <div v-else class="stack-list">
-        <RouterLink v-for="place in relatedPlaces" :key="place.placeId" :to="`/places/${place.placeId}`">
+        <RouterLink v-for="place in localizedRelatedPlaces" :key="place.placeId" :to="`/places/${place.placeId}`">
           <PlaceCard :place="place" compact />
         </RouterLink>
       </div>

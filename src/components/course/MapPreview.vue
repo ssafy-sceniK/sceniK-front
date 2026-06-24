@@ -1,8 +1,12 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { loadKakaoMaps } from '../../utils/kakaoMaps.js';
 import { fetchPlaceDetail } from '../../api/placeApi.js';
+import { localizeContent, localizePlace } from '../../i18n/systemContent.js';
+
+const { t, locale } = useI18n();
 
 const props = defineProps({
   routePlaces: { type: Array, default: () => [] },
@@ -40,8 +44,9 @@ const totalPlaceCount = computed(() => {
 });
 const missingCoordinateCount = computed(() => Math.max(0, totalPlaceCount.value - validPlaces.value.length));
 const mapCountLabel = computed(() => (missingCoordinateCount.value > 0
-  ? `지도 표시 ${validPlaces.value.length} / 전체 ${totalPlaceCount.value}`
-  : `${validPlaces.value.length}개 장소 표시 중`));
+  ? t('autoPass.ui_f346dce058', { value0: validPlaces.value.length, value1: totalPlaceCount.value })
+  : t('autoPass.ui_37333dd7ed', { value0: validPlaces.value.length })));
+const localizedSelectedPlace = computed(() => (selectedPlace.value ? displayPlace(selectedPlace.value) : null));
 
 let kakaoMaps;
 let map;
@@ -55,8 +60,18 @@ function closePlaceInfo() {
   infoOpen.value = false;
 }
 
+function displayPlace(place) {
+  return localizePlace(place, locale.value, t) ?? place;
+}
+
 function placeName(place) {
-  return place.placeName || place.name || '장소 정보';
+  const localized = displayPlace(place);
+  return localized.placeName || localized.name || t('autoPass.ui_7d31290a71');
+}
+
+function placeAddress(place) {
+  const localized = displayPlace(place);
+  return localized.address || [localized.region, localized.district].filter(Boolean).join(' ');
 }
 
 function appendTextElement(parent, tagName, className, text) {
@@ -113,10 +128,12 @@ function relatedContentItems(place) {
     const contentId = item.contentId ?? item.relatedContentId;
     const title = item.title ?? item.contentTitle ?? item.relatedContentTitle;
     if (!contentId || !title) return;
-    const key = `${contentId}:${title}`;
+    const localized = localizeContent({ ...item, contentId, title }, locale.value, t);
+    const displayTitle = localized?.title ?? title;
+    const key = `${contentId}:${displayTitle}`;
     if (seen.has(key)) return;
     seen.add(key);
-    items.push({ contentId, title });
+    items.push({ contentId, title: displayTitle });
   }
 
   (place.relatedContents ?? []).forEach(addItem);
@@ -188,6 +205,7 @@ function placeDetailPath(place) {
 }
 
 function createInfoWindowContent(place) {
+  const localizedPlace = displayPlace(place);
   const content = document.createElement('article');
   content.className = 'kakao-place-info';
   ['click', 'mousedown', 'touchstart', 'pointerdown', 'wheel'].forEach((eventName) => {
@@ -199,7 +217,7 @@ function createInfoWindowContent(place) {
   const closeButton = document.createElement('button');
   closeButton.className = 'kakao-place-info__close';
   closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', '장소 상세 정보 닫기');
+  closeButton.setAttribute('aria-label', t('autoPass.ui_429f39711d'));
   closeButton.textContent = '×';
   closeButton.addEventListener('click', (event) => {
     event.preventDefault();
@@ -211,9 +229,9 @@ function createInfoWindowContent(place) {
   const body = document.createElement('div');
   body.className = 'kakao-place-info__body';
   content.appendChild(body);
-  appendTextElement(body, 'strong', 'kakao-place-info__name', placeName(place));
-  appendTextElement(body, 'span', 'kakao-place-info__address', place.address || `${place.region ?? ''} ${place.district ?? ''}`.trim());
-  appendTextElement(body, 'span', 'kakao-place-info__category', place.category);
+  appendTextElement(body, 'strong', 'kakao-place-info__name', placeName(localizedPlace));
+  appendTextElement(body, 'span', 'kakao-place-info__address', placeAddress(localizedPlace));
+  appendTextElement(body, 'span', 'kakao-place-info__category', localizedPlace.category);
 
   const links = document.createElement('div');
   links.className = 'kakao-place-info__links';
@@ -221,10 +239,10 @@ function createInfoWindowContent(place) {
     links,
     'kakao-place-info__link kakao-place-info__link--external',
     '',
-    `https://map.kakao.com/link/search/${encodeURIComponent(`${placeName(place)} ${place.address ?? ''}`.trim())}`,
+    `https://map.kakao.com/link/search/${encodeURIComponent(`${placeName(localizedPlace)} ${localizedPlace.address ?? ''}`.trim())}`,
     true,
   );
-  kakaoLink?.setAttribute('aria-label', '카카오맵에서 보기');
+  kakaoLink?.setAttribute('aria-label', t('autoPass.ui_2976925371'));
   if (kakaoLink) {
     const icon = document.createElement('img');
     icon.src = KAKAO_MAP_ICON_URL;
@@ -236,7 +254,7 @@ function createInfoWindowContent(place) {
   if (relatedContents.length) {
     const relatedScroller = document.createElement('div');
     relatedScroller.className = 'kakao-place-info__related-scroll';
-    relatedScroller.setAttribute('aria-label', '관련 콘텐츠');
+    relatedScroller.setAttribute('aria-label', t('autoPass.ui_0343cc46a7'));
     relatedContents.forEach((contentItem) => {
       const relatedButton = appendButton(
         relatedScroller,
@@ -247,7 +265,7 @@ function createInfoWindowContent(place) {
           router.push(`/contents/${encodeURIComponent(contentItem.contentId)}`);
         },
       );
-      relatedButton?.setAttribute('aria-label', `관련 콘텐츠 ${contentItem.title} 보기`);
+      relatedButton?.setAttribute('aria-label', t('autoPass.ui_c70234a765', { value0: contentItem.title }));
       relatedButton?.setAttribute('title', contentItem.title);
     });
     enableHorizontalChipScroll(relatedScroller);
@@ -379,34 +397,34 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="map-preview" :class="`map-preview--${mapStatus}`">
-    <div ref="mapContainer" class="kakao-map" role="img" aria-label="카카오 지도 장소 위치"></div>
+    <div ref="mapContainer" class="kakao-map" role="img" :aria-label="t('autoPass.ui_b8d2758afe')"></div>
     <div v-if="mapStatus !== 'ready'" class="map-status" role="status">
-      <strong v-if="mapStatus === 'loading'">지도를 불러오는 중입니다</strong>
+      <strong v-if="mapStatus === 'loading'">{{ t('autoPass.ui_cf6c4fe1f6') }}</strong>
       <template v-else-if="mapStatus === 'missing-key'">
-        <strong>카카오 지도 JavaScript 키가 필요합니다</strong>
-        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>를 설정해 주세요.</span>
+        <strong>{{ t('autoPass.ui_5a852b5a97') }}</strong>
+        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>{{ t('autoPass.ui_ceef3b8e8b') }}</span>
       </template>
       <template v-else-if="mapStatus === 'empty'">
-        <strong>표시할 좌표가 없습니다</strong>
-        <span v-if="totalPlaceCount">전체 {{ totalPlaceCount }}곳 중 지도에 표시할 좌표가 없습니다.</span>
-        <span v-else>장소의 위도와 경도를 확인해 주세요.</span>
+        <strong>{{ t('autoPass.ui_333724b276') }}</strong>
+        <span v-if="totalPlaceCount">{{ t('autoPass.ui_74a3fd1bf9', { count: totalPlaceCount }) }}</span>
+        <span v-else>{{ t('autoPass.ui_caf0e366cc') }}</span>
       </template>
       <template v-else>
-        <strong>카카오 지도를 불러오지 못했습니다</strong>
-        <span>JavaScript 앱 키와 SDK 설정을 확인해 주세요.</span>
+        <strong>{{ t('autoPass.ui_e28793c8b2') }}</strong>
+        <span>{{ t('autoPass.ui_7eb34401bb') }}</span>
       </template>
     </div>
     <button
-      v-if="selectedPlace?.placeId && props.showDetailLink"
+      v-if="localizedSelectedPlace?.placeId && props.showDetailLink"
       class="map-place-popover"
       type="button"
       @click="goToSelectedPlace"
     >
       <span class="map-place-popover__summary">
-        <strong>{{ selectedPlace.placeName }}</strong>
-        <span>{{ selectedPlace.address || `${selectedPlace.region} ${selectedPlace.district}` }}</span>
+        <strong>{{ localizedSelectedPlace.placeName }}</strong>
+        <span>{{ localizedSelectedPlace.address || [localizedSelectedPlace.region, localizedSelectedPlace.district].filter(Boolean).join(' ') }}</span>
       </span>
-      <small>장소 상세 보기</small>
+      <small>{{ t('autoPass.ui_1a31ee0b4b') }}</small>
     </button>
     <span v-if="mapStatus === 'ready' && !infoOpen" class="map-label">{{ mapCountLabel }}</span>
   </div>

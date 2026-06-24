@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import EmptyState from '../common/EmptyState.vue';
+
+const { t } = useI18n();
 
 defineOptions({
   name: 'DetailNotFoundPanel',
@@ -8,19 +11,19 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: '상세 정보를 찾을 수 없습니다',
+    default: '\uc0c1\uc138 \uc815\ubcf4\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4',
   },
   text: {
     type: String,
-    default: '요청한 항목이 없거나 더 이상 제공되지 않습니다.',
+    default: '\uc694\uccad\ud55c \ud56d\ubaa9\uc774 \uc5c6\uac70\ub098 \ub354 \uc774\uc0c1 \uc81c\uacf5\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.',
   },
   retryLabel: {
     type: String,
-    default: '다시 시도',
+    default: '\ub2e4\uc2dc \uc2dc\ub3c4',
   },
   listLabel: {
     type: String,
-    default: '목록으로 돌아가기',
+    default: '\ubaa9\ub85d\uc73c\ub85c \ub3cc\uc544\uac00\uae30',
   },
   listTo: {
     type: String,
@@ -32,7 +35,7 @@ const emit = defineEmits(['retry']);
 </script>
 
 <template>
-  <section class="detail-not-found-panel" aria-label="상세 오류 복구">
+  <section class="detail-not-found-panel" :aria-label="t('common.cleanup.k08b0e222b3')">
     <EmptyState
       icon="!"
       tone="error"

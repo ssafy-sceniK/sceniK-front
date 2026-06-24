@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCurrentLocale } from '../i18n/index.js';
 import { attachUserMessage, unwrapApiData } from './error.js';
 
 export const AUTH_TOKEN_KEY = 'scenik-access-token';
@@ -11,11 +12,12 @@ export const http = axios.create({
 });
 
 http.interceptors.request.use((config) => {
+  config.headers = config.headers ?? {};
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
   if (token) {
-    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.headers['Accept-Language'] = getCurrentLocale();
   return config;
 });
 
@@ -42,6 +44,7 @@ http.interceptors.response.use(
       localStorage.setItem(REFRESH_TOKEN_KEY, tokenPayload.refreshToken ?? tokenPayload.accessToken ?? refreshToken);
       original.headers = original.headers ?? {};
       original.headers.Authorization = `Bearer ${tokenPayload.accessToken}`;
+      original.headers['Accept-Language'] = getCurrentLocale();
       return http(original);
     } catch (refreshError) {
       localStorage.removeItem(AUTH_TOKEN_KEY);

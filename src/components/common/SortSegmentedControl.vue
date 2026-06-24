@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 defineOptions({
   name: 'SortSegmentedControl',
 });
@@ -14,11 +15,12 @@ const props = defineProps({
   },
   ariaLabel: {
     type: String,
-    default: '정렬 선택',
+    default: '',
   },
 });
 
 const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
 
 function choose(value) {
   if (value !== props.modelValue) {
@@ -43,7 +45,7 @@ function chooseByOffset(offset) {
   <div
     class="segmented-sort"
     role="radiogroup"
-    :aria-label="props.ariaLabel"
+    :aria-label="props.ariaLabel || t('common.sortSelection')"
     :style="{ '--segmented-option-count': props.options.length }"
   >
     <button

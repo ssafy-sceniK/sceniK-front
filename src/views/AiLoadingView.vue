@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -13,6 +14,8 @@ import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/r
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
 
+const { t } = useI18n();
+
 const router = useRouter();
 const contentStore = useContentStore();
 const placeStore = usePlaceStore();
@@ -20,20 +23,20 @@ const uiStore = useUiStore();
 const loadingProgress = ref(0);
 const loadingSteps = [
   {
-    label: '촬영지 데이터 검색',
-    detail: '검증된 실제 장소 후보를 확인하고 있어요.',
+    label: t('autoPass.ui_e64051fd86'),
+    detail: t('autoPass.ui_2f367182e1'),
     startAt: 0,
     doneAt: 20,
   },
   {
-    label: '이동 동선 최적화',
-    detail: '일정과 교통 조건에 맞춰 순서를 조정하고 있어요.',
+    label: t('autoPass.ui_433dc97875'),
+    detail: t('autoPass.ui_3bc9b971bf'),
     startAt: 20,
     doneAt: 45,
   },
   {
-    label: '추천 코스 구성',
-    detail: '방문 시간, 이유, 여행 팁을 정리하고 있어요.',
+    label: t('autoPass.ui_cf474f1c88'),
+    detail: t('autoPass.ui_79529319ed'),
     startAt: 45,
     doneAt: 101,
   },
@@ -57,25 +60,25 @@ const activeStepIndex = computed(() => {
 
 const loadingSummary = computed(() => {
   const selected = selectedContents();
-  const title = selected.length > 1 ? `${selected[0].title} 외 ${selected.length - 1}개` : selected[0]?.title ?? '선택한 콘텐츠';
+  const title = selected.length > 1 ? t('autoPass.ui_983bd02e18', { value0: selected[0].title, value1: selected.length - 1 }) : selected[0]?.title ?? t('autoPass.ui_4aeafb9db3');
   const duration = getTripDurationDays(uiStore.courseConditions);
-  return `${selectedRegionLabel()} ${duration}일 코스 · ${title}`;
+  return t('autoPass.ui_5c30f0eb69', { value0: selectedRegionLabel(), value1: duration, value2: title });
 });
 
 const loadingStatusText = computed(() => {
-  if (loadingProgress.value < 20) return '여행 조건을 확인하고 있어요.';
-  if (loadingProgress.value < 45) return '촬영지와 장소 데이터를 검색하고 있어요.';
-  if (loadingProgress.value < 75) return '이동 동선을 계산하고 있어요.';
-  if (loadingProgress.value < 100) return '추천 코스를 정리하고 있어요.';
-  return '코스 생성이 완료되었어요.';
+  if (loadingProgress.value < 20) return t('autoPass.ui_00fb9fb7de');
+  if (loadingProgress.value < 45) return t('autoPass.ui_7a4fa8d7af');
+  if (loadingProgress.value < 75) return t('autoPass.ui_974ad1a339');
+  if (loadingProgress.value < 100) return t('autoPass.ui_0053c4ba73');
+  return t('autoPass.ui_c6b085f270');
 });
 const loadingContextRows = computed(() => [
-  { label: '지역', value: selectedRegionLabel() },
-  { label: '일수', value: `${getTripDurationDays(uiStore.courseConditions)}일` },
-  { label: '이동', value: selectedTransportLabel() },
-  { label: '테마', value: selectedTravelStyles().join(', ') || uiStore.courseConditions.style },
-  { label: '예산', value: uiStore.courseConditions.budget },
-  { label: '숙소', value: uiStore.courseConditions.hotelAddress?.trim() || '입력 안 함' },
+  { label: t('autoPass.ui_1745c23c9e'), value: selectedRegionLabel() },
+  { label: t('autoPass.ui_a5371dc25c'), value: t('autoPass.ui_43d3a63424', { value0: getTripDurationDays(uiStore.courseConditions) }) },
+  { label: t('autoPass.ui_c86dd4bfe3'), value: selectedTransportLabel() },
+  { label: t('autoPass.ui_3811c2cccd'), value: selectedTravelStyles().join(', ') || uiStore.courseConditions.style },
+  { label: t('autoPass.ui_9eb0d6c311'), value: uiStore.courseConditions.budget },
+  { label: t('autoPass.ui_4b0dfbc732'), value: uiStore.courseConditions.hotelAddress?.trim() || t('autoPass.ui_c3bf79c3a1') },
 ]);
 
 function loadingStepState(index, step) {
@@ -157,7 +160,7 @@ function selectedRegions() {
 }
 
 function selectedRegionLabel(separator = ', ') {
-  return selectedRegions().join(separator) || '선택 지역';
+  return selectedRegions().join(separator) || t('autoPass.ui_6ae0fbb904');
 }
 
 function candidateFromPlace(place, selectedContent) {
@@ -170,8 +173,8 @@ function candidateFromPlace(place, selectedContent) {
     latitude: place.latitude,
     longitude: place.longitude,
     relatedContentId: selectedContent?.contentId ?? 'regional-verified',
-    relatedContentTitle: selectedContent?.title ?? '지역 실제 장소',
-    sceneDescription: place.description ?? '실제 장소 데이터입니다.',
+    relatedContentTitle: selectedContent?.title ?? '\uc9c0\uc5ed \uc2e4\uc81c \uc7a5\uc18c',
+    sceneDescription: place.description ?? '\uc2e4\uc81c \uc7a5\uc18c \ub370\uc774\ud130\uc785\ub2c8\ub2e4.',
     verified: place.verified !== false,
     imageUrl: place.imageUrl,
   };
@@ -219,7 +222,7 @@ async function generateRoute() {
   ]);
   const selected = selectedContents();
   if (!selected.length) {
-    uiStore.notify('AI 코스를 만들 콘텐츠를 먼저 선택해주세요.');
+    uiStore.notify(t('autoPass.ui_81d7f0a104'));
     router.push('/ai');
     return;
   }
@@ -267,7 +270,7 @@ async function generateRoute() {
     }
     uiStore.generatedRoute = {
       ...backendRoute,
-      title: `${selectedContentTitle} ${selectedRegionLabel('·')} ${(travelStyles[0] ?? uiStore.courseConditions.style ?? '감성 여행').replace(' 여행', '')} 여행 코스`,
+            title: `${selectedContentTitle} ${selectedRegionLabel('?')} ${(travelStyles[0] ?? uiStore.courseConditions.style ?? '\uac10\uc131 \uc5ec\ud589').replace(' \uc5ec\ud589', '')} \uc5ec\ud589 \ucf54\uc2a4`,
       contentTitle: selectedContentTitle,
       regions: backendRoute.regions ?? regions,
       region: backendRoute.region ?? regions.join(','),
@@ -290,7 +293,7 @@ async function generateRoute() {
     router.push('/ai/result');
     return;
   } catch (error) {
-    const message = getUserMessage(error, 'AI 코스 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    const message = getUserMessage(error, t('autoPass.ui_761f414bf0'));
     if (import.meta.env.VITE_ENABLE_LOCAL_AI_FALLBACK !== 'true') {
       uiStore.routeError = message;
       uiStore.notify(message);
@@ -304,8 +307,8 @@ async function generateRoute() {
   const dayCount = Math.max(1, Math.min(requestedDuration, resolved.candidatePlaces.length));
   const contentTitle = selected.map((content) => content.title).join(' · ');
   const dateRangeLabel = formatDateRange(uiStore.courseConditions);
-  const styleLabel = (travelStyles[0] ?? '감성 여행').replace(' 여행', '');
-  const durationLabel = dayCount > 1 ? `${dayCount - 1}박 ${dayCount}일` : '1일 코스';
+  const styleLabel = (travelStyles[0] ?? '\uac10\uc131 \uc5ec\ud589').replace(' \uc5ec\ud589', '');
+  const durationLabel = dayCount > 1 ? `${dayCount - 1}\ubc15 ${dayCount}\uc77c` : '1\uc77c \ucf54\uc2a4';
   const request = {
     contentId: primaryContent.contentId,
     region: resolved.region,
@@ -320,7 +323,7 @@ async function generateRoute() {
   const route = {
     routeId: `route-${Date.now()}`,
     title: `${contentTitle} ${request.region} ${styleLabel} ${durationLabel}`,
-    summary: `${dateRangeLabel} 일정에 맞춰 ${contentTitle}와 같은 지역의 실제 장소를 연결한 ${dayCount}일 여행 코스입니다.`,
+    summary: `${dateRangeLabel} \uc77c\uc815\uc5d0 \ub9de\ucdb0 ${contentTitle}\uc640 \uac19\uc740 \uc9c0\uc5ed\uc758 \uc2e4\uc81c \uc7a5\uc18c\ub97c \uc5f0\uacb0\ud55c ${dayCount}\uc77c \uc5ec\ud589 \ucf54\uc2a4\uc785\ub2c8\ub2e4.`,
     contentId: primaryContent.contentId,
     contentIds,
     contentTitle,
@@ -341,21 +344,21 @@ async function generateRoute() {
     budgetMax: uiStore.courseConditions.budgetMax,
     budget: uiStore.courseConditions.budget,
     hotelAddress: uiStore.courseConditions.hotelAddress,
-    trustMessage: '등록된 실제 장소 데이터만 사용했습니다. 임의 장소는 포함하지 않습니다.',
+    trustMessage: '\ub4f1\ub85d\ub41c \uc2e4\uc81c \uc7a5\uc18c \ub370\uc774\ud130\ub9cc \uc0ac\uc6a9\ud588\uc2b5\ub2c8\ub2e4. \uc784\uc758 \uc7a5\uc18c\ub294 \ud3ec\ud568\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.',
     candidatePlaces,
     days: groups.map((group, dayIndex) => ({
       dayNumber: dayIndex + 1,
-      estimatedTravelTime: dayIndex === 0 ? '이동 약 58분' : '이동 약 74분',
+      estimatedTravelTime: dayIndex === 0 ? '\uc774\ub3d9 \uc57d 58\ubd84' : '\uc774\ub3d9 \uc57d 74\ubd84',
       places: group.map((place, placeIndex) => ({
         placeId: place.placeId,
         placeName: place.name,
         dayNumber: dayIndex + 1,
         visitOrder: placeIndex + 1,
         recommendedTime: placeIndex === 0 ? '10:00' : placeIndex === 1 ? '14:00' : '17:30',
-        reason: place.category || '촬영지',
+        reason: place.category || '\ucd2c\uc601\uc9c0',
         travelTip: uiStore.courseConditions.hotelAddress
-          ? `${placeIndex === 0 ? `숙소(${uiStore.courseConditions.hotelAddress})에서 출발하는 동선을 참고하세요. ` : ''}${place.region} 이동 동선을 확인하고 운영 시간을 방문 전 다시 확인하세요.${placeIndex === group.length - 1 ? ' 일정 후 숙소 복귀 시간을 함께 확인하세요.' : ''}`
-          : `${place.region} 이동 동선을 확인하고 운영 시간을 방문 전 다시 확인하세요.`,
+          ? `${placeIndex === 0 ? `\uc219\uc18c(${uiStore.courseConditions.hotelAddress})\uc5d0\uc11c \ucd9c\ubc1c\ud558\ub294 \ub3d9\uc120\uc744 \ucc38\uace0\ud558\uc138\uc694. ` : ''}${place.region} \uc774\ub3d9 \ub3d9\uc120\uc744 \ud655\uc778\ud558\uace0 \uc6b4\uc601 \uc2dc\uac04\uc744 \ubc29\ubb38 \uc804 \ub2e4\uc2dc \ud655\uc778\ud558\uc138\uc694.${placeIndex === group.length - 1 ? '\uc77c\uc815 \ud6c4 \uc219\uc18c \ubcf5\uadc0 \uc2dc\uac04\uc744 \ud568\uaed8 \ud655\uc778\ud558\uc138\uc694.' : ''}`
+          : `${place.region} \uc774\ub3d9 \ub3d9\uc120\uc744 \ud655\uc778\ud558\uace0 \uc6b4\uc601 \uc2dc\uac04\uc744 \ubc29\ubb38 \uc804 \ub2e4\uc2dc \ud655\uc778\ud558\uc138\uc694.`,
       })),
     })),
   };
@@ -393,19 +396,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <AppLayout title="AI 코스 생성" back hide-bottom>
+  <AppLayout :title="t('autoPass.ui_16602ec3d5')" back hide-bottom>
     <section class="loading-screen" :class="{ 'loading-screen--light': runwayTheme === 'light' }">
       <AiRunwayProgress :progress="loadingProgress" :theme="runwayTheme" />
 
       <div class="loading-copy">
         <span>{{ loadingSummary }}</span>
-        <h1>AI가 코스를 생성하고 있어요</h1>
+        <h1>{{ t('autoPass.ui_f8441947e8') }}</h1>
         <p>{{ loadingStatusText }}</p>
       </div>
 
-      <AiPromptContextSummary compact title="AI가 참고하는 조건" :rows="loadingContextRows" />
+      <AiPromptContextSummary compact :title="t('autoPass.ui_4afb91df58')" :rows="loadingContextRows" />
 
-      <ol class="loading-steps" aria-label="AI 코스 생성 단계">
+      <ol class="loading-steps" :aria-label="t('autoPass.ui_5c1a55113a')">
         <li
           v-for="(step, index) in loadingSteps"
           :key="step.label"

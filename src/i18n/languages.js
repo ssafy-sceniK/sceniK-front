@@ -3,10 +3,10 @@
 export const supportedLocales = ['ko', 'en', 'ja', 'zh-CN'];
 
 export const languageOptions = [
-  { value: 'ko', labelKey: 'language.ko' },
-  { value: 'en', labelKey: 'language.en' },
-  { value: 'ja', labelKey: 'language.ja' },
-  { value: 'zh-CN', labelKey: 'language.zh-CN' },
+  { value: 'ko', label: '한국어' },
+  { value: 'en', label: 'English' },
+  { value: 'ja', label: '日本語' },
+  { value: 'zh-CN', label: '简体中文' },
 ];
 
 export function normalizeLocale(value) {

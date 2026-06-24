@@ -1,23 +1,23 @@
-export const PREFERENCE_CONTENT_TYPES = ['드라마', '영화', '아이돌', '예능', '배우'];
-export const PREFERENCE_REGIONS = ['서울', '부산', '제주', '경기', '강원', '인천'];
-export const PREFERENCE_THEMES = ['감성 여행', '맛집 중심', '촬영지 중심', '숨은 명소'];
+export const PREFERENCE_CONTENT_TYPES = ['\ub4dc\ub77c\ub9c8', '\uc601\ud654', '\uc544\uc774\ub3cc', '\uc608\ub2a5', '\ubc30\uc6b0'];
+export const PREFERENCE_REGIONS = ['\uc11c\uc6b8', '\ubd80\uc0b0', '\uc81c\uc8fc', '\uacbd\uae30', '\uac15\uc6d0', '\uc778\ucc9c'];
+export const PREFERENCE_THEMES = ['\uac10\uc131 \uc5ec\ud589', '\ub9db\uc9d1 \uc911\uc2ec', '\ucd2c\uc601\uc9c0 \uc911\uc2ec', '\uc228\uc740 \uba85\uc18c'];
 
 const LEGACY_VALUE_MAP = new Map([
-  ['?쒕씪留?', '드라마'],
-  ['?곹솕', '영화'],
-  ['?꾩씠??', '아이돌'],
-  ['?덈뒫', '예능'],
-  ['諛곗슦', '배우'],
-  ['?쒖슱', '서울'],
-  ['遺??', '부산'],
-  ['?쒖＜', '제주'],
-  ['寃쎄린', '경기'],
-  ['媛뺤썝', '강원'],
-  ['?몄쿇', '인천'],
-  ['媛먯꽦 ?ы뻾', '감성 여행'],
-  ['留쏆쭛 以묒떖', '맛집 중심'],
-  ['珥ъ쁺吏 以묒떖', '촬영지 중심'],
-  ['?깆??쒕?', '숨은 명소'],
+  ['?\uc495\uc52a\uf9cd?', '\ub4dc\ub77c\ub9c8'],
+  ['?\uacf9\uc195', '\uc601\ud654'],
+  ['?\uafa9\uc520??', '\uc544\uc774\ub3cc'],
+  ['?\ub348\ub4ab', '\uc608\ub2a5'],
+  ['\u8adb\uacd7\uc2a6', '\ubc30\uc6b0'],
+  ['?\uc496\uc2b1', '\uc11c\uc6b8'],
+  ['遺??', '\ubd80\uc0b0'],
+  ['?\uc496\uff1c', '\uc81c\uc8fc'],
+  ['\u5bc3\uc384\ub9b0', '\uacbd\uae30'],
+  ['\u5a9b\ubea4\uc35d', '\uac15\uc6d0'],
+  ['?\uba84\ucfc7', '\uc778\ucc9c'],
+  ['\u5a9b\uba2f\uaf66 ?\u044b\ubefe', '\uac10\uc131 \uc5ec\ud589'],
+  ['\uf9cd\uc3c6\ucb5b \u4ee5\ubb12\ub596', '\ub9db\uc9d1 \uc911\uc2ec'],
+  ['\u73e5\u044a\uc07a\uf9de\u0080 \u4ee5\ubb12\ub596', '\ucd2c\uc601\uc9c0 \uc911\uc2ec'],
+  ['?\uae46??\uc495?', '\uc228\uc740 \uba85\uc18c'],
 ]);
 
 const OPTION_GROUPS = [

@@ -1,10 +1,13 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 const props = defineProps({
   imageUrl: { type: String, default: '' },
   initial: { type: String, default: 'K' },
-  alt: { type: String, default: '프로필 이미지' },
+  alt: { type: String, default: '\ud504\ub85c\ud544 \uc774\ubbf8\uc9c0' },
   interactive: { type: Boolean, default: false },
-  ariaLabel: { type: String, default: '프로필 편집' },
+  ariaLabel: { type: String, default: '\ud504\ub85c\ud544 \ud3b8\uc9d1' },
   preview: { type: Boolean, default: false },
   badgeLabel: { type: String, default: '✎' },
 });

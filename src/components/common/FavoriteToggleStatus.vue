@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 defineOptions({
   name: 'FavoriteToggleStatus',
 });
@@ -14,15 +17,15 @@ const props = defineProps({
   },
   activeText: {
     type: String,
-    default: '좋아요 완료',
+    default: '\uc88b\uc544\uc694 \uc644\ub8cc',
   },
   inactiveText: {
     type: String,
-    default: '좋아요 취소됨',
+    default: '\uc88b\uc544\uc694 \ucde8\uc18c\ub428',
   },
   pendingText: {
     type: String,
-    default: '상태를 저장하는 중입니다',
+    default: '\uc0c1\ud0dc\ub97c \uc800\uc7a5\ud558\ub294 \uc911\uc785\ub2c8\ub2e4',
   },
 });
 </script>

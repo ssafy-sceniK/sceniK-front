@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -17,8 +17,8 @@ const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const query = ref('');
-const region = ref('전체');
-const category = ref('전체');
+const region = ref('\uc804\uccb4');
+const category = ref('\uc804\uccb4');
 const sort = ref('latest');
 const visibleLimit = ref(12);
 const restoringQuery = ref(false);
@@ -29,11 +29,11 @@ const sortOptions = computed(() => [
 ]);
 const regionOptions = computed(() => placeStore.regions.map((item) => ({
   value: item,
-  label: item === '전체' ? t('content.region.all') : localizeSystemLabel(item, 'region', t, locale.value),
+  label: item === t('place.cleanup.ka2fea217a7') ? t('content.region.all') : localizeSystemLabel(item, 'region', t, locale.value),
 })));
 const categoryOptions = computed(() => placeStore.categories.map((item) => ({
   value: item,
-  label: item === '전체' ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
+  label: item === t('place.cleanup.ka2fea217a7') ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
 })));
 
 function loadPlaces() {
@@ -73,8 +73,8 @@ function restoreQueryState() {
   restoringQuery.value = true;
   const routeSort = queryValue(route.query.sort, 'latest');
   query.value = queryValue(route.query.keyword);
-  region.value = queryValue(route.query.region, '전체');
-  category.value = queryValue(route.query.category, '전체');
+  region.value = queryValue(route.query.region, '\uc804\uccb4');
+  category.value = queryValue(route.query.category, '\uc804\uccb4');
   sort.value = ['latest', 'popular', 'name'].includes(routeSort) ? routeSort : 'latest';
   visibleLimit.value = positiveSize(route.query.size);
   queueMicrotask(() => {
@@ -88,8 +88,8 @@ function syncQueryState() {
     query: {
       ...route.query,
       keyword: query.value.trim() || undefined,
-      region: region.value !== '전체' ? region.value : undefined,
-      category: category.value !== '전체' ? category.value : undefined,
+      region: region.value !== '\uc804\uccb4' ? region.value : undefined,
+      category: category.value !== '\uc804\uccb4' ? category.value : undefined,
       sort: sort.value !== 'latest' ? sort.value : undefined,
       size: visibleLimit.value !== 12 ? String(visibleLimit.value) : undefined,
     },
@@ -107,8 +107,8 @@ watch(() => route.query, restoreQueryState);
 
 function resetFilters() {
   query.value = '';
-  region.value = '전체';
-  category.value = '전체';
+  region.value = '\uc804\uccb4';
+  category.value = '\uc804\uccb4';
   sort.value = 'latest';
 }
 

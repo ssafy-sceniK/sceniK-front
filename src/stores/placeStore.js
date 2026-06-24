@@ -4,9 +4,9 @@ import { fetchPlaceDetail, fetchPlaces } from '../api/placeApi.js';
 function filterPlaces(list, { region, district, category, keyword } = {}) {
   const query = (keyword ?? '').trim().toLowerCase();
   return list.filter((place) => {
-    const matchesRegion = !region || region === '전체' || place.region === region;
+    const matchesRegion = !region || region === '\uc804\uccb4' || place.region === region;
     const matchesDistrict = !district || place.district === district;
-    const matchesCategory = !category || category === '전체' || place.category === category;
+    const matchesCategory = !category || category === '\uc804\uccb4' || place.category === category;
     const haystack = `${place.placeName} ${place.region} ${place.district} ${place.category} ${place.description} ${(place.tags ?? []).join(' ')}`.toLowerCase();
     return matchesRegion && matchesDistrict && matchesCategory && (!query || haystack.includes(query));
   });
@@ -29,8 +29,8 @@ export const usePlaceStore = defineStore('place', {
     error: '',
   }),
   getters: {
-    regions: (state) => ['전체', ...new Set(state.items.map((item) => item.region))],
-    categories: (state) => ['전체', ...new Set(state.items.map((item) => item.category))],
+    regions: (state) => ['\uc804\uccb4', ...new Set(state.items.map((item) => item.region))],
+    categories: (state) => ['\uc804\uccb4', ...new Set(state.items.map((item) => item.category))],
   },
   actions: {
     prepareExplore() {
@@ -44,7 +44,7 @@ export const usePlaceStore = defineStore('place', {
         this.items = (await fetchPlaces(params)).map(enrichPlace);
       } catch (error) {
         this.items = [];
-        this.error = error.userMessage ?? '장소를 불러오지 못했습니다.';
+        this.error = error.userMessage ?? '\uc7a5\uc18c\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.';
       } finally {
         this.loading = false;
       }
@@ -58,7 +58,7 @@ export const usePlaceStore = defineStore('place', {
         this.items = [place, ...this.items.filter((item) => item.placeId !== place.placeId)];
         return place;
       } catch (error) {
-        this.error = error.userMessage ?? '장소 상세를 불러오지 못했습니다.';
+        this.error = error.userMessage ?? '\uc7a5\uc18c \uc0c1\uc138\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.';
         return null;
       }
     },

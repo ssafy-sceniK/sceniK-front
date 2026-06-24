@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
@@ -10,12 +11,76 @@ import PlaceCard from '../components/place/PlaceCard.vue';
 import CourseCard from '../components/course/CourseCard.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { courseTemplates, notices, places } from '../data/mockData.js';
+import { localizeSystemLabel } from '../i18n/systemContent.js';
+
+const LIST_CONFIG = {
+  'liked-content': {
+    titleKey: 'my.menu.likedContent',
+    empty: { icon: 'C', tone: 'route', titleKey: 'my.activity.empty.likedContent.title', textKey: 'my.activity.empty.likedContent.text', actionKey: 'my.activity.empty.likedContent.action', actionTo: '/contents' },
+  },
+  'liked-places': {
+    titleKey: 'my.menu.likedPlaces',
+    empty: { icon: 'P', tone: 'search', titleKey: 'my.activity.empty.likedPlaces.title', textKey: 'my.activity.empty.likedPlaces.text', actionKey: 'my.activity.empty.likedPlaces.action', actionTo: '/places' },
+  },
+  recent: {
+    titleKey: 'my.activity.title.recent',
+    empty: { icon: 'KR', tone: 'search', titleKey: 'my.activity.empty.recent.title', textKey: 'my.activity.empty.recent.text', actionKey: 'my.activity.empty.recent.action', actionTo: '/places' },
+  },
+  planned: {
+    titleKey: 'my.visits.planned',
+    empty: { icon: 'GO', tone: 'route', titleKey: 'my.activity.empty.planned.title', textKey: 'my.activity.empty.planned.text', actionKey: 'my.activity.empty.planned.action', actionTo: '/places' },
+  },
+  completed: {
+    titleKey: 'my.visits.completed',
+    empty: { icon: 'OK', tone: 'route', titleKey: 'my.activity.empty.completed.title', textKey: 'my.activity.empty.completed.text', actionKey: 'my.activity.empty.completed.action', actionTo: '/explore/map' },
+  },
+  'saved-routes': {
+    titleKey: 'my.menu.savedCourses',
+    empty: { icon: 'AI', tone: 'route', titleKey: 'my.activity.empty.savedRoutes.title', textKey: 'my.activity.empty.savedRoutes.text', actionKey: 'my.activity.empty.savedRoutes.action', actionTo: '/ai', secondaryKey: 'my.activity.empty.savedRoutes.secondary', secondaryTo: '/home/routes-all' },
+  },
+  routes: {
+    titleKey: 'my.activity.title.routes',
+    empty: { icon: 'AI', tone: 'route', titleKey: 'my.activity.empty.routes.title', textKey: 'my.activity.empty.routes.text', actionKey: 'my.activity.empty.routes.action', actionTo: '/ai' },
+  },
+  posts: {
+    titleKey: 'my.menu.myPosts',
+    empty: { icon: 'C', tone: 'community', titleKey: 'my.activity.empty.posts.title', textKey: 'my.activity.empty.posts.text', actionKey: 'my.activity.empty.posts.action', actionTo: '/community/write' },
+  },
+  comments: {
+    titleKey: 'my.menu.commentedPosts',
+    empty: { icon: 'C', tone: 'community', titleKey: 'my.activity.empty.comments.title', textKey: 'my.activity.empty.comments.text', actionKey: 'my.activity.empty.comments.action', actionTo: '/community' },
+  },
+  scraps: {
+    titleKey: 'my.menu.scraps',
+    empty: { icon: 'S', tone: 'community', titleKey: 'my.activity.empty.scraps.title', textKey: 'my.activity.empty.scraps.text', actionKey: 'my.activity.empty.scraps.action', actionTo: '/community' },
+  },
+  reviews: {
+    titleKey: 'my.menu.myReviews',
+    empty: { icon: 'R', tone: 'search', titleKey: 'my.activity.empty.reviews.title', textKey: 'my.activity.empty.reviews.text', actionKey: 'my.activity.empty.reviews.action', actionTo: '/places' },
+  },
+  following: {
+    titleKey: 'my.menu.following',
+    empty: { icon: 'F', tone: 'community', titleKey: 'my.activity.empty.following.title', textKey: 'my.activity.empty.following.text', actionKey: 'my.activity.empty.following.action', actionTo: '/community' },
+  },
+  followers: {
+    titleKey: 'my.menu.followers',
+    empty: { icon: 'F', tone: 'community', titleKey: 'my.activity.empty.followers.title', textKey: 'my.activity.empty.followers.text', actionKey: 'my.activity.empty.followers.action', actionTo: '/community/write' },
+  },
+  default: {
+    titleKey: 'my.activity.title.list',
+    empty: { icon: 'SK', tone: 'neutral', titleKey: 'my.activity.empty.default.title', textKey: 'my.activity.empty.default.text' },
+  },
+};
 
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 const type = computed(() => route.meta.type);
 const listNotice = ref(null);
+const listConfig = computed(() => LIST_CONFIG[type.value] ?? LIST_CONFIG.default);
+const title = computed(() => route.meta.titleKey ? t(route.meta.titleKey) : t(listConfig.value.titleKey));
+
 onMounted(async () => {
   if (type.value === 'saved-routes') await uiStore.loadSavedCourses();
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) {
@@ -25,7 +90,6 @@ onMounted(async () => {
   if (type.value === 'reviews') await uiStore.loadMyReviews();
   if (['following', 'followers'].includes(type.value)) await uiStore.loadFollowState();
 });
-const title = computed(() => route.meta.title || '목록');
 
 function ownsPost(post) {
   if (!uiStore.currentUser) return false;
@@ -84,111 +148,16 @@ const errorMessage = computed(() => {
   return '';
 });
 const emptyStateConfig = computed(() => {
-  const map = {
-    'liked-content': {
-      icon: '♥',
-      tone: 'route',
-      title: '좋아요한 콘텐츠가 없어요',
-      text: '마음에 드는 K-content를 발견하면 하트로 모아둘 수 있어요.',
-      actionLabel: '콘텐츠 둘러보기',
-      actionTo: '/contents',
-    },
-    'liked-places': {
-      icon: 'P',
-      tone: 'search',
-      title: '좋아요한 장소가 없어요',
-      text: '가보고 싶은 촬영지를 저장해 나만의 여행 후보를 만들어보세요.',
-      actionLabel: '장소 둘러보기',
-      actionTo: '/places',
-    },
-    recent: {
-      icon: 'KR',
-      tone: 'search',
-      title: '최근 본 장소가 없어요',
-      text: '장소를 열어보면 다시 찾기 쉽도록 이곳에 기록됩니다.',
-      actionLabel: '장소 탐색하기',
-      actionTo: '/places',
-    },
-    planned: {
-      icon: 'GO',
-      tone: 'route',
-      title: '예정된 방문 장소가 없어요',
-      text: '장소 상세에서 방문 예정으로 저장하면 여행 준비 목록이 생겨요.',
-      actionLabel: '장소 탐색하기',
-      actionTo: '/places',
-    },
-    completed: {
-      icon: 'OK',
-      tone: 'route',
-      title: '방문 완료한 장소가 없어요',
-      text: '다녀온 촬영지를 방문 완료로 표시하면 여행 기록이 쌓여요.',
-      actionLabel: '장소 탐색하기',
-      actionTo: '/explore/map',
-    },
-    'saved-routes': {
-      icon: 'AI',
-      tone: 'route',
-      title: '저장한 코스가 없어요',
-      text: '좋아하는 K-content를 고르고 첫 여행 코스를 만들어보세요.',
-      actionLabel: 'AI 코스 만들기',
-      actionTo: '/ai',
-      secondaryLabel: '인기 코스 보기',
-      secondaryTo: '/home/routes-all',
-    },
-    posts: {
-      icon: 'C',
-      tone: 'community',
-      title: '아직 작성한 게시글이 없어요',
-      text: '다녀온 코스나 촬영지 팁을 커뮤니티에 공유해보세요.',
-      actionLabel: '게시글 작성하기',
-      actionTo: '/community/write',
-    },
-    comments: {
-      icon: 'C',
-      tone: 'community',
-      title: '댓글 단 글이 없어요',
-      text: '관심 있는 여행 후기에 댓글을 남기면 이곳에서 다시 볼 수 있어요.',
-      actionLabel: '커뮤니티 둘러보기',
-      actionTo: '/community',
-    },
-    scraps: {
-      icon: 'S',
-      tone: 'community',
-      title: '스크랩한 게시글이 없어요',
-      text: '다시 보고 싶은 여행 후기와 코스를 스크랩해두세요.',
-      actionLabel: '커뮤니티 둘러보기',
-      actionTo: '/community',
-    },
-    reviews: {
-      icon: 'R',
-      tone: 'search',
-      title: '아직 리뷰가 없어요',
-      text: '다녀온 촬영지의 분위기와 이동 팁을 장소 상세에서 남겨보세요.',
-      actionLabel: '장소 둘러보기',
-      actionTo: '/places',
-    },
-    following: {
-      icon: 'F',
-      tone: 'community',
-      title: '팔로잉한 사용자가 없어요',
-      text: '커뮤니티 게시글 작성자를 팔로우하면 이곳에서 다시 볼 수 있어요.',
-      actionLabel: '커뮤니티 둘러보기',
-      actionTo: '/community',
-    },
-    followers: {
-      icon: 'F',
-      tone: 'community',
-      title: '아직 팔로워가 없습니다',
-      text: '커뮤니티에 여행 후기와 촬영지 팁을 공유해보세요.',
-      actionLabel: '글 작성하기',
-      actionTo: '/community/write',
-    },
-  };
-  return map[type.value] ?? {
-    icon: 'SK',
-    tone: 'neutral',
-    title: '표시할 항목이 없어요',
-    text: '서비스를 사용하면 기록이 이곳에 차곡차곡 쌓입니다.',
+  const empty = listConfig.value.empty ?? LIST_CONFIG.default.empty;
+  return {
+    icon: empty.icon,
+    tone: empty.tone,
+    title: t(empty.titleKey),
+    text: t(empty.textKey),
+    actionLabel: empty.actionKey ? t(empty.actionKey) : '',
+    actionTo: empty.actionTo ?? '',
+    secondaryLabel: empty.secondaryKey ? t(empty.secondaryKey) : '',
+    secondaryTo: empty.secondaryTo ?? '',
   };
 });
 
@@ -207,13 +176,19 @@ function openCourse(course) {
   router.push({ name: target, params: { routeId: course.routeId } });
 }
 
+function containsAny(value, terms) {
+  const lower = String(value ?? '').toLowerCase();
+  return terms.some((term) => lower.includes(term));
+}
+
 function boardLabel(post) {
-  const tag = (post.tags ?? [])[0] ?? '';
-  if (tag.includes('드라마')) return '드라마';
-  if (tag.includes('영화')) return '영화';
-  if (tag.includes('아이돌') || tag.includes('K-pop')) return '아이돌';
-  if (tag.includes('예능')) return '예능';
-  return post.region ? `${post.region} 코스` : 'AI 코스';
+  const tagText = (post.tags ?? []).join(' ');
+  if (containsAny(tagText, ['drama', '\ub4dc\ub77c\ub9c8'])) return t('my.activity.boards.drama');
+  if (containsAny(tagText, ['movie', 'film', '\uc601\ud654'])) return t('my.activity.boards.movie');
+  if (containsAny(tagText, ['idol', 'k-pop', 'kpop', '\uc544\uc774\ub3cc'])) return t('my.activity.boards.idol');
+  if (containsAny(tagText, ['variety', '\uc608\ub2a5'])) return t('my.activity.boards.variety');
+  const region = localizeSystemLabel(post.region, 'region', t, locale.value);
+  return region ? t('my.activity.regionCourse', { region }) : t('my.activity.aiCourse');
 }
 
 function postCommentPreview(post) {
@@ -226,11 +201,17 @@ function postCommentCount(post) {
 }
 
 function postMeta(post) {
-  return [post.date, post.region].filter(Boolean).join(' · ');
+  return [post.date, localizeSystemLabel(post.region, 'region', t, locale.value)].filter(Boolean).join(' / ');
 }
 
 function reviewDate(review) {
   return review.updatedAt?.slice?.(0, 10) || review.createdAt?.slice?.(0, 10) || '';
+}
+
+function reviewRatingLabel(review) {
+  const rating = review.rating;
+  if (rating === undefined || rating === null || rating === '') return t('my.activity.review.noRating');
+  return t('my.activity.review.ratingValue', { rating });
 }
 
 function reviewPlaceLabel(review) {
@@ -246,7 +227,7 @@ function reviewPlaceHelper(review) {
 }
 
 function reviewPlaceTo(review) {
-  return review.placeId ? `/places/${review.placeId}` : '/places';
+  return review.placeId ? '/places/' + review.placeId : '/places';
 }
 
 function followUserInitial(user) {
@@ -263,8 +244,8 @@ function isFollowingUser(user) {
 }
 
 function followButtonLabel(user) {
-  if (isFollowActionPending(user.userId)) return '처리 중';
-  return isFollowingUser(user) ? '팔로잉' : '팔로우';
+  if (isFollowActionPending(user.userId)) return t('my.activity.follow.pending');
+  return isFollowingUser(user) ? t('my.activity.follow.following') : t('my.activity.follow.follow');
 }
 
 async function toggleFollowFromList(user) {
@@ -281,8 +262,8 @@ async function toggleFollowFromList(user) {
   }
   listNotice.value = {
     tone: 'error',
-    title: '팔로우 상태를 변경하지 못했습니다.',
-    text: uiStore.followError || '로그인 상태를 확인한 뒤 다시 시도해 주세요.',
+    title: t('my.activity.follow.errorTitle'),
+    text: uiStore.followError || t('my.activity.follow.errorText'),
   };
 }
 </script>
@@ -294,22 +275,22 @@ async function toggleFollowFromList(user) {
         v-if="isLoading"
         tone="loading"
         compact
-        title="목록을 불러오는 중입니다"
-        text="저장된 활동을 확인하고 있어요."
+        :title="t('my.activity.loadingTitle')"
+        :text="t('my.activity.loadingText')"
       />
       <EmptyState
         v-else-if="errorMessage"
         icon="!"
         tone="error"
         compact
-        title="목록을 불러오지 못했습니다"
+        :title="t('my.activity.errorTitle')"
         :text="errorMessage"
-        action-label="다시 시도"
+        :action-label="t('common.retry')"
         @action="reloadList"
       />
 
       <div v-else-if="type === 'liked-content'" class="content-grid">
-        <RouterLink v-for="content in uiStore.likedContentItems" :key="content.contentId" :to="`/contents/${content.contentId}`">
+        <RouterLink v-for="content in uiStore.likedContentItems" :key="content.contentId" :to="'/contents/' + content.contentId">
           <ContentCard :content="content" />
         </RouterLink>
       </div>
@@ -318,7 +299,7 @@ async function toggleFollowFromList(user) {
         <RouterLink
           v-for="place in type === 'completed' ? uiStore.completedVisitItems : type === 'planned' ? uiStore.plannedVisitItems : type === 'recent' ? uiStore.recentPlaceItems : uiStore.likedPlaceItems"
           :key="place.placeId"
-          :to="`/places/${place.placeId}`"
+          :to="'/places/' + place.placeId"
         >
           <PlaceCard :place="place" compact />
         </RouterLink>
@@ -353,7 +334,7 @@ async function toggleFollowFromList(user) {
           v-for="post in activityPosts"
           :key="post.id"
           class="my-post-card"
-          :to="`/community/post/${post.id}`"
+          :to="'/community/post/' + post.id"
         >
           <div class="my-post-top">
             <span class="my-post-board">{{ boardLabel(post) }}</span>
@@ -362,15 +343,15 @@ async function toggleFollowFromList(user) {
           <h2>{{ post.title }}</h2>
           <p>{{ post.body }}</p>
           <blockquote v-if="type === 'comments' && postCommentPreview(post)">
-            내 댓글 · {{ postCommentPreview(post) }}
+            {{ t('my.activity.commentPreview') }} / {{ postCommentPreview(post) }}
           </blockquote>
           <div class="tag-row">
             <span v-for="tag in (post.tags ?? []).slice(0, 3)" :key="tag">{{ tag }}</span>
           </div>
           <div class="my-post-meta">
-            <span>♡ {{ post.likes ?? 0 }}</span>
-            <span>댓글 {{ postCommentCount(post) }}</span>
-            <span>{{ post.routeId ? 'AI 코스 연결됨' : '일반 후기' }}</span>
+            <span>{{ t('my.activity.likes', { count: post.likes ?? 0 }) }}</span>
+            <span>{{ t('my.activity.comments', { count: postCommentCount(post) }) }}</span>
+            <span>{{ post.routeId ? t('my.activity.linkedAiCourse') : t('my.activity.generalStory') }}</span>
           </div>
         </RouterLink>
       </div>
@@ -383,7 +364,7 @@ async function toggleFollowFromList(user) {
           :to="reviewPlaceTo(review)"
         >
           <div>
-            <strong>★ {{ review.rating ?? '평점 없음' }}</strong>
+            <strong>{{ reviewRatingLabel(review) }}</strong>
             <small>{{ reviewDate(review) }}</small>
           </div>
           <p>{{ review.content }}</p>
@@ -412,7 +393,7 @@ async function toggleFollowFromList(user) {
       </div>
 
       <div v-else class="stack-list">
-        <RouterLink v-for="notice in notices" :key="notice.id" class="notice-row" :to="`/notice/${notice.id}`">
+        <RouterLink v-for="notice in notices" :key="notice.id" class="notice-row" :to="'/notice/' + notice.id">
           <span>{{ notice.title }}</span>
           <small>{{ notice.date }}</small>
         </RouterLink>

@@ -1,4 +1,8 @@
 <script setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 defineOptions({
   name: 'ReviewPanel',
 });
@@ -6,7 +10,7 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: '방문 리뷰',
+    default: '',
   },
   reviewCount: {
     type: Number,
@@ -17,15 +21,17 @@ const props = defineProps({
     default: '0.0',
   },
 });
+
+const displayTitle = computed(() => props.title || t('place.detail.visitReviews'));
 </script>
 
 <template>
   <section class="review-panel" aria-labelledby="review-panel-title">
     <div class="section-header">
-      <h2 id="review-panel-title">{{ props.title }}</h2>
+      <h2 id="review-panel-title">{{ displayTitle }}</h2>
       <span>
-        {{ props.reviewCount }}개
-        <span v-if="props.reviewCount"> · 평균 ★ {{ props.averageRating }}</span>
+        {{ t('reviews.cleanup.k5f145dcdd7', { count: props.reviewCount }) }}
+        <span v-if="props.reviewCount"> / {{ t('reviews.cleanup.k11e333b564', { count: props.averageRating }) }}</span>
       </span>
     </div>
     <slot name="summary"></slot>

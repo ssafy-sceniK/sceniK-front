@@ -1,7 +1,10 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import BaseButton from '../common/BaseButton.vue';
 import { motion } from 'motion-v';
 import { motionVariants } from '../../utils/motion.js';
+
+const { t } = useI18n();
 
 defineOptions({
   name: 'CourseDeleteActionSheet',
@@ -14,11 +17,11 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: '저장한 코스를 삭제할까요?',
+    default: '\uc800\uc7a5\ud55c \ucf54\uc2a4\ub97c \uc0ad\uc81c\ud560\uae4c\uc694?',
   },
   description: {
     type: String,
-    default: '삭제하면 마이페이지 저장 코스 목록에서 사라집니다. 같은 조건으로 다시 생성하거나 저장할 수 있습니다.',
+    default: '\uc0ad\uc81c\ud558\uba74 \ub9c8\uc774\ud398\uc774\uc9c0 \uc800\uc7a5 \ucf54\uc2a4 \ubaa9\ub85d\uc5d0\uc11c \uc0ac\ub77c\uc9d1\ub2c8\ub2e4. \uac19\uc740 \uc870\uac74\uc73c\ub85c \ub2e4\uc2dc \uc0dd\uc131\ud558\uac70\ub098 \uc800\uc7a5\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.',
   },
 });
 
@@ -31,7 +34,7 @@ const emit = defineEmits(['confirm', 'cancel']);
       class="bottom-sheet delete-course-sheet"
       role="dialog"
       aria-modal="true"
-      aria-label="저장한 코스 삭제"
+      :aria-label="t('course.cleanup.k4f28a69ed2')"
       @click.stop
       v-bind="motionVariants.bottomSheet()"
     >
@@ -39,9 +42,9 @@ const emit = defineEmits(['confirm', 'cancel']);
       <h2>{{ props.title }}</h2>
       <p>{{ props.description }}</p>
       <div class="sheet-actions two">
-        <BaseButton variant="secondary" :disabled="props.loading" @click="emit('cancel')">취소</BaseButton>
+        <BaseButton variant="secondary" :disabled="props.loading" @click="emit('cancel')">{{ t('course.cleanup.k37fb28c81d') }}</BaseButton>
         <BaseButton variant="danger" :disabled="props.loading" @click="emit('confirm')">
-          {{ props.loading ? '삭제 중...' : '삭제' }}
+          {{ props.loading ? t('course.cleanup.k61aff68fbb') : t('course.cleanup.k627604e374') }}
         </BaseButton>
       </div>
     </motion.div>

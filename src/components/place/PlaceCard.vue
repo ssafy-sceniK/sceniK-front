@@ -12,7 +12,8 @@ const { locale, t } = useI18n();
 const imageLoadFailed = ref(false);
 const imageUrl = computed(() => props.place?.imageUrl || '');
 const displayPlace = computed(() => localizePlace(props.place, locale.value, t));
-const placeInitial = computed(() => props.place?.placeName?.trim?.().slice(0, 1) || 'P');
+const placeInitial = computed(() => displayPlace.value?.placeName?.trim?.().slice(0, 1) || 'P');
+const placeMeta = computed(() => [displayPlace.value?.region, displayPlace.value?.district].filter(Boolean).join(' / '));
 
 watch(imageUrl, () => {
   imageLoadFailed.value = false;
@@ -29,7 +30,7 @@ function markImageFailed() {
       <img
         v-if="imageUrl && !imageLoadFailed"
         :src="imageUrl"
-        :alt="`${place.placeName} place image`"
+        :alt="t('place.detail.imageAlt', { name: displayPlace.placeName })"
         @error="markImageFailed"
       />
       <div v-else class="place-thumb-placeholder" aria-hidden="true">
@@ -38,7 +39,7 @@ function markImageFailed() {
     </div>
     <div class="place-body">
       <strong>{{ displayPlace.placeName }}</strong>
-      <p>{{ displayPlace.region }} · {{ place.district }}</p>
+      <p>{{ placeMeta }}</p>
       <small>{{ displayPlace.category }}</small>
     </div>
   </article>

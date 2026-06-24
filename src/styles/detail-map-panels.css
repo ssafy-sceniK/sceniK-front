@@ -796,3 +796,8 @@
     margin-top: 14px;
   }
 }
+
+/* Content detail spacing: remove duplicated screen-top gap while preserving fixed header clearance. */
+.content-detail-screen {
+  margin-top: calc(-1 * var(--screen-top-gap));
+}

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -30,10 +30,10 @@ onMounted(() => {
 });
 
 const contentTabs = computed(() => [
-  { value: 'drama', label: t('content.category.drama'), category: '드라마' },
-  { value: 'movie', label: t('content.category.movie'), category: '영화' },
-  { value: 'variety', label: t('content.category.variety'), category: '예능' },
-  { value: 'ai', label: t('home.tabs.aiRecommended'), category: '' },
+  { value: 'drama', label: t('content.category.drama'), categoryKey: 'drama' },
+  { value: 'movie', label: t('content.category.movie'), categoryKey: 'movie' },
+  { value: 'variety', label: t('content.category.variety'), categoryKey: 'variety' },
+  { value: 'ai', label: t('home.tabs.aiRecommended'), categoryKey: '' },
 ]);
 const routeTabs = computed(() => [
   { value: 'realtime', label: t('home.tabs.realtime') },
@@ -43,7 +43,7 @@ const routeTabs = computed(() => [
 const activeContentTab = computed(() => contentTabs.value.find((tab) => tab.value === contentTab.value) ?? contentTabs.value[0]);
 const recentPlaces = computed(() => uiStore.recentPlaceItems.length ? uiStore.recentPlaceItems : placeStore.items.slice(0, 3));
 const contentItems = computed(() => contentStore.search({
-  category: activeContentTab.value.category,
+  categoryKey: activeContentTab.value.categoryKey,
   popular: contentTab.value === 'ai' ? undefined : true,
 }).slice(0, 6));
 const routeItems = computed(() => routeTab.value === 'region'

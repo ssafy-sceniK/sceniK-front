@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -8,6 +9,7 @@ import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { PREFERENCE_CONTENT_TYPES, PREFERENCE_REGIONS, PREFERENCE_THEMES, normalizePreferenceSelection } from '../utils/preferences.js';
+import { localizePreferenceOption } from '../i18n/systemContent.js';
 
 const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
@@ -15,13 +17,14 @@ const PROFILE_CROP_SIZE = 512;
 
 const router = useRouter();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 
 const contentOptions = PREFERENCE_CONTENT_TYPES;
 const regionOptions = PREFERENCE_REGIONS;
 const themeOptions = PREFERENCE_THEMES;
 
 const nickname = ref(uiStore.currentUser?.nickname ?? '');
-const bio = ref(uiStore.currentUser?.bio ?? 'K-content 여행 중');
+const bio = ref(uiStore.currentUser?.bio ?? t('my.profile.defaultBio'));
 const currentPreferences = normalizePreferenceSelection(uiStore.currentUser?.preferences);
 const selectedTypes = ref([...currentPreferences.contentTypes]);
 const selectedRegions = ref([...currentPreferences.regions]);
@@ -54,19 +57,23 @@ const canRemoveProfileImage = computed(() => Boolean(selectedImageFile.value || 
 const profileCropImageStyle = computed(() => {
   const { imageWidth, imageHeight } = cropDisplayMetrics();
   return {
-    width: `${imageWidth}px`,
-    height: `${imageHeight}px`,
-    transform: `translate(calc(-50% + ${cropOffsetX.value}px), calc(-50% + ${cropOffsetY.value}px)) rotate(${cropRotation.value}deg)`,
+    width: imageWidth + 'px',
+    height: imageHeight + 'px',
+    transform: 'translate(calc(-50% + ' + cropOffsetX.value + 'px), calc(-50% + ' + cropOffsetY.value + 'px)) rotate(' + cropRotation.value + 'deg)',
   };
 });
 const providerLabel = computed(() => ({
-  google: 'Google 로그인 연결됨',
-  kakao: 'Kakao 로그인 연결됨',
-  email: '이메일 로그인',
-})[uiStore.currentUser?.authProvider] ?? '이메일 로그인');
+  google: t('profile.edit.provider.google'),
+  kakao: t('profile.edit.provider.kakao'),
+  email: t('profile.edit.provider.email'),
+})[uiStore.currentUser?.authProvider] ?? t('profile.edit.provider.email'));
 watch([cropScale, cropRotation, cropPreviewSize, () => cropImageSize.value.width, () => cropImageSize.value.height], () => {
   clampCropOffset();
 });
+
+function preferenceLabel(group, item) {
+  return localizePreferenceOption(group, item, t, locale.value);
+}
 
 function toggle(list, item) {
   const index = list.indexOf(item);
@@ -77,10 +84,10 @@ function toggle(list, item) {
 function validateNickname() {
   const value = nickname.value.trim();
   if (value.length < 2) {
-    nicknameError.value = '닉네임은 2자 이상 입력해 주세요.';
+    nicknameError.value = t('profile.edit.validation.nicknameShort');
     saveNotice.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
+      title: t('profile.edit.validation.title'),
       text: nicknameError.value,
     };
     return false;
@@ -250,8 +257,8 @@ function canvasToBlob(canvas) {
 }
 
 function croppedFileName(name) {
-  const baseName = String(name || 'profile-image').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9가-힣_-]+/g, '-');
-  return `${baseName || 'profile-image'}-crop.png`;
+  const baseName = String(name || 'profile-image').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]+/g, '-');
+  return (baseName || 'profile-image') + '-crop.png';
 }
 
 async function applyCroppedImage() {
@@ -288,8 +295,8 @@ async function applyCroppedImage() {
   } catch (error) {
     saveNotice.value = {
       tone: 'error',
-      title: '이미지를 조정하지 못했습니다.',
-      text: '다른 JPG 또는 PNG 이미지를 선택해 주세요.',
+      title: t('profile.edit.image.cropErrorTitle'),
+      text: t('profile.edit.image.cropErrorText'),
     };
   }
 }
@@ -302,8 +309,8 @@ function handleImageChange(event) {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     saveNotice.value = {
       tone: 'warning',
-      title: '이미지 형식을 확인해 주세요.',
-      text: 'JPG 또는 PNG 이미지만 사용할 수 있습니다.',
+      title: t('profile.edit.image.typeErrorTitle'),
+      text: t('profile.edit.image.typeErrorText'),
     };
     input.value = '';
     return;
@@ -311,8 +318,8 @@ function handleImageChange(event) {
   if (file.size > MAX_PROFILE_IMAGE_SIZE) {
     saveNotice.value = {
       tone: 'warning',
-      title: '이미지 용량을 확인해 주세요.',
-      text: '프로필 이미지는 5MB 이하만 업로드할 수 있습니다.',
+      title: t('profile.edit.image.sizeErrorTitle'),
+      text: t('profile.edit.image.sizeErrorText'),
     };
     input.value = '';
     return;
@@ -332,8 +339,8 @@ async function saveProfile() {
       saving.value = false;
       saveNotice.value = {
         tone: 'error',
-        title: '프로필 이미지를 저장하지 못했습니다.',
-        text: uiStore.authError || '이미지 업로드 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+        title: t('profile.edit.save.imageUploadFailedTitle'),
+        text: uiStore.authError || t('profile.edit.save.imageUploadFailedText'),
       };
       return;
     }
@@ -344,8 +351,8 @@ async function saveProfile() {
       saving.value = false;
       saveNotice.value = {
         tone: 'error',
-        title: '프로필 이미지를 삭제하지 못했습니다.',
-        text: uiStore.authError || '기본 아바타로 되돌리지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        title: t('profile.edit.save.imageRemoveFailedTitle'),
+        text: uiStore.authError || t('profile.edit.save.imageRemoveFailedText'),
       };
       return;
     }
@@ -364,13 +371,13 @@ async function saveProfile() {
   saveNotice.value = ok
     ? {
         tone: 'success',
-        title: '프로필이 저장되었습니다.',
-        text: '닉네임, 소개, 취향, 프로필 이미지가 sceniK 프로필에 반영되었습니다.',
+        title: t('profile.edit.save.successTitle'),
+        text: t('profile.edit.save.successText'),
       }
     : {
         tone: 'error',
-        title: '프로필을 저장하지 못했습니다.',
-        text: uiStore.authError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        title: t('profile.edit.save.failedTitle'),
+        text: uiStore.authError || t('profile.edit.save.failedText'),
       };
   if (ok) {
     removeSavedProfileImage.value = false;
@@ -385,10 +392,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <AppLayout title="프로필 편집" back>
+  <AppLayout :title="t('profile.edit.title')" back>
     <template #actions>
       <button class="top-save-button" type="button" :disabled="saving" @click="saveProfile">
-        {{ saving ? '저장 중' : '저장' }}
+        {{ saving ? t('profile.edit.savingShort') : t('common.save') }}
       </button>
     </template>
 
@@ -396,31 +403,31 @@ onBeforeUnmount(() => {
       <EmptyState
         icon="K"
         tone="login"
-        title="로그인이 필요합니다"
-        text="프로필 편집은 로그인 후 사용할 수 있습니다."
-        action-label="로그인하기"
+        :title="t('profile.edit.loginTitle')"
+        :text="t('profile.edit.loginText')"
+        :action-label="t('auth.login.title')"
         action-to="/login"
       />
     </section>
 
     <section v-else class="profile-edit-screen">
-      <section class="profile-preview-panel" aria-label="프로필 이미지 변경">
+      <section class="profile-preview-panel" :aria-label="t('profile.edit.image.panelAria')">
         <div class="profile-edit-avatar">
           <div class="profile-image-control">
             <ProfileAvatar
               :image-url="profilePreviewUrl"
               :initial="profileInitial"
-              alt="프로필 이미지 미리보기"
+              :alt="t('profile.edit.image.avatarAlt')"
               preview
               interactive
-              aria-label="프로필 이미지 선택"
+              :aria-label="t('profile.edit.image.avatarAria')"
               @click="openImagePicker"
             />
             <button
               v-if="canRemoveProfileImage"
               type="button"
               class="profile-image-remove-button"
-              aria-label="프로필 이미지 제거"
+              :aria-label="t('profile.edit.image.removeAria')"
               @click="removeSelectedImage"
             >
               <svg viewBox="0 0 12 12" aria-hidden="true">
@@ -428,7 +435,7 @@ onBeforeUnmount(() => {
               </svg>
             </button>
           </div>
-          <p class="profile-image-guidance">사진을 눌러 프로필 이미지를 변경하세요.</p>
+          <p class="profile-image-guidance">{{ t('profile.edit.image.guidance') }}</p>
         </div>
         <input
           ref="imageInput"
@@ -441,30 +448,30 @@ onBeforeUnmount(() => {
       </section>
       <div class="profile-edit-form">
         <label class="form-field">
-          이메일
+          {{ t('auth.fields.email') }}
           <input :value="uiStore.currentUser.email" readonly aria-readonly="true" />
         </label>
 
         <label class="form-field">
-          로그인 방식
+          {{ t('profile.edit.loginMethod') }}
           <input :value="providerLabel" readonly aria-readonly="true" />
         </label>
 
         <label class="form-field">
           <span class="field-label-row">
-            닉네임
+            {{ t('auth.fields.nickname') }}
             <small>{{ nickname.length }}/20</small>
           </span>
-          <input v-model="nickname" maxlength="20" placeholder="닉네임" @blur="validateNickname" />
+          <input v-model="nickname" maxlength="20" :placeholder="t('profile.edit.nicknamePlaceholder')" @blur="validateNickname" />
           <em v-if="nicknameError" class="field-error">{{ nicknameError }}</em>
         </label>
 
         <label class="form-field">
           <span class="field-label-row">
-            소개
+            {{ t('profile.edit.intro') }}
             <small>{{ bio.length }}/50</small>
           </span>
-          <input v-model="bio" maxlength="50" placeholder="K-content 여행 중" />
+          <input v-model="bio" maxlength="50" :placeholder="t('profile.edit.introPlaceholder')" />
         </label>
 
         <div class="form-divider"></div>
@@ -476,7 +483,7 @@ onBeforeUnmount(() => {
         />
 
         <div class="preference-block compact">
-          <h2>콘텐츠 취향</h2>
+          <h2>{{ t('preferences.groups.contentTypes') }}</h2>
           <div class="chip-row wrap">
             <button
               v-for="item in contentOptions"
@@ -487,13 +494,13 @@ onBeforeUnmount(() => {
               :aria-pressed="selectedTypes.includes(item)"
               @click="toggle(selectedTypes, item)"
             >
-              {{ item }}
+              {{ preferenceLabel('contentTypes', item) }}
             </button>
           </div>
         </div>
 
         <div class="preference-block compact">
-          <h2>선호 지역</h2>
+          <h2>{{ t('preferences.groups.regions') }}</h2>
           <div class="chip-row wrap">
             <button
               v-for="item in regionOptions"
@@ -504,13 +511,13 @@ onBeforeUnmount(() => {
               :aria-pressed="selectedRegions.includes(item)"
               @click="toggle(selectedRegions, item)"
             >
-              {{ item }}
+              {{ preferenceLabel('regions', item) }}
             </button>
           </div>
         </div>
 
         <div class="preference-block compact">
-          <h2>선호 테마</h2>
+          <h2>{{ t('preferences.groups.themes') }}</h2>
           <div class="chip-row wrap">
             <button
               v-for="item in themeOptions"
@@ -521,27 +528,27 @@ onBeforeUnmount(() => {
               :aria-pressed="selectedThemes.includes(item)"
               @click="toggle(selectedThemes, item)"
             >
-              {{ item }}
+              {{ preferenceLabel('themes', item) }}
             </button>
           </div>
         </div>
       </div>
 
       <div class="sticky-actions">
-        <BaseButton block :disabled="saving" @click="saveProfile">{{ saving ? '저장 중입니다' : '프로필 저장' }}</BaseButton>
-        <BaseButton variant="ghost" block @click="router.push('/my')">취소</BaseButton>
+        <BaseButton block :disabled="saving" @click="saveProfile">{{ saving ? t('profile.edit.savingProfile') : t('profile.edit.saveProfile') }}</BaseButton>
+        <BaseButton variant="ghost" block @click="router.push('/my')">{{ t('common.cancel') }}</BaseButton>
       </div>
       <div v-if="cropEditorOpen" class="profile-crop-backdrop" @click.self="cancelCropEdit">
         <section class="profile-crop-sheet" role="dialog" aria-modal="true" aria-labelledby="profile-crop-title">
           <div class="profile-crop-head">
-            <h2 id="profile-crop-title">프로필 사진 조정</h2>
-            <p>원 안에 보일 위치를 맞춘 뒤 적용하세요.</p>
+            <h2 id="profile-crop-title">{{ t('profile.edit.crop.title') }}</h2>
+            <p>{{ t('profile.edit.crop.description') }}</p>
           </div>
           <div
             ref="cropPreviewRef"
             class="profile-crop-preview"
             :class="{ 'is-dragging': cropDrag.active }"
-            aria-label="원형 프로필 이미지 미리보기"
+            :aria-label="t('profile.edit.crop.previewAria')"
             @pointerdown="startCropDrag"
             @pointermove="moveCropDrag"
             @pointerup="endCropDrag"
@@ -551,23 +558,23 @@ onBeforeUnmount(() => {
             <img
               v-if="cropImageUrl"
               :src="cropImageUrl"
-              alt="선택한 이미지"
+              :alt="t('profile.edit.crop.imageAlt')"
               :style="profileCropImageStyle"
               draggable="false"
               @load="onCropImageLoad"
             />
           </div>
-          <p class="profile-crop-help">사진을 원 안에서 드래그해 위치를 맞추세요.</p>
+          <p class="profile-crop-help">{{ t('profile.edit.crop.help') }}</p>
           <div class="profile-crop-controls">
             <label>
-              확대
+              {{ t('profile.edit.crop.zoom') }}
               <input v-model.number="cropScale" type="range" min="1" max="2.4" step="0.05" />
             </label>
           </div>
           <div class="profile-crop-actions">
-            <button type="button" class="profile-crop-rotate" @click="rotateCropImage">90° 회전</button>
-            <BaseButton variant="ghost" block @click="cancelCropEdit">취소</BaseButton>
-            <BaseButton block @click="applyCroppedImage">적용</BaseButton>
+            <button type="button" class="profile-crop-rotate" @click="rotateCropImage">{{ t('profile.edit.crop.rotate') }}</button>
+            <BaseButton variant="ghost" block @click="cancelCropEdit">{{ t('common.cancel') }}</BaseButton>
+            <BaseButton block @click="applyCroppedImage">{{ t('profile.edit.crop.apply') }}</BaseButton>
           </div>
         </section>
       </div>

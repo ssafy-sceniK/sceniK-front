@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -18,11 +19,13 @@ import {
 import { getUserMessage } from '../api/error.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { localizeContent, localizePlace } from '../i18n/systemContent.js';
 
 const route = useRoute();
 const router = useRouter();
 const placeStore = usePlaceStore();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 const place = ref(null);
 const loading = ref(false);
 const errorMessage = ref('');
@@ -46,8 +49,12 @@ const ratingOptions = [1, 2, 3, 4, 5];
 const placeId = computed(() => route.params.id || '');
 const placeImageUrl = computed(() => place.value?.imageUrl || '');
 const showPlaceImage = computed(() => Boolean(placeImageUrl.value) && !placeImageFailed.value);
-const placeInitial = computed(() => place.value?.placeName?.trim?.().slice(0, 1) || 'P');
 const relatedContents = computed(() => place.value?.relatedContents ?? []);
+const displayPlace = computed(() => localizePlace(place.value, locale.value, t) ?? place.value);
+const placeInitial = computed(() => displayPlace.value?.placeName?.trim?.().slice(0, 1) || 'P');
+const localizedRelatedContents = computed(() => relatedContents.value.map((content) => localizeContent(content, locale.value, t)));
+const mapRoutePlaces = computed(() => (displayPlace.value ? [displayPlace.value] : []));
+const placeMeta = computed(() => [displayPlace.value?.region, displayPlace.value?.district, displayPlace.value?.category].filter(Boolean).join(' \u00b7 '));
 const liked = computed(() => place.value && uiStore.likedPlaces.includes(place.value.placeId));
 const likePending = computed(() => Boolean(place.value)
   && uiStore.pendingPlaceLikes.some((id) => String(id) === String(place.value.placeId)));
@@ -93,37 +100,37 @@ function isReviewOwner(review) {
 }
 
 function reviewStatsText() {
-  return `현재 리뷰 ${reviewCount.value}개, 평균 ${averageRating.value}점으로 갱신되었습니다.`;
+  return t('place.detail.reviewStats', { count: reviewCount.value, rating: averageRating.value });
 }
 
 function reviewActionMessage(error, fallback) {
   const status = error?.response?.status;
   const code = error?.response?.data?.code;
   if (code === 'DUPLICATE_ACTION' || status === 409) {
-    return '이미 이 장소에 리뷰를 작성했습니다. 중복 작성 대신 아래 내 리뷰에서 수정하거나 삭제해 주세요.';
+    return t('place.detail.reviewDuplicateMessage');
   }
   if (code === 'FORBIDDEN' || status === 403) {
-    return '본인이 작성한 리뷰만 수정하거나 삭제할 수 있습니다.';
+    return t('place.detail.reviewForbiddenMessage');
   }
   if (code === 'AUTH_REQUIRED' || status === 401) {
-    return '로그인이 필요합니다. 로그인 후 다시 시도해 주세요.';
+    return t('place.detail.reviewAuthMessage');
   }
   if (code === 'NOT_FOUND' || status === 404) {
-    return '리뷰 또는 장소 정보를 찾을 수 없습니다. 목록을 새로고침한 뒤 다시 시도해 주세요.';
+    return t('place.detail.reviewNotFoundMessage');
   }
   return getUserMessage(error, fallback);
 }
 
 async function loadPlaceDetail() {
   if (!placeId.value) {
-    errorMessage.value = '장소 정보를 찾을 수 없습니다.';
+    errorMessage.value = t('place.detail.notFoundMessage');
     return;
   }
   loading.value = true;
   errorMessage.value = '';
   place.value = await placeStore.getById(placeId.value);
   if (!place.value) {
-    errorMessage.value = placeStore.error || '장소 정보를 불러오지 못했습니다.';
+    errorMessage.value = placeStore.error || t('place.detail.loadFailedMessage');
     loading.value = false;
     return;
   }
@@ -145,7 +152,7 @@ async function loadReviews() {
     reviews.value = await fetchPlaceReviews(placeId.value);
     reviewsLoaded.value = true;
   } catch (error) {
-    reviewError.value = getUserMessage(error, '리뷰를 불러오지 못했습니다.');
+    reviewError.value = getUserMessage(error, t('place.detail.reviewLoadFailedMessage'));
     reviews.value = [];
     reviewsLoaded.value = true;
   } finally {
@@ -155,22 +162,22 @@ async function loadReviews() {
 
 async function submitReview() {
   if (!place.value || reviewSubmitting.value) return;
-  if (!uiStore.requireAuth('로그인하면 장소 리뷰를 작성할 수 있습니다.')) return;
+  if (!uiStore.requireAuth(t('place.detail.reviewLoginRequired'))) return;
   if (!reviewForm.value.content.trim()) {
-    reviewError.value = '리뷰 내용을 입력해 주세요.';
+    reviewError.value = t('place.detail.reviewContentRequired');
     reviewNotice.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
+      title: t('profile.edit.validation.title'),
       text: reviewError.value,
     };
     uiStore.notify(reviewError.value);
     return;
   }
   if (ratingOptions.includes(Number(reviewForm.value.rating)) === false) {
-    reviewError.value = '평점은 1점부터 5점까지 선택해 주세요.';
+    reviewError.value = t('place.detail.ratingRequired');
     reviewNotice.value = {
       tone: 'warning',
-      title: '평점을 확인해 주세요.',
+      title: t('place.detail.ratingWarningTitle'),
       text: reviewError.value,
     };
     uiStore.notify(reviewError.value);
@@ -180,8 +187,8 @@ async function submitReview() {
   reviewError.value = '';
   reviewNotice.value = {
     tone: 'info',
-    title: '리뷰를 등록하는 중입니다.',
-    text: '장소 방문 경험을 backend 리뷰 API에 저장하고 있습니다.',
+    title: t('place.detail.reviewSavingTitle'),
+    text: t('place.detail.reviewSavingText'),
   };
   try {
     const created = await createPlaceReview(place.value.placeId, {
@@ -192,15 +199,15 @@ async function submitReview() {
     reviewForm.value = { rating: 5, content: '' };
     reviewNotice.value = {
       tone: 'success',
-      title: '저장되었습니다.',
-      text: `방문 리뷰가 등록되었습니다. ${reviewStatsText()} 한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.`,
+      title: t('place.detail.reviewSavedTitle'),
+      text: t('place.detail.reviewSavedText', { stats: reviewStatsText() }),
     };
-    uiStore.notify('리뷰를 등록했습니다.', 'success');
+    uiStore.notify(t('place.detail.reviewSavedToast'), 'success');
   } catch (error) {
-    reviewError.value = reviewActionMessage(error, '리뷰를 등록하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, t('place.detail.reviewSaveFailedMessage'));
     reviewNotice.value = {
       tone: 'error',
-      title: '리뷰를 등록하지 못했습니다.',
+      title: t('place.detail.reviewSaveFailedTitle'),
       text: reviewError.value,
     };
   } finally {
@@ -217,8 +224,8 @@ function startEditReview(review) {
   reviewError.value = '';
   reviewNotice.value = {
     tone: 'info',
-    title: '내 리뷰 수정',
-    text: '평점과 리뷰 내용을 수정한 뒤 저장을 눌러 주세요.',
+    title: t('place.detail.myReviewEditTitle'),
+    text: t('place.detail.myReviewEditText'),
   };
 }
 
@@ -230,20 +237,20 @@ function cancelEditReview() {
 async function submitReviewEdit(review) {
   if (!place.value || !review?.reviewId || reviewSubmitting.value) return;
   if (!editReviewForm.value.content.trim()) {
-    reviewError.value = '리뷰 내용을 입력해 주세요.';
+    reviewError.value = t('place.detail.reviewContentRequired');
     reviewNotice.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
+      title: t('profile.edit.validation.title'),
       text: reviewError.value,
     };
     uiStore.notify(reviewError.value);
     return;
   }
   if (ratingOptions.includes(Number(editReviewForm.value.rating)) === false) {
-    reviewError.value = '평점은 1점부터 5점까지 선택해 주세요.';
+    reviewError.value = t('place.detail.ratingRequired');
     reviewNotice.value = {
       tone: 'warning',
-      title: '평점을 확인해 주세요.',
+      title: t('place.detail.ratingWarningTitle'),
       text: reviewError.value,
     };
     uiStore.notify(reviewError.value);
@@ -253,8 +260,8 @@ async function submitReviewEdit(review) {
   reviewError.value = '';
   reviewNotice.value = {
     tone: 'info',
-    title: '리뷰를 수정하는 중입니다.',
-    text: '수정 내용을 저장하고 있습니다.',
+    title: t('place.detail.reviewUpdatingTitle'),
+    text: t('place.detail.reviewUpdatingText'),
   };
   try {
     const updated = await updatePlaceReview(place.value.placeId, review.reviewId, {
@@ -265,15 +272,15 @@ async function submitReviewEdit(review) {
     cancelEditReview();
     reviewNotice.value = {
       tone: 'success',
-      title: '수정되었습니다.',
-      text: `내 방문 리뷰가 업데이트되었습니다. ${reviewStatsText()}`,
+      title: t('place.detail.reviewUpdatedTitle'),
+      text: t('place.detail.reviewUpdatedText', { stats: reviewStatsText() }),
     };
-    uiStore.notify('리뷰를 수정했습니다.', 'success');
+    uiStore.notify(t('place.detail.reviewUpdatedToast'), 'success');
   } catch (error) {
-    reviewError.value = reviewActionMessage(error, '리뷰를 수정하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, t('place.detail.reviewUpdateFailedMessage'));
     reviewNotice.value = {
       tone: 'error',
-      title: '리뷰를 수정하지 못했습니다.',
+      title: t('place.detail.reviewUpdateFailedTitle'),
       text: reviewError.value,
     };
   } finally {
@@ -283,13 +290,13 @@ async function submitReviewEdit(review) {
 
 async function removeReview(review) {
   if (!place.value || !review?.reviewId || reviewSubmitting.value) return;
-  if (!window.confirm('리뷰를 삭제할까요?')) return;
+  if (!window.confirm(t('place.detail.reviewDeleteConfirm'))) return;
   reviewSubmitting.value = true;
   reviewError.value = '';
   reviewNotice.value = {
     tone: 'info',
-    title: '리뷰를 삭제하는 중입니다.',
-    text: '내 리뷰를 삭제하고 목록을 갱신하고 있습니다.',
+    title: t('place.detail.reviewDeletingTitle'),
+    text: t('place.detail.reviewDeletingText'),
   };
   try {
     await deletePlaceReview(place.value.placeId, review.reviewId);
@@ -297,15 +304,15 @@ async function removeReview(review) {
     if (editingReviewId.value === review.reviewId) cancelEditReview();
     reviewNotice.value = {
       tone: 'success',
-      title: '삭제되었습니다.',
-      text: `내 방문 리뷰가 삭제되었습니다. ${reviewStatsText()} 필요하면 다시 작성할 수 있습니다.`,
+      title: t('place.detail.reviewDeletedTitle'),
+      text: t('place.detail.reviewDeletedText', { stats: reviewStatsText() }),
     };
-    uiStore.notify('리뷰를 삭제했습니다.', 'success');
+    uiStore.notify(t('place.detail.reviewDeletedToast'), 'success');
   } catch (error) {
-    reviewError.value = reviewActionMessage(error, '리뷰를 삭제하지 못했습니다.');
+    reviewError.value = reviewActionMessage(error, t('place.detail.reviewDeleteFailedMessage'));
     reviewNotice.value = {
       tone: 'error',
-      title: '리뷰를 삭제하지 못했습니다.',
+      title: t('place.detail.reviewDeleteFailedTitle'),
       text: reviewError.value,
     };
   } finally {
@@ -325,13 +332,13 @@ function markPlaceImageFailed() {
 </script>
 
 <template>
-  <AppLayout title="장소 상세" back>
+  <AppLayout :title="t('place.detail.title')" back>
     <template #actions>
       <button
         class="icon-button heart-button"
         :class="{ active: liked }"
         type="button"
-        aria-label="좋아요"
+        :aria-label="t('content.detail.likeAria')"
         :aria-pressed="liked"
         :disabled="likePending"
         @click="place && uiStore.togglePlaceLike(place.placeId)"
@@ -344,14 +351,14 @@ function markPlaceImageFailed() {
       v-if="loading"
       tone="loading"
       compact
-      title="장소를 불러오는 중입니다"
-      text="검증된 촬영지와 지도 정보를 확인하고 있어요."
+      :title="t('place.detail.loadingTitle')"
+      :text="t('place.detail.loadingText')"
     />
     <DetailNotFoundPanel
       v-else-if="errorMessage"
-      title="장소를 불러오지 못했습니다"
+      :title="t('place.detail.errorTitle')"
       :text="errorMessage"
-      list-label="장소 목록으로 돌아가기"
+      :list-label="t('place.detail.backToList')"
       list-to="/places"
       @retry="loadPlaceDetail"
     />
@@ -360,48 +367,48 @@ function markPlaceImageFailed() {
         <img
           v-if="showPlaceImage"
           :src="placeImageUrl"
-          :alt="`${place.placeName} 장소 이미지`"
+          :alt="t('place.detail.imageAlt', { name: displayPlace.placeName })"
           @error="markPlaceImageFailed"
         />
         <div v-else class="detail-hero-placeholder" aria-hidden="true">
           <span>{{ placeInitial }}</span>
         </div>
         <div>
-          <h1>{{ place.placeName }}</h1>
-          <p>{{ place.region }} · {{ place.district }} · {{ place.category }}</p>
+          <h1>{{ displayPlace.placeName }}</h1>
+          <p>{{ placeMeta }}</p>
         </div>
       </div>
       <div class="detail-body place-detail-body">
-        <p class="place-description-copy">{{ place.description }}</p>
-        <p class="meta-line">{{ place.address }}</p>
-        <MapPreview :route-places="[place]" :show-detail-link="false" />
+        <p class="place-description-copy">{{ displayPlace.description }}</p>
+        <p class="meta-line">{{ displayPlace.address }}</p>
+        <MapPreview :route-places="mapRoutePlaces" :show-detail-link="false" />
         <div class="action-grid two">
           <BaseButton
             :variant="uiStore.plannedVisits.includes(place.placeId) ? 'primary' : 'secondary'"
             :disabled="visitPending"
             @click="uiStore.setVisit(place.placeId, 'planned')"
           >
-            방문 예정
+            {{ t('place.detail.plannedVisit') }}
           </BaseButton>
           <BaseButton
             :variant="uiStore.completedVisits.includes(place.placeId) ? 'primary' : 'secondary'"
             :disabled="visitPending"
             @click="uiStore.setVisit(place.placeId, 'completed')"
           >
-            방문 완료
+            {{ t('place.detail.completedVisit') }}
           </BaseButton>
         </div>
       </div>
 
-      <ReviewPanel :review-count="reviewCount" :average-rating="averageRating">
+      <ReviewPanel :title="t('place.detail.visitReviews')" :review-count="reviewCount" :average-rating="averageRating">
         <template #summary>
-          <div class="review-summary-panel" aria-label="방문 리뷰 요약">
+          <div class="review-summary-panel" :aria-label="t('place.detail.reviewSummaryAria')">
             <strong>★ {{ averageRating }}</strong>
-            <span>{{ reviewCount }}개의 방문 기록</span>
-            <small>실제 촬영지를 다녀온 사용자의 분위기, 이동 팁, 검증 의견을 모아 보여줍니다.</small>
-            <div v-if="reviews.length" class="rating-distribution" aria-label="평점 분포">
+            <span>{{ t('place.detail.reviewCount', { count: reviewCount }) }}</span>
+            <small>{{ t('place.detail.reviewSummaryText') }}</small>
+            <div v-if="reviews.length" class="rating-distribution" :aria-label="t('place.detail.ratingDistributionAria')">
               <span v-for="item in ratingSummary" :key="item.score">
-                <b>{{ item.score }}점</b>
+                <b>{{ t('place.detail.ratingPoint', { score: item.score }) }}</b>
                 <i><em :style="{ width: `${item.percent}%` }"></em></i>
                 <small>{{ item.count }}</small>
               </span>
@@ -421,17 +428,17 @@ function markPlaceImageFailed() {
             v-if="reviewLoading"
             tone="loading"
             compact
-            title="리뷰를 불러오는 중입니다"
-            text="이 장소를 다녀온 여행자의 기록을 확인하고 있어요."
+            :title="t('place.detail.reviewLoadingTitle')"
+            :text="t('place.detail.reviewLoadingText')"
           />
           <EmptyState
             v-else-if="reviewError && !reviews.length"
             icon="!"
             tone="error"
             compact
-            title="리뷰를 불러오지 못했습니다"
+            :title="t('place.detail.reviewLoadFailedTitle')"
             :text="reviewError"
-            action-label="다시 시도"
+            :action-label="t('common.retry')"
             @action="loadReviews"
           />
         </template>
@@ -444,8 +451,8 @@ function markPlaceImageFailed() {
               </div>
               <template v-if="editingReviewId === review.reviewId">
                 <div class="form-field compact star-rating-field">
-  <span>평점</span>
-  <div class="star-rating" role="radiogroup" aria-label="수정 평점 선택">
+  <span>{{ t('reviews.rating') }}</span>
+  <div class="star-rating" role="radiogroup" :aria-label="t('place.detail.editRatingAria')">
     <button
       v-for="score in ratingOptions"
       :key="`edit-rating-${score}`"
@@ -458,14 +465,14 @@ function markPlaceImageFailed() {
       ★
     </button>
   </div>
-  <small class="star-rating-text">{{ normalizeRating(editReviewForm.rating) }}점</small>
+  <small class="star-rating-text">{{ t('place.detail.ratingPoint', { score: normalizeRating(editReviewForm.rating) }) }}</small>
 </div>
                 <label class="form-field compact">
-                  리뷰
+                  {{ t('reviews.title') }}
                   <textarea
                     v-model="editReviewForm.content"
                     maxlength="500"
-                    placeholder="리뷰 내용을 입력해 주세요."
+                    :placeholder="t('place.detail.reviewPlaceholder')"
                   ></textarea>
                 </label>
                 <div class="review-row-actions">
@@ -474,16 +481,16 @@ function markPlaceImageFailed() {
                     :disabled="reviewSubmitting || !editReviewForm.content.trim()"
                     @click="submitReviewEdit(review)"
                   >
-                    저장
+                    {{ t('common.save') }}
                   </button>
-                  <button type="button" :disabled="reviewSubmitting" @click="cancelEditReview">취소</button>
+                  <button type="button" :disabled="reviewSubmitting" @click="cancelEditReview">{{ t('common.cancel') }}</button>
                 </div>
               </template>
               <template v-else>
                 <TranslatableText :text="review.content" :source-language="review.language" resource-type="REVIEW" :resource-id="review.reviewId" field="content" />
                 <div v-if="isReviewOwner(review)" class="review-row-actions">
-                  <button type="button" @click="startEditReview(review)">수정</button>
-                  <button type="button" @click="removeReview(review)">삭제</button>
+                  <button type="button" @click="startEditReview(review)">{{ t('common.edit') }}</button>
+                  <button type="button" @click="removeReview(review)">{{ t('common.delete') }}</button>
                 </div>
               </template>
             </article>
@@ -492,16 +499,16 @@ function markPlaceImageFailed() {
               icon="R"
               tone="search"
               compact
-              title="아직 등록된 리뷰가 없습니다"
-              text="이 장소를 다녀왔다면 첫 리뷰를 남겨보세요."
+              :title="t('reviews.emptyTitle')"
+              :text="t('reviews.emptyText')"
             />
           </div>
         </template>
         <template #form>
           <form v-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
             <div class="form-field star-rating-field">
-  <span>평점</span>
-  <div class="star-rating" role="radiogroup" aria-label="리뷰 평점 선택">
+  <span>{{ t('reviews.rating') }}</span>
+  <div class="star-rating" role="radiogroup" :aria-label="t('place.detail.newRatingAria')">
     <button
       v-for="score in ratingOptions"
       :key="`new-rating-${score}`"
@@ -514,15 +521,15 @@ function markPlaceImageFailed() {
       ★
     </button>
   </div>
-  <small class="star-rating-text">{{ normalizeRating(reviewForm.rating) }}점</small>
+  <small class="star-rating-text">{{ t('place.detail.ratingPoint', { score: normalizeRating(reviewForm.rating) }) }}</small>
 </div>
             <label class="form-field">
-              리뷰
-              <textarea v-model="reviewForm.content" maxlength="500" placeholder="장소 분위기, 이동 팁, 촬영지 느낌을 남겨주세요"></textarea>
+              {{ t('reviews.title') }}
+              <textarea v-model="reviewForm.content" maxlength="500" :placeholder="t('place.detail.reviewWritePlaceholder')"></textarea>
             </label>
             <p v-if="reviewError" class="form-error">{{ reviewError }}</p>
             <BaseButton block :disabled="reviewSubmitting || !reviewForm.content.trim()">
-              {{ reviewSubmitting ? '등록 중...' : '리뷰 등록' }}
+              {{ reviewSubmitting ? t('place.detail.reviewSubmitting') : t('reviews.submit') }}
             </BaseButton>
           </form>
           <FormStatusNotice
@@ -530,36 +537,36 @@ function markPlaceImageFailed() {
             class="review-duplicate-notice"
             tone="info"
             compact
-            title="이미 이 장소에 리뷰를 작성했습니다."
-            :text="myReview ? '중복 리뷰 대신 아래 내 리뷰에서 수정 또는 삭제할 수 있습니다.' : '한 장소에는 계정당 하나의 리뷰만 작성할 수 있습니다.'"
+            :title="t('place.detail.alreadyReviewedTitle')"
+            :text="myReview ? t('place.detail.alreadyReviewedWithMineText') : t('place.detail.alreadyReviewedText')"
           />
           <EmptyState
             v-else
             icon="K"
             tone="login"
             compact
-            title="로그인하면 리뷰를 남길 수 있습니다"
-            text="방문한 촬영지의 분위기와 이동 팁을 공유해 주세요."
-            action-label="로그인하기"
+            :title="t('place.detail.reviewLoginTitle')"
+            :text="t('place.detail.reviewLoginText')"
+            :action-label="t('auth.login.title')"
             action-to="/login"
           />
         </template>
       </ReviewPanel>
 
-      <div class="section-header"><h2>관련 콘텐츠</h2></div>
+      <div class="section-header"><h2>{{ t('place.detail.relatedContents') }}</h2></div>
       <EmptyState
         v-if="!relatedContents.length"
         compact
-        title="연결된 콘텐츠가 아직 없어요"
-        text="관련 콘텐츠 목록이 비어 있어도 장소 정보와 리뷰는 정상적으로 확인할 수 있습니다."
+        :title="t('place.detail.relatedEmptyTitle')"
+        :text="t('place.detail.relatedEmptyText')"
       />
       <div v-else class="chip-row wrap">
-        <RouterLink v-for="content in relatedContents" :key="content.contentId" class="chip" :to="`/contents/${content.contentId}`">
+        <RouterLink v-for="content in localizedRelatedContents" :key="content.contentId" class="chip" :to="'/contents/' + content.contentId">
           {{ content.title }}
         </RouterLink>
       </div>
       <div class="sticky-actions">
-        <BaseButton block @click="startCourse">이 장소로 AI Course 만들기</BaseButton>
+        <BaseButton block @click="startCourse">{{ t('place.detail.createCourseFromPlace') }}</BaseButton>
       </div>
     </section>
   </AppLayout>

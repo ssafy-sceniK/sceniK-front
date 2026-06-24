@@ -4,22 +4,22 @@ export const TRANSPORT_MODES = {
 };
 
 export const TRANSPORT_MODE_OPTIONS = [
-  { value: TRANSPORT_MODES.PUBLIC_TRANSIT, label: '대중교통' },
-  { value: TRANSPORT_MODES.CAR, label: '차량' },
+  { value: TRANSPORT_MODES.PUBLIC_TRANSIT, label: '\ub300\uc911\uad50\ud1b5' },
+  { value: TRANSPORT_MODES.CAR, label: '\ucc28\ub7c9' },
 ];
 
-export function normalizeTransportModes(value, fallback = '대중교통') {
+export function normalizeTransportModes(value, fallback = '\ub300\uc911\uad50\ud1b5') {
   const source = Array.isArray(value) ? value : String(fallback ?? '').split(/[,+·]/);
   const normalized = new Set();
 
   source.forEach((item) => {
     const text = String(item ?? '').trim();
-    if (!text || text.includes('도보')) return;
-    if (text === TRANSPORT_MODES.CAR || text.includes('차량') || text.toUpperCase() === 'CAR') {
+    if (!text || text.includes('\ub3c4\ubcf4')) return;
+    if (text === TRANSPORT_MODES.CAR || text.includes('\ucc28\ub7c9') || text.toUpperCase() === 'CAR') {
       normalized.add(TRANSPORT_MODES.CAR);
       return;
     }
-    if (text === TRANSPORT_MODES.PUBLIC_TRANSIT || text.includes('대중교통') || text.toUpperCase() === 'PUBLIC_TRANSIT') {
+    if (text === TRANSPORT_MODES.PUBLIC_TRANSIT || text.includes('\ub300\uc911\uad50\ud1b5') || text.toUpperCase() === 'PUBLIC_TRANSIT') {
       normalized.add(TRANSPORT_MODES.PUBLIC_TRANSIT);
     }
   });
@@ -44,9 +44,9 @@ export function normalizeCarDays(value, durationDays = 1, modes = [TRANSPORT_MOD
 
 export function transportLabel(modes, carDays = [], durationDays = 1) {
   const normalizedModes = normalizeTransportModes(modes);
-  if (!normalizedModes.includes(TRANSPORT_MODES.CAR)) return '대중교통';
+  if (!normalizedModes.includes(TRANSPORT_MODES.CAR)) return '\ub300\uc911\uad50\ud1b5';
 
   const normalizedCarDays = normalizeCarDays(carDays, durationDays, normalizedModes);
   const dayLabel = normalizedCarDays.map((day) => `Day ${day}`).join(', ');
-  return `대중교통 + 차량 (${dayLabel} 차량)`;
+  return `\ub300\uc911\uad50\ud1b5 + \ucc28\ub7c9 (${dayLabel} \ucc28\ub7c9)`;
 }

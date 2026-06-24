@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 defineOptions({
   name: 'AiPromptContextSummary',
 });
@@ -6,7 +9,7 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: 'AI가 참고하는 조건',
+    default: '',
   },
   rows: {
     type: Array,
@@ -21,7 +24,7 @@ const props = defineProps({
 
 <template>
   <section class="ai-context-panel ai-prompt-context-summary" :class="{ compact: props.compact }" aria-label="AI prompt context summary">
-    <strong>{{ props.title }}</strong>
+    <strong>{{ props.title || t('aiCourse.cleanup.k7817a349e1') }}</strong>
     <dl>
       <template v-for="row in props.rows" :key="row.label">
         <dt>{{ row.label }}</dt>

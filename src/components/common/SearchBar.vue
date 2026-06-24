@@ -1,19 +1,23 @@
 <script setup>
-defineProps({
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+const props = defineProps({
   modelValue: { type: String, default: '' },
-  placeholder: { type: String, default: '검색어 입력' },
+  placeholder: { type: String, default: '' },
   readonly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue', 'focus']);
+const { t } = useI18n();
+const displayPlaceholder = computed(() => props.placeholder || t('common.searchPlaceholder'));
 </script>
 
 <template>
   <label class="search-bar">
     <input
-      :value="modelValue"
-      :placeholder="placeholder"
-      :readonly="readonly"
+      :value="props.modelValue"
+      :placeholder="displayPlaceholder"
+      :readonly="props.readonly"
       @input="emit('update:modelValue', $event.target.value)"
       @focus="emit('focus')"
     />

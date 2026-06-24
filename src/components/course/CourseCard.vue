@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
+
+const { t } = useI18n();
 const props = defineProps({
   course: { type: Object, required: true },
   variant: { type: String, default: 'visual' },
@@ -7,7 +10,7 @@ const props = defineProps({
   hideGenericAiTag: { type: Boolean, default: false },
 });
 
-const genericAiCourseTags = new Set(['AI Course', 'AI 코스']);
+const genericAiCourseTags = new Set(['AI Course', 'AI \ucf54\uc2a4']);
 const visibleTags = computed(() => {
   const tags = Array.isArray(props.course.tags) ? props.course.tags : [];
   if (!props.hideGenericAiTag) return tags;

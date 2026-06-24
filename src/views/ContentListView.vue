@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -16,14 +16,14 @@ const route = useRoute();
 const contentStore = useContentStore();
 const { t, locale } = useI18n();
 const query = ref('');
-const category = ref('전체');
+const category = ref('\uc804\uccb4');
 const mode = ref('content');
 const sort = ref('popular');
 const visibleLimit = ref(24);
 const restoringQuery = ref(false);
 const exploreCategories = computed(() => contentStore.categories.map((item) => ({
   value: item,
-  label: item === '전체' ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
+  label: item === t('content.cleanup.k821956a485') ? t('content.category.all') : localizeSystemLabel(item, 'category', t, locale.value),
 })));
 const sortOptions = computed(() => [
   { value: 'popular', label: t('common.sort.popular') },
@@ -36,7 +36,7 @@ onMounted(() => {
 });
 
 const filteredContents = computed(() => {
-  const filterCategory = contentStore.categories.includes(category.value) ? category.value : '전체';
+  const filterCategory = contentStore.categories.includes(category.value) ? category.value : '\uc804\uccb4';
   return contentStore.search({ category: filterCategory, keyword: query.value });
 });
 const sortedContents = computed(() => [...filteredContents.value].sort((a, b) => {
@@ -61,7 +61,7 @@ function restoreQueryState() {
   restoringQuery.value = true;
   const routeSort = queryValue(route.query.sort, 'popular');
   query.value = queryValue(route.query.keyword);
-  category.value = queryValue(route.query.category, '전체');
+  category.value = queryValue(route.query.category, '\uc804\uccb4');
   sort.value = ['popular', 'latest'].includes(routeSort) ? routeSort : 'popular';
   visibleLimit.value = positiveSize(route.query.size);
   queueMicrotask(() => {
@@ -74,7 +74,7 @@ function syncQueryState() {
   const nextQuery = {
     ...route.query,
     keyword: query.value.trim() || undefined,
-    category: category.value !== '전체' ? category.value : undefined,
+    category: category.value !== '\uc804\uccb4' ? category.value : undefined,
     sort: sort.value !== 'popular' ? sort.value : undefined,
     size: visibleLimit.value !== 24 ? String(visibleLimit.value) : undefined,
   };
@@ -92,7 +92,7 @@ watch(() => route.query, restoreQueryState);
 
 function resetFilters() {
   query.value = '';
-  category.value = '전체';
+  category.value = '\uc804\uccb4';
   sort.value = 'popular';
 }
 

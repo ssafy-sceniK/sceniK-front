@@ -68,13 +68,17 @@ import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/r
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
-import { normalizeLocale, setLocale } from '../i18n/index.js';
+import { i18n, normalizeLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
 
 function applyColorTheme(theme) {
   if (typeof document === 'undefined') return;
   document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+}
+
+function storeT(key, params) {
+  return i18n.global.t(key, params ?? {});
 }
 
 function applyLanguage(language) {
@@ -85,8 +89,8 @@ function applyLanguage(language) {
 
 function formatWon(value) {
   const amount = Number(value) || 0;
-  if (amount >= 10000) return `${Math.round(amount / 10000)}만원`;
-  return `${amount.toLocaleString('ko-KR')}원`;
+  if (amount >= 10000) return `${Math.round(amount / 10000)}\ub9cc\uc6d0`;
+  return `${amount.toLocaleString('ko-KR')}\uc6d0`;
 }
 
 function formatBudgetRange(min, max) {
@@ -125,20 +129,20 @@ function defaultState() {
     selectedContentId: '',
     selectedContentIds: [],
     courseConditions: {
-      region: '서울',
-      regions: ['서울'],
+      region: '\uc11c\uc6b8',
+      regions: ['\uc11c\uc6b8'],
       duration: 1,
       startDate: dateAfter(7),
       endDate: dateAfter(7),
-      transport: '대중교통',
+      transport: '\ub300\uc911\uad50\ud1b5',
       transportModes: ['PUBLIC_TRANSIT'],
       carDays: [],
-      companion: '친구',
-      style: '감성 여행',
-      travelStyles: ['감성 여행'],
+      companion: '\uce5c\uad6c',
+      style: '\uac10\uc131 \uc5ec\ud589',
+      travelStyles: ['\uac10\uc131 \uc5ec\ud589'],
       budgetMin: 100000,
       budgetMax: 300000,
-      budget: '10만원 ~ 30만원',
+      budget: '10\ub9cc\uc6d0 ~ 30\ub9cc\uc6d0',
       hotelAddress: '',
     },
     generatedRoute: null,
@@ -330,15 +334,15 @@ function normalizeDays(days = []) {
       return {
         ...stop,
         placeId: stop.placeId,
-        placeName: stop.placeName ?? stop.name ?? place?.placeName ?? '검증 장소',
-        category: stop.category ?? stop.placeCategory ?? stop.type ?? place?.category ?? '장소',
+        placeName: stop.placeName ?? stop.name ?? place?.placeName ?? '\uac80\uc99d \uc7a5\uc18c',
+        category: stop.category ?? stop.placeCategory ?? stop.type ?? place?.category ?? '\uc7a5\uc18c',
         address: stop.address ?? place?.address,
         latitude: stop.latitude ?? place?.latitude,
         longitude: stop.longitude ?? place?.longitude,
         dayNumber: dayIndex + 1,
         visitOrder: stopIndex + 1,
         recommendedTime: stop.recommendedTime ?? '10:00',
-        reason: stop.reason ?? `${place?.placeName ?? '이 장소'}는 선택한 콘텐츠와 연결된 검증 장소입니다.`,
+        reason: stop.reason ?? `${place?.placeName ?? '\uc774 \uc7a5\uc18c'}\ub294 \uc120\ud0dd\ud55c \ucf58\ud150\uce20\uc640 \uc5f0\uacb0\ub41c \uac80\uc99d \uc7a5\uc18c\uc785\ub2c8\ub2e4.`,
         travelTip: stop.travelTip ?? '',
       };
     }),
@@ -402,7 +406,7 @@ function normalizeCourseToRoute(course) {
         dayNumber: dayIndex + 1,
         visitOrder: placeIndex + 1,
         recommendedTime: placeIndex === 0 ? '10:00' : placeIndex === 1 ? '14:00' : '17:30',
-        reason: `${place.relatedContentTitle} 분위기와 연결된 검증 장소입니다.`,
+        reason: `${place.relatedContentTitle} \ubd84\uc704\uae30\uc640 \uc5f0\uacb0\ub41c \uac80\uc99d \uc7a5\uc18c\uc785\ub2c8\ub2e4.`,
         travelTip: '',
       })),
     })),
@@ -435,7 +439,7 @@ function followDisplayName(userId, fallbackName, ...userGroups) {
   return '\uC0AC\uC6A9\uC790';
 }
 
-function apiErrorMessage(error, fallback = '요청을 처리하지 못했습니다.') {
+function apiErrorMessage(error, fallback = storeT('errors.store.k1')) {
   return getUserMessage(error, fallback);
 }
 
@@ -628,7 +632,7 @@ export const useUiStore = defineStore('ui', {
         this.persist();
         return true;
       } catch (error) {
-        this.authError = apiErrorMessage(error, '언어 설정을 서버에 저장하지 못했습니다.');
+        this.authError = apiErrorMessage(error, storeT('errors.store.k2'));
         this.persist();
         return false;
       }
@@ -680,7 +684,7 @@ export const useUiStore = defineStore('ui', {
         this.persist();
         return this.savedCourses;
       } catch (error) {
-        this.routeError = apiErrorMessage(error, '저장한 코스를 불러오지 못했습니다.');
+        this.routeError = apiErrorMessage(error, storeT('errors.store.k3'));
         this.savedCourses = [];
         this.courseDetailCache = [];
         this.persist();
@@ -702,7 +706,7 @@ export const useUiStore = defineStore('ui', {
         this.unreadNotificationCount = this.notifications.filter((item) => !item.read).length;
         return this.notifications;
       } catch (error) {
-        this.notificationsError = apiErrorMessage(error, '알림을 불러오지 못했습니다.');
+        this.notificationsError = apiErrorMessage(error, storeT('errors.store.k4'));
         this.notifications = [];
         this.unreadNotificationCount = 0;
         return [];
@@ -722,7 +726,7 @@ export const useUiStore = defineStore('ui', {
         this.unreadNotificationCount = this.notifications.filter((item) => !item.read).length;
         return updated;
       } catch (error) {
-        this.notificationsError = apiErrorMessage(error, '알림 읽음 처리에 실패했습니다.');
+        this.notificationsError = apiErrorMessage(error, storeT('errors.store.k5'));
         this.notify(this.notificationsError);
         return null;
       }
@@ -735,7 +739,7 @@ export const useUiStore = defineStore('ui', {
         this.unreadNotificationCount = 0;
         return true;
       } catch (error) {
-        this.notificationsError = apiErrorMessage(error, '알림을 모두 읽음 처리하지 못했습니다.');
+        this.notificationsError = apiErrorMessage(error, storeT('errors.store.k6'));
         this.notify(this.notificationsError);
         return false;
       }
@@ -747,7 +751,7 @@ export const useUiStore = defineStore('ui', {
         this.communityPosts = await fetchCommunityPosts(params);
         return this.communityPosts;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '커뮤니티 글을 불러오지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k7'));
         this.communityPosts = [];
         return [];
       } finally {
@@ -763,7 +767,7 @@ export const useUiStore = defineStore('ui', {
         this.communityPosts = mergeCommunityPost(this.communityPosts, post);
         return post;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글을 불러오지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k8'));
         return null;
       } finally {
         this.communityLoading = false;
@@ -792,7 +796,7 @@ export const useUiStore = defineStore('ui', {
         this.completedVisitDetails = await loadPlaceDetails(this.completedVisits);
         this.persist();
       } catch (error) {
-        this.engagementError = apiErrorMessage(error, '방문 상태를 불러오지 못했습니다.');
+        this.engagementError = apiErrorMessage(error, storeT('errors.store.k9'));
         this.notify(this.engagementError);
       } finally {
         this.engagementLoading = false;
@@ -817,7 +821,7 @@ export const useUiStore = defineStore('ui', {
         }
         return this.resolveCourseDetail(routeId);
       } catch (error) {
-        this.routeError = apiErrorMessage(error, '코스 상세를 불러오지 못했습니다.');
+        this.routeError = apiErrorMessage(error, storeT('errors.store.ka'));
         return null;
       } finally {
         this.savedCoursesLoading = false;
@@ -826,11 +830,11 @@ export const useUiStore = defineStore('ui', {
     async signUp({ email, password, nickname }) {
       const safeEmail = email?.trim() ?? '';
       const safeNickname = nickname?.trim() ?? '';
-      if (!safeEmail) throw new Error('이메일을 입력해 주세요.');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) throw new Error('올바른 이메일 형식이 아닙니다.');
-      if (!password) throw new Error('비밀번호를 입력해 주세요.');
-      if (password.length < 8) throw new Error('비밀번호는 8자 이상이어야 합니다.');
-      if (!safeNickname) throw new Error('닉네임을 입력해 주세요.');
+      if (!safeEmail) throw new Error(storeT('errors.store.kb'));
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) throw new Error(storeT('errors.store.kc'));
+      if (!password) throw new Error(storeT('errors.store.kd'));
+      if (password.length < 8) throw new Error(storeT('errors.store.ke'));
+      if (!safeNickname) throw new Error(storeT('errors.store.kf'));
       this.authLoading = true;
       this.authError = '';
       try {
@@ -844,10 +848,10 @@ export const useUiStore = defineStore('ui', {
         await this.loadFollowState();
         await this.loadNotifications();
         this.persist();
-        this.notify('회원가입이 완료되었습니다.', 'success');
+        this.notify(storeT('toast.store.kg'), 'success');
         return this.currentUser;
       } catch (error) {
-        const message = apiErrorMessage(error, '회원가입에 실패했습니다.');
+        const message = apiErrorMessage(error, storeT('errors.store.kh'));
         this.authError = message;
         error.userMessage = message;
         throw error;
@@ -857,8 +861,8 @@ export const useUiStore = defineStore('ui', {
     },
     async login({ email, password }) {
       const safeEmail = email?.trim() ?? '';
-      if (!safeEmail) throw new Error('이메일을 입력해 주세요.');
-      if (!password) throw new Error('비밀번호를 입력해 주세요.');
+      if (!safeEmail) throw new Error(storeT('errors.store.kb'));
+      if (!password) throw new Error(storeT('errors.store.kd'));
       this.authLoading = true;
       try {
         const session = await loginRequest({ email: safeEmail, password });
@@ -871,20 +875,20 @@ export const useUiStore = defineStore('ui', {
         await this.loadFollowState();
         await this.loadNotifications();
         this.persist();
-        this.notify('로그인되었습니다.', 'success');
+        this.notify(storeT('toast.store.ki'), 'success');
         return this.currentUser;
       } catch (error) {
-        throw new Error(apiErrorMessage(error, '로그인에 실패했습니다.'));
+        throw new Error(apiErrorMessage(error, storeT('errors.store.kj')));
       } finally {
         this.authLoading = false;
       }
     },
     async completeOAuthLogin(code, provider = 'oauth') {
-      if (!code) throw new Error('OAuth 로그인 코드가 없습니다.');
+      if (!code) throw new Error(storeT('errors.store.kk'));
       this.authLoading = true;
       try {
         const session = await exchangeOAuthCode(code);
-        if (!session.accessToken) throw new Error('로그인 토큰을 받지 못했습니다.');
+        if (!session.accessToken) throw new Error(storeT('errors.store.kl'));
         saveAccessToken(session.accessToken, session.refreshToken);
         this.currentUser = session.user;
         this.language = applyLanguage(this.currentUser.language || this.language);
@@ -896,15 +900,15 @@ export const useUiStore = defineStore('ui', {
           this.loadNotifications(),
         ]);
         this.persist();
-        const providerName = ({ google: 'Google', kakao: '카카오' })[provider] ?? '소셜';
-        this.notify(`${providerName} 계정으로 로그인되었습니다.`, 'success');
+        const providerName = ({ google: 'Google', kakao: storeT('errors.store.km') })[provider] ?? storeT('errors.store.kn');
+        this.notify(storeT('toast.store.ko', { provider: providerName }), 'success');
         return this.currentUser;
       } catch (error) {
         clearAccessToken();
         this.currentUser = null;
         this.persist();
-        const providerName = ({ google: 'Google', kakao: '카카오' })[provider] ?? '소셜';
-        throw new Error(apiErrorMessage(error, `${providerName} 로그인에 실패했습니다.`));
+        const providerName = ({ google: 'Google', kakao: storeT('errors.store.km') })[provider] ?? storeT('errors.store.kn');
+        throw new Error(apiErrorMessage(error, storeT('errors.store.kp', { provider: providerName })));
       } finally {
         this.authLoading = false;
       }
@@ -922,7 +926,7 @@ export const useUiStore = defineStore('ui', {
       this.followingUsers = [];
       this.followerUsers = [];
       this.persist();
-      this.notify('로그아웃되었습니다.', 'success');
+      this.notify(storeT('toast.store.kq'), 'success');
     },
     async savePreferences(preferences) {
       const normalized = normalizePreferenceSelection(preferences);
@@ -945,7 +949,7 @@ export const useUiStore = defineStore('ui', {
         } catch (error) {
           this.currentUser.preferences = normalized;
           this.currentUser.preferencesCompleted = hasCompletePreferences(normalized);
-          this.notify(apiErrorMessage(error, '취향 설정을 서버에 저장하지 못했습니다.'));
+          this.notify(apiErrorMessage(error, storeT('toast.store.kr')));
         }
       }
       this.onboardingSeen = true;
@@ -953,7 +957,7 @@ export const useUiStore = defineStore('ui', {
     },
     async uploadProfileImage(file) {
       if (!this.currentUser || !readAccessToken()) {
-        this.authError = '로그인이 필요합니다.';
+        this.authError = storeT('errors.store.ks');
         return false;
       }
       try {
@@ -965,14 +969,14 @@ export const useUiStore = defineStore('ui', {
         this.persist();
         return true;
       } catch (error) {
-        this.authError = apiErrorMessage(error, '프로필 이미지를 저장하지 못했습니다.');
+        this.authError = apiErrorMessage(error, storeT('errors.store.kt'));
         this.notify(this.authError);
         return false;
       }
     },
     async removeProfileImage() {
       if (!this.currentUser || !readAccessToken()) {
-        this.authError = '로그인이 필요합니다.';
+        this.authError = storeT('errors.store.ks');
         return false;
       }
       try {
@@ -985,16 +989,16 @@ export const useUiStore = defineStore('ui', {
         this.persist();
         return true;
       } catch (error) {
-        this.authError = apiErrorMessage(error, '프로필 이미지를 삭제하지 못했습니다.');
+        this.authError = apiErrorMessage(error, storeT('errors.store.ku'));
         this.notify(this.authError);
         return false;
       }
     },
     async updateProfile({ nickname, bio, preferences, language }) {
-      if (!this.requireAuth('로그인하면 프로필을 수정할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.kv'))) return false;
       const safeNickname = nickname?.trim();
       if (!safeNickname || safeNickname.length < 2) {
-        this.notify('닉네임은 2자 이상 입력해 주세요.');
+        this.notify(storeT('toast.store.kw'));
         return false;
       }
 
@@ -1019,10 +1023,10 @@ export const useUiStore = defineStore('ui', {
           preferencesCompleted: hasCompletePreferences(updated.preferences ?? normalizedPreferences),
         };
         this.persist();
-        this.notify('프로필을 저장했습니다.');
+        this.notify(storeT('toast.store.kx'));
         return true;
       } catch (error) {
-        this.authError = apiErrorMessage(error, '프로필을 저장하지 못했습니다.');
+        this.authError = apiErrorMessage(error, storeT('errors.store.ky'));
         this.notify(this.authError);
         return false;
       } finally {
@@ -1030,7 +1034,7 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async toggleContentLike(contentId) {
-      if (!this.requireAuth('로그인하면 콘텐츠를 좋아요로 저장할 수 있습니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.kz'))) return;
       if (this.pendingContentLikes.includes(contentId)) return;
       this.pendingContentLikes = [...this.pendingContentLikes, contentId];
       const liked = this.likedContent.includes(contentId);
@@ -1048,7 +1052,7 @@ export const useUiStore = defineStore('ui', {
         }
         this.persist();
       } catch (error) {
-        this.notify(apiErrorMessage(error, '콘텐츠 좋아요를 저장하지 못했습니다.'));
+        this.notify(apiErrorMessage(error, storeT('toast.store.k10')));
       } finally {
         this.pendingContentLikes = this.pendingContentLikes.filter((id) => id !== contentId);
       }
@@ -1069,7 +1073,7 @@ export const useUiStore = defineStore('ui', {
       this.selectedContentIds = [];
     },
     async togglePlaceLike(placeId) {
-      if (!this.requireAuth('로그인하면 장소를 좋아요로 저장할 수 있습니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.k11'))) return;
       if (this.pendingPlaceLikes.includes(placeId)) return;
       this.pendingPlaceLikes = [...this.pendingPlaceLikes, placeId];
       const liked = this.likedPlaces.includes(placeId);
@@ -1087,13 +1091,13 @@ export const useUiStore = defineStore('ui', {
         }
         this.persist();
       } catch (error) {
-        this.notify(apiErrorMessage(error, '장소 좋아요를 저장하지 못했습니다.'));
+        this.notify(apiErrorMessage(error, storeT('toast.store.k12')));
       } finally {
         this.pendingPlaceLikes = this.pendingPlaceLikes.filter((id) => id !== placeId);
       }
     },
     async setVisit(placeId, status) {
-      if (!this.requireAuth('로그인하면 방문 상태를 저장할 수 있습니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.k13'))) return;
       if (this.pendingVisitStatuses.some((id) => sameId(id, placeId))) return;
       this.pendingVisitStatuses = [...this.pendingVisitStatuses, placeId];
       try {
@@ -1108,9 +1112,9 @@ export const useUiStore = defineStore('ui', {
         if (status === 'planned' && detail) this.plannedVisitDetails = [detail, ...this.plannedVisitDetails];
         if (status === 'completed' && detail) this.completedVisitDetails = [detail, ...this.completedVisitDetails];
         this.persist();
-        this.notify(status === 'completed' ? '방문 완료로 저장했습니다.' : '방문 예정으로 저장했습니다.');
+        this.notify(status === 'completed' ? storeT('toast.store.k14') : storeT('toast.store.k15'));
       } catch (error) {
-        this.notify(apiErrorMessage(error, '방문 상태를 저장하지 못했습니다.'));
+        this.notify(apiErrorMessage(error, storeT('toast.store.k16')));
       } finally {
         this.pendingVisitStatuses = this.pendingVisitStatuses.filter((id) => !sameId(id, placeId));
       }
@@ -1123,15 +1127,15 @@ export const useUiStore = defineStore('ui', {
       this.persist();
     },
     async saveCourse(route) {
-      if (!this.requireAuth('로그인하면 AI 코스를 저장할 수 있습니다.')) {
-        this.routeError = '로그인이 필요합니다.';
+      if (!this.requireAuth(storeT('errors.store.k17'))) {
+        this.routeError = storeT('errors.store.ks');
         return null;
       }
       const normalized = normalizeCourseToRoute(route);
       const validation = validateRoute(normalized);
       if (!validation.ok) {
         const detail = validation.errors[0] ?? AI_ROUTE_VALIDATION_USER_MESSAGE;
-        this.routeError = `저장 전 검증 실패: ${detail}`;
+        this.routeError = storeT('errors.store.k18', { detail });
         console.warn('Route validation failed before save', {
           errors: validation.errors,
           payload: summarizeRoutePayload(normalized),
@@ -1148,18 +1152,18 @@ export const useUiStore = defineStore('ui', {
           ...normalized,
           duration: normalized.duration ?? normalized.durationDays,
           places: placeIds,
-          tags: normalized.tags ?? ['AI 코스', normalized.region, normalized.style].filter(Boolean),
+          tags: normalized.tags ?? ['AI \ucf54\uc2a4', normalized.region, normalized.style].filter(Boolean),
         };
         console.info('AI route save request payload', summarizeRoutePayload(serializeRoutePayload(requestPayload)));
         const saved = normalizeCourseToRoute(await createRoute(requestPayload));
         this.savedCourses = [saved, ...this.savedCourses.filter((item) => item.routeId !== saved.routeId)];
         if (savingGeneratedRoute || this.generatedRoute?.routeId === saved.routeId) this.generatedRoute = saved;
         this.persist();
-        this.notify('AI 코스를 저장했습니다.');
+        this.notify(storeT('toast.store.k19'));
         return saved;
       } catch (error) {
         console.error('AI route save failed', error?.response?.data ?? error);
-        this.routeError = apiErrorMessage(error, 'AI 코스를 저장하지 못했습니다.');
+        this.routeError = apiErrorMessage(error, storeT('errors.store.k1a'));
         this.notify(this.routeError);
         return null;
       } finally {
@@ -1184,7 +1188,7 @@ export const useUiStore = defineStore('ui', {
       };
     },
     async updateSavedCourse(route) {
-      if (!this.requireAuth('로그인하면 저장한 코스를 수정할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k1b'))) return false;
 
       const normalized = normalizeCourseToRoute(route);
       const validation = validateRoute(normalized);
@@ -1196,7 +1200,7 @@ export const useUiStore = defineStore('ui', {
 
       const existing = this.savedCourses.find((course) => course.routeId === normalized.routeId);
       if (!existing) {
-        this.notify('저장한 코스를 찾을 수 없습니다.');
+        this.notify(storeT('toast.store.k1c'));
         return false;
       }
 
@@ -1212,10 +1216,10 @@ export const useUiStore = defineStore('ui', {
         this.savedCourses = this.savedCourses.map((course) => course.routeId === saved.routeId ? saved : course);
         if (this.generatedRoute?.routeId === saved.routeId) this.generatedRoute = saved;
         this.persist();
-        this.notify('코스를 수정했습니다.');
+        this.notify(storeT('toast.store.k1d'));
         return true;
       } catch (error) {
-        this.routeError = apiErrorMessage(error, '저장한 코스를 수정하지 못했습니다.');
+        this.routeError = apiErrorMessage(error, storeT('errors.store.k1e'));
         this.notify(this.routeError);
         return false;
       } finally {
@@ -1233,17 +1237,17 @@ export const useUiStore = defineStore('ui', {
 
       this.generatedRoute = normalized;
       this.persist();
-      this.notify('AI 코스를 수정했습니다.');
+      this.notify(storeT('toast.store.k1f'));
       return true;
     },
     async deleteSavedCourse(routeId) {
-      if (!this.requireAuth('로그인하면 저장한 코스를 삭제할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k1g'))) return false;
       this.routeActionLoading = true;
       this.routeError = '';
       try {
         await deleteRoute(routeId);
       } catch (error) {
-        this.routeError = apiErrorMessage(error, '저장한 코스를 삭제하지 못했습니다.');
+        this.routeError = apiErrorMessage(error, storeT('errors.store.k1h'));
         this.notify(this.routeError);
         this.routeActionLoading = false;
         return false;
@@ -1257,7 +1261,7 @@ export const useUiStore = defineStore('ui', {
       }
       this.persist();
       this.routeActionLoading = false;
-      this.notify('코스를 삭제했습니다.');
+      this.notify(storeT('toast.store.k1i'));
       return true;
     },
     openCourse(course) {
@@ -1268,10 +1272,10 @@ export const useUiStore = defineStore('ui', {
       return true;
     },
     async createPost(payload) {
-      if (!this.requireAuth('로그인하면 커뮤니티 글을 작성할 수 있습니다.')) return null;
+      if (!this.requireAuth(storeT('errors.store.k1j'))) return null;
       try {
         const post = await createCommunityPost({
-          title: payload.title || '커뮤니티 글',
+          title: payload.title || storeT('errors.store.k1k'),
           body: payload.body || payload.content || '',
           region: payload.region || this.courseConditions.region,
           duration: payload.duration || `${this.courseConditions.duration} days`,
@@ -1279,45 +1283,45 @@ export const useUiStore = defineStore('ui', {
           imageUrl: payload.imageUrl ?? null,
           prefix: payload.prefix ?? '',
           attachments: payload.attachments ?? [],
-          tags: payload.tags || ['AI 코스', this.courseConditions.region],
+          tags: payload.tags || ['AI \ucf54\uc2a4', this.courseConditions.region],
         });
         this.communityPosts = mergeCommunityPost(this.communityPosts, post);
-        this.notify('게시글을 작성했습니다.');
+        this.notify(storeT('toast.store.k1l'));
         return post;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글을 작성하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1m'));
         this.notify(this.communityError);
         return null;
       }
     },
     async editPost(postId, payload) {
-      if (!this.requireAuth('로그인하면 게시글을 수정할 수 있습니다.')) return null;
+      if (!this.requireAuth(storeT('errors.store.k1n'))) return null;
       try {
         const post = await updateCommunityPost(postId, payload);
         this.communityPosts = mergeCommunityPost(this.communityPosts, post);
-        this.notify('게시글을 수정했습니다.', 'success');
+        this.notify(storeT('toast.store.k1o'), 'success');
         return post;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글을 수정하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1p'));
         this.notify(this.communityError);
         return null;
       }
     },
     async removePost(postId) {
-      if (!this.requireAuth('로그인하면 게시글을 삭제할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k1q'))) return false;
       try {
         await deleteCommunityPost(postId);
         this.communityPosts = this.communityPosts.filter((post) => !sameId(post.id, postId) && !sameId(post.postId, postId));
-        this.notify('게시글을 삭제했습니다.', 'success');
+        this.notify(storeT('toast.store.k1r'), 'success');
         return true;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글을 삭제하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1s'));
         this.notify(this.communityError);
         return false;
       }
     },
     async togglePostLike(postId) {
-      if (!this.requireAuth('로그인하면 게시글에 좋아요를 누를 수 있습니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.k1t'))) return;
       if (this.pendingPostLikes.some((id) => sameId(id, postId))) return;
       this.pendingPostLikes = [...this.pendingPostLikes, postId];
       const current = this.communityPosts.find((post) => sameId(post.id, postId) || sameId(post.postId, postId));
@@ -1338,7 +1342,7 @@ export const useUiStore = defineStore('ui', {
         this.communityPosts = mergeCommunityPost(this.communityPosts, nextPost);
         return;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글 좋아요를 변경하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1u'));
         this.notify(this.communityError);
         return;
       } finally {
@@ -1346,7 +1350,7 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async toggleCommentLike(commentId) {
-      if (!this.requireAuth('로그인이 필요합니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.ks'))) return;
       if (this.pendingCommentLikes.some((id) => sameId(id, commentId))) return;
 
       const current = this.communityPosts
@@ -1370,7 +1374,7 @@ export const useUiStore = defineStore('ui', {
         this.communityPosts = mergeCommunityComment(this.communityPosts, nextComment);
         return nextComment;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '댓글 좋아요를 변경하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1v'));
         this.notify(this.communityError);
         return null;
       } finally {
@@ -1378,7 +1382,7 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async togglePostScrap(postId) {
-      if (!this.requireAuth('로그인하면 커뮤니티 글을 스크랩할 수 있습니다.')) return;
+      if (!this.requireAuth(storeT('errors.store.k1w'))) return;
       if (this.pendingPostScraps.some((id) => sameId(id, postId))) return;
       const current = this.communityPosts.find((post) => sameId(post.id, postId) || sameId(post.postId, postId));
       if (!current) return;
@@ -1395,18 +1399,18 @@ export const useUiStore = defineStore('ui', {
             : [...scrappedBy, this.currentUser.userId],
         };
         this.communityPosts = mergeCommunityPost(this.communityPosts, nextPost);
-        this.notify(scrapped ? '게시글 스크랩을 해제했습니다.' : '게시글을 스크랩했습니다.');
+        this.notify(scrapped ? storeT('toast.store.k1x') : storeT('toast.store.k1y'));
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '게시글 스크랩을 변경하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k1z'));
         this.notify(this.communityError);
       } finally {
         this.pendingPostScraps = this.pendingPostScraps.filter((id) => !sameId(id, postId));
       }
     },
     async addComment(postId, text, parentCommentId = null) {
-      if (!this.requireAuth('로그인하면 댓글을 작성할 수 있습니다.')) return null;
+      if (!this.requireAuth(storeT('errors.store.k20'))) return null;
       if (!text?.trim()) {
-        this.notify('댓글 내용을 입력해 주세요.');
+        this.notify(storeT('toast.store.k21'));
         return null;
       }
       try {
@@ -1416,15 +1420,15 @@ export const useUiStore = defineStore('ui', {
           : post);
         return comment;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '댓글을 등록하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k22'));
         this.notify(this.communityError);
         return null;
       }
     },
     async editComment(postId, commentId, text) {
-      if (!this.requireAuth('로그인하면 댓글을 수정할 수 있습니다.')) return null;
+      if (!this.requireAuth(storeT('errors.store.k23'))) return null;
       if (!text?.trim()) {
-        this.notify('댓글 내용을 입력해 주세요.');
+        this.notify(storeT('toast.store.k21'));
         return null;
       }
       try {
@@ -1440,13 +1444,13 @@ export const useUiStore = defineStore('ui', {
         });
         return updated;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '댓글을 수정하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k24'));
         this.notify(this.communityError);
         return null;
       }
     },
     async removeComment(postId, commentId) {
-      if (!this.requireAuth('로그인하면 댓글을 삭제할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k25'))) return false;
       try {
         await deleteCommunityComment(postId, commentId);
         this.communityPosts = this.communityPosts.map((post) => {
@@ -1460,7 +1464,7 @@ export const useUiStore = defineStore('ui', {
         });
         return true;
       } catch (error) {
-        this.communityError = apiErrorMessage(error, '댓글을 삭제하지 못했습니다.');
+        this.communityError = apiErrorMessage(error, storeT('errors.store.k26'));
         this.notify(this.communityError);
         return false;
       }
@@ -1474,7 +1478,7 @@ export const useUiStore = defineStore('ui', {
         return this.myReviews;
       } catch (error) {
         this.myReviews = [];
-        this.myReviewsError = apiErrorMessage(error, '내 리뷰를 불러오지 못했습니다.');
+        this.myReviewsError = apiErrorMessage(error, storeT('errors.store.k27'));
         return [];
       } finally {
         this.myReviewsLoading = false;
@@ -1495,16 +1499,16 @@ export const useUiStore = defineStore('ui', {
       } catch (error) {
         this.followingUsers = [];
         this.followerUsers = [];
-        this.followError = apiErrorMessage(error, '팔로우 정보를 불러오지 못했습니다.');
+        this.followError = apiErrorMessage(error, storeT('errors.store.k28'));
         return [];
       } finally {
         this.followLoading = false;
       }
     },
     async followUser(userId, nickname = '') {
-      if (!this.requireAuth('로그인하면 작성자를 팔로우할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k29'))) return false;
       if (sameId(userId, this.currentUser.userId)) {
-        this.notify('자기 자신은 팔로우할 수 없습니다.');
+        this.notify(storeT('toast.store.k2a'));
         return false;
       }
       if (this.followActionLoadingIds.some((id) => sameId(id, userId))) return false;
@@ -1516,8 +1520,8 @@ export const useUiStore = defineStore('ui', {
         this.notify(displayName + '\uB2D8\uC744 \uD314\uB85C\uC6B0\uD588\uC2B5\uB2C8\uB2E4.', 'success');
         return true;
       } catch (error) {
-        const message = apiErrorMessage(error, '팔로우하지 못했습니다.');
-        if (message.includes('이미 팔로우')) await this.loadFollowState();
+        const message = apiErrorMessage(error, storeT('errors.store.k2b'));
+        if (message.includes('\uc774\ubbf8 \ud314\ub85c\uc6b0')) await this.loadFollowState();
         this.notify(message);
         return false;
       } finally {
@@ -1525,7 +1529,7 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async unfollowUser(userId, nickname = '') {
-      if (!this.requireAuth('로그인하면 팔로우를 해제할 수 있습니다.')) return false;
+      if (!this.requireAuth(storeT('errors.store.k2c'))) return false;
       if (this.followActionLoadingIds.some((id) => sameId(id, userId))) return false;
       this.followActionLoadingIds = [...this.followActionLoadingIds, userId];
       const displayName = followDisplayName(userId, nickname, this.followingUsers, this.followerUsers);
@@ -1535,7 +1539,7 @@ export const useUiStore = defineStore('ui', {
         this.notify(displayName + '\uB2D8 \uD314\uB85C\uC6B0\uB97C \uCDE8\uC18C\uD588\uC2B5\uB2C8\uB2E4.', 'success');
         return true;
       } catch (error) {
-        this.notify(apiErrorMessage(error, '팔로우를 해제하지 못했습니다.'));
+        this.notify(apiErrorMessage(error, storeT('toast.store.k2d')));
         return false;
       } finally {
         this.followActionLoadingIds = this.followActionLoadingIds.filter((id) => !sameId(id, userId));

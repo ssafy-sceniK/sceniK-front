@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { AnimatePresence, motion } from 'motion-v';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -11,10 +12,12 @@ import MapPreview from '../components/course/MapPreview.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { motionVariants } from '../utils/motion.js';
+import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
+const { t, locale } = useI18n();
 const selectedDay = ref(1);
 const showDeleteSheet = ref(false);
 const loadingDetail = ref(false);
@@ -41,21 +44,20 @@ const dayTabs = computed(() => routeDays.value.map((day) => day.dayNumber));
 const stops = computed(() => routeDays.value.find((day) => day.dayNumber === selectedDay.value)?.places ?? []);
 const routePlaces = computed(() => routeDays.value.flatMap((day) => day.places ?? []));
 const selectedDayRoutePlaces = computed(() => stops.value);
-const displayRegionLabel = computed(() => firstText(course.value?.region, routePlaces.value.find((place) => place.region)?.region, '선택 지역'));
-const displayDurationLabel = computed(() => `${Number(course.value?.durationDays ?? dayTabs.value.length ?? 1) || 1}일`);
-const displayTransportLabel = computed(() => firstText(course.value?.transport, '이동 조건'));
+const displayRegionLabel = computed(() => localizeRegion(firstText(course.value?.region, routePlaces.value.find((place) => place.region)?.region)) || t('course.detail.unselectedRegion'));
+const displayDurationLabel = computed(() => t('course.detail.durationDays', { count: Number(course.value?.durationDays ?? dayTabs.value.length ?? 1) || 1 }));
+const displayTransportLabel = computed(() => localizeTransport(firstText(course.value?.transport)) || t('course.detail.transportFallback'));
 const travelStyleChips = computed(() => {
   const styles = Array.isArray(course.value?.travelStyles) && course.value.travelStyles.length
     ? course.value.travelStyles
     : splitDisplayList(course.value?.style);
-  return [...new Set(styles.map((style) => String(style).trim()).filter(Boolean))];
+  return [...new Set(styles.map((style) => localizeTravelStyle(style)).filter(Boolean))];
 });
-const primaryStyleLabel = computed(() => travelStyleChips.value[0] ?? '감성 여행');
 const courseDetailChips = computed(() => [
   displayRegionLabel.value,
   displayDurationLabel.value,
   displayTransportLabel.value,
-  `${routePlaces.value.length}곳`,
+  t('course.detail.placeCount', { count: routePlaces.value.length }),
   ...travelStyleChips.value,
 ].filter(Boolean));
 const courseSummaryText = computed(() => {
@@ -77,22 +79,40 @@ function firstText(...values) {
 
 function splitDisplayList(value) {
   return String(value ?? '')
-    .split(/[,.·]/)
+    .split(/[,/?]/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
+function localizeRegion(value) {
+  return localizeSystemLabel(value, 'region', t, locale.value);
+}
+
+function localizeTravelStyle(value) {
+  return localizePreferenceOption('themes', value, t, locale.value);
+}
+
+function localizeTransport(value) {
+  const source = String(value ?? '').trim();
+  if (!source) return '';
+  const lower = source.toLowerCase();
+  if (source === 'PUBLIC_TRANSIT' || lower.includes('public') || source.includes('\ub300\uc911')) return t('aiCourse.transport.PUBLIC_TRANSIT');
+  if (source === 'CAR' || lower.includes('car') || source.includes('\ucc28')) return t('aiCourse.transport.CAR');
+  return source;
+}
+
 function enrichStop(stop = {}) {
   const candidate = routeCandidateMap.value.get(stop.placeId) ?? {};
-  const placeName = firstText(stop.placeName, stop.name, candidate.placeName, candidate.name, '장소');
+  const placeName = firstText(stop.placeName, stop.name, candidate.placeName, candidate.name, t('course.detail.placeFallback'));
+  const category = firstText(stop.category, stop.placeCategory, stop.type, candidate.category);
   return {
     ...candidate,
     ...stop,
     name: firstText(stop.name, stop.placeName, candidate.name, candidate.placeName, placeName),
     placeName,
-    category: firstText(stop.category, stop.placeCategory, stop.type, candidate.category, '장소'),
+    category: category ? localizeSystemLabel(category, 'category', t, locale.value) : t('course.detail.placeFallback'),
     address: firstText(stop.address, candidate.address),
-    region: firstText(stop.region, candidate.region),
+    region: localizeRegion(firstText(stop.region, candidate.region)),
     district: firstText(stop.district, candidate.district),
     latitude: firstText(stop.latitude, candidate.latitude),
     longitude: firstText(stop.longitude, candidate.longitude),
@@ -108,8 +128,7 @@ function isInternalCourseCopy(value) {
   if (!value) return false;
   return /C_[A-Z]+_\d+/.test(value)
     || /contentId|routeId|Course CRUD|AI Course template/i.test(value)
-    || /sceniK DB|DB|verified places connected|This course uses only verified/i.test(value)
-    || /검증\s*장소만|검증된\s*장소만|검증된.*장소로만|sceniK\s*장소로만|내부|정책/.test(value);
+    || /sceniK DB|verified places connected|This course uses only verified|Missing travelTip/i.test(value);
 }
 
 async function loadDetail() {
@@ -142,20 +161,20 @@ async function saveTemplateCourse() {
   if (!course.value) return;
   actionNotice.value = {
     tone: 'info',
-    title: '코스를 저장하고 있습니다.',
-    text: '선택한 코스를 저장 목록에 추가하고 있습니다.',
+    title: t('course.detail.saveProgressTitle'),
+    text: t('course.detail.saveProgressText'),
   };
   const saved = await uiStore.saveCourse(course.value);
   actionNotice.value = saved
     ? {
         tone: 'success',
-        title: '저장되었습니다.',
-        text: '마이페이지에서 다시 확인할 수 있습니다.',
+        title: t('course.detail.saveSuccessTitle'),
+        text: t('course.detail.saveSuccessText'),
       }
     : {
         tone: 'error',
-        title: '저장하지 못했습니다.',
-        text: uiStore.routeError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        title: t('course.detail.saveFailedTitle'),
+        text: uiStore.routeError || t('course.detail.saveFailedText'),
       };
 }
 
@@ -184,7 +203,7 @@ function shareUrl() {
 }
 
 async function shareCourse() {
-  if (!uiStore.requireAuth('로그인하면 코스를 공유할 수 있습니다.')) return;
+  if (!uiStore.requireAuth(t('course.detail.shareLoginRequired'))) return;
   if (!course.value) return;
 
   const payload = {
@@ -197,13 +216,13 @@ async function shareCourse() {
     if (navigator.share) {
       await navigator.share(payload);
     } else if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(`${payload.title}\n${payload.text}\n${payload.url}`.trim());
+      await navigator.clipboard.writeText((payload.title + '\n' + payload.text + '\n' + payload.url).trim());
     }
     actionNotice.value = null;
-    uiStore.notify('공유되었습니다.', 'success');
+    uiStore.notify(t('course.detail.shareSuccess'), 'success');
   } catch (error) {
     if (error?.name === 'AbortError') return;
-    uiStore.notify('공유를 완료하지 못했습니다.');
+    uiStore.notify(t('course.detail.shareFailed'));
   }
 }
 
@@ -211,22 +230,22 @@ async function deleteCourse() {
   if (!isSavedCourse.value || !course.value?.routeId) return;
   actionNotice.value = {
     tone: 'info',
-    title: '코스를 삭제하고 있습니다.',
-    text: '저장한 코스 목록에서 제거하고 있습니다.',
+    title: t('course.detail.deleteProgressTitle'),
+    text: t('course.detail.deleteProgressText'),
   };
   const deleted = await uiStore.deleteSavedCourse(course.value.routeId);
   if (!deleted) {
     actionNotice.value = {
       tone: 'error',
-      title: '삭제하지 못했습니다.',
-      text: uiStore.routeError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      title: t('course.detail.deleteFailedTitle'),
+      text: uiStore.routeError || t('course.detail.deleteFailedText'),
     };
     return;
   }
   actionNotice.value = {
     tone: 'success',
-    title: '삭제되었습니다.',
-    text: '저장한 코스 목록에서 제거했습니다.',
+    title: t('course.detail.deleteSuccessTitle'),
+    text: t('course.detail.deleteSuccessText'),
   };
   showDeleteSheet.value = false;
   window.setTimeout(() => router.replace('/my/activity/saved-routes'), 450);
@@ -234,13 +253,13 @@ async function deleteCourse() {
 </script>
 
 <template>
-  <AppLayout title="코스 상세" back>
+  <AppLayout :title="t('course.detail.title')" back>
     <template #actions>
       <div v-if="course" class="course-detail-menu">
         <button
           type="button"
           class="result-menu-button course-detail-menu__trigger"
-          aria-label="코스 메뉴"
+          :aria-label="t('course.detail.menuAria')"
           aria-haspopup="menu"
           :aria-expanded="showActionMenu"
           @click="showActionMenu = !showActionMenu"
@@ -252,24 +271,24 @@ async function deleteCourse() {
           <motion.div v-if="showActionMenu" class="result-menu-popover course-detail-menu__popover" role="menu" v-bind="motionVariants.popover()">
             <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(editCourse)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg></span>
-              수정
+              {{ t('common.edit') }}
             </button>
             <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
-              공유
+              {{ t('common.share') }}
             </button>
-          <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
-            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>
-            {{ uiStore.routeActionLoading ? '저장 중' : '저장' }}
-          </button>
-          <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">
-            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m5 10 7-7 7 7" /><path d="M5 21h14" /></svg></span>
-            AI 결과로 보기
-          </button>
-          <button v-if="canManageCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
-            <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m10 11 .4 6" /><path d="m14 11-.4 6" /><path d="M5 6l1 15h12l1-15" /></svg></span>
-            삭제
-          </button>
+            <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>
+              {{ uiStore.routeActionLoading ? t('profile.edit.savingShort') : t('common.save') }}
+            </button>
+            <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m5 10 7-7 7 7" /><path d="M5 21h14" /></svg></span>
+              {{ t('course.detail.viewAsAiResult') }}
+            </button>
+            <button v-if="canManageCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m10 11 .4 6" /><path d="m14 11-.4 6" /><path d="M5 6l1 15h12l1-15" /></svg></span>
+              {{ t('common.delete') }}
+            </button>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -279,9 +298,9 @@ async function deleteCourse() {
       <EmptyState
         icon="K"
         tone="login"
-        title="로그인이 필요합니다"
-        text="저장한 코스는 로그인 후 확인할 수 있습니다."
-        action-label="로그인하기"
+        :title="t('common.loginRequired')"
+        :text="t('course.detail.loginRequiredText')"
+        :action-label="t('auth.login.title')"
         action-to="/login"
       />
     </section>
@@ -290,18 +309,18 @@ async function deleteCourse() {
       <EmptyState
         tone="loading"
         compact
-        title="코스를 불러오는 중입니다"
-        text="저장한 일정과 장소 순서를 확인하고 있어요."
+        :title="t('course.detail.loadingTitle')"
+        :text="t('course.detail.loadingText')"
       />
     </section>
 
     <section v-else-if="course" class="course-detail-screen">
       <div class="course-manage-header result-hero">
-        <span class="badge ai course-detail-badge">{{ isSavedCourse ? '저장 코스' : '추천 코스' }}</span>
+        <span class="badge ai course-detail-badge">{{ isSavedCourse ? t('course.detail.savedBadge') : t('course.detail.recommendedBadge') }}</span>
         <h1>{{ course.title }}</h1>
         <p v-if="courseSummaryText" class="course-detail-summary">{{ courseSummaryText }}</p>
         <div v-if="course.dateRangeLabel" class="result-date">{{ course.dateRangeLabel }}</div>
-        <div class="course-detail-chip-list" aria-label="코스 정보">
+        <div class="course-detail-chip-list" :aria-label="t('course.detail.infoAria')">
           <span v-for="chip in courseDetailChips" :key="chip" class="course-detail-chip">{{ chip }}</span>
         </div>
       </div>
@@ -324,7 +343,7 @@ async function deleteCourse() {
 
       <div v-if="dayTabs.length > 1" class="day-tabs">
         <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
-          Day {{ day }}
+          {{ t('course.detail.dayLabel', { day }) }}
         </button>
       </div>
 
@@ -342,9 +361,9 @@ async function deleteCourse() {
 
     <section v-else class="course-detail-screen">
       <DetailNotFoundPanel
-        title="코스를 찾을 수 없습니다"
-        :text="uiStore.routeError || '저장 목록에서 삭제되었거나 아직 저장한 코스가 없습니다. 저장한 코스를 다시 선택하거나 AI 코스를 만들어 보세요.'"
-        list-label="저장한 코스 보기"
+        :title="t('course.detail.notFoundTitle')"
+        :text="uiStore.routeError || t('course.detail.notFoundText')"
+        :list-label="t('course.detail.savedCoursesLink')"
         list-to="/my/activity/saved-routes"
         @retry="loadDetail"
       />

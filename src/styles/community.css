@@ -919,14 +919,17 @@
 }
 
 .post-gallery {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 6px;
   margin: 12px 0;
+  display: block;
+  column-count: 1;
+  column-gap: 8px;
 }
 
-.post-gallery span,
-.post-gallery img {
+.post-gallery:has(.post-gallery-item + .post-gallery-item) {
+  column-count: 2;
+}
+
+.post-gallery span {
   min-height: 86px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -937,8 +940,9 @@
 
 .post-gallery img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .empty-copy {
@@ -1618,12 +1622,8 @@
   bottom: 8px;
 }
 
-.post-gallery {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .post-gallery img {
-  aspect-ratio: 1 / 1;
+  max-height: none;
 }
 
 .feed-thumb-count {
@@ -1643,9 +1643,12 @@
 }
 
 @media (min-width: 560px) {
-  .post-image-preview-grid,
-  .post-gallery {
+  .post-image-preview-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .post-gallery:has(.post-gallery-item + .post-gallery-item) {
+    column-count: 3;
   }
 }
 
@@ -1677,10 +1680,12 @@
 }
 
 .post-gallery-item {
+  width: 100%;
   min-width: 0;
-  min-height: 86px;
+  margin: 0 0 8px;
   padding: 0;
   display: block;
+  break-inside: avoid;
   overflow: hidden;
   background: transparent;
   border: 0;
@@ -1689,6 +1694,8 @@
 }
 
 .post-gallery-item img {
+  width: 100%;
+  height: auto;
   display: block;
   cursor: zoom-in;
 }
@@ -1755,8 +1762,9 @@
 }
 
 .community-image-viewer-body img {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
   max-height: calc(88vh - 52px);
   display: block;
   object-fit: contain;
@@ -1785,4 +1793,117 @@
 
 .image-viewer-nav.next {
   right: 10px;
+}
+
+/* Multilingual community overflow hardening. */
+.community-screen,
+.community-screen * {
+  box-sizing: border-box;
+}
+
+.community-screen .mode-toggle,
+.community-screen .community-tabs,
+.community-sort-row,
+.feed-card-author-row,
+.feed-actions,
+.detail-actions,
+.post-owner-actions,
+.comment-row-actions,
+.board-banner,
+.linked-course,
+.share-options {
+  min-width: 0;
+}
+
+.community-screen .community-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.community-screen .community-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.community-screen .community-tabs a,
+.feed-actions button,
+.feed-actions a,
+.detail-actions button,
+.detail-actions a,
+.detail-actions > span,
+.post-owner-button,
+.author-follow-button,
+.comment-action-button,
+.comment-row-actions button,
+.share-options button,
+.linked-course-cta,
+.board-row em,
+.list-result-count {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-actions button,
+.feed-actions a,
+.detail-actions button,
+.detail-actions a,
+.detail-actions > span {
+  padding-inline: 6px;
+}
+
+.compact-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.linked-course > div,
+.board-option-copy,
+.board-selector-copy,
+.feed-body,
+.post-detail-author,
+.course-picker-copy {
+  min-width: 0;
+}
+
+.linked-course strong,
+.linked-course small,
+.board-row strong,
+.board-row small,
+.board-option-copy strong,
+.board-option-copy small,
+.feed-body h2,
+.feed-body p {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 430px) {
+  .detail-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .route-story-card {
+    padding-inline: 12px;
+  }
+
+  .feed-card-main {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .compact-actions {
+    gap: 6px;
+  }
+
+  .feed-actions button,
+  .feed-actions a,
+  .comment-box button {
+    font-size: 11px;
+  }
 }

@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
   stops: { type: Array, default: () => [] },
@@ -29,7 +32,7 @@ function meaningfulTravelTip(stop) {
 }
 
 function meaningfulCategory(stop) {
-  return firstText(stop.category, stop.placeCategory, stop.type, '장소');
+  return firstText(stop.category, stop.placeCategory, stop.type, t('course.cleanup.k5b847da9ce'));
 }
 
 function meaningfulAddress(stop) {
@@ -74,11 +77,11 @@ function usefulTransitInfo(stop) {
   const closeByTime = minutes != null && minutes <= 30;
   const closeByDistance = meters != null && meters <= 2000;
   if (!closeByTime && !closeByDistance) return '';
-  if (station && minutes != null) return `${station}에서 도보 ${Math.round(minutes)}분`;
-  if (station && meters != null) return `${station}에서 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  if (station && minutes != null) return t('course.cleanup.ke32fa1e2e6', { value0: station, value1: Math.round(minutes) });
+  if (station && meters != null) return t('course.cleanup.k6905c32f98', { value0: station, value1: (meters / 1000).toFixed(meters >= 1000 ? 1 : 0) });
   if (station) return station;
-  if (minutes != null) return `가까운 대중교통까지 도보 ${Math.round(minutes)}분`;
-  if (meters != null) return `가까운 대중교통까지 ${(meters / 1000).toFixed(meters >= 1000 ? 1 : 0)}km`;
+  if (minutes != null) return t('course.cleanup.k6148e18841', { value0: Math.round(minutes) });
+  if (meters != null) return t('course.cleanup.k2d6702cdf6', { value0: (meters / 1000).toFixed(meters >= 1000 ? 1 : 0) });
   return '';
 }
 </script>
@@ -93,7 +96,7 @@ function usefulTransitInfo(stop) {
         <div class="timeline-card__meta">
           <span v-if="stop.displayCategory">{{ stop.displayCategory }}</span>
         </div>
-        <strong>{{ stop.placeName || stop.name || '장소' }}</strong>
+        <strong>{{ stop.placeName || stop.name || t('course.cleanup.k5b847da9ce') }}</strong>
         <p v-if="stop.displayAddress">{{ stop.displayAddress }}</p>
         <p v-if="stop.displayTransit" class="timeline-note">{{ stop.displayTransit }}</p>
       </div>

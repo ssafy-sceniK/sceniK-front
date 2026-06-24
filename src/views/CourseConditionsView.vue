@@ -85,8 +85,8 @@ const regionOptions = computed(() => {
     return acc;
   }, new Map());
   const relatedRegions = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([region]) => region);
-  const allRegions = placeStore.regions.filter((item) => item && item !== '전체');
-  return relatedRegions.length ? relatedRegions : allRegions.length ? allRegions : ['서울'];
+  const allRegions = placeStore.regions.filter((item) => item && item !== '\uc804\uccb4');
+  return relatedRegions.length ? relatedRegions : allRegions.length ? allRegions : [t('aiCourse.cleanup.kcf9a4aba61')];
 });
 const selectedRegions = computed(() => {
   const regions = Array.isArray(uiStore.courseConditions.regions)
@@ -103,14 +103,20 @@ const canGenerate = computed(() => selectedContentIds.value.length > 0 && !candi
 const budgetRangeLabel = computed(() => formatBudgetRange(uiStore.courseConditions.budgetMin, uiStore.courseConditions.budgetMax));
 const budgetMinPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMin));
 const budgetMaxPercent = computed(() => budgetPercent(uiStore.courseConditions.budgetMax));
-const travelStyleOptions = ['감성 여행', '맛집 중심', '촬영지 중심', '숨은 명소'];
+const travelStyleOptions = ['\uac10\uc131 \uc5ec\ud589', '\ub9db\uc9d1 \uc911\uc2ec', '\ucd2c\uc601\uc9c0 \uc911\uc2ec', '\uc228\uc740 \uba85\uc18c'];
 const transportModeOptions = computed(() => TRANSPORT_MODE_OPTIONS.map((option) => ({
   ...option,
   label: t('aiCourse.transport.' + option.value),
 })));
-const companionOptions = computed(() => ['혼자', '친구', '연인', '가족'].map((value) => ({
+const companionKeyMap = {
+  '\ud63c\uc790': 'solo',
+  '\uce5c\uad6c': 'friends',
+  '\uc5f0\uc778': 'couple',
+  '\uac00\uc871': 'family',
+};
+const companionOptions = computed(() => Object.keys(companionKeyMap).map((value) => ({
   value,
-  label: t('aiCourse.companion.' + ({ '혼자': 'solo', '친구': 'friends', '연인': 'couple', '가족': 'family' }[value])),
+  label: t(`aiCourse.companion.${companionKeyMap[value]}`),
 })));
 function travelStyleOptionLabel(style) {
   return localizePreferenceOption('themes', style, t, locale.value);
@@ -209,8 +215,8 @@ function toggleRegion(region) {
 
 function formatWon(value) {
   const amount = Number(value) || 0;
-  if (amount >= 10000) return `${Math.round(amount / 10000)}만원`;
-  return `${amount.toLocaleString('ko-KR')}원`;
+  if (amount >= 10000) return t('aiCourse.cleanup.k7be0f0892f', { value0: Math.round(amount / 10000) });
+  return `${amount.toLocaleString('ko-KR')}\uc6d0`;
 }
 
 function formatBudgetRange(min, max) {

@@ -1,9 +1,12 @@
 <script setup>
 import { computed } from 'vue';
 import { motion } from 'motion-v';
+import { useI18n } from 'vue-i18n';
 import planeIcon from '../../assets/brand/plane-icon.png';
 
 defineOptions({ name: 'AiRunwayProgress' });
+
+const { t } = useI18n();
 
 const props = defineProps({
   progress: { type: Number, required: true },
@@ -32,7 +35,7 @@ const planePosition = computed(() => {
 </script>
 
 <template>
-  <div class="runway-progress" :class="`runway-progress--${props.theme}`" :style="{ '--plane-icon': `url(${planeIcon})` }" role="progressbar" aria-label="AI 코스 생성 진행률" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="safeProgress">
+  <div class="runway-progress" :class="`runway-progress--${props.theme}`" :style="{ '--plane-icon': `url(${planeIcon})` }" role="progressbar" :aria-label="t('aiCourse.loading.progressAria')" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="safeProgress">
     <svg class="runway-progress__track" viewBox="0 0 240 240" aria-hidden="true">
       <circle class="runway-progress__inactive" cx="120" cy="120" r="92" />
       <motion.circle class="runway-progress__active" cx="120" cy="120" r="92" :animate="{ strokeDashoffset: progressOffset }" :transition="{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }" />

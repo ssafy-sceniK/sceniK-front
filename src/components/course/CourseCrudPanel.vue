@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
+
+const { t } = useI18n();
 
 defineOptions({
   name: 'CourseCrudPanel',
@@ -8,11 +11,11 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: '코스 관리',
+    default: '\ucf54\uc2a4 \uad00\ub9ac',
   },
   description: {
     type: String,
-    default: '코스 정보를 확인하고 필요한 작업을 이어갈 수 있습니다.',
+    default: '\ucf54\uc2a4 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uace0 \ud544\uc694\ud55c \uc791\uc5c5\uc744 \uc774\uc5b4\uac08 \uc218 \uc788\uc2b5\ub2c8\ub2e4.',
   },
   courseTitle: {
     type: String,
@@ -37,11 +40,11 @@ const props = defineProps({
 });
 
 const metaItems = computed(() => [
-  { label: '코스명', value: props.courseTitle || '생성된 AI 코스' },
-  { label: '방문 장소', value: props.placeCount + '곳' },
-  { label: '지역', value: props.regionLabel },
-  { label: '기간', value: props.durationLabel },
-  { label: '이동수단', value: props.transportLabel },
+  { label: t('course.cleanup.k84354cfa8d'), value: props.courseTitle || t('course.cleanup.kcbd04b451d') },
+  { label: t('course.cleanup.ke4ff0abb48'), value: props.placeCount + t('course.cleanup.k960f39a4cc') },
+  { label: t('course.cleanup.k9aa330dae0'), value: props.regionLabel },
+  { label: t('course.cleanup.kab4ec9e629'), value: props.durationLabel },
+  { label: t('course.cleanup.k286b8c3295'), value: props.transportLabel },
 ].filter((item) => item.value));
 </script>
 
@@ -49,13 +52,13 @@ const metaItems = computed(() => [
   <section class="course-crud-panel" aria-labelledby="course-crud-panel-title">
     <div class="course-crud-panel__head">
       <div>
-        <span class="course-crud-panel__eyebrow">내 여행 코스</span>
+        <span class="course-crud-panel__eyebrow">{{ t('course.cleanup.k561dde29a9') }}</span>
         <h2 id="course-crud-panel-title">{{ props.title }}</h2>
         <p>{{ props.description }}</p>
       </div>
     </div>
 
-    <dl class="course-crud-panel__meta" aria-label="코스 정보">
+    <dl class="course-crud-panel__meta" :aria-label="t('course.cleanup.ke49c74a878')">
       <div v-for="item in metaItems" :key="item.label">
         <dt>{{ item.label }}</dt>
         <dd>{{ item.value }}</dd>

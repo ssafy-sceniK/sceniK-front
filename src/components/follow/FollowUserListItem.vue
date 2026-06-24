@@ -1,4 +1,6 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
 defineOptions({
   name: 'FollowUserListItem',
 });
@@ -22,22 +24,26 @@ const props = defineProps({
   },
   buttonLabel: {
     type: String,
-    default: '팔로우',
+    default: '',
   },
 });
 
 const emit = defineEmits(['toggle']);
+const { t } = useI18n();
 </script>
 
 <template>
   <article class="user-list-row follow-user-list-item">
-    <RouterLink class="follow-user-link" :to="`/users/${props.user.userId}`">
+    <RouterLink class="follow-user-link" :to="'/users/' + props.user.userId">
       <span class="user-list-avatar">{{ props.initial }}</span>
       <span>
         <strong>
           {{ props.user.nickname }}
         </strong>
-        <small>팔로워 {{ props.user.followerCount ?? 0 }} · 팔로잉 {{ props.user.followingCount ?? 0 }}</small>
+        <small>
+          {{ t('my.activity.follow.followersCount', { count: props.user.followerCount ?? 0 }) }} /
+          {{ t('my.activity.follow.followingCount', { count: props.user.followingCount ?? 0 }) }}
+        </small>
       </span>
     </RouterLink>
     <button
@@ -46,7 +52,7 @@ const emit = defineEmits(['toggle']);
       :disabled="props.pending"
       @click="emit('toggle', props.user)"
     >
-      {{ props.buttonLabel }}
+      {{ props.buttonLabel || t('my.activity.follow.follow') }}
     </button>
   </article>
 </template>

@@ -47,7 +47,7 @@ async function submit() {
     return;
   }
 
-  if (!/^[^s@]+@[^s@]+.[^s@]+$/.test(trimmedEmail)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
     error.value = t('auth.validation.emailInvalid');
     return;
   }

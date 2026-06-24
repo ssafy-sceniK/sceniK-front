@@ -6,15 +6,15 @@ function firstDefined(...values) {
 
 function normalizeCandidatePlace(place = {}, fallback = {}) {
   const placeId = firstDefined(place.placeId, fallback.placeId);
-  const name = firstDefined(place.name, place.placeName, fallback.placeName, fallback.name, '검증 장소');
+  const name = firstDefined(place.name, place.placeName, fallback.placeName, fallback.name, '\uac80\uc99d \uc7a5\uc18c');
   return {
     ...place,
     placeId,
     name,
     placeName: firstDefined(place.placeName, name),
     region: firstDefined(place.region, fallback.region, 'Korea'),
-    category: firstDefined(place.category, fallback.category, '검증 장소'),
-    address: firstDefined(place.address, fallback.address, '검증 장소 주소'),
+    category: firstDefined(place.category, fallback.category, '\uac80\uc99d \uc7a5\uc18c'),
+    address: firstDefined(place.address, fallback.address, '\uac80\uc99d \uc7a5\uc18c \uc8fc\uc18c'),
     latitude: Number(firstDefined(place.latitude, fallback.latitude, 37.5665)),
     longitude: Number(firstDefined(place.longitude, fallback.longitude, 126.9780)),
     relatedContentId: firstDefined(place.relatedContentId, fallback.relatedContentId, 'content-local'),
@@ -38,11 +38,11 @@ function normalizeStop(stop = {}, dayNumber, stopIndex, candidateMap) {
     ...stop,
     placeId: place.placeId,
     placeName: firstDefined(stop.placeName, stop.name, place.placeName, place.name),
-    category: firstDefined(stop.category, stop.placeCategory, stop.type, place.category, '검증 장소'),
+    category: firstDefined(stop.category, stop.placeCategory, stop.type, place.category, '\uac80\uc99d \uc7a5\uc18c'),
     dayNumber,
     visitOrder: Number(firstDefined(stop.visitOrder, stop.order, stop.sequence, stopIndex + 1)),
     recommendedTime: firstDefined(stop.recommendedTime, stop.time, '10:00'),
-    reason: firstDefined(stop.reason, stop.description, `${place.name}는 선택한 콘텐츠와 연결된 검증 장소입니다.`),
+    reason: firstDefined(stop.reason, stop.description, `${place.name}\ub294 \uc120\ud0dd\ud55c \ucf58\ud150\uce20\uc640 \uc5f0\uacb0\ub41c \uac80\uc99d \uc7a5\uc18c\uc785\ub2c8\ub2e4.`),
     travelTip: firstDefined(stop.travelTip, stop.tip, ''),
   };
 }

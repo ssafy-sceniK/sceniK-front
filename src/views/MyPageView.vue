@@ -3,14 +3,16 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
+import { localizePreferenceOption } from '../i18n/systemContent.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import ProfileAvatar from '../components/common/ProfileAvatar.vue';
+import { normalizePreferenceSelection } from '../utils/preferences.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const activeTab = ref('activity');
 
 onMounted(async () => {
@@ -46,14 +48,20 @@ const scrappedPosts = computed(() => uiStore.currentUser
 const profileInitial = computed(() => uiStore.currentUser?.nickname?.slice(0, 1).toUpperCase() ?? 'K');
 const profileBio = computed(() => uiStore.currentUser?.bio || t('my.profile.defaultBio'));
 const profileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
+function preferenceChip(group, value) {
+  return {
+    key: `${group}:${value}`,
+    label: localizePreferenceOption(group, value, t, locale.value),
+  };
+}
+
 const profilePreferenceChips = computed(() => {
-  const preferences = uiStore.currentUser?.preferences;
-  if (!preferences) return [];
-  if (Array.isArray(preferences)) return preferences.filter(Boolean).slice(0, 6);
-  return Object.values(preferences)
-    .flatMap((value) => Array.isArray(value) ? value : [value])
-    .filter(Boolean)
-    .slice(0, 6);
+  const preferences = normalizePreferenceSelection(uiStore.currentUser?.preferences);
+  return [
+    ...preferences.contentTypes.map((value) => preferenceChip('contentTypes', value)),
+    ...preferences.regions.map((value) => preferenceChip('regions', value)),
+    ...preferences.themes.map((value) => preferenceChip('themes', value)),
+  ].slice(0, 6);
 });
 const plannedCount = computed(() => uiStore.plannedVisitItems.length);
 const completedCount = computed(() => uiStore.completedVisitItems.length);
@@ -109,7 +117,7 @@ async function logoutToLanding() {
           <p>{{ profileBio }}</p>
           <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
           <div v-if="profilePreferenceChips.length" class="profile-preference-chips" :aria-label="t('my.profile.preferencesAria')">
-            <span v-for="item in profilePreferenceChips" :key="item">{{ item }}</span>
+            <span v-for="item in profilePreferenceChips" :key="item.key">{{ item.label }}</span>
           </div>
         </div>
         <div class="profile-actions">
@@ -133,7 +141,7 @@ async function logoutToLanding() {
         </button>
       </div>
 
-      <div class="my-section-tabs" aria-label="My Page sections">
+      <div class="my-section-tabs" :aria-label="t('my.tabs.aria')">
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -199,7 +207,7 @@ async function logoutToLanding() {
         </div>
 
         <div class="visit-progress-card" :style="{ '--visit-progress': `${visitProgress}%` }">
-          <strong>총 {{ totalVisitCount }}곳 중 {{ t('my.counts.places', { count: completedCount }) }} {{ t('my.visits.completed') }}</strong>
+          <strong>{{ t('my.visits.totalCompleted', { total: totalVisitCount, completed: completedCount }) }}</strong>
           <b><span></span></b>
           <small>{{ t('my.visits.progressPercent', { percent: visitProgress }) }}</small>
         </div>
@@ -224,9 +232,9 @@ async function logoutToLanding() {
           icon="GO"
           tone="route"
           compact
-          title="{{ t('my.visits.emptyTitle') }}"
-          text="장소 상세에서 {{ t('my.visits.planned') }}이나 {{ t('my.visits.completed') }}를 눌러 여행 기록을 시작해보세요."
-          action-label="{{ t('place.list.title') }}"
+          :title="t('my.visits.emptyTitle')"
+          :text="t('my.cleanup.k9ea895ec86')"
+          :action-label="t('place.list.title')"
           action-to="/explore/map"
         />
       </div>

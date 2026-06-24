@@ -1,6 +1,9 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 import FormStatusNotice from '../common/FormStatusNotice.vue';
+
+const { t } = useI18n();
 
 defineOptions({
   name: 'AuthSessionPanel',
@@ -24,11 +27,11 @@ const emit = defineEmits(['logout']);
   <div class="auth-session-panel">
     <div class="settings-session-card">
       <div>
-        <strong>{{ props.user ? `${props.user.nickname}님으로 로그인 중` : '로그인이 필요합니다' }}</strong>
+        <strong>{{ props.user ? t('auth.cleanup.k8dfd422e0d', { value0: props.user.nickname }) : t('auth.cleanup.kd04aebf093') }}</strong>
         <p>
           {{ props.user
-            ? '로그아웃하면 이 기기에서 세션이 종료되고 저장/댓글/팔로우 기능은 다시 로그인해야 사용할 수 있습니다.'
-            : '로그인하면 저장한 코스, 댓글, 좋아요, 팔로우 정보를 이어서 사용할 수 있습니다.' }}
+            ? t('auth.cleanup.k12e7761e16')
+            : t('auth.cleanup.k493ab4993f') }}
         </p>
       </div>
       <button
@@ -37,9 +40,9 @@ const emit = defineEmits(['logout']);
         class="session-logout-button"
         @click="emit('logout')"
       >
-        로그아웃
+        {{ t('settings.logout') }}
       </button>
-      <RouterLink v-else class="session-login-link" to="/login">로그인하기</RouterLink>
+      <RouterLink v-else class="session-login-link" to="/login">{{ t('auth.cleanup.k112049a2c8') }}</RouterLink>
     </div>
     <FormStatusNotice
       v-if="props.notice"

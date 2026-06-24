@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 defineOptions({
   name: 'AuthorFollowCard',
 });
@@ -6,7 +9,7 @@ defineOptions({
 const props = defineProps({
   authorName: {
     type: String,
-    default: '작성자',
+    default: '\uc791\uc131\uc790',
   },
   meta: {
     type: String,
@@ -44,7 +47,7 @@ const emit = defineEmits(['toggle']);
       :disabled="props.loading"
       @click="emit('toggle')"
     >
-      {{ props.loading ? '처리 중' : props.following ? '팔로잉' : '팔로우' }}
+      {{ props.loading ? t('profile.cleanup.k8015095ff4') : props.following ? t('profile.cleanup.k615cf6ee33') : t('profile.cleanup.k5b35787117') }}
     </button>
   </div>
 </template>

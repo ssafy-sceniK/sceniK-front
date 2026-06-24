@@ -20,12 +20,15 @@ const error = ref('');
 const success = ref('');
 const fieldErrors = ref([]);
 const loading = ref(false);
+const emailTouched = ref(false);
+const emailDirty = ref(false);
+const submitAttempted = ref(false);
 const emailCheckStatus = ref('unchecked');
-const emailCheckMessage = ref(t('auth.signup.emailCheckRequired'));
+const emailCheckMessage = ref('');
 const checkingEmail = ref(false);
 
 const trimmedEmail = computed(() => email.value.trim().toLowerCase());
-const emailFormatValid = computed(() => /^[^s@]+@[^s@]+.[^s@]+$/.test(trimmedEmail.value));
+const emailFormatValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail.value));
 const passwordPolicy = computed(() => [
   {
     label: t('auth.signup.passwordRuleLength'),
@@ -35,6 +38,10 @@ const passwordPolicy = computed(() => [
 const passwordValid = computed(() => passwordPolicy.value.every((item) => item.passed));
 const passwordMatches = computed(() => Boolean(confirm.value) && password.value === confirm.value);
 const confirmEntered = computed(() => Boolean(confirm.value));
+const showEmailStatus = computed(() => emailDirty.value || emailTouched.value || submitAttempted.value || ['checking', 'available', 'duplicate', 'invalid', 'error'].includes(emailCheckStatus.value));
+const showPasswordPolicy = computed(() => Boolean(password.value) || submitAttempted.value);
+const showConfirmStatus = computed(() => confirmEntered.value || (submitAttempted.value && Boolean(password.value)));
+const confirmStatusMessage = computed(() => (passwordMatches.value ? t('auth.signup.passwordMatch') : t('auth.validation.passwordMismatch')));
 const canSubmit = computed(() => (
   nickname.value.trim()
   && emailCheckStatus.value === 'available'
@@ -44,6 +51,7 @@ const canSubmit = computed(() => (
 ));
 
 watch(email, () => {
+  emailDirty.value = true;
   success.value = '';
   error.value = '';
   fieldErrors.value = [];
@@ -71,7 +79,12 @@ function emailNoticeTone() {
   return 'warning';
 }
 
+function markEmailTouched() {
+  emailTouched.value = true;
+}
+
 async function checkEmail() {
+  emailTouched.value = true;
   error.value = '';
   success.value = '';
   if (!trimmedEmail.value) {
@@ -102,6 +115,8 @@ async function checkEmail() {
 }
 
 async function submit() {
+  submitAttempted.value = true;
+  emailTouched.value = true;
   error.value = '';
   success.value = '';
   fieldErrors.value = [];
@@ -113,32 +128,32 @@ async function submit() {
   }
 
   if (!trimmedEmail.value) {
-    error.value = t('auth.validation.emailRequired');
+    emailCheckStatus.value = 'invalid';
+    emailCheckMessage.value = t('auth.validation.emailRequired');
     return;
   }
 
   if (!emailFormatValid.value) {
-    error.value = t('auth.validation.emailInvalid');
+    emailCheckStatus.value = 'invalid';
+    emailCheckMessage.value = t('auth.validation.emailInvalid');
     return;
   }
 
   if (emailCheckStatus.value !== 'available') {
-    error.value = t('auth.signup.emailCheckBeforeSubmit');
+    emailCheckStatus.value = 'unchecked';
+    emailCheckMessage.value = t('auth.signup.emailCheckBeforeSubmit');
     return;
   }
 
   if (!password.value) {
-    error.value = t('auth.validation.passwordRequired');
     return;
   }
 
   if (!passwordValid.value) {
-    error.value = t('auth.validation.passwordTooShort');
     return;
   }
 
   if (!passwordMatches.value) {
-    error.value = t('auth.validation.passwordMismatch');
     return;
   }
 
@@ -158,8 +173,8 @@ async function submit() {
 
 <template>
   <AppLayout :title="t('auth.signup.title')" back hide-bottom>
-    <form class="auth-form" @submit.prevent="submit">
-      <div class="page-intro">
+    <form class="auth-form auth-form--signup" @submit.prevent="submit">
+      <div class="page-intro signup-intro">
         <h1>{{ t('auth.signup.heading') }}</h1>
         <p>{{ t('auth.signup.subtitle') }}</p>
       </div>
@@ -167,30 +182,67 @@ async function submit() {
       <label class="form-field">
         {{ t('auth.fields.email') }}
         <span class="email-check-row">
-          <input v-model="email" type="email" placeholder="email@example.com" autocomplete="email" />
+          <input v-model="email" type="email" placeholder="email@example.com" autocomplete="email" @blur="markEmailTouched" />
           <button type="button" :disabled="checkingEmail || !emailFormatValid" @click="checkEmail">
             {{ checkingEmail ? t('common.checking') : t('auth.signup.checkDuplicate') }}
           </button>
         </span>
+        <p v-if="showEmailStatus" class="field-status field-status--email" :class="`field-status--${emailNoticeTone()}`">
+          {{ emailCheckMessage }}
+        </p>
       </label>
-      <label class="form-field">{{ t('auth.fields.password') }}<input v-model="password" type="password" :placeholder="t('auth.signup.passwordPlaceholder')" autocomplete="new-password" /></label>
-      <label class="form-field">{{ t('auth.fields.passwordConfirm') }}<input v-model="confirm" type="password" :placeholder="t('auth.signup.passwordConfirmPlaceholder')" autocomplete="new-password" /></label>
+      <label class="form-field">
+        {{ t('auth.fields.password') }}
+        <input v-model="password" type="password" :placeholder="t('auth.signup.passwordPlaceholder')" autocomplete="new-password" />
+        <ul v-if="showPasswordPolicy" class="field-status-list field-status-list--password" :aria-label="t('auth.fields.password')">
+          <li v-for="item in passwordPolicy" :key="item.label" :class="{ passed: item.passed }">
+            <span aria-hidden="true">{{ item.passed ? '\u2713' : '\u2022' }}</span>{{ item.label }}
+          </li>
+        </ul>
+      </label>
+      <label class="form-field">
+        {{ t('auth.fields.passwordConfirm') }}
+        <input v-model="confirm" type="password" :placeholder="t('auth.signup.passwordConfirmPlaceholder')" autocomplete="new-password" />
+        <p v-if="showConfirmStatus" class="field-status field-status--confirm" :class="passwordMatches ? 'field-status--success' : 'field-status--error'">
+          {{ confirmStatusMessage }}
+        </p>
+      </label>
       <SignupValidationPanel
-        :email-tone="emailNoticeTone()"
-        :email-message="emailCheckMessage"
-        :password-policy="passwordPolicy"
-        :confirm-entered="confirmEntered"
-        :password-matches="passwordMatches"
         :field-errors="fieldErrors"
         :error="error"
         :success="success"
       />
-      <BaseButton block :disabled="!canSubmit">{{ loading ? t('auth.signup.loading') : t('auth.signup.submit') }}</BaseButton>
+      <BaseButton class="signup-submit" block :disabled="!canSubmit">{{ loading ? t('auth.signup.loading') : t('auth.signup.submit') }}</BaseButton>
     </form>
   </AppLayout>
 </template>
 
 <style scoped>
+.auth-form--signup {
+  padding-bottom: calc(var(--bottom-nav-height) + 28px);
+}
+
+.signup-intro {
+  padding: 24px 0 22px;
+}
+
+.signup-intro h1 {
+  max-width: 320px;
+  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: 760;
+  line-height: 1.28;
+  letter-spacing: 0;
+}
+
+.signup-intro p {
+  max-width: 340px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
 .email-check-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -211,6 +263,56 @@ async function submit() {
 .email-check-row button:disabled {
   color: var(--dim);
   background: var(--color-surface-strong);
+}
+
+.field-status {
+  margin: -2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.field-status--success {
+  color: var(--color-semantic-up);
+}
+
+.field-status--error {
+  color: var(--color-semantic-down);
+}
+
+.field-status--warning {
+  color: var(--color-accent-yellow);
+}
+
+.field-status--info {
+  color: var(--color-primary);
+}
+
+.field-status-list {
+  margin: -2px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  list-style: none;
+}
+
+.field-status-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.field-status-list li.passed {
+  color: var(--color-semantic-up);
+}
+
+.signup-submit {
+  margin-top: 12px;
 }
 
 @media (max-width: 360px) {

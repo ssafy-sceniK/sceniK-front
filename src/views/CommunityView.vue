@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -17,13 +18,14 @@ import { useUiStore } from '../stores/uiStore.js';
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
+const { t } = useI18n();
 const query = ref('');
 const sort = ref('latest');
 const restoringQuery = ref(false);
-const sortOptions = [
-  { value: 'latest', label: '최신순' },
-  { value: 'popular', label: '인기순' },
-];
+const sortOptions = computed(() => [
+  { value: 'latest', label: t('communityAuto.k16lgll3') },
+  { value: 'popular', label: t('communityAuto.k88cncb') },
+]);
 const visibleLimit = ref(8);
 const title = ref('');
 const body = ref('');
@@ -52,21 +54,21 @@ const imageViewerIndex = ref(0);
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 
-const boards = [
-  { id: 'drama', icon: '🎬', name: '드라마 게시판', description: '드라마 촬영지 후기와 코스 공유', tag: '드라마' },
-  { id: 'movie', icon: '🎞️', name: '영화 게시판', description: '영화 장면을 따라간 장소 후기', tag: '영화' },
-  { id: 'idol', icon: '🎤', name: '아이돌 게시판', description: '성지 투어와 팬 여행 기록', tag: '아이돌' },
-  { id: 'variety', icon: '📺', name: '예능 게시판', description: '예능 촬영지와 방문 팁', tag: '예능' },
-  { id: 'region', icon: '📍', name: '지역별 게시판', description: '지역별 여행 코스와 장소 후기', tag: 'AI 코스' },
-];
+const boards = computed(() => [
+  { id: 'drama', icon: '🎬', name: t('communityAuto.kjhjuxb'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
+  { id: 'movie', icon: '🎞️', name: t('communityAuto.k149wfw0'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
+  { id: 'idol', icon: '🎤', name: t('communityAuto.k1dgfzgj'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
+  { id: 'variety', icon: '📺', name: t('communityAuto.k11z8e9i'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
+  { id: 'region', icon: '📍', name: t('communityAuto.k46uety'), description: t('communityAuto.k2glxru'), tag: 'AI \ucf54\uc2a4' },
+]);
 
 const isBoardList = computed(() => route.name === 'community-boards');
 const isBoardFeed = computed(() => route.name === 'community-drama-board');
 const isPostDetail = computed(() => route.name === 'community-post');
 const composeMode = computed(() => route.meta.compose);
-const activeBoard = computed(() => boards.find((board) => board.id === route.query.board) ?? boards[0]);
+const activeBoard = computed(() => boards.value.find((board) => board.id === route.query.board) ?? boards.value[0]);
 const activeMode = computed(() => (isBoardList.value || isBoardFeed.value ? 'boards' : 'all'));
-const otherBoards = computed(() => boards.filter((board) => board.id !== activeBoard.value.id));
+const otherBoards = computed(() => boards.value.filter((board) => board.id !== activeBoard.value.id));
 
 async function loadCommunity() {
   const params = {
@@ -162,32 +164,32 @@ const hasMorePosts = computed(() => visiblePosts.value.length < sortedPosts.valu
 const feedEmptyState = computed(() => {
   if (query.value.trim()) {
     return {
-      title: '검색 결과가 없습니다',
-      text: '다른 키워드로 다시 검색하거나 전체 커뮤니티 글을 확인해보세요.',
-      actionLabel: '검색어 지우기',
+      title: t('communityAuto2.k8'),
+      text: t('communityAuto2.k9'),
+      actionLabel: t('communityAuto2.ka'),
       actionTo: '',
-      secondaryLabel: '글 작성하기',
+      secondaryLabel: t('communityAuto2.kb'),
       secondaryTo: '/community/write',
     };
   }
 
   if (isBoardFeed.value) {
     return {
-      title: `${activeBoard.value.name}에 아직 글이 없습니다`,
-      text: '첫 여행 후기나 촬영지 팁을 남겨 게시판을 채워보세요.',
-      actionLabel: '첫 글 작성하기',
+      title: t('communityAuto2.k1r', { board: activeBoard.value.name }),
+      text: t('communityAuto2.kc'),
+      actionLabel: t('communityAuto2.kd'),
       actionTo: '/community/write',
-      secondaryLabel: '게시판 보기',
+      secondaryLabel: t('communityAuto2.ke'),
       secondaryTo: '/community/boards',
     };
   }
 
   return {
-    title: '아직 커뮤니티 글이 없습니다',
-    text: '다녀온 코스, 촬영지 팁, 저장한 AI 코스를 첫 글로 공유해보세요.',
-    actionLabel: '첫 글 작성하기',
+    title: t('communityAuto2.kf'),
+    text: t('communityAuto2.kg'),
+    actionLabel: t('communityAuto2.kd'),
     actionTo: '/community/write',
-    secondaryLabel: '게시판 보기',
+    secondaryLabel: t('communityAuto2.ke'),
     secondaryTo: '/community/boards',
   };
 });
@@ -283,11 +285,11 @@ function hashtagText(rawValue, fallbackValue) {
 }
 
 function isBoardTag(tag) {
-  return boards.some((board) => board.tag === tag);
+  return boards.value.some((board) => board.tag === tag);
 }
 
 function isSystemPostTag(tag) {
-  return isBoardTag(tag) || tag === 'AI 코스';
+  return isBoardTag(tag) || tag === 'AI \ucf54\uc2a4';
 }
 
 function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
@@ -297,8 +299,8 @@ function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
   if (postEditHashtags.value.length >= MAX_HASHTAGS) {
     postNotice.value = {
       tone: 'warning',
-      title: '해시태그는 최대 10개까지 추가할 수 있습니다.',
-      text: '불필요한 태그를 삭제한 뒤 다시 추가해 주세요.',
+      title: t('communityAuto2.kh'),
+      text: t('communityAuto2.ki'),
     };
     return;
   }
@@ -318,9 +320,9 @@ function removePostEditHashtag(tag) {
 
 function buildPostEditTags(target) {
   return uniqueValues([
-    boards.find((board) => board.id === postEditBoard.value)?.tag,
+    boards.value.find((board) => board.id === postEditBoard.value)?.tag,
     ...postEditHashtags.value,
-    target?.routeId ? 'AI 코스' : '',
+    target?.routeId ? t('communityAuto2.kj') : '',
   ]);
 }
 
@@ -361,7 +363,7 @@ function isCommentLikePending(comment) {
 }
 
 function commentLikeLabel(comment) {
-  return isCommentLiked(comment) ? '댓글 좋아요 취소' : '댓글 좋아요';
+  return isCommentLiked(comment) ? t('communityAuto2.kk') : t('communityAuto2.kl');
 }
 
 function commentKey(comment) {
@@ -389,25 +391,25 @@ function formatDateOnly(date) {
 
 function commentTimeLabel(comment) {
   const rawDate = comment?.createdAt ?? comment?.updatedAt ?? comment?.date;
-  if (!rawDate) return '방금 전';
+  if (!rawDate) return t('communityAuto.k15o4n14');
 
   const createdAt = new Date(rawDate);
-  if (Number.isNaN(createdAt.getTime())) return comment?.date || '방금 전';
+  if (Number.isNaN(createdAt.getTime())) return comment?.date || t('communityAuto.k15o4n14');
 
   const diffMs = Date.now() - createdAt.getTime();
-  if (diffMs < 0) return formatDateOnly(createdAt) || comment?.date || '방금 전';
+  if (diffMs < 0) return formatDateOnly(createdAt) || comment?.date || t('communityAuto.k15o4n14');
 
   const diffSeconds = Math.floor(diffMs / 1000);
-  if (diffSeconds < 10) return '방금 전';
-  if (diffSeconds < 60) return `${diffSeconds}초 전`;
+  if (diffSeconds < 10) return t('communityAuto.k15o4n14');
+  if (diffSeconds < 60) return t('communityAuto2.k2', { count: diffSeconds });
 
   const diffMinutes = Math.floor(diffSeconds / 60);
-  if (diffMinutes < 60) return `${diffMinutes}분 전`;
+  if (diffMinutes < 60) return t('communityAuto2.k3', { count: diffMinutes });
 
   const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}시간 전`;
+  if (diffHours < 24) return t('communityAuto2.k4', { count: diffHours });
 
-  return comment?.date || formatDateOnly(createdAt) || '방금 전';
+  return comment?.date || formatDateOnly(createdAt) || t('communityAuto.k15o4n14');
 }
 
 function replyParentId(targetComment, threadParent = targetComment) {
@@ -415,7 +417,7 @@ function replyParentId(targetComment, threadParent = targetComment) {
 }
 
 function replyPlaceholder(comment) {
-  return `${comment?.user ?? '댓글 작성자'}에게 답글을 입력하세요`;
+  return t('communityAuto2.k5', { user: comment?.user ?? t('communityAuto.k1wxp860') });
 }
 
 function linkedCourseTo(post) {
@@ -534,7 +536,7 @@ async function createPost() {
   const created = await uiStore.createPost({
     title: title.value,
     body: body.value,
-    tags: [activeBoard.value.tag, 'AI 코스'].filter(Boolean),
+    tags: [activeBoard.value.tag, 'AI \ucf54\uc2a4'].filter(Boolean),
   });
   if (created) {
     title.value = '';
@@ -548,7 +550,7 @@ function startPostEdit() {
   editingPost.value = true;
   postEditTitle.value = selectedPost.value.title ?? '';
   postEditBody.value = selectedPost.value.body ?? '';
-  postEditBoard.value = boards.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id ?? 'drama';
+  postEditBoard.value = boards.value.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id ?? 'drama';
   postEditHashtagInput.value = '';
   postEditHashtags.value = uniqueValues((selectedPost.value.tags ?? [])
     .map(normalizeHashtag)
@@ -556,8 +558,8 @@ function startPostEdit() {
     .slice(0, MAX_HASHTAGS);
   postNotice.value = {
     tone: 'info',
-    title: '게시글 수정',
-    text: '제목과 내용을 수정한 뒤 저장을 눌러 주세요.',
+    title: t('communityAuto2.km'),
+    text: t('communityAuto2.kn'),
   };
 }
 
@@ -575,16 +577,16 @@ async function savePostEdit() {
   if (postEditTitle.value.trim().length < 2 || postEditBody.value.trim().length < 5) {
     postNotice.value = {
       tone: 'warning',
-      title: '입력 내용을 확인해 주세요.',
-      text: '제목은 2자 이상, 내용은 5자 이상 입력해야 수정할 수 있습니다.',
+      title: t('communityAuto2.ko'),
+      text: t('communityAuto2.kp'),
     };
     return;
   }
   postActionLoading.value = true;
   postNotice.value = {
     tone: 'info',
-    title: '게시글을 수정하는 중입니다.',
-    text: '수정 내용을 backend에 저장하고 있습니다.',
+    title: t('communityAuto2.kq'),
+    text: t('communityAuto2.kr'),
   };
   const updated = await uiStore.editPost(postKey(target), {
     title: postEditTitle.value.trim(),
@@ -602,15 +604,15 @@ async function savePostEdit() {
     cancelPostEdit();
     postNotice.value = {
       tone: 'success',
-      title: '수정되었습니다.',
-      text: '게시글 제목과 내용이 업데이트되었습니다.',
+      title: t('communityAuto2.ks'),
+      text: t('communityAuto2.kt'),
     };
     return;
   }
   postNotice.value = {
     tone: 'error',
-    title: '게시글을 수정하지 못했습니다.',
-    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+    title: t('communityAuto2.ku'),
+    text: uiStore.communityError || t('communityAuto2.kv'),
   };
 }
 
@@ -620,8 +622,8 @@ async function deletePost() {
   postActionLoading.value = true;
   postNotice.value = {
     tone: 'info',
-    title: '게시글을 삭제하는 중입니다.',
-    text: '작성한 게시글을 삭제하고 커뮤니티 목록을 갱신하고 있습니다.',
+    title: t('communityAuto2.kw'),
+    text: t('communityAuto2.kx'),
   };
   const deleted = await uiStore.removePost(postKey(target));
   postActionLoading.value = false;
@@ -629,16 +631,16 @@ async function deletePost() {
   if (deleted) {
     postNotice.value = {
       tone: 'success',
-      title: '삭제되었습니다.',
-      text: '게시글이 커뮤니티에서 제거되었습니다.',
+      title: t('communityAuto2.ky'),
+      text: t('communityAuto2.kz'),
     };
     window.setTimeout(() => router.replace('/community'), 450);
     return;
   }
   postNotice.value = {
     tone: 'error',
-    title: '게시글을 삭제하지 못했습니다.',
-    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+    title: t('communityAuto2.k10'),
+    text: uiStore.communityError || t('communityAuto2.kv'),
   };
 }
 
@@ -646,16 +648,16 @@ async function addComment(postId) {
   if (!commentText.value.trim()) {
     commentNotice.value = {
       tone: 'warning',
-      title: '댓글 내용을 입력해 주세요.',
-      text: '댓글은 한 글자 이상 입력해야 등록할 수 있습니다.',
+      title: t('communityAuto.kvzi8xh'),
+      text: t('communityAuto2.k11'),
     };
-    uiStore.notify('댓글 내용을 입력해 주세요.');
+    uiStore.notify(t('communityAuto.kvzi8xh'));
     return;
   }
   commentNotice.value = {
     tone: 'info',
-    title: '댓글을 등록하는 중입니다.',
-    text: '작성한 댓글을 backend에 저장하고 있습니다.',
+    title: t('communityAuto2.k12'),
+    text: t('communityAuto2.k13'),
   };
   const created = await uiStore.addComment(postId, commentText.value);
   if (created) {
@@ -665,8 +667,8 @@ async function addComment(postId) {
   }
   commentNotice.value = {
     tone: 'error',
-    title: '댓글을 등록하지 못했습니다.',
-    text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    title: t('communityAuto2.k14'),
+    text: uiStore.communityError || t('communityAuto2.k15'),
   };
 }
 
@@ -686,17 +688,17 @@ async function addReply(postId, comment, threadParent = comment) {
   if (!replyText.value.trim()) {
     commentNotice.value = {
       tone: 'warning',
-      title: '댓글 내용을 입력해 주세요.',
-      text: '답글은 한 글자 이상 입력해야 등록할 수 있습니다.',
+      title: t('communityAuto.kvzi8xh'),
+      text: t('communityAuto2.k16'),
     };
-    uiStore.notify('댓글 내용을 입력해 주세요.');
+    uiStore.notify(t('communityAuto.kvzi8xh'));
     return;
   }
   commentActionLoading.value = true;
   commentNotice.value = {
     tone: 'info',
-    title: '답글을 등록하는 중입니다.',
-    text: '선택한 댓글의 답글로 저장하고 있습니다.',
+    title: t('communityAuto2.k17'),
+    text: t('communityAuto2.k18'),
   };
   const created = await uiStore.addComment(postId, replyText.value, parentId);
   commentActionLoading.value = false;
@@ -707,8 +709,8 @@ async function addReply(postId, comment, threadParent = comment) {
   }
   commentNotice.value = {
     tone: 'error',
-    title: '답글을 등록하지 못했습니다.',
-    text: uiStore.communityError || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    title: t('communityAuto2.k19'),
+    text: uiStore.communityError || t('communityAuto2.k15'),
   };
 }
 
@@ -717,8 +719,8 @@ function startEditComment(comment) {
   editingCommentText.value = comment.text ?? '';
   commentNotice.value = {
     tone: 'info',
-    title: '댓글 수정',
-    text: '내용을 수정한 뒤 저장을 눌러 주세요.',
+    title: t('communityAuto2.k1a'),
+    text: t('communityAuto2.k1b'),
   };
 }
 
@@ -732,17 +734,17 @@ async function saveEditedComment(postId) {
   if (!editingCommentText.value.trim()) {
     commentNotice.value = {
       tone: 'warning',
-      title: '댓글 내용을 입력해 주세요.',
-      text: '수정할 댓글 내용은 비워둘 수 없습니다.',
+      title: t('communityAuto.kvzi8xh'),
+      text: t('communityAuto2.k1c'),
     };
-    uiStore.notify('댓글 내용을 입력해 주세요.');
+    uiStore.notify(t('communityAuto.kvzi8xh'));
     return;
   }
   commentActionLoading.value = true;
   commentNotice.value = {
     tone: 'info',
-    title: '댓글을 수정하는 중입니다.',
-    text: '수정 내용을 backend에 저장하고 있습니다.',
+    title: t('communityAuto2.k1d'),
+    text: t('communityAuto2.kr'),
   };
   const updated = await uiStore.editComment(postId, editingCommentId.value, editingCommentText.value);
   commentActionLoading.value = false;
@@ -753,8 +755,8 @@ async function saveEditedComment(postId) {
   }
   commentNotice.value = {
     tone: 'error',
-    title: '댓글을 수정하지 못했습니다.',
-    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+    title: t('communityAuto2.k1e'),
+    text: uiStore.communityError || t('communityAuto2.kv'),
   };
 }
 
@@ -764,8 +766,8 @@ async function deleteComment(postId, comment) {
   commentActionLoading.value = true;
   commentNotice.value = {
     tone: 'info',
-    title: '댓글을 삭제하는 중입니다.',
-    text: '선택한 댓글을 삭제하고 목록을 갱신하고 있습니다.',
+    title: t('communityAuto2.k1f'),
+    text: t('communityAuto2.k1g'),
   };
   const deleted = await uiStore.removeComment(postId, targetId);
   commentActionLoading.value = false;
@@ -776,8 +778,8 @@ async function deleteComment(postId, comment) {
   }
   commentNotice.value = {
     tone: 'error',
-    title: '댓글을 삭제하지 못했습니다.',
-    text: uiStore.communityError || '권한 또는 로그인 상태를 확인해 주세요.',
+    title: t('communityAuto2.k1h'),
+    text: uiStore.communityError || t('communityAuto2.kv'),
   };
 }
 
@@ -816,10 +818,10 @@ async function copyShareLink() {
   try {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
     await navigator.clipboard.writeText(text);
-    uiStore.notify('공유 링크를 복사했습니다.');
+    uiStore.notify(t('communityAuto2.k1i'));
     closeShareSheet();
   } catch {
-    uiStore.notify('이 환경에서는 링크 복사를 지원하지 않습니다.');
+    uiStore.notify(t('communityAuto2.k1j'));
   }
 }
 
@@ -841,7 +843,7 @@ async function nativeShare() {
     closeShareSheet();
   } catch (error) {
     if (error?.name !== 'AbortError') {
-      uiStore.notify('공유를 완료하지 못했습니다. 링크 복사를 이용해 주세요.');
+      uiStore.notify(t('communityAuto2.k1k'));
     }
   }
 }
@@ -851,10 +853,10 @@ async function nativeShare() {
   <AppLayout :title="isPostDetail ? '게시글' : composeMode ? '커뮤니티' : ''" :back="isPostDetail || composeMode">
     <section class="community-screen">
       <template v-if="isBoardList">
-        <SearchBar v-model="query" placeholder="게시글, 태그 검색" @focus="router.push('/community/search')" />
+        <SearchBar v-model="query" :placeholder="t('communityAuto.kdbrluq')" @focus="router.push('/community/search')" />
         <div class="mode-toggle community-tabs" aria-label="Community sections">
-          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
-          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
+          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">{{ t('communityAuto.kowdtt1') }}</RouterLink>
+          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">{{ t('communityAuto.k7vl8in') }}</RouterLink>
         </div>
         <div class="board-list">
           <RouterLink
@@ -869,7 +871,7 @@ async function nativeShare() {
             <span class="board-copy">
               <strong>{{ board.name }}</strong>
             </span>
-            <em>{{ boardPostCount(board) }}개</em>
+            <em>{{ t('communityAuto2.k1s', { count: boardPostCount(board) }) }}</em>
             <span class="board-chevron" aria-hidden="true">›</span>
           </RouterLink>
         </div>
@@ -889,8 +891,8 @@ async function nativeShare() {
                 @toggle="toggleSelectedAuthorFollow"
               />
               <div v-if="isPostOwner(selectedPost) && !editingPost" class="post-owner-actions post-owner-actions--compact">
-                <BaseButton class="post-owner-button" variant="secondary" @click="startPostEdit">수정</BaseButton>
-                <BaseButton class="post-owner-button" variant="danger" @click="showPostDeleteSheet = true">삭제</BaseButton>
+                <BaseButton class="post-owner-button" variant="secondary" @click="startPostEdit">{{ t('communityAuto.k4xzvue') }}</BaseButton>
+                <BaseButton class="post-owner-button" variant="danger" @click="showPostDeleteSheet = true">{{ t('communityAuto.k149a04s') }}</BaseButton>
               </div>
             </div>
             <FormStatusNotice
@@ -901,25 +903,23 @@ async function nativeShare() {
               :text="postNotice.text"
             />
             <template v-if="editingPost">
-              <label class="form-field compact">
-                게시판
-                <select v-model="postEditBoard">
+              <label class="form-field compact">{{ t('communityAuto.k7vl8in') }}<select v-model="postEditBoard">
                   <option v-for="board in boards" :key="board.id" :value="board.id">{{ board.name }}</option>
                 </select>
               </label>
               <div class="form-field compact">
-                <span>해시태그</span>
+                <span>{{ t('communityAuto.k1e5ef9d') }}</span>
                 <div class="hashtag-input-row">
                   <span aria-hidden="true">#</span>
                   <input
                     v-model="postEditHashtagInput"
                     type="text"
                     maxlength="24"
-                    placeholder="태그 입력"
+                    :placeholder="t('communityAuto.kctwhf1')"
                     @keydown="handlePostEditHashtagKeydown"
                     @blur="addPostEditHashtag()"
                   />
-                  <button type="button" @click="addPostEditHashtag()">추가</button>
+                  <button type="button" @click="addPostEditHashtag()">{{ t('communityAuto.k7836ex') }}</button>
                 </div>
                 <div v-if="postEditHashtags.length" class="chip-row wrap write-hashtag-row selected-hashtag-row">
                   <button
@@ -927,7 +927,7 @@ async function nativeShare() {
                     :key="tag"
                     type="button"
                     class="chip selected"
-                    :aria-label="tag + ' 해시태그 삭제'"
+                    :aria-label="tag + t('communityAuto2.k1l')"
                     @click="removePostEditHashtag(tag)"
                   >
                     #{{ tag }} <span aria-hidden="true">×</span>
@@ -935,32 +935,28 @@ async function nativeShare() {
                 </div>
                 <small>{{ postEditHashtags.length }}/{{ MAX_HASHTAGS }}</small>
               </div>
-              <label class="form-field compact">
-                제목
-                <input v-model="postEditTitle" maxlength="50" placeholder="게시글 제목" />
+              <label class="form-field compact">{{ t('communityAuto.k1ub2ks6') }}<input v-model="postEditTitle" maxlength="50" :placeholder="t('communityAuto.k5d9iwe')" />
               </label>
-              <label class="form-field compact">
-                내용
-                <textarea v-model="postEditBody" maxlength="500" placeholder="게시글 내용을 입력해 주세요."></textarea>
+              <label class="form-field compact">{{ t('communityAuto.k1supta6') }}<textarea v-model="postEditBody" maxlength="500" :placeholder="t('communityAuto.k99wxgm')"></textarea>
               </label>
               <div class="post-owner-actions">
                 <BaseButton :disabled="postActionLoading || postEditTitle.trim().length < 2 || postEditBody.trim().length < 5" @click="savePostEdit">
-                  {{ postActionLoading ? '저장 중...' : '수정 저장' }}
+                  {{ postActionLoading ? t('communityAuto2.k1m') : t('communityAuto2.k1n') }}
                 </BaseButton>
-                <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">취소</BaseButton>
+                <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">{{ t('communityAuto.kjiry9t') }}</BaseButton>
               </div>
             </template>
             <template v-else>
               <h1>{{ selectedPost.title }}</h1>
               <TranslatableText :text="selectedPost.body" :source-language="selectedPost.language" resource-type="POST" :resource-id="postKey(selectedPost)" field="content" />
             </template>
-            <div v-if="postImageSources(selectedPost).length" class="post-gallery" aria-label="게시글 이미지 미리보기">
+            <div v-if="postImageSources(selectedPost).length" class="post-gallery" :aria-label="t('communityAuto.kfroizt')">
               <button
                 v-for="(image, index) in postImageSources(selectedPost)"
                 :key="`post-image-${index}-${image}`"
                 type="button"
                 class="post-gallery-item"
-                :aria-label="`게시글 이미지 ${index + 1} 확대 보기`"
+                :aria-label="t('community.a11y.postImageOpen', { index: index + 1 })"
                 @click="openImageViewer(selectedPost, index)"
               >
                 <img :src="image" alt="" @error="markPostImageFailed(selectedPost, image)" />
@@ -968,18 +964,18 @@ async function nativeShare() {
             </div>
             <div v-if="selectedPost.attachments?.length" class="attachment-preview-list">
               <span v-for="attachment in selectedPost.attachments" :key="attachment.id">
-                {{ attachment.type === 'video' ? '동영상' : '사진' }} · {{ attachment.name }}
+                {{ attachment.type === 'video' ? t('communityAuto.k1w2zrd6') : t('communityAuto.k46x8nx') }} · {{ attachment.name }}
               </span>
             </div>
             <div class="tag-row"><span v-for="tag in selectedPost.tags" :key="tag">{{ tag }}</span></div>
             <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
               <span class="course-dot">AI</span>
               <div>
-                <small class="course-kicker">연결된 AI 코스</small>
-                <strong>{{ selectedPost.region }} 감성 코스</strong>
-                <small>{{ selectedPost.region }} · {{ selectedPost.duration }} · 검증 장소 기반</small>
+                <small class="course-kicker">{{ t('communityAuto.k166mo55') }}</small>
+                <strong>{{ t('community.linkedCourse.title', { region: selectedPost.region }) }}</strong>
+                <small>{{ t('community.linkedCourse.meta', { region: selectedPost.region, duration: selectedPost.duration }) }}</small>
               </div>
-              <span class="linked-course-cta">보기</span>
+              <span class="linked-course-cta">{{ t('communityAuto.k1nbnyzt') }}</span>
             </RouterLink>
             <div class="feed-actions detail-actions">
               <button
@@ -992,25 +988,25 @@ async function nativeShare() {
                 <span class="action-icon">{{ isPostLiked(selectedPost) ? '♥' : '♡' }}</span>
                 {{ selectedPost.likes }}
               </button>
-              <a href="#community-comments" @click.prevent="focusCommentSection">댓글 {{ selectedCommentCount }}</a>
+              <a href="#community-comments" @click.prevent="focusCommentSection">{{ t('communityAuto2.k1v', { count: selectedCommentCount }) }}</a>
               <button
                 type="button"
                 :class="{ 'is-active': isPostScrapped(selectedPost) }"
                 @click="uiStore.togglePostScrap(postKey(selectedPost))"
               >
-                {{ isPostScrapped(selectedPost) ? '스크랩 취소' : '스크랩' }}
+                {{ isPostScrapped(selectedPost) ? t('communityAuto.ksf2n5k') : t('communityAuto.k1y81wz0') }}
               </button>
-              <button type="button" @click="openShareSheet(selectedPost)">공유</button>
+              <button type="button" @click="openShareSheet(selectedPost)">{{ t('communityAuto.k1vcmj4') }}</button>
             </div>
             <div v-if="showPostDeleteSheet" class="sheet-backdrop" @click="showPostDeleteSheet = false">
-              <div class="bottom-sheet delete-course-sheet" role="dialog" aria-modal="true" aria-label="게시글 삭제" @click.stop>
+              <div class="bottom-sheet delete-course-sheet" role="dialog" aria-modal="true" :aria-label="t('communityAuto.kfzlptw')" @click.stop>
                 <div class="sheet-handle"></div>
-                <h2>게시글을 삭제할까요?</h2>
-                <p>삭제하면 커뮤니티 목록과 내 게시글 목록에서 사라집니다. 댓글도 함께 보이지 않게 됩니다.</p>
+                <h2>{{ t('communityAuto.koccas3') }}</h2>
+                <p>{{ t('communityAuto.knp5gnz') }}</p>
                 <div class="sheet-actions two">
-                  <BaseButton variant="secondary" :disabled="postActionLoading" @click="showPostDeleteSheet = false">취소</BaseButton>
+                  <BaseButton variant="secondary" :disabled="postActionLoading" @click="showPostDeleteSheet = false">{{ t('communityAuto.kjiry9t') }}</BaseButton>
                   <BaseButton variant="danger" :disabled="postActionLoading" @click="deletePost">
-                    {{ postActionLoading ? '삭제 중...' : '삭제' }}
+                    {{ postActionLoading ? t('communityAuto.kbhchor') : t('communityAuto.k149a04s') }}
                   </BaseButton>
                 </div>
               </div>
@@ -1029,17 +1025,17 @@ async function nativeShare() {
               v-if="commentSectionLoading"
               tone="loading"
               compact
-              title="댓글을 불러오는 중입니다"
-              text="게시글에 연결된 댓글 목록을 확인하고 있어요."
+              :title="t('communityAuto.kmfj9kw')"
+              :text="t('communityAuto.kmzt68v')"
             />
             <EmptyState
               v-else-if="commentSectionNeedsRetry"
               icon="!"
               tone="error"
               compact
-              title="댓글 목록을 다시 불러와야 합니다"
-              :text="uiStore.communityError || '댓글 수와 실제 댓글 목록이 맞지 않아 다시 조회가 필요합니다.'"
-              action-label="댓글 다시 불러오기"
+              :title="t('communityAuto.k1juvedb')"
+              :text="uiStore.communityError || t('communityAuto.k1t99km4')"
+              :action-label="t('communityAuto.k4f8zfi')"
               @action="retryCommentSection"
             />
             <template v-if="!commentSectionLoading && !commentSectionNeedsRetry">
@@ -1074,7 +1070,7 @@ async function nativeShare() {
                         v-model="editingCommentText"
                         class="comment-edit-input"
                         maxlength="500"
-                        placeholder="댓글 내용을 입력해 주세요."
+                        :placeholder="t('communityAuto.kvzi8xh')"
                       ></textarea>
                       <div class="comment-row-actions">
                         <button
@@ -1082,10 +1078,8 @@ async function nativeShare() {
                           class="comment-action-button is-primary"
                           :disabled="commentActionLoading || !editingCommentText.trim()"
                           @click="saveEditedComment(postKey(selectedPost))"
-                        >
-                          저장
-                        </button>
-                        <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                        >{{ t('communityAuto.k1xp6hfy') }}</button>
+                        <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">{{ t('communityAuto.kjiry9t') }}</button>
                       </div>
                     </template>
                     <template v-else>
@@ -1094,31 +1088,25 @@ async function nativeShare() {
                         <button
                           type="button"
                           class="comment-action-button"
-                          :aria-label="`${comment.user}에게 답글 작성`"
+                          :aria-label="t('community.a11y.replyToUser', { user: comment.user })"
                           @click="startReply(comment)"
-                        >
-                          답글
-                        </button>
+                        >{{ t('communityAuto.k1qte1m8') }}</button>
                         <button
                           v-if="isCommentOwner(comment)"
                           type="button"
                           class="comment-action-button"
                           :disabled="commentActionLoading"
-                          :aria-label="`${comment.user} 댓글 수정`"
+                          :aria-label="t('community.a11y.editCommentUser', { user: comment.user })"
                           @click="startEditComment(comment)"
-                        >
-                          수정
-                        </button>
+                        >{{ t('communityAuto.k4xzvue') }}</button>
                         <button
                           v-if="isCommentOwner(comment)"
                           type="button"
                           class="comment-action-button is-danger"
                           :disabled="commentActionLoading"
-                          :aria-label="`${comment.user} 댓글 삭제`"
+                          :aria-label="t('community.a11y.deleteCommentUser', { user: comment.user })"
                           @click="deleteComment(postKey(selectedPost), comment)"
-                        >
-                          삭제
-                        </button>
+                        >{{ t('communityAuto.k149a04s') }}</button>
                       </div>
                       <div v-if="replyTargetId === commentKey(comment)" class="comment-reply-box">
                         <input
@@ -1130,10 +1118,8 @@ async function nativeShare() {
                           type="button"
                           :disabled="commentActionLoading || !replyText.trim()"
                           @click="addReply(postKey(selectedPost), comment)"
-                        >
-                          등록
-                        </button>
-                        <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
+                        >{{ t('communityAuto.k44cu1f') }}</button>
+                        <button type="button" :disabled="commentActionLoading" @click="cancelReply">{{ t('communityAuto.kjiry9t') }}</button>
                       </div>
                     </template>
                   </div>
@@ -1170,7 +1156,7 @@ async function nativeShare() {
                           v-model="editingCommentText"
                           class="comment-edit-input"
                           maxlength="500"
-                          placeholder="댓글 내용을 입력해 주세요."
+                          :placeholder="t('communityAuto.kvzi8xh')"
                         ></textarea>
                         <div class="comment-row-actions">
                           <button
@@ -1178,10 +1164,8 @@ async function nativeShare() {
                             class="comment-action-button is-primary"
                             :disabled="commentActionLoading || !editingCommentText.trim()"
                             @click="saveEditedComment(postKey(selectedPost))"
-                          >
-                            저장
-                          </button>
-                          <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">취소</button>
+                          >{{ t('communityAuto.k1xp6hfy') }}</button>
+                          <button type="button" class="comment-action-button" :disabled="commentActionLoading" @click="cancelEditComment">{{ t('communityAuto.kjiry9t') }}</button>
                         </div>
                       </template>
                       <template v-else>
@@ -1190,31 +1174,25 @@ async function nativeShare() {
                           <button
                             type="button"
                             class="comment-action-button"
-                            :aria-label="`${reply.user}에게 답글 작성`"
+                            :aria-label="t('community.a11y.replyToUser', { user: reply.user })"
                             @click="startReply(reply)"
-                          >
-                            답글
-                          </button>
+                          >{{ t('communityAuto.k1qte1m8') }}</button>
                           <button
                             v-if="isCommentOwner(reply)"
                             type="button"
                             class="comment-action-button"
                             :disabled="commentActionLoading"
-                            :aria-label="`${reply.user} 답글 수정`"
+                            :aria-label="t('community.a11y.editReplyUser', { user: reply.user })"
                             @click="startEditComment(reply)"
-                          >
-                            수정
-                          </button>
+                          >{{ t('communityAuto.k4xzvue') }}</button>
                           <button
                             v-if="isCommentOwner(reply)"
                             type="button"
                             class="comment-action-button is-danger"
                             :disabled="commentActionLoading"
-                            :aria-label="`${reply.user} 답글 삭제`"
+                            :aria-label="t('community.a11y.deleteReplyUser', { user: reply.user })"
                             @click="deleteComment(postKey(selectedPost), reply)"
-                          >
-                            삭제
-                          </button>
+                          >{{ t('communityAuto.k149a04s') }}</button>
                         </div>
                         <div v-if="replyTargetId === commentKey(reply)" class="comment-reply-box comment-reply-box--reply">
                           <input
@@ -1226,10 +1204,8 @@ async function nativeShare() {
                             type="button"
                             :disabled="commentActionLoading || !replyText.trim()"
                             @click="addReply(postKey(selectedPost), reply, comment)"
-                          >
-                            등록
-                          </button>
-                          <button type="button" :disabled="commentActionLoading" @click="cancelReply">취소</button>
+                          >{{ t('communityAuto.k44cu1f') }}</button>
+                          <button type="button" :disabled="commentActionLoading" @click="cancelReply">{{ t('communityAuto.kjiry9t') }}</button>
                         </div>
                       </template>
                     </div>
@@ -1242,21 +1218,21 @@ async function nativeShare() {
               icon="C"
               tone="community"
               compact
-              title="첫 댓글을 기다리고 있어요"
-              text="이 코스를 참고했다면 짧은 후기를 남겨보세요."
+              :title="t('communityAuto.kka907d')"
+              :text="t('communityAuto.kpedprg')"
             />
             <div v-if="uiStore.currentUser" class="comment-box">
-              <input v-model="commentText" placeholder="댓글을 입력하세요" @keyup.enter="addComment(postKey(selectedPost))" />
-              <button type="button" :disabled="!commentText.trim()" @click="addComment(postKey(selectedPost))">등록</button>
+              <input v-model="commentText" :placeholder="t('communityAuto.khjll7g')" @keyup.enter="addComment(postKey(selectedPost))" />
+              <button type="button" :disabled="!commentText.trim()" @click="addComment(postKey(selectedPost))">{{ t('communityAuto.k44cu1f') }}</button>
             </div>
             <EmptyState
               v-else
               icon="L"
               tone="login"
               compact
-              title="로그인하면 댓글을 남길 수 있어요"
-              text="여행 후기와 촬영지 이야기에 댓글로 함께 참여해 보세요."
-              action-label="로그인하기"
+              :title="t('communityAuto.kt1lbwa')"
+              :text="t('communityAuto.k4x2ynu')"
+              :action-label="t('communityAuto.k1naycwj')"
               action-to="/login"
             />
           </CommentThread>
@@ -1265,39 +1241,39 @@ async function nativeShare() {
           v-else-if="uiStore.communityLoading"
           tone="loading"
           compact
-          title="게시글을 불러오는 중입니다"
-          text="커뮤니티 이야기를 확인하고 있어요."
+          :title="t('communityAuto.km6jghz')"
+          :text="t('communityAuto.k1mtn7u6')"
         />
         <DetailNotFoundPanel
           v-else
-          title="게시글을 찾을 수 없습니다"
-          text="삭제되었거나 접근할 수 없는 글입니다."
-          list-label="커뮤니티로 돌아가기"
+          :title="t('communityAuto.k1anh7ve')"
+          :text="t('communityAuto.k1l56hjk')"
+          :list-label="t('communityAuto.kpxy5yp')"
           list-to="/community"
           @retry="loadCommunity"
         />
       </template>
 
       <template v-else>
-        <SearchBar v-model="query" placeholder="게시글, 태그 검색" />
+        <SearchBar v-model="query" :placeholder="t('communityAuto.kdbrluq')" />
         <div class="mode-toggle community-tabs" aria-label="Community sections">
-          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">전체</RouterLink>
-          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">게시판</RouterLink>
+          <RouterLink :class="{ active: activeMode === 'all' }" to="/community">{{ t('communityAuto.kowdtt1') }}</RouterLink>
+          <RouterLink :class="{ active: activeMode === 'boards' }" to="/community/boards">{{ t('communityAuto.k7vl8in') }}</RouterLink>
         </div>
-        <div v-if="!isBoardFeed" class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
-          <span class="list-control-label">정렬</span>
+        <div v-if="!isBoardFeed" class="list-control-row community-sort-row" :aria-label="t('communityAuto.k16gamjy')">
+          <span class="list-control-label">{{ t('communityAuto.k1u22q50') }}</span>
           <SortSegmentedControl
             v-model="sort"
             :options="sortOptions"
-            aria-label="커뮤니티 글 정렬"
+            :aria-label="t('communityAuto.khg1xgu')"
           />
-          <span class="list-result-count" aria-live="polite">{{ sortedPosts.length }}개 결과</span>
+          <span class="list-result-count" aria-live="polite">{{ t('communityAuto2.k1t', { count: sortedPosts.length }) }}</span>
         </div>
 
         <form v-if="composeMode" class="compose-card" @submit.prevent="createPost">
-          <label class="form-field">제목<input v-model="title" placeholder="여행 후기 제목" /></label>
-          <label class="form-field">내용<textarea v-model="body" placeholder="코스 경험을 공유해 주세요"></textarea></label>
-          <BaseButton block>게시하기</BaseButton>
+          <label class="form-field">{{ t('communityAuto.k1ub2ks6') }}<input v-model="title" :placeholder="t('communityAuto.k1mpzjd5')" /></label>
+          <label class="form-field">{{ t('communityAuto.k1supta6') }}<textarea v-model="body" :placeholder="t('communityAuto.k5p4uqt')"></textarea></label>
+          <BaseButton block>{{ t('communityAuto.k1856ft1') }}</BaseButton>
         </form>
 
         <div v-if="isBoardFeed" class="board-selector">
@@ -1312,7 +1288,7 @@ async function nativeShare() {
               type="button"
               class="board-accordion-toggle"
               :aria-expanded="boardSelectorOpen"
-              aria-label="게시판 선택 열기"
+              :aria-label="t('communityAuto.k18idub2')"
               @click="toggleBoardSelector"
             >
               <span class="board-selector-chevron" :class="{ open: boardSelectorOpen }" aria-hidden="true">&#8964;</span>
@@ -1331,41 +1307,41 @@ async function nativeShare() {
               </span>
               <span class="board-option-copy">
                 <strong>{{ board.name }}</strong>
-                <small>{{ boardPostCount(board) }}개</small>
+                <small>{{ t('communityAuto2.k1s', { count: boardPostCount(board) }) }}</small>
               </span>
             </button>
           </div>
         </div>
 
-        <div v-if="isBoardFeed" class="list-control-row community-sort-row" aria-label="커뮤니티 정렬과 결과 수">
-          <span class="list-control-label">정렬</span>
+        <div v-if="isBoardFeed" class="list-control-row community-sort-row" :aria-label="t('communityAuto.k16gamjy')">
+          <span class="list-control-label">{{ t('communityAuto.k1u22q50') }}</span>
           <SortSegmentedControl
             v-model="sort"
             :options="sortOptions"
-            aria-label="커뮤니티 글 정렬"
+            :aria-label="t('communityAuto.khg1xgu')"
           />
-          <span class="list-result-count" aria-live="polite">{{ sortedPosts.length }}개 결과</span>
+          <span class="list-result-count" aria-live="polite">{{ t('communityAuto2.k1t', { count: sortedPosts.length }) }}</span>
         </div>
 
         <div v-if="!isBoardFeed" class="feed-summary">
-          <strong>{{ sortedPosts.length }}개의 이야기</strong>
+          <strong>{{ t('communityAuto2.k1u', { count: sortedPosts.length }) }}</strong>
         </div>
 
         <EmptyState
           v-if="uiStore.communityLoading"
           tone="loading"
           compact
-          title="커뮤니티를 불러오는 중입니다"
-          text="새로운 여행 이야기를 확인하고 있어요."
+          :title="t('communityAuto.kayho8x')"
+          :text="t('communityAuto.k18s7zcj')"
         />
         <EmptyState
           v-else-if="uiStore.communityError"
           icon="!"
           tone="error"
           compact
-          title="커뮤니티를 불러오지 못했습니다"
+          :title="t('communityAuto.k6lajqj')"
           :text="uiStore.communityError"
-          action-label="다시 시도"
+          :action-label="t('communityAuto.ko6d5xb')"
           @action="loadCommunity"
         />
 
@@ -1385,7 +1361,7 @@ async function nativeShare() {
                 :disabled="isAuthorFollowLoading(post)"
                 @click="toggleAuthorFollow(post)"
               >
-                {{ isAuthorFollowLoading(post) ? '처리 중' : isAuthorFollowed(post) ? '팔로잉' : '팔로우' }}
+                {{ isAuthorFollowLoading(post) ? t('communityAuto2.k1o') : isAuthorFollowed(post) ? t('communityAuto2.k1p') : t('communityAuto2.k1q') }}
               </button>
             </div>
             <RouterLink
@@ -1414,19 +1390,19 @@ async function nativeShare() {
                 <span class="action-icon">{{ isPostLiked(post) ? '♥' : '♡' }}</span>
                 {{ post.likes }}
               </button>
-              <RouterLink :to="`/community/post/${postKey(post)}`">댓글 {{ postCommentCount(post) }}</RouterLink>
+              <RouterLink :to="`/community/post/${postKey(post)}`">{{ t('communityAuto2.k1v', { count: postCommentCount(post) }) }}</RouterLink>
               <button
                 type="button"
                 :class="{ 'is-active': isPostScrapped(post) }"
                 @click="uiStore.togglePostScrap(postKey(post))"
               >
-                {{ isPostScrapped(post) ? '스크랩 취소' : '스크랩' }}
+                {{ isPostScrapped(post) ? t('communityAuto.ksf2n5k') : t('communityAuto.k1y81wz0') }}
               </button>
             </div>
           </article>
         </div>
         <div v-if="hasMorePosts" class="load-more-row">
-          <button type="button" @click="loadMorePosts">더 보기</button>
+          <button type="button" @click="loadMorePosts">{{ t('communityAuto.knkzs11') }}</button>
         </div>
         <EmptyState
           v-if="!uiStore.communityLoading && !uiStore.communityError && !sortedPosts.length"
@@ -1444,40 +1420,36 @@ async function nativeShare() {
       </template>
     </section>
 
-    <div v-if="imageViewerImage" class="community-image-viewer-backdrop" role="dialog" aria-modal="true" aria-label="게시글 이미지 확대 보기" @click.self="closeImageViewer">
+    <div v-if="imageViewerImage" class="community-image-viewer-backdrop" role="dialog" aria-modal="true" :aria-label="t('communityAuto.k1u24yco')" @click.self="closeImageViewer">
       <section class="community-image-viewer">
         <header>
           <span>{{ imageViewerIndex + 1 }} / {{ imageViewerImages.length }}</span>
-          <button type="button" aria-label="이미지 닫기" @click="closeImageViewer">×</button>
+          <button type="button" :aria-label="t('communityAuto.k1oxvxfm')" @click="closeImageViewer">×</button>
         </header>
         <div class="community-image-viewer-body">
-          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav prev" aria-label="이전 이미지" @click="moveImageViewer(-1)">‹</button>
-          <img :src="imageViewerImage" alt="게시글 이미지 확대 보기" @error="markPostImageFailed(imageViewerPost, imageViewerImage); closeImageViewer()" />
-          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav next" aria-label="다음 이미지" @click="moveImageViewer(1)">›</button>
+          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav prev" :aria-label="t('communityAuto.k279do1')" @click="moveImageViewer(-1)">‹</button>
+          <img :src="imageViewerImage" :alt="t('communityAuto.k1u24yco')" @error="markPostImageFailed(imageViewerPost, imageViewerImage); closeImageViewer()" />
+          <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav next" :aria-label="t('communityAuto.ka7lzvt')" @click="moveImageViewer(1)">›</button>
         </div>
       </section>
     </div>
 
     <div v-if="shareTarget" class="sheet-backdrop" @click.self="closeShareSheet">
-      <div class="bottom-sheet community-share-sheet" role="dialog" aria-modal="true" aria-label="게시글 공유">
+      <div class="bottom-sheet community-share-sheet" role="dialog" aria-modal="true" :aria-label="t('communityAuto.ky1eeco')">
         <div class="sheet-handle"></div>
-        <h2>공유하기</h2>
+        <h2>{{ t('communityAuto.kv79prs') }}</h2>
         <p>{{ shareTarget.title }}</p>
         <div class="share-preview">
           <span>{{ shareTarget.region }}</span>
-          <strong>{{ shareTarget.duration }} 코스 후기</strong>
+          <strong>{{ t('community.share.courseReview', { duration: shareTarget.duration }) }}</strong>
         </div>
         <div class="share-options">
           <button type="button" @click="nativeShare">
-            <span aria-hidden="true">↗</span>
-            기기 공유
-          </button>
+            <span aria-hidden="true">↗</span>{{ t('communityAuto.ko666xe') }}</button>
           <button type="button" @click="copyShareLink">
-            <span aria-hidden="true">⛓</span>
-            링크 복사
-          </button>
+            <span aria-hidden="true">⛓</span>{{ t('communityAuto.k135sohl') }}</button>
         </div>
-        <BaseButton variant="secondary" block @click="closeShareSheet">닫기</BaseButton>
+        <BaseButton variant="secondary" block @click="closeShareSheet">{{ t('communityAuto.k11apzn2') }}</BaseButton>
       </div>
     </div>
   </AppLayout>
