@@ -30,6 +30,10 @@
     "account": "アカウント",
     "profileEdit": "プロフィール / 好みを編集",
     "logout": "ログアウト",
+    "deleteAccount": "アカウントを削除",
+    "deleteAccountWarning": "アカウント情報は削除後に復元できません。",
+    "deleteAccountConfirm": "退会する",
+    "deleteAccountFailed": "退会を完了できませんでした。しばらくしてからもう一度お試しください。",
     "login": "ログイン",
     "session": "セッション管理",
     "languageSaved": "言語設定を保存しました。",
@@ -555,6 +559,26 @@
       "loading": "登録中...",
       "submit": "登録完了"
     },
+    "passwordReset": {
+      "link": "パスワードを忘れた場合",
+      "failureHint": "パスワードを何度か間違えましたか？",
+      "requestTitle": "パスワードを忘れた場合",
+      "requestHeading": "パスワードを再設定",
+      "requestDescription": "登録したメールアドレスに再設定リンクを送信します。",
+      "requestSubmit": "再設定リンクを送信",
+      "emailInvalid": "正しいメールアドレスを入力してください。",
+      "requestFailed": "再設定リクエストを処理できませんでした。",
+      "sentTitle": "メールを確認してください",
+      "sentText": "該当するアカウントがある場合、再設定の案内を送信します。",
+      "confirmTitle": "パスワードを再設定",
+      "confirmHeading": "新しいパスワードを設定",
+      "confirmDescription": "新しいパスワードを入力してください。",
+      "confirmSubmit": "パスワードを再設定",
+      "confirmFailed": "パスワードを再設定できませんでした。",
+      "invalidLink": "再設定リンクが無効または期限切れです。",
+      "completeTitle": "パスワードを再設定しました",
+      "completeText": "ログイン画面へ移動します。"
+    },
     "oauth": {
       "providerSocial": "ソーシャル",
       "title": "{provider}ログイン",
@@ -832,7 +856,8 @@
     "loadingText": "検証済みロケ地の座標を確認しています。",
     "errorTitle": "地図の場所を読み込めませんでした",
     "emptyTitle": "表示する場所がありません",
-    "emptyText": "地域や検索語を変えて地図に表示する場所を探してください。"
+    "emptyText": "地域や検索語を変えて地図に表示する場所を探してください。",
+    "placeDetailAction": "場所の詳細を見る"
   },
   "aiCourse": {
     "selection": {

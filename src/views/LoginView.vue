@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
@@ -18,6 +18,17 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const socialMessage = ref('');
+const failedLoginEmail = ref('');
+const passwordFailureCount = ref(0);
+const emphasizePasswordReset = computed(() => passwordFailureCount.value >= 5);
+
+watch(email, (value) => {
+  const normalized = value.trim().toLowerCase();
+  if (normalized !== failedLoginEmail.value) {
+    failedLoginEmail.value = normalized;
+    passwordFailureCount.value = 0;
+  }
+});
 
 function continueWithOAuth(provider, url) {
   socialMessage.value = '';
@@ -60,8 +71,16 @@ async function submit() {
   loading.value = true;
   try {
     await uiStore.login({ email: trimmedEmail, password: password.value });
+    passwordFailureCount.value = 0;
     router.push(uiStore.preferencesCompleted ? '/home' : '/preferences');
   } catch (err) {
+    if (err?.code === 'INVALID_CREDENTIALS') {
+      const normalizedEmail = trimmedEmail.toLowerCase();
+      passwordFailureCount.value = failedLoginEmail.value === normalizedEmail
+        ? passwordFailureCount.value + 1
+        : 1;
+      failedLoginEmail.value = normalizedEmail;
+    }
     error.value = getUserMessage(err, t('auth.login.failedFallback'));
   } finally {
     loading.value = false;
@@ -118,6 +137,10 @@ async function submit() {
         :title="t('auth.login.errorTitle')"
         :text="error"
       />
+      <RouterLink class="auth-helper-link" :class="{ 'auth-helper-link--emphasized': emphasizePasswordReset }" to="/forgot-password">
+        <strong v-if="emphasizePasswordReset">{{ t('auth.passwordReset.failureHint') }}</strong>
+        <span>{{ t('auth.passwordReset.link') }}</span>
+      </RouterLink>
       <div class="auth-action-stack" :class="{ 'auth-action-stack--with-error': error }">
         <BaseButton block :disabled="loading">{{ loading ? t('auth.login.loading') : t('auth.login.submit') }}</BaseButton>
         <BaseButton v-if="error" variant="secondary" block type="button" @click="retryLogin">{{ t('common.retry') }}</BaseButton>
@@ -126,3 +149,29 @@ async function submit() {
     </form>
   </AppLayout>
 </template>
+
+<style scoped>
+.auth-helper-link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-helper-link--emphasized {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  color: var(--color-semantic-down, #cf202f);
+  background: rgba(207, 32, 47, 0.07);
+  border: 1px solid rgba(207, 32, 47, 0.2);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.auth-helper-link--emphasized strong { font-size: 13px; }
+</style>

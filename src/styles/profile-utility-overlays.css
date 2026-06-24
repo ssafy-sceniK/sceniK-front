@@ -142,6 +142,15 @@
   color: var(--color-primary);
 }
 
+.settings-card .settings-action-row--delete-account,
+.settings-card .settings-action-row--delete-account span {
+  color: var(--color-semantic-down);
+}
+
+.settings-card .settings-action-row--delete-account em {
+  color: var(--color-semantic-down);
+}
+
 .settings-action-row:focus-visible {
   position: relative;
   z-index: 1;

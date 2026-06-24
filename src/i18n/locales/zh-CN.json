@@ -30,6 +30,10 @@
     "account": "账号",
     "profileEdit": "编辑资料 / 偏好",
     "logout": "退出登录",
+    "deleteAccount": "注销账户",
+    "deleteAccountWarning": "注销后无法恢复账户信息。",
+    "deleteAccountConfirm": "注销",
+    "deleteAccountFailed": "无法完成注销，请稍后重试。",
     "login": "登录",
     "session": "会话管理",
     "languageSaved": "语言设置已保存。",
@@ -555,6 +559,26 @@
       "loading": "注册中...",
       "submit": "完成注册"
     },
+    "passwordReset": {
+      "link": "找回密码",
+      "failureHint": "多次输错密码了吗？",
+      "requestTitle": "找回密码",
+      "requestHeading": "重设密码",
+      "requestDescription": "输入注册邮箱后，我们会发送密码重设链接。",
+      "requestSubmit": "发送重设链接",
+      "emailInvalid": "请输入正确的邮箱地址。",
+      "requestFailed": "无法处理重设请求。",
+      "sentTitle": "请查看邮箱",
+      "sentText": "如果该邮箱存在账户，将发送密码重设说明。",
+      "confirmTitle": "重设密码",
+      "confirmHeading": "设置新密码",
+      "confirmDescription": "请输入新密码。",
+      "confirmSubmit": "重设密码",
+      "confirmFailed": "无法重设密码。",
+      "invalidLink": "密码重设链接无效或已过期。",
+      "completeTitle": "密码已重设",
+      "completeText": "正在跳转到登录页面。"
+    },
     "oauth": {
       "providerSocial": "社交账号",
       "title": "{provider} 登录",
@@ -832,7 +856,8 @@
     "loadingText": "正在确认已验证取景地坐标。",
     "errorTitle": "无法加载地图地点",
     "emptyTitle": "没有可显示的地点",
-    "emptyText": "请更改地区或关键词后重新查找地图地点。"
+    "emptyText": "请更改地区或关键词后重新查找地图地点。",
+    "placeDetailAction": "查看地点详情"
   },
   "aiCourse": {
     "selection": {

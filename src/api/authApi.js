@@ -76,6 +76,14 @@ export async function checkEmailAvailability(email) {
   return unwrapApiData(data);
 }
 
+export async function requestPasswordReset(email) {
+  await http.post('/auth/password-reset/request', { email });
+}
+
+export async function confirmPasswordReset(token, password) {
+  await http.post('/auth/password-reset/confirm', { token, password });
+}
+
 export async function logout() {
   await http.post('/auth/logout');
 }
@@ -116,4 +124,8 @@ export async function deleteProfileImage() {
   const { data } = await http.delete('/users/me/profile-image');
   const user = unwrapApiData(data);
   return normalizeUser(user?.user ?? user);
+}
+
+export async function deleteMe() {
+  await http.delete('/users/me');
 }

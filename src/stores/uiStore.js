@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
 import {
   clearAccessToken,
+  deleteMe as deleteMeRequest,
   exchangeOAuthCode,
   deleteProfileImage as deleteProfileImageRequest,
   fetchMe,
@@ -899,7 +900,9 @@ export const useUiStore = defineStore('ui', {
         this.notify(storeT('toast.store.ki'), 'success');
         return this.currentUser;
       } catch (error) {
-        throw new Error(apiErrorMessage(error, storeT('errors.store.kj')));
+        const loginError = new Error(apiErrorMessage(error, storeT('errors.store.kj')));
+        loginError.code = error?.response?.data?.code;
+        throw loginError;
       } finally {
         this.authLoading = false;
       }
@@ -949,6 +952,19 @@ export const useUiStore = defineStore('ui', {
       this.followerUsers = [];
       this.persist();
       this.notify(storeT('toast.store.kq'), 'success');
+    },
+    async deleteAccount() {
+      if (!readAccessToken()) throw new Error(storeT('common.loginRequired'));
+      await deleteMeRequest();
+      clearAccessToken();
+      this.currentUser = null;
+      this.savedCourses = [];
+      this.myReviews = [];
+      this.followingUsers = [];
+      this.followerUsers = [];
+      this.notifications = [];
+      this.unreadNotificationCount = 0;
+      this.persist();
     },
     async savePreferences(preferences) {
       const normalized = normalizePreferenceSelection(preferences);

@@ -29,12 +29,16 @@ import SettingsView from '../views/SettingsView.vue';
 import PublicUserProfileView from '../views/PublicUserProfileView.vue';
 import AdminView from '../views/AdminView.vue';
 import OAuthCallbackView from '../views/OAuthCallbackView.vue';
+import ForgotPasswordView from '../views/ForgotPasswordView.vue';
+import ResetPasswordView from '../views/ResetPasswordView.vue';
 
 const routes = [
   { path: '/', name: 'splash', component: SplashView, meta: { public: true } },
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView, meta: { public: true } },
   { path: '/signup', name: 'signup', component: SignupView, meta: { public: true } },
+  { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordView, meta: { public: true } },
+  { path: '/password-reset', name: 'password-reset', component: ResetPasswordView, meta: { public: true } },
   { path: '/preferences', name: 'preferences', component: PreferencesView },
   { path: '/home', name: 'home', component: HomeView },
   { path: '/home/recent-all', name: 'home-recent-all', component: SimpleListView, meta: { titleKey: 'my.activity.title.recent', type: 'recent' } },

@@ -30,6 +30,10 @@
     "account": "Account",
     "profileEdit": "Edit profile / preferences",
     "logout": "Log out",
+    "deleteAccount": "Delete account",
+    "deleteAccountWarning": "Account information cannot be recovered after deletion.",
+    "deleteAccountConfirm": "Delete account",
+    "deleteAccountFailed": "Could not delete the account. Please try again.",
     "login": "Log in",
     "session": "Session",
     "languageSaved": "Language preference saved.",
@@ -555,6 +559,26 @@
       "loading": "Signing up...",
       "submit": "Complete sign-up"
     },
+    "passwordReset": {
+      "link": "Forgot password?",
+      "failureHint": "Entered the wrong password several times?",
+      "requestTitle": "Forgot password",
+      "requestHeading": "Reset password",
+      "requestDescription": "Enter your email and we will send a password reset link.",
+      "requestSubmit": "Send reset link",
+      "emailInvalid": "Enter a valid email address.",
+      "requestFailed": "Could not process the reset request.",
+      "sentTitle": "Check your email",
+      "sentText": "If an account exists for this email, password reset instructions will be sent.",
+      "confirmTitle": "Reset password",
+      "confirmHeading": "Set a new password",
+      "confirmDescription": "Enter your new password.",
+      "confirmSubmit": "Reset password",
+      "confirmFailed": "Could not reset the password.",
+      "invalidLink": "This password reset link is invalid or expired.",
+      "completeTitle": "Password reset complete",
+      "completeText": "Taking you to the login page."
+    },
     "oauth": {
       "providerSocial": "Social",
       "title": "{provider} login",
@@ -832,7 +856,8 @@
     "loadingText": "Checking coordinates for verified filming locations.",
     "errorTitle": "Could not load map places",
     "emptyTitle": "No places to show",
-    "emptyText": "Change region or keyword to find places on the map."
+    "emptyText": "Change region or keyword to find places on the map.",
+    "placeDetailAction": "View place details"
   },
   "aiCourse": {
     "selection": {

@@ -424,7 +424,7 @@ onBeforeUnmount(() => {
         <strong>{{ localizedSelectedPlace.placeName }}</strong>
         <span>{{ localizedSelectedPlace.address || [localizedSelectedPlace.region, localizedSelectedPlace.district].filter(Boolean).join(' ') }}</span>
       </span>
-      <small>{{ t('autoPass.ui_1a31ee0b4b') }}</small>
+      <small>{{ t('map.placeDetailAction') }}</small>
     </button>
     <span v-if="mapStatus === 'ready' && !infoOpen" class="map-label">{{ mapCountLabel }}</span>
   </div>
