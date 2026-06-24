@@ -104,7 +104,7 @@ const bodyText = computed(() => props.description || props.text);
   overflow: hidden;
   color: var(--text);
   text-align: center;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(247, 247, 247, 0.96) 100%);
+  background: var(--gradient-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
@@ -164,7 +164,7 @@ const bodyText = computed(() => props.description || props.text);
   background: var(--empty-accent-soft);
   border: 1px solid var(--empty-accent-border);
   border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card) 72%, transparent);
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
@@ -180,7 +180,7 @@ const bodyText = computed(() => props.description || props.text);
   border-color: transparent;
   background:
     conic-gradient(var(--empty-accent) 0 96deg, transparent 97deg 360deg),
-    #ffffff;
+    var(--card);
   animation: empty-state-spin 900ms linear infinite;
 }
 
@@ -251,6 +251,24 @@ const bodyText = computed(() => props.description || props.text);
   box-shadow: none;
 }
 
+
+:global(:root[data-theme="dark"]) .empty-state {
+  background: var(--gradient-card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:global(:root[data-theme="dark"]) .empty-state__visual {
+  background: var(--control-bg-selected);
+  border-color: var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+:global(:root[data-theme="dark"]) .empty-state--loading .empty-state__visual {
+  background:
+    conic-gradient(var(--empty-accent) 0 96deg, transparent 97deg 360deg),
+    var(--card);
+}
 @keyframes empty-state-spin {
   to {
     transform: rotate(360deg);

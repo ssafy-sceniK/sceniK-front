@@ -149,7 +149,7 @@ function selectLanguage(language) {
   display: grid;
   overflow: hidden;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: var(--control-bg, var(--card));
   box-shadow: var(--shadow-sm);
 }
 
@@ -161,7 +161,7 @@ function selectLanguage(language) {
   align-items: center;
   gap: 10px;
   color: var(--text);
-  background: #ffffff;
+  background: var(--card);
   border-bottom: 1px solid var(--border);
   font: inherit;
   text-align: left;
@@ -202,7 +202,7 @@ function selectLanguage(language) {
 .app-language-selector button:focus-visible {
   position: relative;
   z-index: 1;
-  outline: 2px solid rgba(0, 82, 255, 0.34);
+  outline: 2px solid var(--focus-ring);
   outline-offset: -3px;
 }
 
@@ -230,9 +230,9 @@ function selectLanguage(language) {
   padding: 0;
   justify-content: center;
   color: var(--text);
-  border: 1px solid rgba(219, 227, 239, 0.9);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-elevated, var(--card));
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(16px);
 }
@@ -257,7 +257,7 @@ function selectLanguage(language) {
   gap: 2px;
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-elevated, var(--card));
   box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
   backdrop-filter: blur(18px);
 }
@@ -285,22 +285,23 @@ function selectLanguage(language) {
 
 .app-language-selector--splash .app-language-selector__option.selected {
   color: var(--color-primary-deep);
-  background: rgba(219, 234, 254, 0.96);
+  background: var(--control-bg-selected);
 }
 
 @media (hover: hover) {
   .app-language-selector--splash .app-language-selector__trigger:hover,
   .app-language-selector--splash .app-language-selector__option:hover {
     color: var(--color-primary-deep);
-    background: rgba(219, 234, 254, 0.82);
+    background: var(--control-bg-hover);
   }
 }
 
 :global(:root[data-theme="dark"]) .app-language-selector,
 :global(:root[data-theme="dark"]) .app-language-selector button {
   color: var(--text);
-  background-color: var(--card);
+  background: var(--control-bg);
   border-color: var(--border);
+  box-shadow: none;
 }
 
 :global(:root[data-theme="dark"]) .app-language-selector--splash {
@@ -309,12 +310,22 @@ function selectLanguage(language) {
 
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger,
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__menu {
-  background: rgba(41, 41, 41, 0.92);
+  background: var(--surface-elevated);
   border-color: var(--border);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.36);
 }
 
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__option.selected {
-  color: #fca5a5;
-  background: rgba(239, 68, 68, 0.18);
+  color: var(--dark-soft-red-text);
+  background: var(--control-bg-selected);
+}
+
+@media (hover: hover) {
+  :global(:root[data-theme="dark"]) .app-language-selector button:not(.selected):hover,
+  :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger:hover,
+  :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__option:not(.selected):hover {
+    color: var(--text);
+    background: var(--control-bg-hover);
+  }
 }
 </style>

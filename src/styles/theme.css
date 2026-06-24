@@ -1195,3 +1195,125 @@ body {
   background: var(--card-strong);
   border-color: var(--border);
 }
+/* Final dark-mode surface audit layer: shared controls should never fall back to light cards. */
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  color: var(--text);
+  background-color: var(--control-bg);
+  border-color: var(--control-border);
+}
+
+:root[data-theme="dark"] input:focus,
+:root[data-theme="dark"] textarea:focus,
+:root[data-theme="dark"] select:focus,
+:root[data-theme="dark"] input:focus-visible,
+:root[data-theme="dark"] textarea:focus-visible,
+:root[data-theme="dark"] select:focus-visible {
+  background-color: var(--control-bg);
+  border-color: var(--color-primary);
+  outline-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+:root[data-theme="dark"] .app-language-selector,
+:root[data-theme="dark"] .app-language-selector button,
+:root[data-theme="dark"] .settings-segment,
+:root[data-theme="dark"] .settings-segment button,
+:root[data-theme="dark"] .sort-select,
+:root[data-theme="dark"] .list-control-row,
+:root[data-theme="dark"] .translation-toggle,
+:root[data-theme="dark"] .load-more-row button,
+:root[data-theme="dark"] .user-list-row,
+:root[data-theme="dark"] .visit-progress-card,
+:root[data-theme="dark"] .top-save-button:disabled,
+:root[data-theme="dark"] .day-drag-grip,
+:root[data-theme="dark"] .condition-confirm-actions .button-ghost,
+:root[data-theme="dark"] .ai-share-actions button,
+:root[data-theme="dark"] .share-options button {
+  color: var(--text);
+  background: var(--control-bg);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .settings-segment,
+:root[data-theme="dark"] .my-section-tabs,
+:root[data-theme="dark"] .public-profile-screen .my-section-tabs,
+:root[data-theme="dark"] .visit-progress-card b {
+  background: var(--control-bg-soft);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .settings-segment button.active,
+:root[data-theme="dark"] .sort-select:focus,
+:root[data-theme="dark"] .translation-toggle:focus-visible,
+:root[data-theme="dark"] .load-more-row button:focus-visible,
+:root[data-theme="dark"] .visit-control-row a.router-link-active,
+:root[data-theme="dark"] .visit-control-row a:focus-visible,
+:root[data-theme="dark"] .share-options button:focus-visible,
+:root[data-theme="dark"] .ai-share-options button:focus-visible {
+  color: var(--dark-soft-red-text);
+  background: var(--control-bg-selected);
+  border-color: var(--dark-soft-red-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .top-save-button,
+:root[data-theme="dark"] .session-logout-button,
+:root[data-theme="dark"] .session-login-link {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .social-login-button,
+:root[data-theme="dark"] .social-login-button--kakao {
+  color: var(--text);
+  background: var(--control-bg);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .social-login-button--kakao svg path {
+  fill: #fee500;
+}
+
+:root[data-theme="dark"] .sheet-backdrop,
+:root[data-theme="dark"] .condition-confirm-backdrop,
+:root[data-theme="dark"] .result-menu-backdrop,
+:root[data-theme="dark"] .profile-crop-backdrop,
+:root[data-theme="dark"] .community-image-viewer-backdrop {
+  background: var(--overlay-bg);
+}
+
+:root[data-theme="dark"] .empty-state--loading .empty-state__visual::before {
+  background: var(--card);
+}
+
+:root[data-theme="dark"] .bottom-sheet,
+:root[data-theme="dark"] .condition-confirm-modal,
+:root[data-theme="dark"] .course-picker-modal,
+:root[data-theme="dark"] .profile-crop-sheet,
+:root[data-theme="dark"] .result-menu-popover,
+:root[data-theme="dark"] .course-detail-menu__popover,
+:root[data-theme="dark"] .comment-action-sheet {
+  color: var(--text);
+  background: var(--modal-bg);
+  border-color: var(--border);
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .settings-segment button:not(.active):hover,
+  :root[data-theme="dark"] .translation-toggle:hover,
+  :root[data-theme="dark"] .load-more-row button:hover,
+  :root[data-theme="dark"] .share-options button:hover,
+  :root[data-theme="dark"] .ai-share-options button:hover,
+  :root[data-theme="dark"] .social-login-button:hover {
+    color: var(--text);
+    background: var(--control-bg-hover);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+}
