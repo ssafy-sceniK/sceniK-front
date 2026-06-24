@@ -1,4 +1,5 @@
 import { http } from './http.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 
 function firstDefined(...values) {
   return values.find((value) => value !== undefined && value !== null && value !== '');
@@ -21,7 +22,7 @@ function normalizeCandidatePlace(place = {}, fallback = {}) {
     relatedContentTitle: firstDefined(place.relatedContentTitle, fallback.relatedContentTitle, 'sceniK content'),
     sceneDescription: firstDefined(place.sceneDescription, place.description, fallback.sceneDescription, 'Verified sceniK place.'),
     verified: place.verified !== false,
-    imageUrl: firstDefined(place.imageUrl, fallback.imageUrl),
+    imageUrl: firstDefined(getPlaceImageUrl(place), getPlaceImageUrl(fallback)),
   };
 }
 

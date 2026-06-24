@@ -7,6 +7,7 @@ import AiPromptContextSummary from '../components/ai/AiPromptContextSummary.vue'
 import AiRunwayProgress from '../components/ai/AiRunwayProgress.vue';
 import { generateAiRoute } from '../api/aiApi.js';
 import { getUserMessage } from '../api/error.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -176,7 +177,7 @@ function candidateFromPlace(place, selectedContent) {
     relatedContentTitle: selectedContent?.title ?? '\uc9c0\uc5ed \uc2e4\uc81c \uc7a5\uc18c',
     sceneDescription: place.description ?? '\uc2e4\uc81c \uc7a5\uc18c \ub370\uc774\ud130\uc785\ub2c8\ub2e4.',
     verified: place.verified !== false,
-    imageUrl: place.imageUrl,
+    imageUrl: getPlaceImageUrl(place),
   };
 }
 

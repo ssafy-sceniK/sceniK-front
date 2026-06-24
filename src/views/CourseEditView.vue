@@ -9,6 +9,7 @@ import { getUserMessage } from '../api/error.js';
 import { fetchPlaces } from '../api/placeApi.js';
 import { contentPlaces, places as catalogPlaces } from '../data/mockData.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 
 const { t } = useI18n();
 
@@ -222,7 +223,7 @@ function normalizeCatalogCandidate(place, relatedContentId = '') {
     relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '\uc120\ud0dd \ucf58\ud150\uce20',
     sceneDescription: place.description,
     verified: place.verified !== false,
-    imageUrl: place.imageUrl,
+    imageUrl: getPlaceImageUrl(place),
   };
 }
 
@@ -244,7 +245,7 @@ function normalizeSearchPlace(place) {
     relatedContentTitle: course.value?.contentTitle ?? course.value?.title ?? '\uc800\uc7a5 \ucf54\uc2a4',
     sceneDescription: place.description ?? '\uac80\uc99d\ub41c \uc7a5\uc18c\uc785\ub2c8\ub2e4.',
     verified: place.verified !== false,
-    imageUrl: place.imageUrl,
+    imageUrl: getPlaceImageUrl(place),
   };
 }
 

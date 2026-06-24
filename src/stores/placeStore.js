@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { fetchPlaceDetail, fetchPlaces } from '../api/placeApi.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 
 function filterPlaces(list, { region, district, category, keyword } = {}) {
   const query = (keyword ?? '').trim().toLowerCase();
@@ -15,7 +16,7 @@ function filterPlaces(list, { region, district, category, keyword } = {}) {
 function enrichPlace(place) {
   return {
     ...place,
-    imageUrl: place.imageUrl || '/images/seoul-street.jpg',
+    imageUrl: getPlaceImageUrl(place),
     relatedContentIds: place.relatedContentIds ?? [],
     tags: place.tags ?? [],
     verified: place.verified ?? true,

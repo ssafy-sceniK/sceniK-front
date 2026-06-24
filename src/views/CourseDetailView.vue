@@ -13,6 +13,7 @@ import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { motionVariants } from '../utils/motion.js';
 import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -116,7 +117,7 @@ function enrichStop(stop = {}) {
     district: firstText(stop.district, candidate.district),
     latitude: firstText(stop.latitude, candidate.latitude),
     longitude: firstText(stop.longitude, candidate.longitude),
-    imageUrl: firstText(stop.imageUrl, stop.thumbnailUrl, candidate.imageUrl, candidate.thumbnailUrl),
+    imageUrl: firstText(getPlaceImageUrl(stop), getPlaceImageUrl(candidate)),
   };
 }
 

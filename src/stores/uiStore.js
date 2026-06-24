@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 import {
   clearAccessToken,
   exchangeOAuthCode,
@@ -224,7 +225,7 @@ function makeCandidatePlace(place, relatedContent) {
     relatedContentTitle: relatedContent?.title ?? 'Saved course',
     sceneDescription: place.description ?? 'Verified sceniK place',
     verified: place.verified === true,
-    imageUrl: place.imageUrl,
+    imageUrl: getPlaceImageUrl(place),
   };
 }
 

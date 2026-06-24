@@ -1,5 +1,6 @@
 import { http } from './http.js';
 import { unwrapApiData } from './error.js';
+import { withNormalizedPlaceImage } from '../utils/placeImages.js';
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -7,12 +8,12 @@ function asArray(value) {
 
 function normalizePlace(place) {
   if (!place) return null;
-  return {
+  return withNormalizedPlaceImage({
     ...place,
     tags: asArray(place.tags),
     relatedContentIds: asArray(place.relatedContentIds),
     relatedContents: asArray(place.relatedContents),
-  };
+  });
 }
 
 export async function fetchPlaces(params = {}) {

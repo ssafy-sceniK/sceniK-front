@@ -20,6 +20,7 @@ import { getUserMessage } from '../api/error.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { localizeContent, localizePlace } from '../i18n/systemContent.js';
+import { getPlaceImageUrl } from '../utils/placeImages.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -47,7 +48,7 @@ const editReviewForm = ref({
 });
 const ratingOptions = [1, 2, 3, 4, 5];
 const placeId = computed(() => route.params.id || '');
-const placeImageUrl = computed(() => place.value?.imageUrl || '');
+const placeImageUrl = computed(() => getPlaceImageUrl(place.value));
 const showPlaceImage = computed(() => Boolean(placeImageUrl.value) && !placeImageFailed.value);
 const relatedContents = computed(() => place.value?.relatedContents ?? []);
 const displayPlace = computed(() => localizePlace(place.value, locale.value, t) ?? place.value);
