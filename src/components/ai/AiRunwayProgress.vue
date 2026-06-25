@@ -54,7 +54,7 @@ const planePosition = computed(() => {
 </template>
 
 <style scoped>
-.runway-progress { --progress-active: #ef4444; --progress-inactive: rgba(255,255,255,.18); --runway-dash: rgba(255,255,255,.38); --value-text: #fff; --value-subtext: #d1d5db; --plane-color: #fff; --plane-size: 60px; position: relative; width: min(100%, 240px); aspect-ratio: 1; margin: 0 auto; }
+.runway-progress { --progress-active: #DC2626; --progress-inactive: rgba(255,255,255,.18); --runway-dash: rgba(255,255,255,.38); --value-text: #fff; --value-subtext: #d1d5db; --plane-color: #fff; --plane-size: 60px; position: relative; width: min(100%, 240px); aspect-ratio: 1; margin: 0 auto; }
 .runway-progress--light { --progress-active: #2563eb; --progress-inactive: #e5e7eb; --runway-dash: #cbd5e1; --value-text: #111827; --value-subtext: #6b7280; --plane-color: #111827; --plane-size: 50px; }
 .runway-progress__track { width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
 .runway-progress__inactive, .runway-progress__active, .runway-progress__dash { fill: none; transform-origin: center; }

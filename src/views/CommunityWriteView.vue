@@ -456,7 +456,6 @@ async function createPost() {
         </div>
 
         <div v-if="selectedCourse" class="linked-course write-linked-course">
-          <span class="course-dot">AI</span>
           <div>
             <small class="course-kicker">{{ t('community.write.selectedCourse') }}</small>
             <strong>{{ selectedCourse.title }}</strong>
@@ -537,7 +536,6 @@ async function createPost() {
           <EmptyState
             v-else
             class="course-picker-empty-state"
-            icon="AI"
             tone="route"
             compact
             :title="t('community.write.noSavedCourseTitle')"

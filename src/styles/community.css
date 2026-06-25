@@ -130,14 +130,13 @@
   overflow: hidden;
   border: 1px solid rgba(0, 82, 255, 0.1);
   border-radius: 16px;
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #eff5ff, #ffffff);
+  background: linear-gradient(145deg, #eff5ff, #ffffff);
   font-size: 20px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
 }
 
 .board-icon::after {
+  content: none;
   display: none;
 }
 
@@ -156,33 +155,23 @@
 }
 
 .board-drama {
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #eef5ff, #fff7f0);
+  background: linear-gradient(145deg, #eef5ff, #fff7f0);
 }
 
 .board-movie {
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #edf2ff, #f7f7f7);
+  background: linear-gradient(145deg, #edf2ff, #f7f7f7);
 }
 
 .board-idol {
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #fff1f7, #eef5ff);
+  background: linear-gradient(145deg, #fff1f7, #eef5ff);
 }
 
 .board-variety {
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #fff8df, #f2f6ff);
+  background: linear-gradient(145deg, #fff8df, #f2f6ff);
 }
 
 .board-region {
-  background:
-    radial-gradient(circle at 76% 25%, rgba(255, 255, 255, 0.92) 0 9px, transparent 10px),
-    linear-gradient(145deg, #ecfdf5, #eef5ff);
+  background: linear-gradient(145deg, #ecfdf5, #eef5ff);
 }
 
 .board-copy,
@@ -1643,10 +1632,20 @@
   display: inline-grid;
   place-items: center;
   color: #ffffff;
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: var(--radius-pill);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
   font-size: 11px;
   font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="dark"] .feed-thumb-count {
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.78);
+  border-color: rgba(255, 236, 232, 0.72);
 }
 
 @media (min-width: 560px) {
@@ -2617,4 +2616,18 @@
 }
 .community-image-manager__grid--manual {
   grid-template-columns: minmax(0, 170px);
+}
+
+.comment-heart-button,
+.comment-heart-button:hover,
+.comment-heart-button.is-active {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.board-region .board-icon-symbol {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }

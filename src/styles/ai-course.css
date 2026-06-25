@@ -558,17 +558,17 @@
 }
 
 .loading-screen .loading-steps .is-done b {
-  border-color: #ef4444;
-  background: #ef4444;
+  border-color: #DC2626;
+  background: #DC2626;
 }
 
 .loading-screen .loading-steps .is-active b {
-  border-color: #ef4444;
+  border-color: #DC2626;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
 }
 
 .loading-screen .loading-steps .is-active b::after {
-  background: #ef4444;
+  background: #DC2626;
 }
 
 .loading-screen .loading-steps .is-waiting strong,

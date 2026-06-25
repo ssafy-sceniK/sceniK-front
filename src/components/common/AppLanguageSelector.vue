@@ -232,9 +232,9 @@ function selectLanguage(language) {
   color: var(--text);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--surface-elevated, var(--card));
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(16px);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .app-language-selector--splash .app-language-selector__trigger svg {
@@ -289,7 +289,11 @@ function selectLanguage(language) {
 }
 
 @media (hover: hover) {
-  .app-language-selector--splash .app-language-selector__trigger:hover,
+  .app-language-selector--splash .app-language-selector__trigger:hover {
+    color: var(--color-primary-deep);
+    background: transparent;
+  }
+
   .app-language-selector--splash .app-language-selector__option:hover {
     color: var(--color-primary-deep);
     background: var(--control-bg-hover);
@@ -308,7 +312,12 @@ function selectLanguage(language) {
   background: transparent;
 }
 
-:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger,
+:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__menu {
   background: var(--surface-elevated);
   border-color: var(--border);
@@ -322,10 +331,14 @@ function selectLanguage(language) {
 
 @media (hover: hover) {
   :global(:root[data-theme="dark"]) .app-language-selector button:not(.selected):hover,
-  :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger:hover,
   :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__option:not(.selected):hover {
     color: var(--text);
     background: var(--control-bg-hover);
+  }
+
+  :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger:hover {
+    color: var(--text);
+    background: transparent;
   }
 }
 </style>

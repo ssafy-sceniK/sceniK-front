@@ -102,7 +102,7 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-primary: #ef4444;
+  --color-primary: #DC2626;
   --color-primary-deep: #fca5a5;
   --color-primary-press: #e23a3a;
   --color-primary-active: #e23a3a;

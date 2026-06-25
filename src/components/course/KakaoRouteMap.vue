@@ -113,7 +113,7 @@ function openStopInfo(kakaoMaps, marker, stop) {
 }
 
 function routeStrokeColor() {
-  if (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark') return '#ef4444';
+  if (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark') return '#DC2626';
   return '#1455ff';
 }
 

@@ -1465,9 +1465,9 @@
   },
   "communityAuto2": {
     "k1": "{board}\\uc5d0 \\uc544\\uc9c1 \\uae00\\uc774 \\uc5c6\\uc2b5\\ub2c8\\ub2e4",
-    "k2": "{count}s ago",
-    "k3": "{count}m ago",
-    "k4": "{count}h ago",
+    "k2": "たった今",
+    "k3": "{count}分前",
+    "k4": "{count}時間前",
     "k5": "Write a reply to {user}",
     "k6": "{count}\\uac1c \\uacb0\\uacfc",
     "k7": "{count}\\uac1c\\uc758 \\uc774\\uc57c\\uae30",

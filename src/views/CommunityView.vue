@@ -439,27 +439,43 @@ function formatDateOnly(date) {
   return `${year}-${month}-${day}`;
 }
 
-function commentTimeLabel(comment) {
-  const rawDate = comment?.createdAt ?? comment?.updatedAt ?? comment?.date;
+function parseCommunityTimestamp(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === 'number') return new Date(value);
+
+  const rawValue = String(value).trim();
+  if (!rawValue) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) return new Date(`${rawValue}T00:00:00`);
+
+  const hasTimezone = /(?:z|[+-]\d{2}:?\d{2})$/i.test(rawValue);
+  const normalizedValue = rawValue.includes('T') ? rawValue : rawValue.replace(' ', 'T');
+  const dateValue = hasTimezone ? normalizedValue : `${normalizedValue}Z`;
+  return new Date(dateValue);
+}
+
+function relativeTimeLabel(entity) {
+  const rawDate = entity?.createdAt ?? entity?.updatedAt ?? entity?.date;
   if (!rawDate) return t('communityAuto.k15o4n14');
 
-  const createdAt = new Date(rawDate);
-  if (Number.isNaN(createdAt.getTime())) return comment?.date || t('communityAuto.k15o4n14');
+  const createdAt = parseCommunityTimestamp(rawDate);
+  if (Number.isNaN(createdAt.getTime())) return entity?.date || t('communityAuto.k15o4n14');
 
   const diffMs = Date.now() - createdAt.getTime();
-  if (diffMs < 0) return formatDateOnly(createdAt) || comment?.date || t('communityAuto.k15o4n14');
+  if (diffMs < 60_000) return t('communityAuto.k15o4n14');
 
   const diffSeconds = Math.floor(diffMs / 1000);
-  if (diffSeconds < 10) return t('communityAuto.k15o4n14');
-  if (diffSeconds < 60) return t('communityAuto2.k2', { count: diffSeconds });
-
   const diffMinutes = Math.floor(diffSeconds / 60);
   if (diffMinutes < 60) return t('communityAuto2.k3', { count: diffMinutes });
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) return t('communityAuto2.k4', { count: diffHours });
 
-  return comment?.date || formatDateOnly(createdAt) || t('communityAuto.k15o4n14');
+  return entity?.date || formatDateOnly(createdAt) || t('communityAuto.k15o4n14');
+}
+
+function commentTimeLabel(comment) {
+  return relativeTimeLabel(comment);
 }
 
 function replyParentId(targetComment, threadParent = targetComment) {
@@ -721,7 +737,11 @@ function userProfileTo(userId) {
 }
 
 function postMeta(post) {
-  return post?.date ?? '';
+  return relativeTimeLabel(post);
+}
+
+function postTimeLabel(post) {
+  return relativeTimeLabel(post);
 }
 
 function authorDisplayName(post) {
@@ -1707,7 +1727,7 @@ async function nativeShare() {
                   <b>{{ displayUserName(post) }}</b>
                 </RouterLink>
                 <b v-else>{{ displayUserName(post) }}</b>
-                <span>{{ post.date }}</span>
+                <span>{{ postTimeLabel(post) }}</span>
               </div>
             </div>
             <RouterLink

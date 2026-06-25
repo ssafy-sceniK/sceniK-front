@@ -150,16 +150,16 @@ body {
 
 /* Landing splash SVG brandmark turns red only in dark mode. */
 :root[data-theme="dark"] .splash-screen .splash-brandmark__word {
-  fill: #ef4444;
-  stroke: #ef4444;
+  fill: #DC2626;
+  stroke: #DC2626;
 }
 
 :root[data-theme="dark"] .splash-screen .splash-brandmark__trail {
-  stroke: #ef4444;
+  stroke: #DC2626;
 }
 
 :root[data-theme="dark"] .splash-screen .splash-brandmark__plane {
-  fill: #ef4444;
+  fill: #DC2626;
 }
 /* Dark is charcoal-first; red is reserved for actions and selected states. */
 :root[data-theme="dark"] body {
@@ -307,7 +307,6 @@ body {
 
 :root[data-theme="dark"] .profile-preference-chips span,
 :root[data-theme="dark"] .tag-row span,
-:root[data-theme="dark"] .board-region span,
 :root[data-theme="dark"] .feed-card .badge,
 :root[data-theme="dark"] .my-post-board {
   color: #fee2e2;
@@ -365,7 +364,6 @@ body {
 :root[data-theme="dark"] .condition-block,
 :root[data-theme="dark"] .preference-block,
 :root[data-theme="dark"] .community-screen > section,
-:root[data-theme="dark"] .community-sort-row,
 :root[data-theme="dark"] .explore-sort-row {
   background: #212121;
   border-color: transparent;
@@ -498,8 +496,8 @@ body {
 :root[data-theme="dark"] .sticky-actions .button-primary,
 :root[data-theme="dark"] .community-write-screen .button-primary {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
   box-shadow: none;
 }
 
@@ -582,8 +580,8 @@ body {
 :root[data-theme="dark"] .action-grid .button-primary,
 :root[data-theme="dark"] .day-tabs button.active {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
   box-shadow: none;
 }
 
@@ -649,7 +647,7 @@ body {
 }
 
 :root[data-theme="dark"] .budget-track span {
-  background: #ef4444;
+  background: #DC2626;
 }
 
 :root[data-theme="dark"] .budget-range-input::-webkit-slider-runnable-track {
@@ -671,7 +669,7 @@ body {
 :root[data-theme="dark"] .budget-range-card input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
-  border: 3px solid #ef4444;
+  border: 3px solid #DC2626;
   background: #ffffff;
   box-shadow: none;
 }
@@ -679,7 +677,7 @@ body {
 :root[data-theme="dark"] .budget-range-card input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  border: 3px solid #ef4444;
+  border: 3px solid #DC2626;
   background: #ffffff;
   box-shadow: none;
 }
@@ -723,8 +721,8 @@ body {
 
 :root[data-theme="dark"] .car-day-grid button.selected {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
 }
 /* Notification list uses dark cards instead of inherited light utility surfaces. */
 :root[data-theme="dark"] .notification-list {
@@ -824,7 +822,7 @@ body {
 /* Dark profile avatar edit badge follows the red accent. */
 :root[data-theme="dark"] .profile-avatar-button .avatar-edit-badge {
   color: #ffffff;
-  background: #ef4444;
+  background: #DC2626;
   border-color: rgba(254, 226, 226, 0.95);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.24);
 }
@@ -904,7 +902,7 @@ body {
 }
 
 :root[data-theme="dark"] .profile-crop-controls input[type="range"] {
-  accent-color: #ef4444;
+  accent-color: #DC2626;
 }
 
 :root[data-theme="dark"] .profile-crop-rotate,
@@ -916,8 +914,8 @@ body {
 
 :root[data-theme="dark"] .profile-crop-actions .button-primary {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
   box-shadow: none;
 }
 /* Final dark-mode polish for AI budget range and Course Edit surfaces. */
@@ -948,7 +946,7 @@ body {
 }
 
 :root[data-theme="dark"] .budget-track span {
-  background: #ef4444;
+  background: #DC2626;
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.28);
 }
 
@@ -971,7 +969,7 @@ body {
   height: 20px;
   margin-top: -6px;
   pointer-events: auto;
-  border: 3px solid #ef4444;
+  border: 3px solid #DC2626;
   border-radius: 999px;
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 4px 12px rgba(0, 0, 0, 0.36);
@@ -990,7 +988,7 @@ body {
   width: 18px;
   height: 18px;
   pointer-events: auto;
-  border: 3px solid #ef4444;
+  border: 3px solid #DC2626;
   border-radius: 999px;
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 4px 12px rgba(0, 0, 0, 0.36);
@@ -1037,8 +1035,8 @@ body {
 :root[data-theme="dark"] .candidate-day-tabs button.active,
 :root[data-theme="dark"] .recommended-place-grid span {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
 }
 
 :root[data-theme="dark"] .time-menu button:hover,
@@ -1115,8 +1113,8 @@ body {
 :root[data-theme="dark"] .result-day-tabs button.active,
 :root[data-theme="dark"] .result-day-tabs button:active {
   color: #ffffff;
-  background: #ef4444;
-  border-color: #ef4444;
+  background: #DC2626;
+  border-color: #DC2626;
 }
 
 :root[data-theme="dark"] .prototype-timeline-item::before {
@@ -1124,7 +1122,7 @@ body {
 }
 
 :root[data-theme="dark"] .prototype-timeline-dot {
-  background: #ef4444;
+  background: #DC2626;
 }
 
 :root[data-theme="dark"] .prototype-stop-tags span {
@@ -1320,10 +1318,10 @@ body {
 :root[data-theme="dark"] {
   --dark-action-bg: rgba(255, 255, 255, 0.055);
   --dark-action-bg-strong: rgba(122, 48, 44, 0.30);
-  --dark-action-border: rgba(226, 137, 121, 0.38);
+  --dark-action-border: #953939;
   --dark-action-text: #fee2e2;
   --dark-action-solid: #dc2626;
-  --dark-action-solid-hover: #ef4444;
+  --dark-action-solid-hover: #DC2626;
 }
 
 :root[data-theme="dark"] .button-primary,
@@ -1457,12 +1455,12 @@ body {
   --community-dark-action-border: rgba(255, 255, 255, 0.12);
   --community-dark-action-text: #ebe3df;
   --community-dark-action-hover-bg: rgba(255, 255, 255, 0.085);
-  --community-dark-action-hover-border: rgba(237, 177, 165, 0.24);
+  --community-dark-action-hover-border: #953939;
   --community-dark-accent-soft: rgba(122, 48, 44, 0.30);
-  --community-dark-accent-border: rgba(226, 137, 121, 0.38);
+  --community-dark-accent-border: #953939;
   --community-dark-accent-text: #fee2e2;
   --community-dark-primary-bg: #dc2626;
-  --community-dark-primary-hover-bg: #ef4444;
+  --community-dark-primary-hover-bg: #DC2626;
   --community-dark-danger-bg: rgba(239, 68, 68, 0.18);
   --community-dark-danger-border: rgba(248, 113, 113, 0.42);
   --community-dark-danger-text: #fecaca;
@@ -1641,7 +1639,6 @@ body {
     border-color: rgba(248, 113, 113, 0.58);
   }
 }
-:root[data-theme="dark"] .community-screen .comment-heart-button,
 :root[data-theme="dark"] .community-screen .comment-box button,
 :root[data-theme="dark"] .community-screen .community-image-manager__frame {
   color: var(--community-dark-action-text);
@@ -1650,10 +1647,16 @@ body {
   box-shadow: none;
 }
 
+:root[data-theme="dark"] .community-screen .comment-heart-button,
+:root[data-theme="dark"] .community-screen .comment-heart-button:hover,
+:root[data-theme="dark"] .community-screen .comment-heart-button.is-active {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
 :root[data-theme="dark"] .community-screen .comment-heart-button.is-active {
   color: var(--community-dark-accent-text);
-  background: var(--community-dark-accent-soft);
-  border-color: var(--community-dark-accent-border);
 }
 
 :root[data-theme="dark"] .community-screen .button-primary,

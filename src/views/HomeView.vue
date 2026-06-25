@@ -30,6 +30,48 @@ const homePopularRouteLimit = 3;
 const translatedCourseTitles = ref({});
 const courseTitleRequests = new Map();
 
+const HOME_COURSE_TITLE_TRANSLATIONS = {
+  'csv-route-1': {
+    en: 'Lovely Runner 2-Day Gyeonggi Course',
+    ja: 'ソンジェ背負って走れ 京畿2日コース',
+    'zh-CN': '背着善宰跑 京畿2日路线',
+  },
+  'csv-route-2': {
+    en: 'Queen of Tears 2-Day Gyeongbuk Course',
+    ja: '涙の女王 慶北2日コース',
+    'zh-CN': '眼泪女王 庆北2日路线',
+  },
+  'csv-route-3': {
+    en: 'When Life Gives You Tangerines 2-Day Jeju Course',
+    ja: 'おつかれさま 済州2日コース',
+    'zh-CN': '苦尽柑来遇见你 济州2日路线',
+  },
+  'csv-route-4': {
+    en: 'Squid Game 2-Day Seoul Course',
+    ja: 'イカゲーム ソウル2日コース',
+    'zh-CN': '鱿鱼游戏 首尔2日路线',
+  },
+  'csv-route-5': {
+    en: 'Guardian: The Lonely and Great God 2-Day Gangwon Course',
+    ja: 'トッケビ 江原2日コース',
+    'zh-CN': '鬼怪 江原2日路线',
+  },
+  'csv-route-6': {
+    en: 'Hometown Cha-Cha-Cha 2-Day Gyeongbuk Course',
+    ja: '海街チャチャチャ 慶北2日コース',
+    'zh-CN': '海岸村恰恰恰 庆北2日路线',
+  },
+  'csv-route-7': {
+    en: 'Our Beloved Summer 2-Day Gyeonggi Course',
+    ja: 'その年、私たちは 京畿2日コース',
+    'zh-CN': '那年，我们的夏天 京畿2日路线',
+  },
+  'csv-route-8': {
+    en: 'Crash Landing on You 2-Day Gyeonggi Course',
+    ja: '愛の不時着 京畿2日コース',
+    'zh-CN': '爱的迫降 京畿2日路线',
+  },
+};
 onMounted(() => {
   contentStore.load();
   placeStore.load();
@@ -64,14 +106,21 @@ function courseTitleCacheKey(course, targetLocale = currentLocale.value) {
   return [targetLocale, course.routeId, 'title', course.title].join('::');
 }
 
+function localizeHomeCourseTag(tag, targetLocale) {
+  const regionLabel = localizeSystemLabel(tag, 'region', t, targetLocale);
+  if (regionLabel !== tag) return regionLabel;
+  return localizeSystemTag(tag, t, targetLocale);
+}
+
 function localizeHomeCourse(course) {
   const targetLocale = currentLocale.value;
   const titleKey = courseTitleCacheKey(course, targetLocale);
+  const fallbackTitle = HOME_COURSE_TITLE_TRANSLATIONS[course.routeId]?.[targetLocale] || course.title;
   return {
     ...course,
-    title: targetLocale === 'ko' ? course.title : translatedCourseTitles.value[titleKey] || course.title,
+    title: targetLocale === 'ko' ? course.title : translatedCourseTitles.value[titleKey] || fallbackTitle,
     region: localizeSystemLabel(course.region, 'region', t, targetLocale),
-    tags: (course.tags ?? []).map((tag) => localizeSystemTag(tag, t, targetLocale)),
+    tags: (course.tags ?? []).map((tag) => localizeHomeCourseTag(tag, targetLocale)),
   };
 }
 
