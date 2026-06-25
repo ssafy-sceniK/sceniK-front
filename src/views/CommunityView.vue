@@ -369,6 +369,14 @@ function selectBoard(board) {
     },
   });
 }
+
+function communityPostDetailTarget(post) {
+  const postId = post?.postId ?? post?.id;
+  return postId
+    ? { name: 'community-post', params: { id: postId } }
+    : { name: 'community' };
+}
+
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -1112,6 +1120,7 @@ async function savePostEdit() {
   postActionLoading.value = false;
   if (updated) {
     resetPostEditState({ clearDraft: true });
+    window.setTimeout(() => router.replace(communityPostDetailTarget(updated)), 450);
     return;
   }
   postNotice.value = {

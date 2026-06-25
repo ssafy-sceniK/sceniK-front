@@ -389,6 +389,13 @@ function buildTags() {
   ]);
 }
 
+function postDetailTarget(post) {
+  const postId = post?.postId ?? post?.id;
+  return postId
+    ? { name: 'community-post', params: { id: postId } }
+    : { name: 'community' };
+}
+
 async function createPost() {
   if (posting.value) return;
   if (body.value.length > MAX_POST_BODY_LENGTH) {
@@ -457,7 +464,7 @@ async function createPost() {
   selectedBoard.value = 'drama';
   revokeImagePreviews();
   statusNotice.value = null;
-  window.setTimeout(() => router.push('/community'), 450);
+  window.setTimeout(() => router.replace(postDetailTarget(created)), 450);
 }
 </script>
 
