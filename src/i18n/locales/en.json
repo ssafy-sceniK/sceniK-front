@@ -92,6 +92,8 @@
     "all": "All",
     "boards": "Boards",
     "searchPlaceholder": "Search posts or tags",
+    "boardPostCount": "{count} posts",
+    "boardPostCountOne": "{count} post",
     "comments": {
       "titleWithCount": "Comments {count}"
     },

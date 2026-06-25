@@ -1,20 +1,23 @@
 ﻿<script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { motion } from 'motion-v';
 import { readAccessToken } from '../api/authApi.js';
 import { useUiStore } from '../stores/uiStore.js';
 import AppLayout from '../components/layout/AppLayout.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import { motionVariants } from '../utils/motion.js';
+import { utilityBackTo } from '../utils/utilityNavigation.js';
 
 const router = useRouter();
+const route = useRoute();
 const uiStore = useUiStore();
 const { t } = useI18n();
 const notifications = computed(() => uiStore.notifications);
 const error = computed(() => uiStore.notificationsError);
 const loading = computed(() => uiStore.notificationsLoading);
+const utilityBackTarget = computed(() => utilityBackTo(route));
 const hasToken = ref(Boolean(readAccessToken()));
 const showDeleteAllConfirm = ref(false);
 const deletingAll = ref(false);
@@ -75,7 +78,7 @@ onMounted(loadNotifications);
 </script>
 
 <template>
-  <AppLayout :title="t('notifications.title')" back back-to="/home" back-replace>
+  <AppLayout :title="t('notifications.title')" back :back-to="utilityBackTarget" back-replace>
     <section class="utility-screen">
       <div class="utility-header">
         <p>{{ t('notifications.description') }}</p>

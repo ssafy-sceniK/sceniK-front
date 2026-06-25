@@ -92,6 +92,8 @@
     "all": "전체",
     "boards": "게시판",
     "searchPlaceholder": "게시글, 태그 검색",
+    "boardPostCount": "{count}개 글",
+    "boardPostCountOne": "{count}개 글",
     "comments": {
       "titleWithCount": "댓글 {count}"
     },

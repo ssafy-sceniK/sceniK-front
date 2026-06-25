@@ -92,6 +92,8 @@
     "all": "全部",
     "boards": "版块",
     "searchPlaceholder": "搜索帖子或标签",
+    "boardPostCount": "{count} 篇帖子",
+    "boardPostCountOne": "{count} 篇帖子",
     "comments": {
       "titleWithCount": "评论 {count}"
     },

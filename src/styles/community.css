@@ -1189,6 +1189,19 @@
   padding: 9px 10px;
 }
 
+.board-banner-toggle {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.board-banner-toggle:focus-visible {
+  outline: 3px solid rgba(0, 82, 255, 0.22);
+  outline-offset: 2px;
+}
+
 .board-banner--selector > .board-icon {
   width: 34px;
   height: 34px;

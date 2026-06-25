@@ -92,6 +92,8 @@
     "all": "すべて",
     "boards": "掲示板",
     "searchPlaceholder": "投稿、タグを検索",
+    "boardPostCount": "{count}件の投稿",
+    "boardPostCountOne": "{count}件の投稿",
     "comments": {
       "titleWithCount": "コメント {count}"
     },

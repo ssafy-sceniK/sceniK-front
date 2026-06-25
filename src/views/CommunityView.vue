@@ -37,7 +37,7 @@ import { filterDisplayTags, isGenericAiCourseTag, isInternalSystemTag } from '..
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const query = ref('');
 const sort = ref('latest');
 const restoringQuery = ref(false);
@@ -303,6 +303,14 @@ function postBelongsToBoard(post, board) {
 
 function boardPostCount(board) {
   return uiStore.communityPosts.filter((post) => postBelongsToBoard(post, board)).length;
+}
+
+function boardPostCountLabel(board) {
+  const count = boardPostCount(board);
+  const key = String(locale.value).startsWith('en') && count === 1
+    ? 'community.boardPostCountOne'
+    : 'community.boardPostCount';
+  return t(key, { count });
 }
 
 function toggleBoardSelector() {
@@ -1279,7 +1287,7 @@ async function nativeShare() {
             <span class="board-copy">
               <strong>{{ board.fullName }}</strong>
             </span>
-            <em>{{ t('communityAuto2.k1s', { count: boardPostCount(board) }) }}</em>
+            <em>{{ boardPostCountLabel(board) }}</em>
             <span class="board-chevron" aria-hidden="true">›</span>
           </RouterLink>
         </div>
@@ -1723,23 +1731,23 @@ async function nativeShare() {
         </form>
 
         <div v-if="isBoardFeed" class="board-selector">
-          <div class="board-banner board-banner--selector">
+          <button
+            type="button"
+            class="board-banner board-banner--selector board-banner-toggle"
+            :aria-expanded="boardSelectorOpen"
+            :aria-label="t('communityAuto.k18idub2')"
+            @click="toggleBoardSelector"
+          >
             <span :class="['board-icon', `board-${activeBoard.id}`]" aria-hidden="true">
               <span class="board-icon-symbol"><CommunityBoardIcon :type="activeBoard.id" /></span>
             </span>
             <div class="board-selector-copy">
               <strong>{{ activeBoard.name }}</strong>
             </div>
-            <button
-              type="button"
-              class="board-accordion-toggle"
-              :aria-expanded="boardSelectorOpen"
-              :aria-label="t('communityAuto.k18idub2')"
-              @click="toggleBoardSelector"
-            >
+            <span class="board-accordion-toggle" aria-hidden="true">
               <span class="board-selector-chevron" :class="{ open: boardSelectorOpen }" aria-hidden="true">&#8964;</span>
-            </button>
-          </div>
+            </span>
+          </button>
           <div v-if="boardSelectorOpen" class="board-accordion-list">
             <button
               v-for="board in otherBoards"
@@ -1753,7 +1761,7 @@ async function nativeShare() {
               </span>
               <span class="board-option-copy">
                 <strong>{{ board.name }}</strong>
-                <small>{{ t('communityAuto2.k1s', { count: boardPostCount(board) }) }}</small>
+                <small>{{ boardPostCountLabel(board) }}</small>
               </span>
             </button>
           </div>

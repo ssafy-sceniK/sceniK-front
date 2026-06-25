@@ -1,16 +1,19 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import AppLanguageSelector from '../components/common/AppLanguageSelector.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { normalizeLocale, setLocale } from '../i18n/index.js';
+import { utilityBackTo } from '../utils/utilityNavigation.js';
 
 const router = useRouter();
+const route = useRoute();
 const uiStore = useUiStore();
 const { t, locale } = useI18n();
 const activeLanguage = computed(() => normalizeLocale(locale.value) || 'ko');
+const utilityBackTarget = computed(() => utilityBackTo(route));
 const languageSaving = ref(false);
 const theme = computed({
   get: () => uiStore.theme,
@@ -83,7 +86,7 @@ async function confirmAccountDelete() {
 </script>
 
 <template>
-  <AppLayout :title="t('settings.title')" back back-to="/home" back-replace>
+  <AppLayout :title="t('settings.title')" back :back-to="utilityBackTarget" back-replace>
     <section class="utility-screen">
       <div class="settings-section">
         <h2>{{ t('language.selectorTitle') }}</h2>
