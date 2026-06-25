@@ -189,6 +189,18 @@ function placeById(places, placeId) {
 }
 
 const places = readPlacesCsv();
+const cafeFallbackSamples = [
+  ['\uD14C\uC2A4\uD2B8\uCE74\uD398', 'Teseuteu Cafe'],
+  ['\uD14C\uC2A4\uD2B8 \uCE74\uD398', 'Teseuteu Cafe'],
+  ['\uCE74\uD398\uD654\uD64D', 'Cafe Hwahong'],
+  ['\uCE74\uD398\uD14C\uC2A4\uD2B8', 'Cafe Teseuteu'],
+];
+for (const [source, expected] of cafeFallbackSamples) {
+  const actual = placeNameFallbackForLocale(source, 'en');
+  assert(actual === expected, `Cafe fallback mismatch for ${source}: expected ${expected}, got ${actual}`);
+  assert(!/Kape/i.test(actual), `Cafe fallback still contains Kape for ${source}: ${actual}`);
+}
+
 const expectedSamples = [
   ['P_0219', 'en', 'Lotte World Tower Seoul Sky'],
   ['P_0219', 'ja', 'ロッテワールドタワー ソウルスカイ'],

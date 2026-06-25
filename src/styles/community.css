@@ -1988,6 +1988,23 @@
   object-fit: contain;
 }
 
+.post-gallery--detail:has(.post-gallery-item + .post-gallery-item) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.post-gallery--detail:has(.post-gallery-item + .post-gallery-item) .post-gallery-item {
+  aspect-ratio: 1 / 1;
+  place-items: stretch;
+  overflow: hidden;
+}
+
+.post-gallery--detail:has(.post-gallery-item + .post-gallery-item) .post-gallery-item img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
 .post-edit-attachment-manager {
   margin-top: 12px;
   padding: 12px;
@@ -2106,9 +2123,8 @@
 }
 
 @media (min-width: 560px) {
-  .post-gallery--detail,
   .post-gallery--detail:has(.post-gallery-item + .post-gallery-item) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     column-count: initial;
   }
 

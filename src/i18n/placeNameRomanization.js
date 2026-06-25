@@ -210,6 +210,7 @@ const PLACE_NAME_OVERRIDES = new Map([
 ]);
 
 const SUFFIX_TRANSLATIONS = [
+  ['\uCE74\uD398', { en: 'Cafe', ja: '\u30AB\u30D5\u30A7', 'zh-CN': '\u5496\u5561\u9986' }],
   ['관광정보센터', { en: 'Tourist Information Center', ja: '観光情報センター', 'zh-CN': '旅游信息中心' }],
   ['문화박물관', { en: 'Cultural Museum', ja: '文化博物館', 'zh-CN': '文化博物馆' }],
   ['역사박물관', { en: 'History Museum', ja: '歴史博物館', 'zh-CN': '历史博物馆' }],
@@ -262,6 +263,10 @@ const SUFFIX_TRANSLATIONS = [
   ['항', { en: 'Port', ja: '港', 'zh-CN': '港' }],
   ['섬', { en: 'Island', ja: '島', 'zh-CN': '岛' }],
   ['산', { en: 'Mountain', ja: '山', 'zh-CN': '山' }],
+];
+
+const PREFIX_TRANSLATIONS = [
+  ['\uCE74\uD398', { en: 'Cafe', ja: '\u30AB\u30D5\u30A7', 'zh-CN': '\u5496\u5561\u9986' }],
 ];
 
 const ROOT_TRANSLATIONS = [
@@ -436,6 +441,13 @@ function localizedHybridPlaceName(source, locale) {
   const directKey = String(source ?? '').trim();
   const override = PLACE_NAME_OVERRIDES.get(directKey) ?? PLACE_NAME_OVERRIDES.get(compact);
   if (override?.[targetLocale]) return override[targetLocale];
+
+  const prefixMatch = PREFIX_TRANSLATIONS.find(([prefix]) => compact.startsWith(prefix) && compact.length > prefix.length);
+  if (prefixMatch) {
+    const [prefix, translations] = prefixMatch;
+    const root = compact.slice(prefix.length);
+    return [translations[targetLocale] ?? translations.en, localizeRoot(root, targetLocale)].filter(Boolean).join(' ').trim();
+  }
 
   const suffixMatch = SUFFIX_TRANSLATIONS.find(([suffix]) => compact.endsWith(suffix) && compact.length > suffix.length);
   if (!suffixMatch) return '';

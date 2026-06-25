@@ -55,9 +55,7 @@ const postEditTitle = ref('');
 const postEditBody = ref('');
 const postEditBoard = ref('drama');
 const postEditHashtags = ref([]);
-const postEditAttachments = ref([]);
-const postEditImageFiles = ref([]);
-const postEditImagePreviewItems = ref([]);
+const postEditImageItems = ref([]);
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 const failedPostImageKeys = ref(new Set());
@@ -561,10 +559,40 @@ function editablePostAttachments(post) {
   return buildEditableAttachments(attachments.length ? attachments : directPostImageAttachments(post));
 }
 
-function revokePostEditImagePreviews() {
-  postEditImagePreviewItems.value.forEach((item) => URL.revokeObjectURL(item.url));
-  postEditImagePreviewItems.value = [];
-  postEditImageFiles.value = [];
+function createExistingPostEditImageItem(attachment, index = 0) {
+  const previewUrl = attachmentImageUrl(attachment);
+  return {
+    localKey: `existing-${attachment.editKey ?? attachment.imageId ?? attachment.id ?? previewUrl ?? index}`,
+    kind: 'existing',
+    attachment,
+    previewUrl,
+    name: attachmentDisplayName(attachment, `image-${index + 1}`),
+    isImage: isDisplayableImageAttachment(attachment) && Boolean(previewUrl),
+  };
+}
+
+function createNewPostEditImageItem(file) {
+  const id = postEditImageFileId(file);
+  return {
+    localKey: `new-${id}`,
+    kind: 'new',
+    file,
+    previewUrl: URL.createObjectURL(file),
+    name: file.name,
+    isImage: true,
+  };
+}
+
+function postEditImageItemName(item, index = 0) {
+  if (item.kind === 'new') return item.name || item.file?.name || `image-${index + 1}`;
+  return item.name || attachmentDisplayName(item.attachment ?? item, `image-${index + 1}`);
+}
+
+function resetPostEditImageItems() {
+  postEditImageItems.value.forEach((item) => {
+    if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+  postEditImageItems.value = [];
 }
 
 function handlePostEditImageFiles(event) {
@@ -575,7 +603,7 @@ function handlePostEditImageFiles(event) {
     return;
   }
 
-  const currentImageCount = displayableImageAttachments(postEditAttachments.value).length + postEditImageFiles.value.length;
+  const currentImageCount = postEditImageItems.value.filter((item) => item.isImage).length;
   const availableCount = Math.max(0, MAX_POST_IMAGES - currentImageCount);
   if (availableCount <= 0) {
     postNotice.value = {
@@ -587,7 +615,9 @@ function handlePostEditImageFiles(event) {
     return;
   }
 
-  const existingIds = new Set(postEditImageFiles.value.map(postEditImageFileId));
+  const existingIds = new Set(postEditImageItems.value
+    .filter((item) => item.kind === 'new' && item.file)
+    .map((item) => postEditImageFileId(item.file)));
   const acceptedFiles = files
     .filter((file) => !existingIds.has(postEditImageFileId(file)))
     .slice(0, availableCount);
@@ -600,67 +630,48 @@ function handlePostEditImageFiles(event) {
     };
   }
 
-  postEditImageFiles.value = [...postEditImageFiles.value, ...acceptedFiles];
-  postEditImagePreviewItems.value = [
-    ...postEditImagePreviewItems.value,
-    ...acceptedFiles.map((file) => ({
-      id: postEditImageFileId(file),
-      name: file.name,
-      url: URL.createObjectURL(file),
-    })),
+  postEditImageItems.value = [
+    ...postEditImageItems.value,
+    ...acceptedFiles.map(createNewPostEditImageItem),
   ];
   if (input) input.value = '';
 }
 
-function removePostEditAttachment(editKey) {
-  postEditAttachments.value = postEditAttachments.value.filter((attachment) => attachment.editKey !== editKey);
+function removePostEditImageItem(localKey) {
+  const target = postEditImageItems.value.find((item) => item.localKey === localKey);
+  if (target?.kind === 'new' && target.previewUrl) URL.revokeObjectURL(target.previewUrl);
+  postEditImageItems.value = postEditImageItems.value.filter((item) => item.localKey !== localKey);
 }
 
-function movePostEditAttachment(index, offset) {
-  postEditAttachments.value = moveArrayItem(postEditAttachments.value, index, offset);
+function movePostEditImageItem(index, offset) {
+  postEditImageItems.value = moveArrayItem(postEditImageItems.value, index, offset);
 }
 
-function removePostEditNewImage(id) {
-  const target = postEditImagePreviewItems.value.find((item) => item.id === id);
-  if (target) URL.revokeObjectURL(target.url);
-  postEditImageFiles.value = postEditImageFiles.value.filter((file) => postEditImageFileId(file) !== id);
-  postEditImagePreviewItems.value = postEditImagePreviewItems.value.filter((item) => item.id !== id);
+async function uploadPostEditImages() {
+  const uploadPairs = await Promise.all(postEditImageItems.value
+    .filter((item) => item.kind === 'new' && item.file)
+    .map(async (item) => [item.localKey, await uploadPostImage(item.file)]));
+  return new Map(uploadPairs);
 }
 
-function movePostEditNewImage(index, offset) {
-  postEditImageFiles.value = moveArrayItem(postEditImageFiles.value, index, offset);
-  postEditImagePreviewItems.value = moveArrayItem(postEditImagePreviewItems.value, index, offset);
-}
-
-function postEditAttachmentPayload(uploadedUrls = []) {
-  const existingAttachments = postEditAttachments.value
-    .map((attachment, index) => {
-      const url = attachmentUrl(attachment);
+function postEditAttachmentPayload(uploadedUrlByKey = new Map()) {
+  return postEditImageItems.value
+    .map((item, index) => {
+      const attachment = item.attachment ?? {};
+      const url = item.kind === 'new'
+        ? uploadedUrlByKey.get(item.localKey)
+        : attachmentUrl(attachment);
       if (!url) return null;
       return {
         url,
         imageUrl: url,
-        thumbnailUrl: attachment.thumbnailUrl ?? attachment.thumbnail_url ?? url,
-        type: attachment.type ?? 'image',
-        name: attachmentDisplayName(attachment, `image-${index + 1}`),
+        thumbnailUrl: item.kind === 'new' ? url : attachment.thumbnailUrl ?? attachment.thumbnail_url ?? url,
+        type: item.kind === 'new' ? 'image' : attachment.type ?? 'image',
+        name: postEditImageItemName(item, index),
       };
     })
-    .filter(Boolean);
-
-  const uploadedAttachments = uploadedUrls
-    .map((url, index) => {
-      if (!url) return null;
-      return {
-        url,
-        imageUrl: url,
-        thumbnailUrl: url,
-        type: 'image',
-        name: postEditImageFiles.value[index]?.name || `image-${index + 1}`,
-      };
-    })
-    .filter(Boolean);
-
-  return [...existingAttachments, ...uploadedAttachments].slice(0, MAX_POST_IMAGES);
+    .filter(Boolean)
+    .slice(0, MAX_POST_IMAGES);
 }
 function canShowAuthorFollow(post) {
   const authorId = post?.userId;
@@ -712,8 +723,8 @@ function startPostEdit() {
     .map(normalizeHashtag)
     .filter((tag) => tag && !isSystemPostTag(tag)))
     .slice(0, MAX_HASHTAGS);
-  revokePostEditImagePreviews();
-  postEditAttachments.value = editablePostAttachments(selectedPost.value);
+  resetPostEditImageItems();
+  postEditImageItems.value = editablePostAttachments(selectedPost.value).map(createExistingPostEditImageItem);
   postNotice.value = null;
 }
 
@@ -723,8 +734,7 @@ function resetPostEditState() {
   postEditBody.value = '';
   postEditHashtags.value = [];
   postEditHashtagInput.value = '';
-  postEditAttachments.value = [];
-  revokePostEditImagePreviews();
+  resetPostEditImageItems();
   postNotice.value = null;
 }
 
@@ -751,8 +761,8 @@ async function savePostEdit() {
   };
   let updated = null;
   try {
-    const uploadedUrls = await Promise.all(postEditImageFiles.value.map((file) => uploadPostImage(file)));
-    const attachments = postEditAttachmentPayload(uploadedUrls);
+    const uploadedUrlByKey = await uploadPostEditImages();
+    const attachments = postEditAttachmentPayload(uploadedUrlByKey);
     updated = await uiStore.editPost(postKey(target), {
       title: postEditTitle.value.trim(),
       body: postEditBody.value.trim(),
@@ -1118,41 +1128,33 @@ async function nativeShare() {
               </label>
               <label class="form-field compact">{{ t('communityAuto.k1supta6') }}<textarea v-model="postEditBody" maxlength="500" :placeholder="t('communityAuto.k99wxgm')"></textarea>
               </label>
-              <div v-if="postEditAttachments.length || postEditImagePreviewItems.length" class="post-edit-attachment-manager">
+              <div v-if="postEditImageItems.length" class="post-edit-attachment-manager">
                 <div class="post-edit-attachment-heading">
                   <strong>{{ t('community.edit.attachmentsTitle') }}</strong>
                   <small>{{ t('community.edit.attachmentsHelp') }}</small>
                 </div>
-                <div v-if="postEditAttachments.length" class="post-edit-image-grid">
-                  <figure v-for="(attachment, index) in postEditAttachments" :key="attachment.editKey" class="post-edit-image-item">
+                <div class="post-edit-image-grid">
+                  <figure
+                    v-for="(item, index) in postEditImageItems"
+                    :key="item.localKey"
+                    class="post-edit-image-item"
+                    :class="{ 'post-edit-image-item--new': item.kind === 'new' }"
+                  >
                     <div class="post-edit-image-frame">
                       <img
-                        v-if="isDisplayableImageAttachment(attachment) && attachmentImageUrl(attachment)"
-                        :src="attachmentImageUrl(attachment)"
-                        :alt="t('community.edit.existingImageAlt', { index: index + 1 })"
-                        :title="attachmentDisplayName(attachment)"
+                        v-if="item.isImage && item.previewUrl"
+                        :src="item.previewUrl"
+                        :alt="item.kind === 'new' ? t('community.edit.newImageAlt', { index: index + 1 }) : t('community.edit.existingImageAlt', { index: index + 1 })"
+                        :title="postEditImageItemName(item, index)"
                       />
-                      <span v-else>{{ attachmentDisplayName(attachment, t('community.edit.fallbackFile')) }}</span>
+                      <span v-else>{{ postEditImageItemName(item, index) }}</span>
+                      <span v-if="item.kind === 'new'" class="post-edit-image-badge">{{ t('community.edit.newImageBadge') }}</span>
                     </div>
-                    <figcaption>{{ attachmentDisplayName(attachment, t('community.edit.fallbackFile')) }}</figcaption>
+                    <figcaption>{{ postEditImageItemName(item, index) }}</figcaption>
                     <div class="post-edit-image-actions">
-                      <button type="button" :disabled="index === 0" :aria-label="t('community.edit.movePrevious')" :title="t('community.edit.movePrevious')" @click="movePostEditAttachment(index, -1)">&lt;</button>
-                      <button type="button" :disabled="index === postEditAttachments.length - 1" :aria-label="t('community.edit.moveNext')" :title="t('community.edit.moveNext')" @click="movePostEditAttachment(index, 1)">&gt;</button>
-                      <button type="button" class="danger" :aria-label="t('community.edit.removeImage')" :title="t('community.edit.removeImage')" @click="removePostEditAttachment(attachment.editKey)">x</button>
-                    </div>
-                  </figure>
-                </div>
-                <div v-if="postEditImagePreviewItems.length" class="post-edit-image-grid">
-                  <figure v-for="(item, index) in postEditImagePreviewItems" :key="item.id" class="post-edit-image-item post-edit-image-item--new">
-                    <div class="post-edit-image-frame">
-                      <img :src="item.url" :alt="t('community.edit.newImageAlt', { index: index + 1 })" :title="item.name" />
-                      <span class="post-edit-image-badge">{{ t('community.edit.newImageBadge') }}</span>
-                    </div>
-                    <figcaption>{{ item.name }}</figcaption>
-                    <div class="post-edit-image-actions">
-                      <button type="button" :disabled="index === 0" :aria-label="t('community.edit.movePrevious')" :title="t('community.edit.movePrevious')" @click="movePostEditNewImage(index, -1)">&lt;</button>
-                      <button type="button" :disabled="index === postEditImagePreviewItems.length - 1" :aria-label="t('community.edit.moveNext')" :title="t('community.edit.moveNext')" @click="movePostEditNewImage(index, 1)">&gt;</button>
-                      <button type="button" class="danger" :aria-label="t('community.edit.removeImage')" :title="t('community.edit.removeImage')" @click="removePostEditNewImage(item.id)">x</button>
+                      <button type="button" :disabled="index === 0" :aria-label="t('community.edit.movePrevious')" :title="t('community.edit.movePrevious')" @click="movePostEditImageItem(index, -1)">&lt;</button>
+                      <button type="button" :disabled="index === postEditImageItems.length - 1" :aria-label="t('community.edit.moveNext')" :title="t('community.edit.moveNext')" @click="movePostEditImageItem(index, 1)">&gt;</button>
+                      <button type="button" class="danger" :aria-label="t('community.edit.removeImage')" :title="t('community.edit.removeImage')" @click="removePostEditImageItem(item.localKey)">x</button>
                     </div>
                   </figure>
                 </div>
