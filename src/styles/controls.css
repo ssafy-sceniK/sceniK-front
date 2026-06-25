@@ -170,6 +170,10 @@
   box-shadow: var(--shadow-sm);
 }
 
+.auth-form .form-field input {
+  font-size: 16px;
+}
+
 .form-field textarea {
   min-height: 112px;
   padding: 14px;

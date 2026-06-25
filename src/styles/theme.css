@@ -754,9 +754,16 @@ body {
 }
 
 :root[data-theme="dark"] .notification-delete-button {
+  color: #f87171;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .notification-delete-button:hover:not(:disabled),
+:root[data-theme="dark"] .notification-delete-button:active:not(:disabled) {
   color: #fca5a5;
-  background: #302a2a;
-  border-color: var(--border);
+  background: transparent;
 }
 
 :root[data-theme="dark"] .notification-row strong {

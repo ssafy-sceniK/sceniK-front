@@ -134,19 +134,27 @@
 }
 
 .notification-delete-button {
-  width: 38px;
-  min-height: 38px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
   align-self: center;
-  margin-right: 10px;
+  margin-right: 8px;
   display: grid;
   place-items: center;
-  color: var(--muted);
-  background: var(--color-surface-soft);
-  border: 1px solid var(--border);
+  color: var(--color-semantic-down, #dc2626);
+  background: transparent;
+  border: 0;
   border-radius: var(--radius-full);
-  font-size: 18px;
-  font-weight: 700;
+  box-shadow: none;
+  font-size: 20px;
+  font-weight: 800;
   line-height: 1;
+}
+
+.notification-delete-button:hover:not(:disabled),
+.notification-delete-button:active:not(:disabled) {
+  color: #b91c1c;
+  background: transparent;
 }
 
 .notification-delete-button:disabled {
