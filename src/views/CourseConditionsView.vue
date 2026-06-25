@@ -13,7 +13,7 @@ import { dateAfter, ensureDateRange, formatDateRange, getTripDurationDays } from
 import { motionVariants } from '../utils/motion.js';
 import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 import { TRANSPORT_MODE_OPTIONS, TRANSPORT_MODES, normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
-import { canonicalizeCompanion, canonicalizeCourseRegions, canonicalizeTravelStyles } from '../utils/aiCourseCanonical.js';
+import { canonicalizeCompanion, canonicalizeCourseRegion, canonicalizeCourseRegions, canonicalizeTravelStyles } from '../utils/aiCourseCanonical.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -82,12 +82,14 @@ watch(() => selectedContentIds.value.join('|'), () => {
 
 const regionOptions = computed(() => {
   const counts = relatedPlaces.value.reduce((acc, place) => {
-    acc.set(place.region, (acc.get(place.region) ?? 0) + 1);
+    const region = canonicalizeCourseRegion(place.region);
+    if (!region) return acc;
+    acc.set(region, (acc.get(region) ?? 0) + 1);
     return acc;
   }, new Map());
   const relatedRegions = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([region]) => region);
-  const allRegions = placeStore.regions.filter((item) => item && item !== '\uc804\uccb4');
-  return relatedRegions.length ? relatedRegions : allRegions.length ? allRegions : [t('aiCourse.cleanup.kcf9a4aba61')];
+  const allRegions = canonicalizeCourseRegions(placeStore.regions.filter((item) => item && item !== '\uc804\uccb4'));
+  return relatedRegions.length ? relatedRegions : allRegions.length ? allRegions : ['\uc11c\uc6b8'];
 });
 const selectedRegions = computed(() => {
   const regions = Array.isArray(uiStore.courseConditions.regions)
@@ -207,9 +209,11 @@ function toggleTravelStyle(style) {
 }
 
 function toggleRegion(region) {
+  const normalizedRegion = canonicalizeCourseRegion(region);
+  if (!normalizedRegion) return;
   const current = new Set(selectedRegions.value);
-  if (current.has(region) && current.size > 1) current.delete(region);
-  else current.add(region);
+  if (current.has(normalizedRegion) && current.size > 1) current.delete(normalizedRegion);
+  else current.add(normalizedRegion);
   uiStore.courseConditions.regions = [...current];
   uiStore.courseConditions.region = uiStore.courseConditions.regions.join(',');
 }
@@ -259,7 +263,8 @@ watchEffect(() => {
     uiStore.courseConditions.regions = [uiStore.courseConditions.region || regionOptions.value[0]].filter(Boolean);
   }
   const normalizedRegions = canonicalizeCourseRegions(uiStore.courseConditions.regions);
-  const validRegions = normalizedRegions.filter((region) => regionOptions.value.includes(region));
+  const validRegionSet = new Set(regionOptions.value);
+  const validRegions = normalizedRegions.filter((region) => validRegionSet.has(region));
   uiStore.courseConditions.regions = validRegions.length ? validRegions : [regionOptions.value[0]];
   uiStore.courseConditions.region = uiStore.courseConditions.regions.join(',');
 

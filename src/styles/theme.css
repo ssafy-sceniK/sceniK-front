@@ -1547,6 +1547,10 @@ body {
 
 :root[data-theme="dark"] .community-screen .feed-actions button,
 :root[data-theme="dark"] .community-screen .feed-actions a,
+:root[data-theme="dark"] .my-community-feed .feed-actions button,
+:root[data-theme="dark"] .my-community-feed .feed-actions a,
+:root[data-theme="dark"] .public-profile-feed .feed-actions button,
+:root[data-theme="dark"] .public-profile-feed .feed-actions a,
 :root[data-theme="dark"] .community-screen .detail-actions button,
 :root[data-theme="dark"] .community-screen .detail-actions a,
 :root[data-theme="dark"] .community-screen .detail-actions > span,
@@ -1598,6 +1602,10 @@ body {
 @media (hover: hover) {
   :root[data-theme="dark"] .community-screen .feed-actions button:hover,
   :root[data-theme="dark"] .community-screen .feed-actions a:hover,
+  :root[data-theme="dark"] .my-community-feed .feed-actions button:hover,
+  :root[data-theme="dark"] .my-community-feed .feed-actions a:hover,
+  :root[data-theme="dark"] .public-profile-feed .feed-actions button:hover,
+  :root[data-theme="dark"] .public-profile-feed .feed-actions a:hover,
   :root[data-theme="dark"] .community-screen .detail-actions button:hover,
   :root[data-theme="dark"] .community-screen .detail-actions a:hover,
   :root[data-theme="dark"] .community-screen .comment-action-button:hover,
@@ -1624,6 +1632,10 @@ body {
 
 :root[data-theme="dark"] .community-screen .feed-actions button.is-active,
 :root[data-theme="dark"] .community-screen .feed-actions a.is-active,
+:root[data-theme="dark"] .my-community-feed .feed-actions button.is-active,
+:root[data-theme="dark"] .my-community-feed .feed-actions a.is-active,
+:root[data-theme="dark"] .public-profile-feed .feed-actions button.is-active,
+:root[data-theme="dark"] .public-profile-feed .feed-actions a.is-active,
 :root[data-theme="dark"] .community-screen .detail-actions button.is-active,
 :root[data-theme="dark"] .community-screen .detail-actions a.is-active,
 :root[data-theme="dark"] .community-screen .comment-action-button.is-active,
