@@ -750,7 +750,8 @@
       "bulkVisitSuccessTitle": "访问状态已更新。",
       "bulkVisitSuccessText": "已更新路线中的 {count} 个地点。",
       "bulkVisitFailedTitle": "无法更新访问状态。",
-      "bulkVisitFailedText": "部分地点未能更新。"
+      "bulkVisitFailedText": "部分地点未能更新。",
+      "bulkVisitUndoCompleted": "取消全部已访问"
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -1080,7 +1081,10 @@
       "emptyText": "在地点详情中点击计划访问或已访问，开始记录你的旅行。",
       "totalCompleted": "共 {total} 个中已完成 {completed} 个访问",
       "markCompleted": "标记已访问",
-      "markingCompleted": "处理中"
+      "markingCompleted": "处理中",
+      "undoCompleted": "取消已访问",
+      "remove": "删除访问记录",
+      "updating": "处理中"
     },
     "activity": {
       "title": {
@@ -1620,7 +1624,8 @@
       "k1y": "게시글을 스크랩했습니다.",
       "k21": "댓글 내용을 입력해 주세요.",
       "k2a": "자기 자신은 팔로우할 수 없습니다.",
-      "k2d": "팔로우를 해제하지 못했습니다."
+      "k2d": "팔로우를 해제하지 못했습니다.",
+      "visitRemoved": "已删除访问记录。"
     }
   },
   "errors": {

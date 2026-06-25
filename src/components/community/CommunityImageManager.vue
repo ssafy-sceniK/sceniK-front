@@ -235,9 +235,10 @@ onBeforeUnmount(clearPointerDragState);
         @pointermove="handleTouchReorderMove"
         @pointerup="endTouchReorder"
         @pointercancel="clearPointerDragState"
+        @contextmenu.prevent
       >
-        <div class="community-image-manager__frame">
-          <img v-if="item.isImage && item.previewUrl" :src="item.previewUrl" :alt="itemAlt(item, index)" draggable="false" />
+        <div class="community-image-manager__frame" @contextmenu.prevent>
+          <img v-if="item.isImage && item.previewUrl" :src="item.previewUrl" :alt="itemAlt(item, index)" draggable="false" @contextmenu.prevent />
           <span v-else class="community-image-manager__fallback">{{ itemName(item, index) }}</span>
           <span v-if="index === 0 && representativeLabel" class="community-image-manager__representative">{{ representativeLabel }}</span>
           <span v-if="item.kind === 'new' && newBadge" class="community-image-manager__badge">{{ newBadge }}</span>

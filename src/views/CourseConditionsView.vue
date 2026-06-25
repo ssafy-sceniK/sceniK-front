@@ -245,6 +245,7 @@ function openGenerateConfirm() {
 function confirmGenerate() {
   uiStore.persist();
   showGenerateConfirm.value = false;
+  sessionStorage.removeItem('scenik-ai-generation-complete');
   router.push('/ai/loading');
 }
 

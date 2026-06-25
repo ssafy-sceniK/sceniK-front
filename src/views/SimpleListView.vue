@@ -16,6 +16,7 @@ import { localizedNotices } from '../data/notices.js';
 import { resolveApiAssetUrl } from '../api/http.js';
 import { attachmentUrl, displayableImageAttachments } from '../utils/communityAttachments.js';
 import { filterGenericAiCourseTags } from '../utils/tags.js';
+import { isCommunityBoardTag } from '../utils/communityBoardTags.js';
 
 const LIST_CONFIG = {
   'liked-content': {
@@ -176,7 +177,8 @@ function openCourse(course) {
 }
 
 function displayPostTags(post) {
-  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  const tags = (Array.isArray(post?.tags) ? post.tags : [])
+    .filter((tag) => !isCommunityBoardTag(tag) && !String(tag ?? '').startsWith('__'));
   return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
 }
 
@@ -307,6 +309,16 @@ async function completeVisit(placeId) {
   await uiStore.setVisit(placeId, 'completed');
 }
 
+async function planVisit(placeId) {
+  if (!placeId || isVisitPending(placeId)) return;
+  await uiStore.setVisit(placeId, 'planned');
+}
+
+async function clearVisit(placeId) {
+  if (!placeId || isVisitPending(placeId)) return;
+  await uiStore.clearVisit(placeId);
+}
+
 function followButtonLabel(user) {
   if (isFollowActionPending(user.userId)) return t('my.activity.follow.pending');
   return isFollowingUser(user) ? t('my.activity.follow.following') : t('my.activity.follow.follow');
@@ -363,7 +375,7 @@ async function toggleFollowFromList(user) {
         <div
           v-for="place in type === 'completed' ? uiStore.completedVisitItems : type === 'planned' ? uiStore.plannedVisitItems : type === 'recent' ? uiStore.recentPlaceItems : uiStore.likedPlaceItems"
           :key="place.placeId"
-          :class="{ 'visit-place-action-card': type === 'planned' }"
+          :class="{ 'visit-place-action-card': type === 'planned' || type === 'completed' }"
         >
           <RouterLink class="visit-place-card-link" :to="'/places/' + place.placeId">
             <PlaceCard :place="place" compact />
@@ -377,6 +389,24 @@ async function toggleFollowFromList(user) {
           >
             {{ isVisitPending(place.placeId) ? t('my.visits.markingCompleted') : t('my.visits.markCompleted') }}
           </button>
+          <div v-else-if="type === 'completed'" class="visit-card-actions">
+            <button
+              type="button"
+              class="visit-complete-button"
+              :disabled="isVisitPending(place.placeId)"
+              @click="planVisit(place.placeId)"
+            >
+              {{ isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.undoCompleted') }}
+            </button>
+            <button
+              type="button"
+              class="visit-remove-button"
+              :disabled="isVisitPending(place.placeId)"
+              @click="clearVisit(place.placeId)"
+            >
+              {{ t('my.visits.remove') }}
+            </button>
+          </div>
         </div>
       </div>
 

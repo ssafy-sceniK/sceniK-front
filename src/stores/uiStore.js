@@ -31,6 +31,7 @@ import {
   updateRoute,
 } from '../api/routeApi.js';
 import {
+  clearPlaceVisitStatus,
   fetchMyLikes,
   fetchMyVisitStatus,
   likeContent,
@@ -458,6 +459,26 @@ function sameId(left, right) {
   return String(left) === String(right);
 }
 
+function uniqueIds(ids = []) {
+  const seen = new Set();
+  return ids.filter((id) => {
+    const key = String(id ?? '').trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function uniquePlacesById(items = []) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = String(item?.placeId ?? '').trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function followDisplayName(userId, fallbackName, ...userGroups) {
   const directName = String(fallbackName ?? '').trim();
   if (directName) return directName;
@@ -875,14 +896,14 @@ export const useUiStore = defineStore('ui', {
         this.likedPlaces = likes.placeIds ?? [];
         this.likedContentDetails = await loadContentDetails(this.likedContent);
         this.likedPlaceDetails = await loadPlaceDetails(this.likedPlaces);
-        this.plannedVisits = visitStatuses
+        this.plannedVisits = uniqueIds(visitStatuses
           .filter((item) => item.status === 'planned')
-          .map((item) => item.placeId);
-        this.completedVisits = visitStatuses
+          .map((item) => item.placeId));
+        this.completedVisits = uniqueIds(visitStatuses
           .filter((item) => item.status === 'completed')
-          .map((item) => item.placeId);
-        this.plannedVisitDetails = await loadPlaceDetails(this.plannedVisits);
-        this.completedVisitDetails = await loadPlaceDetails(this.completedVisits);
+          .map((item) => item.placeId));
+        this.plannedVisitDetails = uniquePlacesById(await loadPlaceDetails(this.plannedVisits));
+        this.completedVisitDetails = uniquePlacesById(await loadPlaceDetails(this.completedVisits));
         this.persist();
       } catch (error) {
         this.engagementError = apiErrorMessage(error, storeT('errors.store.k9'));
@@ -1236,12 +1257,30 @@ export const useUiStore = defineStore('ui', {
         this.plannedVisitDetails = this.plannedVisitDetails.filter((item) => item.placeId !== placeId);
         this.completedVisitDetails = this.completedVisitDetails.filter((item) => item.placeId !== placeId);
         const detail = await fetchPlaceDetail(placeId).catch(() => null);
-        if (status === 'planned') this.plannedVisits.push(placeId);
-        if (status === 'completed') this.completedVisits.push(placeId);
-        if (status === 'planned' && detail) this.plannedVisitDetails = [detail, ...this.plannedVisitDetails];
-        if (status === 'completed' && detail) this.completedVisitDetails = [detail, ...this.completedVisitDetails];
+        if (status === 'planned') this.plannedVisits = uniqueIds([placeId, ...this.plannedVisits]);
+        if (status === 'completed') this.completedVisits = uniqueIds([placeId, ...this.completedVisits]);
+        if (status === 'planned' && detail) this.plannedVisitDetails = uniquePlacesById([detail, ...this.plannedVisitDetails]);
+        if (status === 'completed' && detail) this.completedVisitDetails = uniquePlacesById([detail, ...this.completedVisitDetails]);
         this.persist();
         this.notify(status === 'completed' ? storeT('toast.store.k14') : storeT('toast.store.k15'));
+      } catch (error) {
+        this.notify(apiErrorMessage(error, storeT('toast.store.k16')));
+      } finally {
+        this.pendingVisitStatuses = this.pendingVisitStatuses.filter((id) => !sameId(id, placeId));
+      }
+    },
+    async clearVisit(placeId) {
+      if (!this.requireAuth(storeT('errors.store.k13'))) return;
+      if (this.pendingVisitStatuses.some((id) => sameId(id, placeId))) return;
+      this.pendingVisitStatuses = [...this.pendingVisitStatuses, placeId];
+      try {
+        await clearPlaceVisitStatus(placeId);
+        this.plannedVisits = this.plannedVisits.filter((id) => !sameId(id, placeId));
+        this.completedVisits = this.completedVisits.filter((id) => !sameId(id, placeId));
+        this.plannedVisitDetails = this.plannedVisitDetails.filter((item) => !sameId(item.placeId, placeId));
+        this.completedVisitDetails = this.completedVisitDetails.filter((item) => !sameId(item.placeId, placeId));
+        this.persist();
+        this.notify(storeT('toast.store.visitRemoved'));
       } catch (error) {
         this.notify(apiErrorMessage(error, storeT('toast.store.k16')));
       } finally {

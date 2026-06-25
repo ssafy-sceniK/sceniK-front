@@ -750,7 +750,8 @@
       "bulkVisitSuccessTitle": "방문 상태가 업데이트되었습니다.",
       "bulkVisitSuccessText": "코스 내 장소 {count}곳의 방문 상태를 업데이트했습니다.",
       "bulkVisitFailedTitle": "방문 상태를 변경하지 못했습니다.",
-      "bulkVisitFailedText": "일부 장소의 방문 상태를 변경하지 못했습니다."
+      "bulkVisitFailedText": "일부 장소의 방문 상태를 변경하지 못했습니다.",
+      "bulkVisitUndoCompleted": "전체 방문 완료 취소"
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -1080,7 +1081,10 @@
       "emptyText": "장소 상세에서 방문 예정이나 방문 완료를 눌러 여행 기록을 시작해보세요.",
       "totalCompleted": "총 {total}개 중 {completed}개 방문 완료",
       "markCompleted": "방문 완료",
-      "markingCompleted": "처리 중"
+      "markingCompleted": "처리 중",
+      "undoCompleted": "방문 완료 취소",
+      "remove": "방문 기록 삭제",
+      "updating": "처리 중"
     },
     "activity": {
       "title": {
@@ -1628,7 +1632,8 @@
       "k1y": "게시글을 스크랩했습니다.",
       "k21": "댓글 내용을 입력해 주세요.",
       "k2a": "자기 자신은 팔로우할 수 없습니다.",
-      "k2d": "팔로우를 해제하지 못했습니다."
+      "k2d": "팔로우를 해제하지 못했습니다.",
+      "visitRemoved": "방문 기록을 삭제했습니다."
     }
   },
   "errors": {

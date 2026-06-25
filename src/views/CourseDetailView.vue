@@ -75,9 +75,9 @@ const allCoursePlacesTracked = computed(() => Boolean(routePlaceIds.value.length
   && routePlaceIds.value.every((placeId) => uiStore.plannedVisits.includes(placeId) || uiStore.completedVisits.includes(placeId)));
 const allCoursePlacesCompleted = computed(() => Boolean(routePlaceIds.value.length)
   && routePlaceIds.value.every((placeId) => uiStore.completedVisits.includes(placeId)));
-const courseVisitActionDisabled = computed(() => uiStore.engagementLoading || !routePlaceIds.value.length || allCoursePlacesCompleted.value);
+const courseVisitActionDisabled = computed(() => uiStore.engagementLoading || !routePlaceIds.value.length);
 const courseVisitActionLabel = computed(() => {
-  if (allCoursePlacesCompleted.value) return t('course.detail.bulkVisitDone');
+  if (allCoursePlacesCompleted.value) return t('course.detail.bulkVisitUndoCompleted');
   return allCoursePlacesTracked.value ? t('course.detail.bulkVisitCompleted') : t('course.detail.bulkVisitPlanned');
 });
 
@@ -278,8 +278,8 @@ async function shareCourse() {
 async function markCoursePlacesVisitStatus() {
   if (!uiStore.requireAuth(t('course.detail.shareLoginRequired'))) return;
   const placeIds = routePlaceIds.value;
-  if (!placeIds.length || allCoursePlacesCompleted.value) return;
-  const targetStatus = allCoursePlacesTracked.value ? 'completed' : 'planned';
+  if (!placeIds.length) return;
+  const targetStatus = allCoursePlacesCompleted.value ? 'planned' : allCoursePlacesTracked.value ? 'completed' : 'planned';
   actionNotice.value = {
     tone: 'info',
     title: t('course.detail.bulkVisitProgressTitle'),

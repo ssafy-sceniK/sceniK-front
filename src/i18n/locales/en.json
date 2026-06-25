@@ -750,7 +750,8 @@
       "bulkVisitSuccessTitle": "Visit status updated.",
       "bulkVisitSuccessText": "Updated visit status for {count} places.",
       "bulkVisitFailedTitle": "Could not update visit status.",
-      "bulkVisitFailedText": "Some places could not be updated."
+      "bulkVisitFailedText": "Some places could not be updated.",
+      "bulkVisitUndoCompleted": "Undo all completed"
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -1080,7 +1081,10 @@
       "emptyText": "Start your travel record by marking planned or completed visits on place detail pages.",
       "totalCompleted": "{completed} of {total} visits completed",
       "markCompleted": "Mark completed",
-      "markingCompleted": "Updating"
+      "markingCompleted": "Updating",
+      "undoCompleted": "Undo completed",
+      "remove": "Remove visit",
+      "updating": "Updating"
     },
     "activity": {
       "title": {
@@ -1620,7 +1624,8 @@
       "k1y": "게시글을 스크랩했습니다.",
       "k21": "댓글 내용을 입력해 주세요.",
       "k2a": "자기 자신은 팔로우할 수 없습니다.",
-      "k2d": "팔로우를 해제하지 못했습니다."
+      "k2d": "팔로우를 해제하지 못했습니다.",
+      "visitRemoved": "Visit record removed."
     }
   },
   "errors": {

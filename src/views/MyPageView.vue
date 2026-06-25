@@ -91,6 +91,16 @@ async function completeVisit(placeId) {
   if (!placeId || isVisitPending(placeId)) return;
   await uiStore.setVisit(placeId, 'completed');
 }
+
+async function planVisit(placeId) {
+  if (!placeId || isVisitPending(placeId)) return;
+  await uiStore.setVisit(placeId, 'planned');
+}
+
+async function clearVisit(placeId) {
+  if (!placeId || isVisitPending(placeId)) return;
+  await uiStore.clearVisit(placeId);
+}
 </script>
 
 <template>
@@ -220,7 +230,7 @@ async function completeVisit(placeId) {
           <h2>{{ t('my.visits.planned') }}</h2>
           <span>{{ t('my.counts.places', { count: plannedCount }) }}</span>
         </div>
-        <div v-for="place in uiStore.plannedVisitItems" :key="`planned-${place.placeId}`" class="visit-place-action-row">
+        <div v-for="place in uiStore.plannedVisitItems" :key="`planned-${place.placeId}`" class="visit-place-action-card">
           <RouterLink class="visit-place-card-link" :to="`/places/${place.placeId}`">
             <PlaceCard :place="place" compact />
           </RouterLink>
@@ -238,9 +248,29 @@ async function completeVisit(placeId) {
           <h2>{{ t('my.visits.completed') }}</h2>
           <span>{{ t('my.counts.places', { count: completedCount }) }}</span>
         </div>
-        <RouterLink v-for="place in uiStore.completedVisitItems" :key="`completed-${place.placeId}`" :to="`/places/${place.placeId}`">
-          <PlaceCard :place="place" compact />
-        </RouterLink>
+        <div v-for="place in uiStore.completedVisitItems" :key="`completed-${place.placeId}`" class="visit-place-action-card">
+          <RouterLink class="visit-place-card-link" :to="`/places/${place.placeId}`">
+            <PlaceCard :place="place" compact />
+          </RouterLink>
+          <div class="visit-card-actions">
+            <button
+              type="button"
+              class="visit-complete-button"
+              :disabled="isVisitPending(place.placeId)"
+              @click="planVisit(place.placeId)"
+            >
+              {{ isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.undoCompleted') }}
+            </button>
+            <button
+              type="button"
+              class="visit-remove-button"
+              :disabled="isVisitPending(place.placeId)"
+              @click="clearVisit(place.placeId)"
+            >
+              {{ t('my.visits.remove') }}
+            </button>
+          </div>
+        </div>
         <EmptyState
           v-if="!totalVisitCount"
           icon="GO"

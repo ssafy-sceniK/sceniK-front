@@ -66,6 +66,7 @@ const resultShareRouteId = computed(() => {
 const resultShareUrl = computed(() => {
   return buildCourseShareUrl(router, resultShareRouteId.value);
 });
+const resultShareDisabled = computed(() => savingRoute.value || !resultShareUrl.value);
 const saveStatusRows = computed(() => {
   if (!route.value) return [];
   return [
@@ -123,9 +124,9 @@ const allRoutePlacesTracked = computed(() => Boolean(routePlaceIds.value.length)
   && routePlaceIds.value.every((placeId) => uiStore.plannedVisits.includes(placeId) || uiStore.completedVisits.includes(placeId)));
 const allRoutePlacesCompleted = computed(() => Boolean(routePlaceIds.value.length)
   && routePlaceIds.value.every((placeId) => uiStore.completedVisits.includes(placeId)));
-const bulkVisitActionDisabled = computed(() => !routePlaceIds.value.length || allRoutePlacesCompleted.value);
+const bulkVisitActionDisabled = computed(() => !routePlaceIds.value.length);
 const bulkVisitActionLabel = computed(() => {
-  if (allRoutePlacesCompleted.value) return t('course.detail.bulkVisitDone');
+  if (allRoutePlacesCompleted.value) return t('course.detail.bulkVisitUndoCompleted');
   return allRoutePlacesTracked.value ? t('course.detail.bulkVisitCompleted') : t('course.detail.bulkVisitPlanned');
 });
 
@@ -266,6 +267,10 @@ function handleResultAction() {
 
 function openShareSheet() {
   if (!uiStore.requireAuth(t('autoPass.ui_7bdc2a95cb'))) return;
+  if (resultShareDisabled.value) {
+    uiStore.notify(t('course.detail.shareUnavailable'));
+    return;
+  }
   showActionMenu.value = false;
   showShareSheet.value = true;
 }
@@ -401,8 +406,8 @@ async function shareMessage() {
 async function markRoutePlacesVisitStatus() {
   if (!route.value || !uiStore.requireAuth(t('autoPass.ui_5823398baa'))) return;
   const placeIds = routePlaceIds.value;
-  if (!placeIds.length || allRoutePlacesCompleted.value) return;
-  const targetStatus = allRoutePlacesTracked.value ? 'completed' : 'planned';
+  if (!placeIds.length) return;
+  const targetStatus = allRoutePlacesCompleted.value ? 'planned' : allRoutePlacesTracked.value ? 'completed' : 'planned';
   showActionMenu.value = false;
   closeShareSheet();
   for (const placeId of placeIds) {
@@ -435,7 +440,7 @@ function postFromShareSheet() {
         <AnimatePresence>
           <motion.div v-if="showActionMenu" class="result-menu-backdrop" v-bind="motionVariants.backdrop()" @click="showActionMenu = false">
           <motion.div id="ai-result-action-menu" class="result-menu-popover" role="menu" v-bind="motionVariants.popover()" @click.stop>
-            <button type="button" role="menuitem" @click="openShareSheet">
+            <button type="button" role="menuitem" :disabled="resultShareDisabled" @click="openShareSheet">
               <span class="result-menu-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg>
               </span>

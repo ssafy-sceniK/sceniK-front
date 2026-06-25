@@ -21,6 +21,7 @@ const router = useRouter();
 const contentStore = useContentStore();
 const placeStore = usePlaceStore();
 const uiStore = useUiStore();
+const GENERATION_COMPLETE_KEY = 'scenik-ai-generation-complete';
 const loadingProgress = ref(0);
 const loadingSteps = [
   {
@@ -171,6 +172,13 @@ function compactContentTitle(selected = selectedContents()) {
   return `${titles[0]} \uc678 ${titles.length - 1}\uac1c`;
 }
 
+function compactPlaceTitle(places = []) {
+  const name = places
+    .map((place) => String(place?.placeName ?? place?.name ?? '').trim())
+    .find((value) => value && value.length <= 12);
+  return name || '';
+}
+
 function cleanStyleLabel(styles = selectedTravelStyles()) {
   const style = String(styles[0] ?? uiStore.courseConditions.style ?? '\uac10\uc131 \uc5ec\ud589').trim();
   return style.replace(/\s*\uc5ec\ud589$/u, '').replace(/\s+/g, ' ');
@@ -185,8 +193,9 @@ function cleanCourseTitle(value) {
 
 function isUsableCourseTitle(value) {
   const title = cleanCourseTitle(value);
-  if (!title || title.length < 5) return false;
-  if (/[?�]/.test(title) || title.includes('\ufffd') || title.includes('\u5360')) return false;
+  if (!title || title.length < 5 || title.length > 42) return false;
+  if (/[\ufffd\u5360?]/u.test(title)) return false;
+  if (/(\uc120\ud0dd\ud55c\s*K-?\ucf58\ud150\uce20|AI\s*\ucf54\uc2a4|\ucd94\ucc9c\s*\ucf54\uc2a4|\uc5ec\ud589\s*\ucf54\uc2a4|K-content travel|sceniK AI Course)/i.test(title)) return false;
   return !/^(sceniK\s*)?(AI\s*)?(course|\ucf54\uc2a4|\ucd94\ucc9c \ucf54\uc2a4|\uc5ec\ud589 \ucf54\uc2a4)$/i.test(title);
 }
 
@@ -195,16 +204,21 @@ function buildAutoCourseTitle({
   selected = selectedContents(),
   regions = selectedRegions(),
   styles = selectedTravelStyles(),
+  places = [],
   durationDays = getTripDurationDays(uiStore.courseConditions),
 } = {}) {
   if (isUsableCourseTitle(backendTitle)) return cleanCourseTitle(backendTitle);
   const contentTitle = compactContentTitle(selected);
   const regionTitle = regions.slice(0, 2).join(' · ') || 'Korea';
   const styleTitle = cleanStyleLabel(styles);
+  const placeTitle = compactPlaceTitle(places);
   const durationTitle = `${Math.max(1, Number(durationDays) || 1)}\uc77c \ucf54\uc2a4`;
-  const fullTitle = [contentTitle, regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
-  if (fullTitle.length <= 42) return fullTitle;
-  return [regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  const candidates = [
+    [contentTitle, regionTitle, styleTitle, durationTitle],
+    [regionTitle, placeTitle, styleTitle, durationTitle],
+    [regionTitle, styleTitle, durationTitle],
+  ].map((parts) => cleanCourseTitle(parts.filter(Boolean).join(' ')));
+  return candidates.find((title) => isUsableCourseTitle(title)) || `${regionTitle} ${durationTitle}`;
 }
 
 function candidateFromPlace(place, selectedContent) {
@@ -319,6 +333,7 @@ async function generateRoute() {
         selected,
         regions,
         styles: travelStyles,
+        places: backendRoute.candidatePlaces ?? [],
         durationDays: backendRoute.durationDays ?? requestedDuration,
       }),
       contentTitle: selectedContentTitle,
@@ -340,7 +355,8 @@ async function generateRoute() {
     };
     uiStore.persist();
     await completeLoading();
-    router.push('/ai/result');
+    sessionStorage.setItem(GENERATION_COMPLETE_KEY, '1');
+    router.replace('/ai/result');
     return;
   } catch (error) {
     const message = getUserMessage(error, t('autoPass.ui_761f414bf0'));
@@ -374,6 +390,7 @@ async function generateRoute() {
       selected,
       regions: request.regions,
       styles: travelStyles,
+      places: candidatePlaces,
       durationDays: dayCount,
     }),
     summary: `${dateRangeLabel} \uc77c\uc815\uc5d0 \ub9de\ucdb0 ${contentTitle}\uc640 \uac19\uc740 \uc9c0\uc5ed\uc758 \uc2e4\uc81c \uc7a5\uc18c\ub97c \uc5f0\uacb0\ud55c ${dayCount}\uc77c \uc5ec\ud589 \ucf54\uc2a4\uc785\ub2c8\ub2e4.`,
@@ -424,10 +441,15 @@ async function generateRoute() {
   uiStore.generatedRoute = route;
   uiStore.persist();
   await completeLoading();
-  router.push('/ai/result');
+  sessionStorage.setItem(GENERATION_COMPLETE_KEY, '1');
+  router.replace('/ai/result');
 }
 
 onMounted(() => {
+  if (sessionStorage.getItem(GENERATION_COMPLETE_KEY) === '1' && uiStore.generatedRoute) {
+    router.replace('/ai/result');
+    return;
+  }
   generationStartTime = Date.now();
   progressTimerId = window.setInterval(() => {
     const elapsed = Date.now() - generationStartTime;
