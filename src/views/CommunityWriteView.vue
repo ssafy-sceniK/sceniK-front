@@ -18,7 +18,7 @@ const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 const MAX_POST_BODY_LENGTH = 1000;
 const COURSE_PICKER_PAGE_SIZE = 5;
-const CREATE_DRAFT_KEY = 'community:create';
+const CREATE_DRAFT_PREFIX = 'community:create:';
 const LEGACY_ROUTE_DRAFT_KEY = 'scenik-community-draft';
 let createDraftFiles = [];
 
@@ -87,6 +87,19 @@ watch([
   persistDraft();
 }, { deep: true });
 
+watch(() => draftUserId(), (userId, previousUserId) => {
+  if (previousUserId && userId !== previousUserId) {
+    clearDraft(previousUserId);
+    selectedBoard.value = 'drama';
+    selectedHashtags.value = [];
+    hashtagInput.value = '';
+    title.value = '';
+    body.value = '';
+    selectedRouteId.value = '';
+    revokeImagePreviews();
+  }
+});
+
 
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
@@ -143,8 +156,26 @@ function hasDraftContent() {
   );
 }
 
+function draftUserId() {
+  return String(uiStore.currentUser?.userId ?? uiStore.currentUser?.email ?? '').trim();
+}
+
+function createDraftKey(userId = draftUserId()) {
+  return userId ? `${CREATE_DRAFT_PREFIX}${userId}` : '';
+}
+
+function isBackNavigationEntry() {
+  return typeof window !== 'undefined' && Boolean(window.history?.state?.forward);
+}
+
+function shouldRestoreStoredDraft() {
+  if (typeof sessionStorage === 'undefined') return false;
+  return Boolean(route.query.routeId || sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY) || isBackNavigationEntry());
+}
+
 function draftPayload() {
   return {
+    userId: draftUserId(),
     board: selectedBoard.value,
     title: title.value,
     body: body.value,
@@ -156,31 +187,50 @@ function draftPayload() {
 
 function persistDraft() {
   if (typeof sessionStorage === 'undefined') return;
+  const draftKey = createDraftKey();
+  if (!draftKey) return;
   createDraftFiles = postImageItems.value
     .filter((item) => item.kind === 'new' && item.file)
     .map((item) => item.file);
   if (!hasDraftContent()) {
-    sessionStorage.removeItem(CREATE_DRAFT_KEY);
+    sessionStorage.removeItem(draftKey);
     createDraftFiles = [];
     return;
   }
-  sessionStorage.setItem(CREATE_DRAFT_KEY, JSON.stringify(draftPayload()));
+  sessionStorage.setItem(draftKey, JSON.stringify(draftPayload()));
 }
 
-function clearDraft() {
+function clearDraft(userId = draftUserId()) {
   if (typeof sessionStorage !== 'undefined') {
-    sessionStorage.removeItem(CREATE_DRAFT_KEY);
+    const draftKey = createDraftKey(userId);
+    if (draftKey) sessionStorage.removeItem(draftKey);
     sessionStorage.removeItem(LEGACY_ROUTE_DRAFT_KEY);
   }
   createDraftFiles = [];
 }
 
 function restoreDraft() {
-  const rawDraft = sessionStorage.getItem(CREATE_DRAFT_KEY) || sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY);
+  if (typeof sessionStorage === 'undefined') return;
+  const userId = draftUserId();
+  if (!userId) {
+    sessionStorage.removeItem(LEGACY_ROUTE_DRAFT_KEY);
+    return;
+  }
+  if (!shouldRestoreStoredDraft()) {
+    clearDraft(userId);
+    return;
+  }
+  const draftKey = createDraftKey(userId);
+  const legacyDraft = sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY);
+  const rawDraft = sessionStorage.getItem(draftKey) || legacyDraft;
   if (!rawDraft && !route.query.routeId) return;
   try {
     const draft = rawDraft ? JSON.parse(rawDraft) : {};
-    if (sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY)) {
+    if (draft.userId && String(draft.userId) !== userId) {
+      clearDraft(userId);
+      return;
+    }
+    if (legacyDraft) {
       sessionStorage.removeItem(LEGACY_ROUTE_DRAFT_KEY);
     }
     selectedBoard.value = draft.board || (draft.routeId || route.query.routeId ? 'region' : 'drama');
@@ -195,7 +245,7 @@ function restoreDraft() {
       postImageItems.value = createDraftFiles.map(createPostImageItem);
     }
   } catch {
-    clearDraft();
+    clearDraft(userId);
   }
 }
 
@@ -537,6 +587,7 @@ async function createPost() {
             v-else
             class="course-picker-empty-state"
             tone="route"
+            :show-visual="false"
             compact
             :title="t('community.write.noSavedCourseTitle')"
             :text="t('community.write.noSavedCourseText')"

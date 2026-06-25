@@ -1769,3 +1769,33 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Final QA polish for Community controls and image-count overlays. */
+.community-screen .list-control-row.community-sort-row,
+:root[data-theme="dark"] .community-screen .list-control-row.community-sort-row {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.community-screen .list-control-row.community-sort-row {
+  padding-inline: 0;
+}
+
+.feed-thumb-count,
+:root[data-theme="dark"] .feed-thumb-count {
+  z-index: 2;
+  min-width: 30px;
+  min-height: 25px;
+  color: #ffffff;
+  background: rgba(2, 6, 23, 0.92);
+  border-color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
+  font-size: 12px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+}
+
+:root[data-theme="dark"] .feed-thumb-count {
+  background: rgba(0, 0, 0, 0.94);
+  border-color: rgba(255, 255, 255, 0.94);
+}

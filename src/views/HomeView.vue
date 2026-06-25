@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -13,10 +13,8 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
-import { translateResource } from '../api/translationApi.js';
 import { courseTemplates } from '../data/mockData.js';
 import { normalizeLocale } from '../i18n/languages.js';
-import { localizeSystemLabel, localizeSystemTag } from '../i18n/systemContent.js';
 import { localizedNotices } from '../data/notices.js';
 
 const router = useRouter();
@@ -27,51 +25,58 @@ const { t, locale } = useI18n();
 const contentTab = ref('drama');
 const routeTab = ref('realtime');
 const homePopularRouteLimit = 3;
-const translatedCourseTitles = ref({});
-const courseTitleRequests = new Map();
 
-const HOME_COURSE_TITLE_TRANSLATIONS = {
+const HOME_COURSE_DISPLAY = {
   'csv-route-1': {
-    en: 'Lovely Runner 2-Day Gyeonggi Course',
-    ja: 'ソンジェ背負って走れ 京畿2日コース',
-    'zh-CN': '背着善宰跑 京畿2日路线',
+    ko: { title: '\uc120\uc7ac \uc5c5\uace0 \ud280\uc5b4 \uacbd\uae30 2\uc77c \ucf54\uc2a4', region: '\uacbd\uae30', tags: ['\ub4dc\ub77c\ub9c8', '\uacbd\uae30', '\uc218\uc6d0'] },
+    en: { title: 'Lovely Runner 2-Day Gyeonggi Course', region: 'Gyeonggi', tags: ['Drama', 'Gyeonggi', 'Suwon'] },
+    ja: { title: 'ソンジェ背負って走れ 京畿2日コース', region: '京畿', tags: ['ドラマ', '京畿', '水原'] },
+    'zh-CN': { title: '背着善宰跑 京畿2日行程', region: '京畿', tags: ['电视剧', '京畿', '水原'] },
   },
   'csv-route-2': {
-    en: 'Queen of Tears 2-Day Gyeongbuk Course',
-    ja: '涙の女王 慶北2日コース',
-    'zh-CN': '眼泪女王 庆北2日路线',
+    ko: { title: '\ub208\ubb3c\uc758 \uc5ec\uc655 \uacbd\ubd81 2\uc77c \ucf54\uc2a4', region: '\uacbd\ubd81', tags: ['\ub4dc\ub77c\ub9c8', '\uacbd\ubd81', '\uc11c\uc6b8'] },
+    en: { title: 'Queen of Tears 2-Day Gyeongbuk Course', region: 'Gyeongbuk', tags: ['Drama', 'Gyeongbuk', 'Seoul'] },
+    ja: { title: '涙の女王 慶北2日コース', region: '慶北', tags: ['ドラマ', '慶北', 'ソウル'] },
+    'zh-CN': { title: '泪之女王 庆北2日行程', region: '庆北', tags: ['电视剧', '庆北', '首尔'] },
   },
   'csv-route-3': {
-    en: 'When Life Gives You Tangerines 2-Day Jeju Course',
-    ja: 'おつかれさま 済州2日コース',
-    'zh-CN': '苦尽柑来遇见你 济州2日路线',
+    ko: { title: '\ud3ed\uc2f9 \uc18d\uc558\uc218\ub2e4 \uc81c\uc8fc 2\uc77c \ucf54\uc2a4', region: '\uc81c\uc8fc', tags: ['\ub4dc\ub77c\ub9c8', '\uc81c\uc8fc'] },
+    en: { title: 'When Life Gives You Tangerines 2-Day Jeju Course', region: 'Jeju', tags: ['Drama', 'Jeju'] },
+    ja: { title: 'おつかれさま 済州2日コース', region: '済州', tags: ['ドラマ', '済州'] },
+    'zh-CN': { title: '苦尽柑来遇见你 济州2日行程', region: '济州', tags: ['电视剧', '济州'] },
   },
   'csv-route-4': {
-    en: 'Squid Game 2-Day Seoul Course',
-    ja: 'イカゲーム ソウル2日コース',
-    'zh-CN': '鱿鱼游戏 首尔2日路线',
+    ko: { title: '\uc624\uc9d5\uc5b4 \uac8c\uc784 \uc11c\uc6b8 2\uc77c \ucf54\uc2a4', region: '\uc11c\uc6b8', tags: ['\ub4dc\ub77c\ub9c8', '\uc11c\uc6b8'] },
+    en: { title: 'Squid Game 2-Day Seoul Course', region: 'Seoul', tags: ['Drama', 'Seoul'] },
+    ja: { title: 'イカゲーム ソウル2日コース', region: 'ソウル', tags: ['ドラマ', 'ソウル'] },
+    'zh-CN': { title: '鱿鱼游戏 首尔2日行程', region: '首尔', tags: ['电视剧', '首尔'] },
   },
   'csv-route-5': {
-    en: 'Guardian: The Lonely and Great God 2-Day Gangwon Course',
-    ja: 'トッケビ 江原2日コース',
-    'zh-CN': '鬼怪 江原2日路线',
+    ko: { title: '\ub3c4\uae68\ube44 \uac15\uc6d0 2\uc77c \ucf54\uc2a4', region: '\uac15\uc6d0', tags: ['\ub4dc\ub77c\ub9c8', '\uac15\uc6d0', '\uac15\ub989'] },
+    en: { title: 'Guardian: The Lonely and Great God 2-Day Gangwon Course', region: 'Gangwon', tags: ['Drama', 'Gangwon', 'Gangneung'] },
+    ja: { title: 'トッケビ 江原2日コース', region: '江原', tags: ['ドラマ', '江原', '江陵'] },
+    'zh-CN': { title: '鬼怪 江原2日行程', region: '江原', tags: ['电视剧', '江原', '江陵'] },
   },
   'csv-route-6': {
-    en: 'Hometown Cha-Cha-Cha 2-Day Gyeongbuk Course',
-    ja: '海街チャチャチャ 慶北2日コース',
-    'zh-CN': '海岸村恰恰恰 庆北2日路线',
+    ko: { title: '\uac2f\ub9c8\uc744 \ucc28\ucc28\ucc28 \uacbd\ubd81 2\uc77c \ucf54\uc2a4', region: '\uacbd\ubd81', tags: ['\ub4dc\ub77c\ub9c8', '\uacbd\ubd81', '\ud3ec\ud56d'] },
+    en: { title: 'Hometown Cha-Cha-Cha 2-Day Gyeongbuk Course', region: 'Gyeongbuk', tags: ['Drama', 'Gyeongbuk', 'Pohang'] },
+    ja: { title: '海街チャチャチャ 慶北2日コース', region: '慶北', tags: ['ドラマ', '慶北', '浦項'] },
+    'zh-CN': { title: '海岸村恰恰恰 庆北2日行程', region: '庆北', tags: ['电视剧', '庆北', '浦项'] },
   },
   'csv-route-7': {
-    en: 'Our Beloved Summer 2-Day Gyeonggi Course',
-    ja: 'その年、私たちは 京畿2日コース',
-    'zh-CN': '那年，我们的夏天 京畿2日路线',
+    ko: { title: '\uadf8 \ud574 \uc6b0\ub9ac\ub294 \uacbd\uae30 2\uc77c \ucf54\uc2a4', region: '\uacbd\uae30', tags: ['\ub4dc\ub77c\ub9c8', '\uacbd\uae30', '\uc11c\uc6b8'] },
+    en: { title: 'Our Beloved Summer 2-Day Gyeonggi Course', region: 'Gyeonggi', tags: ['Drama', 'Gyeonggi', 'Seoul'] },
+    ja: { title: 'その年、私たちは 京畿2日コース', region: '京畿', tags: ['ドラマ', '京畿', 'ソウル'] },
+    'zh-CN': { title: '那年，我们的夏天 京畿2日行程', region: '京畿', tags: ['电视剧', '京畿', '首尔'] },
   },
   'csv-route-8': {
-    en: 'Crash Landing on You 2-Day Gyeonggi Course',
-    ja: '愛の不時着 京畿2日コース',
-    'zh-CN': '爱的迫降 京畿2日路线',
+    ko: { title: '\uc0ac\ub791\uc758 \ubd88\uc2dc\ucc29 \uacbd\uae30 2\uc77c \ucf54\uc2a4', region: '\uacbd\uae30', tags: ['\ub4dc\ub77c\ub9c8', '\uacbd\uae30', '\ucda9\uc8fc'] },
+    en: { title: 'Crash Landing on You 2-Day Gyeonggi Course', region: 'Gyeonggi', tags: ['Drama', 'Gyeonggi', 'Chungju'] },
+    ja: { title: '愛の不時着 京畿2日コース', region: '京畿', tags: ['ドラマ', '京畿', '忠州'] },
+    'zh-CN': { title: '爱的迫降 京畿2日行程', region: '京畿', tags: ['电视剧', '京畿', '忠州'] },
   },
 };
+
 onMounted(() => {
   contentStore.load();
   placeStore.load();
@@ -102,67 +107,17 @@ const currentLocale = computed(() => normalizeLocale(locale.value) || 'ko');
 const visibleRouteItems = computed(() => visibleRawRouteItems.value.map(localizeHomeCourse));
 const noticeItems = computed(() => localizedNotices(t));
 
-function courseTitleCacheKey(course, targetLocale = currentLocale.value) {
-  return [targetLocale, course.routeId, 'title', course.title].join('::');
-}
-
-function localizeHomeCourseTag(tag, targetLocale) {
-  const regionLabel = localizeSystemLabel(tag, 'region', t, targetLocale);
-  if (regionLabel !== tag) return regionLabel;
-  return localizeSystemTag(tag, t, targetLocale);
-}
-
 function localizeHomeCourse(course) {
   const targetLocale = currentLocale.value;
-  const titleKey = courseTitleCacheKey(course, targetLocale);
-  const fallbackTitle = HOME_COURSE_TITLE_TRANSLATIONS[course.routeId]?.[targetLocale] || course.title;
+  const display = HOME_COURSE_DISPLAY[course.routeId]?.[targetLocale]
+    ?? HOME_COURSE_DISPLAY[course.routeId]?.ko;
   return {
     ...course,
-    title: targetLocale === 'ko' ? course.title : translatedCourseTitles.value[titleKey] || fallbackTitle,
-    region: localizeSystemLabel(course.region, 'region', t, targetLocale),
-    tags: (course.tags ?? []).map((tag) => localizeHomeCourseTag(tag, targetLocale)),
+    title: display?.title ?? course.title,
+    region: display?.region ?? course.region,
+    tags: display?.tags ?? (course.tags ?? []),
   };
 }
-
-async function loadCourseTitleTranslation(course) {
-  const targetLocale = currentLocale.value;
-  if (!course?.title || targetLocale === 'ko') return;
-  const cacheKey = courseTitleCacheKey(course, targetLocale);
-  if (translatedCourseTitles.value[cacheKey]) return;
-  if (courseTitleRequests.has(cacheKey)) return courseTitleRequests.get(cacheKey);
-  const request = translateResource({
-    resourceType: 'SYSTEM_TEXT',
-    resourceId: 'home-course:' + course.routeId,
-    field: 'title',
-    targetLanguage: targetLocale,
-    sourceText: course.title,
-    sourceLanguage: 'ko',
-  })
-    .then((result) => {
-      const translated = result?.translatedText;
-      if (translated) {
-        translatedCourseTitles.value = {
-          ...translatedCourseTitles.value,
-          [cacheKey]: translated,
-        };
-      }
-    })
-    .catch(() => {})
-    .finally(() => {
-      courseTitleRequests.delete(cacheKey);
-    });
-  courseTitleRequests.set(cacheKey, request);
-  return request;
-}
-
-function loadVisibleCourseTranslations() {
-  visibleRawRouteItems.value.forEach((course) => {
-    void loadCourseTitleTranslation(course);
-  });
-}
-
-watch([currentLocale, visibleRawRouteItems], loadVisibleCourseTranslations, { immediate: true });
-
 
 function openCourse(course) {
   if (!course?.routeId) {

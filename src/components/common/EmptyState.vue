@@ -9,6 +9,7 @@ const props = defineProps({
   tone: { type: String, default: 'neutral' },
   compact: { type: Boolean, default: false },
   variant: { type: String, default: 'card' },
+  showVisual: { type: Boolean, default: true },
   actionLabel: { type: String, default: '' },
   actionTo: { type: [String, Object], default: '' },
   secondaryLabel: { type: String, default: '' },
@@ -43,7 +44,7 @@ const bodyText = computed(() => props.description || props.text);
       { 'empty-state--compact': compact },
     ]"
   >
-    <div class="empty-state__visual" aria-hidden="true">
+    <div v-if="showVisual" class="empty-state__visual" aria-hidden="true">
       <span v-if="iconLabel">{{ iconLabel }}</span>
     </div>
 

@@ -341,4 +341,14 @@ function selectLanguage(language) {
     background: transparent;
   }
 }
+
+.app-language-selector--splash .app-language-selector__trigger,
+:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger,
+:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger:hover,
+:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger:active {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
 </style>

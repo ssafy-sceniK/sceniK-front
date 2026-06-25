@@ -73,6 +73,20 @@ import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../ut
 import { getCurrentLocale, i18n, normalizeLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
+const COMMUNITY_DRAFT_KEYS = ['community:create', 'community:edit:', 'scenik-community-draft'];
+
+function clearCommunityDraftStorage() {
+  if (typeof sessionStorage === 'undefined') return;
+  const keysToRemove = [];
+  for (let index = 0; index < sessionStorage.length; index += 1) {
+    const key = sessionStorage.key(index);
+    if (!key) continue;
+    if (COMMUNITY_DRAFT_KEYS.some((draftKey) => key === draftKey || key.startsWith(draftKey))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+}
 
 function applyColorTheme(theme) {
   if (typeof document === 'undefined') return;
@@ -945,6 +959,7 @@ export const useUiStore = defineStore('ui', {
         // Local logout should still clear client state if the token is already invalid.
       }
       clearAccessToken();
+      clearCommunityDraftStorage();
       this.currentUser = null;
       this.savedCourses = [];
       this.myReviews = [];
@@ -957,6 +972,7 @@ export const useUiStore = defineStore('ui', {
       if (!readAccessToken()) throw new Error(storeT('common.loginRequired'));
       await deleteMeRequest();
       clearAccessToken();
+      clearCommunityDraftStorage();
       this.currentUser = null;
       this.savedCourses = [];
       this.myReviews = [];

@@ -772,9 +772,14 @@ async function createPost() {
   }
 }
 
+function postEditDraftUserId() {
+  return String(uiStore.currentUser?.userId ?? uiStore.currentUser?.email ?? '').trim();
+}
+
 function postEditDraftKey(post = postEditDraftSource.value || selectedPost.value) {
   const key = postKey(post);
-  return key ? EDIT_DRAFT_PREFIX + key : '';
+  const userId = postEditDraftUserId();
+  return key && userId ? `${EDIT_DRAFT_PREFIX}${key}:${userId}` : '';
 }
 
 function hasPostEditDraftContent(post = postEditDraftSource.value || selectedPost.value) {
@@ -794,6 +799,7 @@ function hasPostEditDraftContent(post = postEditDraftSource.value || selectedPos
 
 function postEditDraftPayload(post = postEditDraftSource.value || selectedPost.value) {
   return {
+    userId: postEditDraftUserId(),
     title: postEditTitle.value,
     body: postEditBody.value,
     board: postEditBoard.value,
@@ -835,6 +841,10 @@ function restorePostEditDraft(post = postEditDraftSource.value || selectedPost.v
   if (!rawDraft) return false;
   try {
     const draft = JSON.parse(rawDraft);
+    if (draft.userId && String(draft.userId) !== postEditDraftUserId()) {
+      clearPostEditDraft(post);
+      return false;
+    }
     postEditTitle.value = draft.title ?? post.title ?? '';
     postEditBody.value = draft.body ?? post.body ?? '';
     postEditBoard.value = draft.board || communityBoardIdFromTags(post.tags ?? []) || 'drama';
@@ -1338,7 +1348,6 @@ async function nativeShare() {
             </div>
             <div v-if="!editingPost && displayPostTags(selectedPost).length" class="tag-row"><span v-for="tag in displayPostTags(selectedPost)" :key="tag">{{ tag }}</span></div>
             <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
-              <span class="course-dot">AI</span>
               <div>
                 <small class="course-kicker">{{ t('communityAuto.k166mo55') }}</small>
                 <strong>{{ t('community.linkedCourse.title', { region: selectedPost.region }) }}</strong>
