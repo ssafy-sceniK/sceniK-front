@@ -21,11 +21,11 @@ const uiStore = useUiStore();
 const { t } = useI18n();
 
 const boards = [
-  { id: 'drama', labelKey: 'community.boardLabels.drama.short', tagKey: 'content.category.drama' },
-  { id: 'movie', labelKey: 'community.boardLabels.movie.short', tagKey: 'content.category.movie' },
-  { id: 'idol', labelKey: 'community.boardLabels.idol.short', tagKey: 'content.category.idol' },
-  { id: 'variety', labelKey: 'community.boardLabels.variety.short', tagKey: 'content.category.variety' },
-  { id: 'region', labelKey: 'community.boardLabels.region.short', tagKey: 'community.write.boards.region' },
+  { id: 'drama', icon: '\u{1F3AD}', labelKey: 'community.boardLabels.drama.short', tagKey: 'content.category.drama' },
+  { id: 'movie', icon: '\u{1F3AC}', labelKey: 'community.boardLabels.movie.short', tagKey: 'content.category.movie' },
+  { id: 'idol', icon: '\u2605', labelKey: 'community.boardLabels.idol.short', tagKey: 'content.category.idol' },
+  { id: 'variety', icon: '\u2726', labelKey: 'community.boardLabels.variety.short', tagKey: 'content.category.variety' },
+  { id: 'region', icon: '\u2316', labelKey: 'community.boardLabels.region.short', tagKey: 'community.write.boards.region' },
 ];
 
 const selectedBoard = ref('drama');
@@ -339,6 +339,7 @@ async function createPost() {
               :class="{ active: selectedBoard === board.id }"
               @click="selectedBoard = board.id"
             >
+              <span class="write-board-icon" aria-hidden="true">{{ board.icon }}</span>
               <span>{{ t(board.labelKey) }}</span>
             </button>
           </div>
@@ -478,9 +479,16 @@ async function createPost() {
           </div>
           <EmptyState
             v-else
+            class="course-picker-empty-state"
+            icon="AI"
+            tone="route"
             compact
             :title="t('community.write.noSavedCourseTitle')"
             :text="t('community.write.noSavedCourseText')"
+            :action-label="t('community.write.createAiCourse')"
+            action-to="/ai"
+            :secondary-label="t('common.close')"
+            @secondary="closeCoursePicker"
           />
           <footer>
             <button type="button" class="button button-secondary" :disabled="!selectedRouteId" @click="clearSelectedCourse">{{ t('community.write.clear') }}</button>

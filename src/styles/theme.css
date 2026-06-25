@@ -1317,3 +1317,111 @@ body {
     box-shadow: none;
   }
 }
+
+/* Dark-mode action polish: reserve red for destructive states. */
+:root[data-theme="dark"] {
+  --dark-action-bg: rgba(59, 130, 246, 0.18);
+  --dark-action-bg-strong: rgba(59, 130, 246, 0.28);
+  --dark-action-border: rgba(96, 165, 250, 0.48);
+  --dark-action-text: #bfdbfe;
+  --dark-action-solid: #3b82f6;
+  --dark-action-solid-hover: #60a5fa;
+}
+
+:root[data-theme="dark"] .button-primary,
+:root[data-theme="dark"] .top-save-button,
+:root[data-theme="dark"] .course-primary-cta,
+:root[data-theme="dark"] .hashtag-input-row button,
+:root[data-theme="dark"] .course-picker-load-more {
+  color: #ffffff;
+  background: var(--dark-action-solid);
+  border-color: var(--dark-action-solid);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .button-primary:not(:disabled):hover,
+:root[data-theme="dark"] .top-save-button:not(:disabled):hover,
+:root[data-theme="dark"] .course-primary-cta:not(:disabled):hover,
+:root[data-theme="dark"] .hashtag-input-row button:not(:disabled):hover,
+:root[data-theme="dark"] .course-picker-load-more:not(:disabled):hover {
+  background: var(--dark-action-solid-hover);
+  border-color: var(--dark-action-solid-hover);
+}
+
+:root[data-theme="dark"] .button-danger,
+:root[data-theme="dark"] .post-owner-button.button-danger,
+:root[data-theme="dark"] .comment-action-button.is-danger,
+:root[data-theme="dark"] .account-delete-confirm,
+:root[data-theme="dark"] .post-edit-image-actions button.danger {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(248, 113, 113, 0.36);
+}
+
+:root[data-theme="dark"] .chip.selected,
+:root[data-theme="dark"] .write-board-grid button.active,
+:root[data-theme="dark"] .course-picker-option.selected,
+:root[data-theme="dark"] .detail-actions button.is-active,
+:root[data-theme="dark"] .feed-actions button.is-active,
+:root[data-theme="dark"] .author-follow-button.is-following,
+:root[data-theme="dark"] .my-section-tabs button.active,
+:root[data-theme="dark"] .public-profile-screen .my-section-tabs button.active,
+:root[data-theme="dark"] .community-tabs a.active,
+:root[data-theme="dark"] .segmented-sort__option.active,
+:root[data-theme="dark"] .settings-segment button.active {
+  color: var(--dark-action-text);
+  background: var(--dark-action-bg-strong);
+  border-color: var(--dark-action-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .write-board-grid button.active .write-board-icon {
+  color: #ffffff;
+  background: var(--dark-action-solid);
+  border-color: var(--dark-action-solid);
+}
+
+:root[data-theme="dark"] .course-picker-option.selected strong,
+:root[data-theme="dark"] .course-picker-option.selected small,
+:root[data-theme="dark"] .my-section-tabs button.active,
+:root[data-theme="dark"] .public-profile-screen .my-section-tabs button.active {
+  color: var(--dark-action-text);
+}
+
+:root[data-theme="dark"] .public-profile-screen .my-section-tabs button:not(.active),
+:root[data-theme="dark"] .my-section-tabs button:not(.active) {
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .translation-toggle {
+  color: var(--dark-action-text);
+  background: var(--dark-action-bg);
+  border-color: var(--dark-action-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .translation-toggle:not(:disabled):hover,
+:root[data-theme="dark"] .translation-toggle:focus-visible {
+  color: #ffffff;
+  background: var(--dark-action-solid);
+  border-color: var(--dark-action-solid-hover);
+}
+
+:root[data-theme="dark"] .profile-name-row span {
+  color: var(--dark-action-text);
+  background: var(--dark-action-bg);
+  border-color: var(--dark-action-border);
+}
+:root[data-theme="dark"] .profile-avatar-button .avatar-edit-badge {
+  color: #ffffff;
+  background: var(--dark-action-solid);
+  border-color: rgba(219, 234, 254, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+}
+
+:root[data-theme="dark"] .course-picker-empty-state.empty-state {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--dark-action-border);
+}

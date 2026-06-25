@@ -119,8 +119,8 @@
       "courseLink": "저장한 AI 코스",
       "noneSelected": "선택 안 함",
       "scheduleFallback": "Schedule",
-      "courseLinkEmptyHelp": "저장한 AI 코스",
-      "courseLinkHelp": "저장한 AI 코스",
+      "courseLinkEmptyHelp": "??? AI ??? ???? ??? ? ????.",
+      "courseLinkHelp": "??? ??? ??? ???? ?? ????.",
       "selectedCourse": "저장한 AI 코스",
       "clear": "취소",
       "titleLabel": "Title",
@@ -140,9 +140,9 @@
       "submitReady": "첫 여행 이야기를 남겨보세요.",
       "submitDisabled": "Title 2 / content 5",
       "coursePickerTitle": "저장한 AI 코스",
-      "coursePickerDescription": "저장한 AI 코스",
-      "noSavedCourseTitle": "저장한 AI 코스",
-      "noSavedCourseText": "저장한 AI 코스",
+      "coursePickerDescription": "???? ??? ?? ??? ?????.",
+      "noSavedCourseTitle": "??? AI ??? ????",
+      "noSavedCourseText": "?? AI ??? ???? ??? ? ???? ??? ? ????.",
       "validationTitle": "로그인 실패",
       "validationText": "Title 2 / content 5",
       "saveProgressTitle": "저장",
@@ -153,7 +153,8 @@
       "createFailedText": "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
       "savedTitle": "저장",
       "savedText": "첫 여행 이야기를 남겨보세요.",
-      "addHashtag": "해시태그 추가"
+      "addHashtag": "해시태그 추가",
+      "createAiCourse": "AI ?? ???"
     },
     "a11y": {
       "postImageOpen": "게시글 이미지 {index} 확대 보기",

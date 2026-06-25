@@ -119,8 +119,8 @@
       "courseLink": "保存したAIコース",
       "noneSelected": "未選択",
       "scheduleFallback": "Schedule",
-      "courseLinkEmptyHelp": "保存したAIコース",
-      "courseLinkHelp": "保存したAIコース",
+      "courseLinkEmptyHelp": "????AI?????????????????",
+      "courseLinkHelp": "?????????????????????",
       "selectedCourse": "保存したAIコース",
       "clear": "キャンセル",
       "titleLabel": "Title",
@@ -140,9 +140,9 @@
       "submitReady": "最初の旅行ストーリーを共有しましょう。",
       "submitDisabled": "Title 2 / content 5",
       "coursePickerTitle": "保存したAIコース",
-      "coursePickerDescription": "保存したAIコース",
-      "noSavedCourseTitle": "保存したAIコース",
-      "noSavedCourseText": "保存したAIコース",
+      "coursePickerDescription": "?????????????????????????",
+      "noSavedCourseTitle": "????AI?????????",
+      "noSavedCourseText": "??AI?????????????????????????",
       "validationTitle": "ログイン失敗",
       "validationText": "Title 2 / content 5",
       "saveProgressTitle": "保存",
@@ -153,7 +153,8 @@
       "createFailedText": "一時的なエラーが発生しました。しばらくしてから再試行してください。",
       "savedTitle": "保存",
       "savedText": "最初の旅行ストーリーを共有しましょう。",
-      "addHashtag": "ハッシュタグを追加"
+      "addHashtag": "ハッシュタグを追加",
+      "createAiCourse": "AI??????"
     },
     "a11y": {
       "postImageOpen": "投稿画像{index}を拡大表示",
@@ -1179,12 +1180,12 @@
       }
     },
     "cleanup": {
-      "kba4361d8d3": "프로필 이미지",
-      "k4bd7ec96c2": "프로필 편집",
-      "kd76eed1eb9": "작성자",
-      "k8015095ff4": "처리 중",
-      "k615cf6ee33": "팔로잉",
-      "k5b35787117": "팔로우"
+      "kba4361d8d3": "????????",
+      "k4bd7ec96c2": "?????????",
+      "kd76eed1eb9": "???",
+      "k8015095ff4": "???",
+      "k615cf6ee33": "?????",
+      "k5b35787117": "????"
     }
   },
   "communityAuto": {
@@ -1760,8 +1761,8 @@
     "ui_d4a0532b58": "프로필 이미지",
     "ui_dd4e92605a": "K-content 여행자",
     "ui_14fe17f496": "{count}명",
-    "ui_0aa8938154": "팔로잉",
-    "ui_e0fa0960ec": "팔로우",
+    "ui_0aa8938154": "?????",
+    "ui_e0fa0960ec": "????",
     "ui_2dc06acea8": "프로필 활동",
     "ui_cb3c4036f4": "게시글",
     "ui_ef6d419ef9": "공개된 저장 코스가 없습니다",

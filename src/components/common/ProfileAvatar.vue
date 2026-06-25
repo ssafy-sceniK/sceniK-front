@@ -9,7 +9,7 @@ const props = defineProps({
   interactive: { type: Boolean, default: false },
   ariaLabel: { type: String, default: '\ud504\ub85c\ud544 \ud3b8\uc9d1' },
   preview: { type: Boolean, default: false },
-  badgeLabel: { type: String, default: '✎' },
+  badgeLabel: { type: String, default: '\u270E' },
 });
 
 const emit = defineEmits(['click']);
@@ -35,6 +35,6 @@ function handleClick(event) {
       <img v-if="imageUrl" :src="imageUrl" :alt="alt" />
       <span v-else class="avatar-initial">{{ initial }}</span>
     </span>
-    <span class="avatar-edit-badge large">{{ badgeLabel }}</span>
+    <span v-if="interactive" class="avatar-edit-badge large">{{ badgeLabel }}</span>
   </component>
 </template>

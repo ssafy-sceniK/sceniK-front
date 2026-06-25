@@ -1783,3 +1783,30 @@
 .profile-image-control {
   overflow: visible;
 }
+
+/* Profile card text should not clip email or meta rows. */
+.my-profile-card .profile-copy,
+.public-profile-card .profile-copy {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  overflow: visible;
+}
+
+.my-profile-card .profile-copy p,
+.public-profile-card .profile-copy p,
+.profile-meta {
+  min-height: 0;
+  overflow: visible;
+  line-height: 1.5;
+  text-overflow: clip;
+}
+
+.profile-name-row span {
+  border: 1px solid rgba(0, 82, 255, 0.16);
+  word-break: keep-all;
+}
+
+.public-profile-screen .my-section-tabs button {
+  word-break: keep-all;
+}

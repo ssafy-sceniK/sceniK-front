@@ -142,7 +142,7 @@
       "coursePickerTitle": "Saved AI courses",
       "coursePickerDescription": "Select a saved course to link to this post.",
       "noSavedCourseTitle": "No saved AI courses",
-      "noSavedCourseText": "Create and save an AI course to link it to a post.",
+      "noSavedCourseText": "Create and save an AI course first, then link it to your post.",
       "validationTitle": "Login failed",
       "validationText": "Title must be at least 2 characters and content at least 5 characters.",
       "saveProgressTitle": "Save",
@@ -153,7 +153,8 @@
       "createFailedText": "A temporary error occurred. Please try again soon.",
       "savedTitle": "Save",
       "savedText": "The post was added to the community feed.",
-      "addHashtag": "Add hashtag"
+      "addHashtag": "Add hashtag",
+      "createAiCourse": "Create AI Course"
     },
     "a11y": {
       "postImageOpen": "Open post image {index}",
@@ -222,7 +223,7 @@
     }
   },
   "translation": {
-    "show": "Translate",
+    "show": "Show translation",
     "original": "Show original",
     "loading": "Translating...",
     "failed": "Could not load translation. Showing the original text.",
@@ -990,7 +991,7 @@
       "followers": "Followers",
       "myPosts": "My posts",
       "commentedPosts": "Commented posts",
-      "scraps": "Scraps"
+      "scraps": "Saved posts"
     },
     "counts": {
       "content": "{count} content",
@@ -999,7 +1000,7 @@
       "reviews": "{count} reviews",
       "users": "{count} users",
       "posts": "{count} posts",
-      "scraps": "{count} scraps"
+      "scraps": "{count} saved"
     },
     "visits": {
       "planned": "Planned visits",
@@ -1093,8 +1094,8 @@
           "action": "Browse community"
         },
         "scraps": {
-          "title": "No scrapped posts yet",
-          "text": "Scrap travel stories and courses you want to revisit.",
+          "title": "No saved posts yet",
+          "text": "Save travel stories and courses you want to revisit.",
           "action": "Browse community"
         },
         "reviews": {
@@ -1179,12 +1180,12 @@
       }
     },
     "cleanup": {
-      "kba4361d8d3": "프로필 이미지",
-      "k4bd7ec96c2": "프로필 편집",
-      "kd76eed1eb9": "작성자",
-      "k8015095ff4": "처리 중",
-      "k615cf6ee33": "팔로잉",
-      "k5b35787117": "팔로우"
+      "kba4361d8d3": "Profile image",
+      "k4bd7ec96c2": "Edit profile",
+      "kd76eed1eb9": "Author",
+      "k8015095ff4": "Processing",
+      "k615cf6ee33": "Following",
+      "k5b35787117": "Follow"
     }
   },
   "communityAuto": {
@@ -1265,8 +1266,8 @@
     "k1wxp860": "Comment author",
     "k1w2zrd6": "Video",
     "k46x8nx": "Photo",
-    "ksf2n5k": "Unscrap",
-    "k1y81wz0": "Scrap",
+    "ksf2n5k": "Saved",
+    "k1y81wz0": "Save",
     "kbhchor": "Deleting...",
     "k1t99km4": "The comment count and list do not match. Reload the comments."
   },
@@ -1760,8 +1761,8 @@
     "ui_d4a0532b58": "프로필 이미지",
     "ui_dd4e92605a": "K-content 여행자",
     "ui_14fe17f496": "{count}명",
-    "ui_0aa8938154": "팔로잉",
-    "ui_e0fa0960ec": "팔로우",
+    "ui_0aa8938154": "Following",
+    "ui_e0fa0960ec": "Follow",
     "ui_2dc06acea8": "프로필 활동",
     "ui_cb3c4036f4": "게시글",
     "ui_ef6d419ef9": "공개된 저장 코스가 없습니다",

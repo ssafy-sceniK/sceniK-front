@@ -68,11 +68,11 @@ const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 
 const boards = computed(() => [
-  { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
-  { id: 'movie', icon: 'MV', name: t('community.boardLabels.movie.short'), fullName: t('community.boardLabels.movie.full'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
-  { id: 'idol', icon: 'ID', name: t('community.boardLabels.idol.short'), fullName: t('community.boardLabels.idol.full'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
-  { id: 'variety', icon: 'TV', name: t('community.boardLabels.variety.short'), fullName: t('community.boardLabels.variety.full'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
-  { id: 'region', icon: 'RG', name: t('community.boardLabels.region.short'), fullName: t('community.boardLabels.region.full'), description: t('communityAuto.k2glxru'), tag: '\uc9c0\uc5ed' },
+  { id: 'drama', icon: '\u{1F3AD}', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
+  { id: 'movie', icon: '\u{1F3AC}', name: t('community.boardLabels.movie.short'), fullName: t('community.boardLabels.movie.full'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
+  { id: 'idol', icon: '\u2605', name: t('community.boardLabels.idol.short'), fullName: t('community.boardLabels.idol.full'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
+  { id: 'variety', icon: '\u2726', name: t('community.boardLabels.variety.short'), fullName: t('community.boardLabels.variety.full'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
+  { id: 'region', icon: '\u2316', name: t('community.boardLabels.region.short'), fullName: t('community.boardLabels.region.full'), description: t('communityAuto.k2glxru'), tag: '\uc9c0\uc5ed' },
 ]);
 
 const isBoardList = computed(() => route.name === 'community-boards');
@@ -684,8 +684,24 @@ function isAuthorFollowed(post) {
   return Boolean(authorId && uiStore.followingIds.some((id) => String(id) === String(authorId)));
 }
 
+function displayUserName(entity) {
+  return entity?.nickname || entity?.user || entity?.authorName || 'sceniK user';
+}
+
+function userInitial(entity) {
+  return displayUserName(entity).slice(0, 1).toUpperCase();
+}
+
+function userProfileTo(userId) {
+  return userId ? { name: 'user-profile', params: { userId } } : '';
+}
+
+function postMeta(post) {
+  return [post?.date, post?.region].filter(Boolean).join(' / ');
+}
+
 function authorDisplayName(post) {
-  return post?.nickname || post?.user || post?.authorName || '';
+  return displayUserName(post);
 }
 
 function isAuthorFollowLoading(post) {
@@ -1062,8 +1078,10 @@ async function nativeShare() {
             <div class="post-detail-topline">
               <AuthorFollowCard
                 class="post-detail-author"
-                :author-name="selectedPost.user"
-                :meta="`${selectedPost.date} · ${selectedPost.region}`"
+                :author-name="authorDisplayName(selectedPost)"
+                :author-initial="userInitial(selectedPost)"
+                :author-to="userProfileTo(selectedPost.userId)"
+                :meta="postMeta(selectedPost)"
                 :can-follow="canFollowSelectedAuthor"
                 :following="selectedAuthorFollowed"
                 :loading="selectedAuthorFollowLoading"
@@ -1092,6 +1110,7 @@ async function nativeShare() {
                     :class="{ active: postEditBoard === board.id }"
                     @click="postEditBoard = board.id"
                   >
+                    <span class="write-board-icon" aria-hidden="true">{{ board.icon }}</span>
                     <span>{{ board.name }}</span>
                   </button>
                 </div>
@@ -1270,11 +1289,13 @@ async function nativeShare() {
                 class="comment-thread"
               >
                 <div class="comment-row">
-                  <span class="comment-avatar">{{ comment.user?.slice(0, 1) || 'U' }}</span>
+                  <RouterLink v-if="comment.userId" class="comment-avatar comment-profile-link" :to="userProfileTo(comment.userId)">{{ userInitial(comment) }}</RouterLink>
+                  <span v-else class="comment-avatar">{{ userInitial(comment) }}</span>
                   <div class="comment-content">
                     <div class="comment-header">
                       <div class="comment-meta">
-                        <b>{{ comment.user }}</b>
+                        <RouterLink v-if="comment.userId" class="comment-author-link" :to="userProfileTo(comment.userId)"><b>{{ displayUserName(comment) }}</b></RouterLink>
+                        <b v-else>{{ displayUserName(comment) }}</b>
                         <small>{{ commentTimeLabel(comment) }}</small>
                       </div>
                       <button
@@ -1356,11 +1377,13 @@ async function nativeShare() {
                     :key="commentKey(reply)"
                     class="comment-row comment-row--reply"
                   >
-                    <span class="comment-avatar comment-avatar--reply">{{ reply.user?.slice(0, 1) || 'U' }}</span>
+                    <RouterLink v-if="reply.userId" class="comment-avatar comment-avatar--reply comment-profile-link" :to="userProfileTo(reply.userId)">{{ userInitial(reply) }}</RouterLink>
+                    <span v-else class="comment-avatar comment-avatar--reply">{{ userInitial(reply) }}</span>
                     <div class="comment-content">
                       <div class="comment-header">
                         <div class="comment-meta">
-                          <b>{{ reply.user }}</b>
+                          <RouterLink v-if="reply.userId" class="comment-author-link" :to="userProfileTo(reply.userId)"><b>{{ displayUserName(reply) }}</b></RouterLink>
+                          <b v-else>{{ displayUserName(reply) }}</b>
                           <small>{{ commentTimeLabel(reply) }}</small>
                         </div>
                         <button
@@ -1574,7 +1597,11 @@ async function nativeShare() {
           <article v-for="post in visiblePosts" :key="postKey(post)" class="feed-card route-story-card">
             <div class="feed-card-author-row">
               <div class="user-row feed-author-copy">
-                <b>{{ post.user }}</b>
+                <RouterLink v-if="post.userId" class="feed-author-profile-link" :to="userProfileTo(post.userId)">
+                  <span class="comment-avatar feed-author-avatar" aria-hidden="true">{{ userInitial(post) }}</span>
+                  <b>{{ displayUserName(post) }}</b>
+                </RouterLink>
+                <b v-else>{{ displayUserName(post) }}</b>
                 <span>{{ post.date }}</span>
               </div>
               <button

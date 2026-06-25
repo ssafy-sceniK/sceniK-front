@@ -11,6 +11,14 @@ const props = defineProps({
     type: String,
     default: '\uc791\uc131\uc790',
   },
+  authorInitial: {
+    type: String,
+    default: '',
+  },
+  authorTo: {
+    type: [String, Object],
+    default: '',
+  },
   meta: {
     type: String,
     default: '',
@@ -34,9 +42,19 @@ const emit = defineEmits(['toggle']);
 
 <template>
   <div class="user-row author-follow-card">
-    <div>
-      <b>{{ props.authorName }}</b>
-      <span>{{ props.meta }}</span>
+    <RouterLink v-if="props.authorTo" class="author-profile-link" :to="props.authorTo">
+      <span class="comment-avatar author-profile-avatar" aria-hidden="true">{{ props.authorInitial || props.authorName.slice(0, 1).toUpperCase() }}</span>
+      <span class="author-profile-copy">
+        <b>{{ props.authorName }}</b>
+        <span>{{ props.meta }}</span>
+      </span>
+    </RouterLink>
+    <div v-else class="author-profile-link author-profile-link--static">
+      <span class="comment-avatar author-profile-avatar" aria-hidden="true">{{ props.authorInitial || props.authorName.slice(0, 1).toUpperCase() }}</span>
+      <span class="author-profile-copy">
+        <b>{{ props.authorName }}</b>
+        <span>{{ props.meta }}</span>
+      </span>
     </div>
     <button
       v-if="props.canFollow"
@@ -47,7 +65,7 @@ const emit = defineEmits(['toggle']);
       :disabled="props.loading"
       @click="emit('toggle')"
     >
-      {{ props.loading ? t('profile.cleanup.k8015095ff4') : props.following ? t('profile.cleanup.k615cf6ee33') : t('profile.cleanup.k5b35787117') }}
+      {{ props.loading ? t('communityAuto2.k1o') : props.following ? t('communityAuto2.k1p') : t('communityAuto2.k1q') }}
     </button>
   </div>
 </template>
