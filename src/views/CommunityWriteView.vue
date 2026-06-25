@@ -12,6 +12,7 @@ import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
+import { isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
 import { isGenericAiCourseTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
@@ -289,8 +290,23 @@ function createPostImageItem(file) {
   };
 }
 
-function handleAttachments(files = []) {
-  const incomingFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+async function normalizeSelectedImageFiles(files, noticeRef) {
+  const imageFiles = Array.from(files).filter(isCommunityImageCandidateFile);
+  if (!imageFiles.length) return [];
+  try {
+    return await Promise.all(imageFiles.map(normalizeCommunityImageFile));
+  } catch {
+    noticeRef.value = {
+      tone: 'warning',
+      title: t('community.write.uploadFailedTitle'),
+      text: t('community.write.uploadFailedText'),
+    };
+    return [];
+  }
+}
+
+async function handleAttachments(files = []) {
+  const incomingFiles = await normalizeSelectedImageFiles(files, statusNotice);
   if (!incomingFiles.length) return;
 
   const existingIds = new Set(postImageItems.value

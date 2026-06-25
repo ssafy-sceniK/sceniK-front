@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
+import { isCommunityImageCandidateFile } from '../../utils/communityImageFiles.js';
 
 defineOptions({
   name: 'CommunityImageManager',
@@ -49,7 +50,7 @@ function itemAlt(item, index) {
 }
 
 function emitAddFiles(files) {
-  const imageFiles = Array.from(files ?? []).filter((file) => file?.type?.startsWith('image/'));
+  const imageFiles = Array.from(files ?? []).filter(isCommunityImageCandidateFile);
   if (imageFiles.length) emit('add-files', imageFiles);
 }
 
@@ -202,7 +203,7 @@ onBeforeUnmount(clearPointerDragState);
       <input
         :id="fileInputId"
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
         multiple
         :disabled="isFull"
         @change="handleInputChange"

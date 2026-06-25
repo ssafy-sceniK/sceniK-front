@@ -30,6 +30,7 @@ import {
   isDisplayableImageAttachment,
 } from '../utils/communityAttachments.js';
 import { communityBoardIdFromTags, communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
+import { isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
 import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
 const route = useRoute();
@@ -646,8 +647,23 @@ function resetPostEditImageItems() {
   postEditImageItems.value = [];
 }
 
-function handlePostEditImageFiles(files = []) {
-  const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+async function normalizeSelectedPostEditImages(files) {
+  const imageFiles = Array.from(files).filter(isCommunityImageCandidateFile);
+  if (!imageFiles.length) return [];
+  try {
+    return await Promise.all(imageFiles.map(normalizeCommunityImageFile));
+  } catch {
+    postNotice.value = {
+      tone: 'warning',
+      title: t('community.write.uploadFailedTitle'),
+      text: t('community.write.uploadFailedText'),
+    };
+    return [];
+  }
+}
+
+async function handlePostEditImageFiles(files = []) {
+  const imageFiles = await normalizeSelectedPostEditImages(files);
   if (!imageFiles.length) return;
 
   const currentImageCount = postEditImageItems.value.filter((item) => item.isImage).length;

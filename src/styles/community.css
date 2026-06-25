@@ -449,10 +449,16 @@
 }
 
 .feed-body h2 {
+  overflow: hidden;
+  display: -webkit-box;
   margin: 8px 0 6px;
   color: var(--text);
   font-size: 14px;
   line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .feed-body p {
@@ -462,6 +468,7 @@
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+  word-break: keep-all;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -1916,7 +1923,7 @@
   }
 
   .feed-card-main {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
     gap: 10px;
   }
 
