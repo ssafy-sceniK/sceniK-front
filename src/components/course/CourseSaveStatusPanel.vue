@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FormStatusNotice from '../common/FormStatusNotice.vue';
 
@@ -11,15 +12,15 @@ defineOptions({
 const props = defineProps({
   title: {
     type: String,
-    default: '',
+    default: null,
   },
   eyebrow: {
     type: String,
-    default: '',
+    default: null,
   },
   description: {
     type: String,
-    default: '',
+    default: null,
   },
   rows: {
     type: Array,
@@ -30,14 +31,18 @@ const props = defineProps({
     default: null,
   },
 });
+
+const eyebrowText = computed(() => props.eyebrow === null ? t('course.cleanup.kd97a76eb1c') : props.eyebrow);
+const titleText = computed(() => props.title === null ? t('course.cleanup.kcbd04b451d') : props.title);
+const descriptionText = computed(() => props.description === null ? t('course.cleanup.k30ff523c4c') : props.description);
 </script>
 
 <template>
   <section class="course-save-status-panel" aria-labelledby="course-save-status-title">
     <div>
-      <span>{{ props.eyebrow || t('course.cleanup.kd97a76eb1c') }}</span>
-      <h2 id="course-save-status-title">{{ props.title || t('course.cleanup.kcbd04b451d') }}</h2>
-      <p>{{ props.description || t('course.cleanup.k30ff523c4c') }}</p>
+      <span v-if="eyebrowText">{{ eyebrowText }}</span>
+      <h2 id="course-save-status-title">{{ titleText }}</h2>
+      <p v-if="descriptionText">{{ descriptionText }}</p>
     </div>
     <dl v-if="props.rows.length" :aria-label="t('course.cleanup.k9f2b9841d5')">
       <template v-for="row in props.rows" :key="row.label">

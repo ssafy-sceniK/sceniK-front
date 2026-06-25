@@ -728,7 +728,7 @@
       "k4a43dd6f90": "코스 관리",
       "k7a443f46ab": "코스 정보를 확인하고 필요한 작업을 이어갈 수 있습니다.",
       "k84354cfa8d": "코스명",
-      "kcbd04b451d": "생성된 AI 코스",
+      "kcbd04b451d": "AI course result",
       "ke4ff0abb48": "방문 장소",
       "k960f39a4cc": "곳",
       "k9aa330dae0": "지역",
@@ -742,7 +742,7 @@
       "k7591815a45": "{count}일",
       "kebe8916a4d": "이동",
       "k28c95e9c39": "스타일",
-      "kf4761e95f0": "저장 전 변경사항",
+      "kf4761e95f0": "Changes",
       "k5b847da9ce": "장소",
       "ke32fa1e2e6": "{value0}에서 도보 {value1}분",
       "k6905c32f98": "{value0}에서 {value1}km",
@@ -754,9 +754,9 @@
       "k37fb28c81d": "취소",
       "k61aff68fbb": "삭제 중...",
       "k627604e374": "삭제",
-      "kd97a76eb1c": "저장 전 확인",
-      "k30ff523c4c": "저장 전 검증된 장소와 코스 조건을 확인합니다.",
-      "k9f2b9841d5": "AI 코스 저장 정보"
+      "kd97a76eb1c": "Auto-saved",
+      "k30ff523c4c": "This itinerary was generated from your selected conditions.",
+      "k9f2b9841d5": "AI course information"
     }
   },
   "place": {
@@ -978,7 +978,10 @@
       "retrySave": "Retry auto-save",
       "resultTitle": "AI course result",
       "courseSummary": "Course summary",
-      "generatedFromConditions": "This itinerary was generated and saved from your selected conditions."
+      "generatedFromConditions": "This itinerary was generated from your selected conditions.",
+      "title": "AI course result",
+      "description": "This itinerary was generated from your selected conditions.",
+      "autoSaved": "Auto-saved"
     }
   },
   "my": {

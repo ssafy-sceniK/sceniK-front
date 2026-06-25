@@ -728,7 +728,7 @@
       "k4a43dd6f90": "코스 관리",
       "k7a443f46ab": "코스 정보를 확인하고 필요한 작업을 이어갈 수 있습니다.",
       "k84354cfa8d": "코스명",
-      "kcbd04b451d": "생성된 AI 코스",
+      "kcbd04b451d": "AIコース結果",
       "ke4ff0abb48": "방문 장소",
       "k960f39a4cc": "곳",
       "k9aa330dae0": "지역",
@@ -742,7 +742,7 @@
       "k7591815a45": "{count}일",
       "kebe8916a4d": "이동",
       "k28c95e9c39": "스타일",
-      "kf4761e95f0": "저장 전 변경사항",
+      "kf4761e95f0": "変更内容",
       "k5b847da9ce": "장소",
       "ke32fa1e2e6": "{value0}에서 도보 {value1}분",
       "k6905c32f98": "{value0}에서 {value1}km",
@@ -754,9 +754,9 @@
       "k37fb28c81d": "취소",
       "k61aff68fbb": "삭제 중...",
       "k627604e374": "삭제",
-      "kd97a76eb1c": "저장 전 확인",
-      "k30ff523c4c": "저장 전 검증된 장소와 코스 조건을 확인합니다.",
-      "k9f2b9841d5": "AI 코스 저장 정보"
+      "kd97a76eb1c": "自動保存済み",
+      "k30ff523c4c": "選択した条件をもとに生成された旅行コースです。",
+      "k9f2b9841d5": "AIコース情報"
     }
   },
   "place": {
@@ -968,17 +968,20 @@
     },
     "result": {
       "done": "完了",
-      "savingButton": "?????...",
-      "savingCourse": "?????????????...",
-      "savingCourseText": "?????AI????????????????????",
+      "savingButton": "自動保存中...",
+      "savingCourse": "コースを自動保存しています。",
+      "savingCourseText": "生成されたAIコースを保存リストに反映しています。",
       "courseSaved": "コースを保存しました。",
       "courseSavedText": "保存済みAIコースで再度確認できます。",
       "saveFailed": "コースを保存できませんでした。",
       "saveFailedText": "接続状況を確認して、もう一度保存してください。",
-      "retrySave": "????????",
-      "resultTitle": "AI?????",
-      "courseSummary": "?????",
-      "generatedFromConditions": "????????????????????????????"
+      "retrySave": "自動保存を再試行",
+      "resultTitle": "AIコース結果",
+      "courseSummary": "コース概要",
+      "generatedFromConditions": "選択した条件をもとに生成された旅行コースです。",
+      "title": "AIコース結果",
+      "description": "選択した条件をもとに生成された旅行コースです。",
+      "autoSaved": "自動保存済み"
     }
   },
   "my": {

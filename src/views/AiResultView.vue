@@ -396,7 +396,7 @@ function postFromShareSheet() {
   <main class="app-shell ai-result-shell">
     <section v-if="route" class="ai-result-card">
       <header class="ai-result-topbar">
-        <h1>{{ t('aiCourse.result.resultTitle') }}</h1>
+        <h1>{{ t('aiCourse.result.title') }}</h1>
         <button
           type="button"
           class="result-menu-button"
@@ -440,7 +440,7 @@ function postFromShareSheet() {
         <CourseSaveStatusPanel
           :title="t('aiCourse.result.courseSummary')"
           eyebrow=""
-          :description="t('aiCourse.result.generatedFromConditions')"
+          :description="t('aiCourse.result.description')"
           :rows="saveStatusRows"
           :notice="saveNotice"
         />

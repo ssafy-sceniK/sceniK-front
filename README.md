@@ -140,7 +140,7 @@ VITE_ENABLE_LOCAL_AI_FALLBACK=false
 ## 설치 및 실행 방법
 
 ```bash
-cd /Users/kellys-mac/Desktop/sceniK/sceniK-front
+cd /path/to/sceniK/sceniK-front
 npm install
 npm run dev
 ```

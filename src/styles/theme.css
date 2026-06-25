@@ -1804,3 +1804,17 @@ body {
   background: rgba(0, 0, 0, 0.94);
   border-color: rgba(255, 255, 255, 0.94);
 }
+
+/* Final QA polish for Explore sort/result rows: the wrapper stays on the page canvas. */
+.explore-screen .list-control-row.explore-sort-row,
+.list-screen .list-control-row.explore-sort-row,
+:root[data-theme="dark"] .explore-screen .list-control-row.explore-sort-row,
+:root[data-theme="dark"] .list-screen .list-control-row.explore-sort-row {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
