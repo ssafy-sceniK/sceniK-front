@@ -13,6 +13,7 @@ import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
+import { formatCourseMetadata } from '../utils/courseMetadata.js';
 import { isGenericAiCourseTag, isInternalSystemTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
@@ -61,23 +62,11 @@ const visibleCourseOptions = computed(() => courseOptions.value.slice(0, Math.mi
 const hasMoreCourseOptions = computed(() => visibleCourseOptions.value.length < courseOptions.value.length);
 const selectedCourseSummary = computed(() => {
   if (!selectedCourse.value) return t('community.write.courseLinkEmptyHelp');
-  return courseSummaryMeta(selectedCourse.value);
+  return courseSummaryMeta(selectedCourse.value) || t('community.write.selectedCourse');
 });
 
-function courseDurationLabel(course) {
-  const value = course?.durationDays ?? course?.duration;
-  if (value === null || value === undefined || value === '') return '';
-  const text = String(value).trim();
-  if (!text) return '';
-  const dayMatch = text.match(/\d+/);
-  return dayMatch ? t('course.detail.durationDays', { count: Number(dayMatch[0]) }) : text;
-}
-
 function courseSummaryMeta(course) {
-  return [
-    course?.region,
-    courseDurationLabel(course),
-  ].filter(Boolean).join(' · ');
+  return formatCourseMetadata(course, t);
 }
 
 onMounted(() => {
@@ -550,7 +539,10 @@ async function createPost() {
             <strong>{{ selectedCourse.title }}</strong>
             <small>{{ selectedCourseSummary }}</small>
           </div>
-          <button type="button" class="linked-course-clear" @click="clearSelectedCourse">{{ t('community.write.clear') }}</button>
+          <div class="linked-course-action-row">
+            <button type="button" class="linked-course-clear" @click="openCoursePicker">{{ t('community.write.changeCourse') }}</button>
+            <button type="button" class="linked-course-clear" @click="clearSelectedCourse">{{ t('community.write.unlinkCourse') }}</button>
+          </div>
         </div>
 
         <label class="form-field">
@@ -637,7 +629,7 @@ async function createPost() {
             @secondary="closeCoursePicker"
           />
           <footer>
-            <button type="button" class="button button-secondary" :disabled="!selectedRouteId" @click="clearSelectedCourse">{{ t('community.write.clear') }}</button>
+            <button type="button" class="button button-secondary" :disabled="!selectedRouteId" @click="clearSelectedCourse">{{ t('community.write.unlinkCourse') }}</button>
             <button type="button" class="button button-secondary" @click="closeCoursePicker">{{ t('common.close') }}</button>
           </footer>
         </section>

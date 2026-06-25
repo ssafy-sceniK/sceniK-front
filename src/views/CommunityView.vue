@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
@@ -32,6 +32,7 @@ import {
 } from '../utils/communityAttachments.js';
 import { communityBoardIdFromTags, communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
+import { formatCourseMetadata } from '../utils/courseMetadata.js';
 import { filterDisplayTags, isGenericAiCourseTag, isInternalSystemTag } from '../utils/tags.js';
 
 const route = useRoute();
@@ -46,6 +47,8 @@ const sortOptions = computed(() => [
   { value: 'popular', label: t('communityAuto.k88cncb') },
 ]);
 const visibleLimit = ref(8);
+const feedSentinel = ref(null);
+const feedLoadingMore = ref(false);
 const title = ref('');
 const body = ref('');
 const commentText = ref('');
@@ -63,6 +66,9 @@ const postEditBody = ref('');
 const postEditBoard = ref('drama');
 const postEditHashtags = ref([]);
 const postEditImageItems = ref([]);
+const postEditRouteId = ref('');
+const postEditCoursePickerOpen = ref(false);
+const postEditVisibleCourseCount = ref(5);
 const postEditDraftSource = ref(null);
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
@@ -75,8 +81,11 @@ const imageViewerIndex = ref(0);
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 const MAX_POST_BODY_LENGTH = 1000;
+const COURSE_PICKER_PAGE_SIZE = 5;
 const EDIT_DRAFT_PREFIX = 'community:edit:';
 const postEditDraftFilesByKey = new Map();
+let feedObserver = null;
+let feedLoadTimer = 0;
 
 const boards = computed(() => [
   { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
@@ -114,17 +123,12 @@ function queryValue(value, fallback = '') {
   return value ?? fallback;
 }
 
-function positiveSize(value, fallback = 8) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 8 ? Math.min(50, parsed) : fallback;
-}
-
 function restoreQueryState() {
   restoringQuery.value = true;
   const routeSort = queryValue(route.query.sort, 'latest');
   query.value = queryValue(route.query.keyword);
   sort.value = ['latest', 'popular'].includes(routeSort) ? routeSort : 'latest';
-  visibleLimit.value = positiveSize(route.query.size);
+  visibleLimit.value = 8;
   queueMicrotask(() => {
     restoringQuery.value = false;
   });
@@ -137,7 +141,6 @@ function syncQueryState() {
       ...route.query,
       keyword: query.value.trim() || undefined,
       sort: sort.value !== 'latest' ? sort.value : undefined,
-      size: visibleLimit.value !== 8 ? String(visibleLimit.value) : undefined,
     },
   });
 }
@@ -145,11 +148,14 @@ function syncQueryState() {
 onMounted(() => {
   restoreQueryState();
   void loadCommunity();
+  void nextTick(setupFeedObserver);
   document.addEventListener('pointerdown', handleBoardSelectorPointerDown);
   document.addEventListener('keydown', handleImageViewerKeydown);
 });
 
 onBeforeUnmount(() => {
+  disconnectFeedObserver();
+  window.clearTimeout(feedLoadTimer);
   document.removeEventListener('pointerdown', handleBoardSelectorPointerDown);
   document.removeEventListener('keydown', handleImageViewerKeydown);
   if (editingPost.value) {
@@ -166,6 +172,7 @@ watch(() => `${route.name ?? ''}:${route.params.id ?? ''}`, (nextRouteKey, previ
 });
 watch(() => route.query.board, () => {
   boardSelectorOpen.value = false;
+  visibleLimit.value = 8;
 });
 watch(sort, () => {
   if (restoringQuery.value) return;
@@ -178,7 +185,6 @@ watch(query, () => {
   visibleLimit.value = 8;
   syncQueryState();
 });
-watch(visibleLimit, syncQueryState);
 
 watch([
   editingPost,
@@ -187,6 +193,7 @@ watch([
   postEditBoard,
   postEditHashtags,
   postEditImageItems,
+  postEditRouteId,
 ], () => {
   if (editingPost.value) persistPostEditDraft();
 }, { deep: true });
@@ -207,6 +214,25 @@ const sortedPosts = computed(() => [...filteredPosts.value].sort((a, b) => {
 }));
 const visiblePosts = computed(() => sortedPosts.value.slice(0, visibleLimit.value));
 const hasMorePosts = computed(() => visiblePosts.value.length < sortedPosts.value.length);
+const postEditCourseOptions = computed(() => uiStore.savedCourses.filter((course) => course?.routeId));
+const postEditSelectedCourse = computed(() => postEditCourseOptions.value.find((course) => course.routeId === postEditRouteId.value) ?? null);
+const postEditVisibleCourseOptions = computed(() => postEditCourseOptions.value.slice(
+  0,
+  Math.min(postEditVisibleCourseCount.value, postEditCourseOptions.value.length),
+));
+const hasMorePostEditCourseOptions = computed(() => postEditVisibleCourseOptions.value.length < postEditCourseOptions.value.length);
+const postEditSelectedCourseTitle = computed(() => {
+  if (postEditSelectedCourse.value) return postEditSelectedCourse.value.title;
+  if (postEditRouteId.value) return t('community.linkedCourse.title', { region: selectedPost.value?.region ?? '' });
+  return t('community.write.noneSelected');
+});
+const postEditSelectedCourseSummary = computed(() => {
+  if (postEditSelectedCourse.value) {
+    return postEditCourseSummaryMeta(postEditSelectedCourse.value) || t('community.write.selectedCourse');
+  }
+  if (postEditRouteId.value) return linkedCourseMeta(selectedPost.value) || t('community.write.selectedCourse');
+  return t('community.write.courseLinkEmptyHelp');
+});
 const feedEmptyState = computed(() => {
   if (query.value.trim()) {
     return {
@@ -239,6 +265,14 @@ const feedEmptyState = computed(() => {
     secondaryTo: '/community/boards',
   };
 });
+
+watch([visiblePosts, hasMorePosts], () => {
+  void nextTick(setupFeedObserver);
+}, { flush: 'post' });
+
+watch(feedSentinel, () => {
+  void nextTick(setupFeedObserver);
+}, { flush: 'post' });
 
 const selectedPost = computed(() => {
   if (!isPostDetail.value) return null;
@@ -503,19 +537,17 @@ function linkedCourseTo(post) {
     : '/ai/result';
 }
 
-function durationDaysLabel(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const text = String(value).trim();
-  if (!text) return '';
-  const dayMatch = text.match(/\d+/);
-  return dayMatch ? t('course.detail.durationDays', { count: Number(dayMatch[0]) }) : text;
+function linkedCourseMeta(post) {
+  return formatCourseMetadata({
+    region: post?.region,
+    duration: post?.duration,
+    durationDays: post?.durationDays,
+    routeId: post?.routeId,
+  }, t);
 }
 
-function linkedCourseMeta(post) {
-  return t('community.linkedCourse.meta', {
-    region: post?.region,
-    duration: durationDaysLabel(post?.durationDays ?? post?.duration),
-  });
+function postEditCourseSummaryMeta(course) {
+  return formatCourseMetadata(course, t);
 }
 
 function hasLinkedCourse(post) {
@@ -838,6 +870,33 @@ async function createPost() {
   }
 }
 
+function openPostEditCoursePicker() {
+  postEditVisibleCourseCount.value = COURSE_PICKER_PAGE_SIZE;
+  postEditCoursePickerOpen.value = true;
+  if (uiStore.currentUser) void uiStore.loadSavedCourses();
+}
+
+function closePostEditCoursePicker() {
+  postEditCoursePickerOpen.value = false;
+}
+
+function selectPostEditCourse(routeId) {
+  postEditRouteId.value = routeId;
+  closePostEditCoursePicker();
+}
+
+function clearPostEditCourse() {
+  postEditRouteId.value = '';
+  closePostEditCoursePicker();
+}
+
+function loadMorePostEditCourseOptions() {
+  postEditVisibleCourseCount.value = Math.min(
+    postEditVisibleCourseCount.value + COURSE_PICKER_PAGE_SIZE,
+    postEditCourseOptions.value.length,
+  );
+}
+
 function postEditDraftUserId() {
   return String(uiStore.currentUser?.userId ?? uiStore.currentUser?.email ?? '').trim();
 }
@@ -857,6 +916,7 @@ function hasPostEditDraftContent(post = postEditDraftSource.value || selectedPos
     || postEditBoard.value !== (communityBoardIdFromTags(post.tags ?? [])
       || boards.value.find((board) => (post.tags ?? []).some((tag) => tag.includes(board.tag)))?.id
       || 'drama')
+    || postEditRouteId.value !== (post.routeId ?? '')
     || JSON.stringify(postEditHashtags.value) !== JSON.stringify(originalTags)
     || postEditImageItems.value.some((item) => item.kind === 'new')
     || postEditImageItems.value.length !== editablePostAttachments(post).length
@@ -869,6 +929,7 @@ function postEditDraftPayload(post = postEditDraftSource.value || selectedPost.v
     title: postEditTitle.value,
     body: postEditBody.value,
     board: postEditBoard.value,
+    routeId: postEditRouteId.value,
     tags: postEditHashtags.value,
     existingAttachments: postEditImageItems.value
       .filter((item) => item.kind === 'existing')
@@ -914,6 +975,7 @@ function restorePostEditDraft(post = postEditDraftSource.value || selectedPost.v
     postEditTitle.value = draft.title ?? post.title ?? '';
     postEditBody.value = draft.body ?? post.body ?? '';
     postEditBoard.value = draft.board || communityBoardIdFromTags(post.tags ?? []) || 'drama';
+    postEditRouteId.value = draft.routeId ?? post.routeId ?? '';
     postEditHashtagInput.value = '';
     postEditHashtags.value = uniqueValues((draft.tags ?? [])
       .map(normalizeHashtag)
@@ -944,6 +1006,10 @@ function startPostEdit() {
   postEditBoard.value = communityBoardIdFromTags(selectedPost.value.tags ?? [])
     || boards.value.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id
     || 'drama';
+  postEditRouteId.value = selectedPost.value.routeId ?? '';
+  postEditCoursePickerOpen.value = false;
+  postEditVisibleCourseCount.value = COURSE_PICKER_PAGE_SIZE;
+  if (uiStore.currentUser) void uiStore.loadSavedCourses();
   postEditHashtagInput.value = '';
   postEditHashtags.value = uniqueValues((selectedPost.value.tags ?? [])
     .map(normalizeHashtag)
@@ -961,6 +1027,9 @@ function resetPostEditState({ clearDraft = false } = {}) {
   postEditBody.value = '';
   postEditHashtags.value = [];
   postEditHashtagInput.value = '';
+  postEditRouteId.value = '';
+  postEditCoursePickerOpen.value = false;
+  postEditVisibleCourseCount.value = COURSE_PICKER_PAGE_SIZE;
   postEditDraftSource.value = null;
   resetPostEditImageItems();
   postNotice.value = null;
@@ -1006,7 +1075,7 @@ async function savePostEdit() {
       tags: buildPostEditTags(target),
       region: target.region,
       duration: target.duration,
-      routeId: target.routeId,
+      routeId: postEditRouteId.value || '',
       imageUrl: attachments[0]?.imageUrl ?? null,
       prefix: target.prefix,
       attachments,
@@ -1203,8 +1272,34 @@ function clearQuery() {
   query.value = '';
 }
 
+function disconnectFeedObserver() {
+  if (!feedObserver) return;
+  feedObserver.disconnect();
+  feedObserver = null;
+}
+
+function setupFeedObserver() {
+  disconnectFeedObserver();
+  if (!feedSentinel.value || !hasMorePosts.value || typeof IntersectionObserver === 'undefined') return;
+  feedObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) loadMorePosts();
+  }, {
+    root: null,
+    rootMargin: '240px 0px 360px',
+    threshold: 0,
+  });
+  feedObserver.observe(feedSentinel.value);
+}
+
 function loadMorePosts() {
-  visibleLimit.value += 8;
+  if (!hasMorePosts.value || feedLoadingMore.value || uiStore.communityLoading) return;
+  feedLoadingMore.value = true;
+  window.clearTimeout(feedLoadTimer);
+  feedLoadTimer = window.setTimeout(() => {
+    visibleLimit.value = Math.min(visibleLimit.value + 8, sortedPosts.value.length);
+    feedLoadingMore.value = false;
+    void nextTick(setupFeedObserver);
+  }, 120);
 }
 
 const canFollowSelectedAuthor = computed(() => canShowAuthorFollow(selectedPost.value));
@@ -1358,6 +1453,28 @@ async function nativeShare() {
                   </button>
                 </div>
               </div>
+              <div class="form-field compact course-select-field">
+                <span>{{ t('community.write.courseLink') }}</span>
+                <button type="button" class="course-picker-trigger" @click="openPostEditCoursePicker">
+                  <span class="course-picker-copy">
+                    <strong>{{ postEditSelectedCourseTitle }}</strong>
+                    <small>{{ postEditSelectedCourseSummary }}</small>
+                  </span>
+                  <span class="course-picker-chevron" aria-hidden="true">&rsaquo;</span>
+                </button>
+                <small>{{ t('community.write.courseLinkHelp') }}</small>
+              </div>
+              <div v-if="postEditRouteId" class="linked-course write-linked-course">
+                <div>
+                  <small class="course-kicker">{{ t('community.write.selectedCourse') }}</small>
+                  <strong>{{ postEditSelectedCourseTitle }}</strong>
+                  <small v-if="postEditSelectedCourseSummary">{{ postEditSelectedCourseSummary }}</small>
+                </div>
+                <div class="linked-course-action-row">
+                  <button type="button" class="linked-course-clear" @click="openPostEditCoursePicker">{{ t('community.write.changeCourse') }}</button>
+                  <button type="button" class="linked-course-clear" @click="clearPostEditCourse">{{ t('community.write.unlinkCourse') }}</button>
+                </div>
+              </div>
               <label class="form-field compact">{{ t('community.write.titleLabel') }}<input v-model="postEditTitle" maxlength="50" :placeholder="t('community.write.titlePlaceholder')" />
               </label>
               <label class="form-field compact">{{ t('community.write.bodyLabel') }}<textarea v-model="postEditBody" :maxlength="MAX_POST_BODY_LENGTH" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
@@ -1419,7 +1536,7 @@ async function nativeShare() {
               <div>
                 <small class="course-kicker">{{ t('communityAuto.k166mo55') }}</small>
                 <strong>{{ t('community.linkedCourse.title', { region: selectedPost.region }) }}</strong>
-                <small>{{ linkedCourseMeta(selectedPost) }}</small>
+                <small v-if="linkedCourseMeta(selectedPost)">{{ linkedCourseMeta(selectedPost) }}</small>
               </div>
               <span class="linked-course-cta">{{ t('communityAuto.k1nbnyzt') }}</span>
             </RouterLink>
@@ -1848,8 +1965,13 @@ async function nativeShare() {
             </div>
           </article>
         </div>
-        <div v-if="hasMorePosts" class="load-more-row">
-          <button type="button" @click="loadMorePosts">{{ t('communityAuto.knkzs11') }}</button>
+        <div
+          v-if="hasMorePosts || feedLoadingMore"
+          ref="feedSentinel"
+          class="infinite-feed-sentinel"
+          aria-live="polite"
+        >
+          <span v-if="feedLoadingMore">{{ t('common.loading') }}</span>
         </div>
         <EmptyState
           v-if="!uiStore.communityLoading && !uiStore.communityError && !sortedPosts.length"
@@ -1878,6 +2000,51 @@ async function nativeShare() {
           <img :src="imageViewerImage" :alt="t('communityAuto.k1u24yco')" @error="markPostImageFailed(imageViewerPost, imageViewerImage); closeImageViewer()" />
           <button v-if="imageViewerImages.length > 1" type="button" class="image-viewer-nav next" :aria-label="t('communityAuto.ka7lzvt')" @click="moveImageViewer(1)">›</button>
         </div>
+      </section>
+    </div>
+
+    <div v-if="postEditCoursePickerOpen" class="course-picker-backdrop" @click.self="closePostEditCoursePicker">
+      <section class="course-picker-modal" role="dialog" aria-modal="true" aria-labelledby="post-edit-course-picker-title" @click.stop>
+        <header>
+          <div>
+            <h2 id="post-edit-course-picker-title">{{ t('community.write.coursePickerTitle') }}</h2>
+            <p>{{ t('community.write.coursePickerDescription') }}</p>
+          </div>
+          <button type="button" :aria-label="t('common.close')" @click="closePostEditCoursePicker">x</button>
+        </header>
+        <div v-if="postEditCourseOptions.length" class="course-picker-list">
+          <button
+            v-for="course in postEditVisibleCourseOptions"
+            :key="course.routeId"
+            type="button"
+            class="course-picker-option"
+            :class="{ selected: postEditRouteId === course.routeId }"
+            @click="selectPostEditCourse(course.routeId)"
+          >
+            <strong>{{ course.title }}</strong>
+            <small>{{ postEditCourseSummaryMeta(course) }}</small>
+          </button>
+          <button v-if="hasMorePostEditCourseOptions" type="button" class="course-picker-load-more" @click="loadMorePostEditCourseOptions">
+            {{ t('common.loadMore') }}
+          </button>
+        </div>
+        <EmptyState
+          v-else
+          class="course-picker-empty-state"
+          tone="route"
+          :show-visual="false"
+          compact
+          :title="t('community.write.noSavedCourseTitle')"
+          :text="t('community.write.noSavedCourseText')"
+          :action-label="t('community.write.createAiCourse')"
+          action-to="/ai"
+          :secondary-label="t('common.close')"
+          @secondary="closePostEditCoursePicker"
+        />
+        <footer>
+          <button type="button" class="button button-secondary" :disabled="!postEditRouteId" @click="clearPostEditCourse">{{ t('community.write.unlinkCourse') }}</button>
+          <button type="button" class="button button-secondary" @click="closePostEditCoursePicker">{{ t('common.close') }}</button>
+        </footer>
       </section>
     </div>
 

@@ -163,7 +163,10 @@
       "addHashtag": "ハッシュタグを追加",
       "createAiCourse": "AIコースを作成",
       "contentLimitTitle": "内容は最大1000文字まで入力できます。",
-      "contentLimitText": "内容を短くしてからもう一度お試しください。"
+      "contentLimitText": "内容を短くしてからもう一度お試しください。",
+      "changeCourse": "コース変更",
+      "unlinkCourse": "リンク解除",
+      "selectCourse": "コース選択"
     },
     "a11y": {
       "postImageOpen": "投稿画像{index}を拡大表示",

@@ -163,7 +163,10 @@
       "addHashtag": "添加话题标签",
       "createAiCourse": "创建 AI 路线",
       "contentLimitTitle": "内容最多可输入 1000 个字符。",
-      "contentLimitText": "请缩短内容后再试。"
+      "contentLimitText": "请缩短内容后再试。",
+      "changeCourse": "更换路线",
+      "unlinkCourse": "取消关联",
+      "selectCourse": "选择路线"
     },
     "a11y": {
       "postImageOpen": "放大查看帖子图片 {index}",
