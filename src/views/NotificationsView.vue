@@ -16,6 +16,9 @@ const notifications = computed(() => uiStore.notifications);
 const error = computed(() => uiStore.notificationsError);
 const loading = computed(() => uiStore.notificationsLoading);
 const hasToken = ref(Boolean(readAccessToken()));
+const showDeleteAllConfirm = ref(false);
+const deletingAll = ref(false);
+const deletingNotificationIds = ref([]);
 
 async function loadNotifications() {
   hasToken.value = Boolean(readAccessToken());
@@ -28,6 +31,39 @@ async function loadNotifications() {
 
 function markAllRead() {
   void uiStore.markAllNotificationsRead();
+}
+
+function notificationKey(notification) {
+  return notification.notificationId ?? notification.id;
+}
+
+function isDeletingNotification(notification) {
+  const id = notificationKey(notification);
+  return deletingNotificationIds.value.some((item) => String(item) === String(id));
+}
+
+async function deleteOne(notification) {
+  const id = notificationKey(notification);
+  if (!id || isDeletingNotification(notification)) return;
+  deletingNotificationIds.value = [...deletingNotificationIds.value, id];
+  await uiStore.deleteNotification(id);
+  deletingNotificationIds.value = deletingNotificationIds.value.filter((item) => String(item) !== String(id));
+}
+
+function askDeleteAll() {
+  showDeleteAllConfirm.value = true;
+}
+
+function closeDeleteAllConfirm() {
+  if (!deletingAll.value) showDeleteAllConfirm.value = false;
+}
+
+async function confirmDeleteAll() {
+  if (deletingAll.value) return;
+  deletingAll.value = true;
+  const ok = await uiStore.deleteAllNotifications();
+  deletingAll.value = false;
+  if (ok) showDeleteAllConfirm.value = false;
 }
 
 async function openNotification(notification) {
@@ -43,7 +79,10 @@ onMounted(loadNotifications);
     <section class="utility-screen">
       <div class="utility-header">
         <p>{{ t('notifications.description') }}</p>
-        <button v-if="notifications.length" type="button" @click="markAllRead">{{ t('notifications.markAllRead') }}</button>
+        <div v-if="notifications.length" class="notification-header-actions">
+          <button type="button" @click="markAllRead">{{ t('notifications.markAllRead') }}</button>
+          <button type="button" class="notification-delete-all-button" @click="askDeleteAll">{{ t('notifications.deleteAll') }}</button>
+        </div>
       </div>
 
       <EmptyState
@@ -65,22 +104,31 @@ onMounted(loadNotifications);
       />
 
       <div v-else-if="notifications.length" class="notification-list">
-        <motion.button
+        <motion.div
           v-for="(notification, index) in notifications"
           :key="notification.id"
           class="notification-row"
           :class="{ unread: !notification.read }"
-          type="button"
+          role="article"
           v-bind="motionVariants.listItem(index)"
-          @click="openNotification(notification)"
         >
-          <span class="notification-icon">!</span>
-          <span>
-            <strong>{{ notification.title }}</strong>
-            <small>{{ notification.subtitle }}</small>
-          </span>
-          <em>{{ notification.time }}</em>
-        </motion.button>
+          <button type="button" class="notification-row-main" @click="openNotification(notification)">
+            <span class="notification-content">
+              <strong>{{ notification.title }}</strong>
+              <small>{{ notification.subtitle }}</small>
+            </span>
+            <em>{{ notification.time }}</em>
+          </button>
+          <button
+            type="button"
+            class="notification-delete-button"
+            :disabled="isDeletingNotification(notification)"
+            :aria-label="t('notifications.deleteOne')"
+            @click="deleteOne(notification)"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </motion.div>
       </div>
 
       <EmptyState
@@ -92,6 +140,21 @@ onMounted(loadNotifications);
         :action-label="hasToken ? t('notifications.communityAction') : t('settings.login')"
         :action-to="hasToken ? '/community' : '/login'"
       />
+
+      <div v-if="showDeleteAllConfirm" class="sheet-backdrop notification-confirm-backdrop" @click.self="closeDeleteAllConfirm">
+        <section class="bottom-sheet notification-confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="notification-delete-all-title">
+          <h2 id="notification-delete-all-title">{{ t('notifications.deleteAllConfirmTitle') }}</h2>
+          <p>{{ t('notifications.deleteAllConfirmText') }}</p>
+          <div class="notification-confirm-actions">
+            <button type="button" class="notification-confirm-cancel" :disabled="deletingAll" @click="closeDeleteAllConfirm">
+              {{ t('common.cancel') }}
+            </button>
+            <button type="button" class="notification-confirm-delete" :disabled="deletingAll" @click="confirmDeleteAll">
+              {{ deletingAll ? t('common.loading') : t('notifications.deleteConfirm') }}
+            </button>
+          </div>
+        </section>
+      </div>
     </section>
   </AppLayout>
 </template>

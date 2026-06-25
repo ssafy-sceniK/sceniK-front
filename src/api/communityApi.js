@@ -271,3 +271,13 @@ export async function markAllNotificationsRead() {
   const { data } = await http.patch('/notifications/read');
   return unwrapApiData(data) ?? data;
 }
+
+export async function deleteNotification(notificationId) {
+  const { data } = await http.delete(`/notifications/${notificationId}`);
+  return unwrapApiData(data) ?? data;
+}
+
+export async function deleteAllNotifications() {
+  const { data } = await http.delete('/notifications');
+  return unwrapApiData(data) ?? data;
+}

@@ -30,6 +30,19 @@
   font-weight: 800;
 }
 
+.notification-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.utility-header .notification-delete-all-button {
+  color: var(--color-semantic-down);
+  background: rgba(207, 32, 47, 0.08);
+}
+
 .notification-list,
 .settings-card {
   overflow: hidden;
@@ -39,7 +52,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.notification-row,
 .settings-card button,
 .settings-card a {
   width: 100%;
@@ -54,23 +66,34 @@
   text-align: left;
 }
 
+.notification-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  color: var(--text);
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
 .notification-row:last-child,
 .settings-card button:last-child,
 .settings-card a:last-child {
   border-bottom: 0;
 }
 
-.notification-icon {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--panel-soft);
+.notification-row-main {
+  min-width: 0;
+  min-height: 58px;
+  padding: 12px 8px 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
 }
 
-.notification-row span:nth-child(2) {
+.notification-content {
   min-width: 0;
   flex: 1;
 }
@@ -101,6 +124,75 @@
   vertical-align: middle;
   border-radius: 999px;
   background: var(--accent);
+}
+
+.notification-delete-button {
+  width: 38px;
+  min-height: 38px;
+  align-self: center;
+  margin-right: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.notification-delete-button:disabled {
+  cursor: progress;
+  opacity: 0.55;
+}
+
+.notification-delete-button:focus-visible,
+.notification-row-main:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.35);
+  outline-offset: -2px;
+}
+
+.notification-confirm-sheet {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-confirm-sheet h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+}
+
+.notification-confirm-sheet p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.notification-confirm-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.notification-confirm-actions button {
+  min-height: 44px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notification-confirm-cancel {
+  color: var(--text);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--border);
+}
+
+.notification-confirm-delete {
+  color: #ffffff;
+  background: var(--color-semantic-down);
 }
 
 .settings-section h2 {
@@ -592,6 +684,10 @@
   color: var(--dim);
   font-size: 10px;
   line-height: 1.25;
+}
+
+.my-page {
+  padding-bottom: calc(var(--bottom-nav-height, 72px) + 28px + env(safe-area-inset-bottom));
 }
 
 .my-section-panel {

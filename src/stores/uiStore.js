@@ -42,7 +42,9 @@ import {
 import {
   createComment as createCommunityComment,
   createPost as createCommunityPost,
+  deleteAllNotifications as deleteAllNotificationsRequest,
   deleteComment as deleteCommunityComment,
+  deleteNotification as deleteNotificationRequest,
   deletePost as deleteCommunityPost,
   getMyComments as fetchMyComments,
   getPost as fetchCommunityPost,
@@ -781,6 +783,34 @@ export const useUiStore = defineStore('ui', {
         return true;
       } catch (error) {
         this.notificationsError = apiErrorMessage(error, storeT('errors.store.k6'));
+        this.notify(this.notificationsError);
+        return false;
+      }
+    },
+    async deleteNotification(notificationId) {
+      if (!notificationId || !this.currentUser) return false;
+      try {
+        await deleteNotificationRequest(notificationId);
+        this.notifications = this.notifications.filter((item) => !sameId(item.notificationId ?? item.id, notificationId));
+        this.unreadNotificationCount = this.notifications.filter((item) => !item.read).length;
+        this.notify(storeT('notifications.deleteSuccess'), 'success');
+        return true;
+      } catch (error) {
+        this.notificationsError = apiErrorMessage(error, storeT('notifications.deleteFailed'));
+        this.notify(this.notificationsError);
+        return false;
+      }
+    },
+    async deleteAllNotifications() {
+      if (!this.currentUser) return false;
+      try {
+        await deleteAllNotificationsRequest();
+        this.notifications = [];
+        this.unreadNotificationCount = 0;
+        this.notify(storeT('notifications.deleteAllSuccess'), 'success');
+        return true;
+      } catch (error) {
+        this.notificationsError = apiErrorMessage(error, storeT('notifications.deleteAllFailed'));
         this.notify(this.notificationsError);
         return false;
       }

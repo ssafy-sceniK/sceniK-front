@@ -748,10 +748,15 @@ body {
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
-:root[data-theme="dark"] .notification-icon {
+:root[data-theme="dark"] .notification-row-main {
+  color: #ffffff;
+  background: transparent;
+}
+
+:root[data-theme="dark"] .notification-delete-button {
   color: #fca5a5;
   background: #302a2a;
-  border: 1px solid var(--border);
+  border-color: var(--border);
 }
 
 :root[data-theme="dark"] .notification-row strong {
@@ -771,6 +776,11 @@ body {
   background: var(--dark-soft-red-bg);
   border: 1px solid var(--dark-soft-red-border);
   box-shadow: none;
+}
+
+:root[data-theme="dark"] .utility-header .notification-delete-all-button {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.14);
 }
 
 /* Social brand buttons retain their readable light-surface text contrast. */
