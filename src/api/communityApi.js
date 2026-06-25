@@ -58,6 +58,28 @@ function normalizeAttachment(attachment = {}) {
   };
 }
 
+function normalizeLinkedCourse(course = {}, fallbackRouteId = '') {
+  const routeId = firstDefined(course.routeId, course.courseId, course.id, fallbackRouteId);
+  if (!routeId) return null;
+  const title = firstDefined(course.title, course.courseTitle, course.courseName, course.name, '');
+  const durationDays = Number(firstDefined(course.durationDays, course.days, course.duration, 0));
+  const placeCount = Number(firstDefined(course.placeCount, course.totalPlaces, course.totalPlaceCount, 0));
+  return {
+    ...course,
+    routeId,
+    courseId: firstDefined(course.courseId, routeId),
+    id: firstDefined(course.id, routeId),
+    title,
+    courseTitle: firstDefined(course.courseTitle, title),
+    region: firstDefined(course.region, ''),
+    durationDays: Number.isFinite(durationDays) && durationDays > 0 ? durationDays : undefined,
+    days: Number.isFinite(durationDays) && durationDays > 0 ? durationDays : undefined,
+    placeCount: Number.isFinite(placeCount) && placeCount > 0 ? placeCount : undefined,
+    transport: firstDefined(course.transport, course.transportLabel, ''),
+    style: firstDefined(course.style, course.theme, ''),
+  };
+}
+
 export function normalizePost(post = {}) {
   const postId = firstDefined(post.postId, post.id);
   const comments = (post.comments ?? post.commentItems ?? []).map(normalizeComment);
@@ -68,6 +90,14 @@ export function normalizePost(post = {}) {
   const thumbnailUrl = firstDefined(post.thumbnailUrl, post.thumbnail_url);
   const coverImageUrl = firstDefined(post.coverImageUrl, post.cover_image_url);
   const isScrapped = Boolean(firstDefined(post.isScrapped, post.scrapped, false));
+  const routeId = firstDefined(post.routeId, post.travelRouteId);
+  const linkedCourse = normalizeLinkedCourse(firstDefined(
+    post.linkedCourse,
+    post.linked_course,
+    post.course,
+    post.route,
+    {},
+  ), routeId);
   return {
     ...post,
     id: post.id ?? postId,
@@ -81,7 +111,8 @@ export function normalizePost(post = {}) {
     content: firstDefined(post.content, post.body, post.text, ''),
     region: firstDefined(post.region, 'Korea'),
     duration: firstDefined(post.duration, post.durationLabel, post.durationDays && `${post.durationDays} days`),
-    routeId: firstDefined(post.routeId, post.travelRouteId),
+    routeId,
+    linkedCourse,
     tags: Array.isArray(post.tags) ? post.tags : [],
     likes: Number(firstDefined(post.likes, post.likeCount, 0)),
     isLiked: Boolean(firstDefined(post.isLiked, post.liked, false)),

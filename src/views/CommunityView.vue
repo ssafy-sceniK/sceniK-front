@@ -223,7 +223,8 @@ const postEditVisibleCourseOptions = computed(() => postEditCourseOptions.value.
 const hasMorePostEditCourseOptions = computed(() => postEditVisibleCourseOptions.value.length < postEditCourseOptions.value.length);
 const postEditSelectedCourseTitle = computed(() => {
   if (postEditSelectedCourse.value) return postEditSelectedCourse.value.title;
-  if (postEditRouteId.value) return t('community.linkedCourse.title', { region: selectedPost.value?.region ?? '' });
+  if (postEditRouteId.value && selectedPost.value?.routeId === postEditRouteId.value) return linkedCourseTitle(selectedPost.value);
+  if (postEditRouteId.value) return t('community.write.selectedCourse');
   return t('community.write.noneSelected');
 });
 const postEditSelectedCourseSummary = computed(() => {
@@ -532,18 +533,37 @@ function replyPlaceholder(comment) {
 }
 
 function linkedCourseTo(post) {
-  return post?.routeId
-    ? { name: 'course-detail', params: { routeId: post.routeId } }
+  const routeId = linkedCourseData(post)?.routeId;
+  return routeId
+    ? { name: 'course-detail', params: { routeId } }
     : '/ai/result';
 }
 
+function linkedCourseFromStore(routeId) {
+  if (!routeId) return null;
+  const sameRoute = (course) => String(course?.routeId ?? '') === String(routeId);
+  return uiStore.savedCourses.find(sameRoute)
+    ?? uiStore.courseDetailCache.find(sameRoute)
+    ?? null;
+}
+
+function linkedCourseData(post) {
+  const routeId = post?.routeId ?? post?.linkedCourse?.routeId ?? post?.linkedCourse?.courseId;
+  if (!routeId) return null;
+  const liveCourse = linkedCourseFromStore(routeId);
+  const apiCourse = post?.linkedCourse ?? null;
+  if (liveCourse) return { ...apiCourse, ...liveCourse, routeId };
+  if (apiCourse) return { ...apiCourse, routeId: apiCourse.routeId ?? routeId };
+  return { routeId };
+}
+
+function linkedCourseTitle(post) {
+  const course = linkedCourseData(post);
+  return course?.title || course?.courseTitle || course?.courseName || t('community.write.selectedCourse');
+}
+
 function linkedCourseMeta(post) {
-  return formatCourseMetadata({
-    region: post?.region,
-    duration: post?.duration,
-    durationDays: post?.durationDays,
-    routeId: post?.routeId,
-  }, t);
+  return formatCourseMetadata(linkedCourseData(post) ?? {}, t);
 }
 
 function postEditCourseSummaryMeta(course) {
@@ -551,7 +571,7 @@ function postEditCourseSummaryMeta(course) {
 }
 
 function hasLinkedCourse(post) {
-  return Boolean(post?.routeId);
+  return Boolean(linkedCourseData(post)?.routeId);
 }
 
 function displayPostTags(post) {
@@ -1535,7 +1555,7 @@ async function nativeShare() {
             <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
               <div>
                 <small class="course-kicker">{{ t('communityAuto.k166mo55') }}</small>
-                <strong>{{ t('community.linkedCourse.title', { region: selectedPost.region }) }}</strong>
+                <strong>{{ linkedCourseTitle(selectedPost) }}</strong>
                 <small v-if="linkedCourseMeta(selectedPost)">{{ linkedCourseMeta(selectedPost) }}</small>
               </div>
               <span class="linked-course-cta">{{ t('communityAuto.k1nbnyzt') }}</span>
