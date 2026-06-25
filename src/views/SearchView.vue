@@ -1,5 +1,5 @@
 ﻿<script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -14,6 +14,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const keyword = ref(searchStore.keyword);
+const searchInputRef = ref(null);
 const restoringQuery = ref(false);
 const hasResults = computed(() => (
   searchStore.results.contents.length + searchStore.results.places.length
@@ -51,14 +52,22 @@ function clearSearch() {
   router.replace({ query: { ...route.query, keyword: undefined } });
 }
 
-onMounted(restoreQueryState);
+async function focusSearchInput() {
+  await nextTick();
+  searchInputRef.value?.focus?.({ preventScroll: true });
+}
+
+onMounted(() => {
+  restoreQueryState();
+  focusSearchInput();
+});
 watch(() => route.query.keyword, restoreQueryState);
 </script>
 
 <template>
   <AppLayout :title="t('search.title')" back>
     <section class="search-screen">
-      <SearchBar v-model="keyword" :placeholder="t('search.placeholder')" @update:model-value="runSearch" />
+      <SearchBar ref="searchInputRef" v-model="keyword" :placeholder="t('search.placeholder')" @update:model-value="runSearch" />
       <EmptyState
         v-if="!keyword"
         icon="?"

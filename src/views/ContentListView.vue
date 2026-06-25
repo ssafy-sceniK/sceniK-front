@@ -104,7 +104,7 @@ function loadMore() {
 <template>
   <AppLayout>
     <section class="explore-screen">
-      <SearchBar v-model="query" :placeholder="t('content.list.searchPlaceholder')" @focus="router.push('/search')" />
+      <SearchBar v-model="query" :placeholder="t('content.list.searchPlaceholder')" @focus="router.push({ name: 'search', query: { focus: '1' } })" />
       <div class="mode-toggle">
         <button :class="{ active: mode === 'content' }" @click="mode = 'content'">{{ t('content.list.contentMode') }}</button>
         <button :class="{ active: mode === 'map' }" @click="router.push('/explore/map')">{{ t('content.list.mapMode') }}</button>

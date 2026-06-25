@@ -1,15 +1,33 @@
 import { defineStore } from 'pinia';
 import { fetchPlaceDetail, fetchPlaces } from '../api/placeApi.js';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
+import { matchesSearchText, normalizeSearchText } from '../utils/searchText.js';
 
 function filterPlaces(list, { region, district, category, keyword } = {}) {
-  const query = (keyword ?? '').trim().toLowerCase();
+  const query = normalizeSearchText(keyword);
   return list.filter((place) => {
     const matchesRegion = !region || region === '\uc804\uccb4' || place.region === region;
     const matchesDistrict = !district || place.district === district;
     const matchesCategory = !category || category === '\uc804\uccb4' || place.category === category;
-    const haystack = `${place.placeName} ${place.region} ${place.district} ${place.category} ${place.description} ${(place.tags ?? []).join(' ')}`.toLowerCase();
-    return matchesRegion && matchesDistrict && matchesCategory && (!query || haystack.includes(query));
+    const searchableValues = [
+      place.placeId,
+      place.name,
+      place.originalName,
+      place.placeName,
+      place.originalPlaceName,
+      place.address,
+      place.region,
+      place.originalRegion,
+      place.district,
+      place.originalDistrict,
+      place.category,
+      place.originalCategory,
+      place.description,
+      place.originalDescription,
+      place.tags,
+      place.relatedContents?.map((content) => [content.title, content.originalTitle, content.contentId]),
+    ];
+    return matchesRegion && matchesDistrict && matchesCategory && matchesSearchText(searchableValues, query);
   });
 }
 

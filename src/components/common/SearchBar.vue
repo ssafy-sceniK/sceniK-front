@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -10,11 +10,19 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'focus']);
 const { t } = useI18n();
 const displayPlaceholder = computed(() => props.placeholder || t('common.searchPlaceholder'));
+const inputRef = ref(null);
+
+function focus(options) {
+  inputRef.value?.focus(options);
+}
+
+defineExpose({ focus });
 </script>
 
 <template>
   <label class="search-bar">
     <input
+      ref="inputRef"
       :value="props.modelValue"
       :placeholder="displayPlaceholder"
       :readonly="props.readonly"
