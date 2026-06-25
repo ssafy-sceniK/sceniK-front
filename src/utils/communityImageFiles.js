@@ -6,6 +6,13 @@ const WEB_SAFE_IMAGE_TYPES = new Set([
 ]);
 
 const IMAGE_EXTENSION_PATTERN = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
+const SIZE_ERROR_CODES = new Set(['IMAGE_TOO_LARGE', 'CONVERTED_IMAGE_TOO_LARGE']);
+const TYPE_ERROR_CODES = new Set([
+  'UNSUPPORTED_IMAGE_TYPE',
+  'IMAGE_DECODE_FAILED',
+  'IMAGE_CONVERSION_FAILED',
+  'CANVAS_UNSUPPORTED',
+]);
 const MIME_BY_EXTENSION = new Map([
   ['jpg', 'image/jpeg'],
   ['jpeg', 'image/jpeg'],
@@ -127,6 +134,9 @@ export async function normalizeCommunityImageFile(file) {
   if (!isCommunityImageCandidateFile(file)) {
     throw new Error('UNSUPPORTED_IMAGE_TYPE');
   }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error('IMAGE_TOO_LARGE');
+  }
   if (isHeicLikeFile(file)) {
     return convertHeicToJpeg(file);
   }
@@ -135,4 +145,11 @@ export async function normalizeCommunityImageFile(file) {
     throw new Error('UNSUPPORTED_IMAGE_TYPE');
   }
   return normalized;
+}
+
+export function communityImageErrorKind(error) {
+  const code = String(error?.message ?? '');
+  if (SIZE_ERROR_CODES.has(code)) return 'size';
+  if (TYPE_ERROR_CODES.has(code)) return 'type';
+  return 'upload';
 }

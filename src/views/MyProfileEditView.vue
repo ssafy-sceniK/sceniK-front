@@ -13,6 +13,7 @@ import { localizePreferenceOption } from '../i18n/systemContent.js';
 
 const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
+const PROFILE_IMAGE_EXTENSION_PATTERN = /\.(jpe?g|png)$/i;
 const PROFILE_CROP_SIZE = 512;
 
 const router = useRouter();
@@ -255,6 +256,14 @@ function croppedFileName(name) {
   return (baseName || 'profile-image') + '-crop.png';
 }
 
+function inferProfileImageType(file) {
+  if (file.type) return file.type;
+  const name = String(file.name ?? '').toLowerCase();
+  if (name.endsWith('.png')) return 'image/png';
+  if (PROFILE_IMAGE_EXTENSION_PATTERN.test(name)) return 'image/jpeg';
+  return '';
+}
+
 async function applyCroppedImage() {
   if (!cropImageUrl.value || !cropSourceFile.value) return;
   try {
@@ -300,7 +309,8 @@ function handleImageChange(event) {
   const [file] = input.files ?? [];
 
   if (!file) return;
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+  const inferredType = inferProfileImageType(file);
+  if (!ALLOWED_IMAGE_TYPES.includes(inferredType)) {
     saveNotice.value = {
       tone: 'warning',
       title: t('profile.edit.image.typeErrorTitle'),
@@ -319,7 +329,11 @@ function handleImageChange(event) {
     return;
   }
 
-  openCropEditor(file);
+  const profileFile = file.type ? file : new File([file], file.name || 'profile-image.jpg', {
+    type: inferredType,
+    lastModified: file.lastModified || Date.now(),
+  });
+  openCropEditor(profileFile);
 }
 
 async function saveProfile() {

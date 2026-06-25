@@ -12,7 +12,7 @@ import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
-import { isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
+import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
 import { isGenericAiCourseTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
@@ -295,14 +295,24 @@ async function normalizeSelectedImageFiles(files, noticeRef) {
   if (!imageFiles.length) return [];
   try {
     return await Promise.all(imageFiles.map(normalizeCommunityImageFile));
-  } catch {
+  } catch (error) {
+    const errorKind = communityImageErrorKind(error);
     noticeRef.value = {
       tone: 'warning',
-      title: t('community.write.uploadFailedTitle'),
-      text: t('community.write.uploadFailedText'),
+      title: t('community.write.imageValidationTitle'),
+      text: errorKind === 'size'
+        ? t('community.write.imageSizeErrorText')
+        : t('community.write.imageTypeErrorText'),
     };
     return [];
   }
+}
+
+function uploadFailureMessage(error) {
+  if (!error?.response || error.response.status >= 500) {
+    return t('community.write.uploadFailedText');
+  }
+  return getUserMessage(error, t('community.write.uploadFailedText'));
 }
 
 async function handleAttachments(files = []) {
@@ -412,7 +422,7 @@ async function createPost() {
     statusNotice.value = {
       tone: 'error',
       title: t('community.write.uploadFailedTitle'),
-      text: getUserMessage(error, t('community.write.uploadFailedText')),
+      text: uploadFailureMessage(error),
     };
     return;
   }

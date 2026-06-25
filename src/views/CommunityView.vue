@@ -19,6 +19,7 @@ import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import TranslatableText from '../components/translation/TranslatableText.vue';
 import TranslatablePostText from '../components/translation/TranslatablePostText.vue';
 import { uploadPostImage } from '../api/communityApi.js';
+import { getUserMessage } from '../api/error.js';
 import { resolveApiAssetUrl } from '../api/http.js';
 import { useUiStore } from '../stores/uiStore.js';
 import {
@@ -30,7 +31,7 @@ import {
   isDisplayableImageAttachment,
 } from '../utils/communityAttachments.js';
 import { communityBoardIdFromTags, communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
-import { isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
+import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
 import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
 const route = useRoute();
@@ -652,14 +653,24 @@ async function normalizeSelectedPostEditImages(files) {
   if (!imageFiles.length) return [];
   try {
     return await Promise.all(imageFiles.map(normalizeCommunityImageFile));
-  } catch {
+  } catch (error) {
+    const errorKind = communityImageErrorKind(error);
     postNotice.value = {
       tone: 'warning',
-      title: t('community.write.uploadFailedTitle'),
-      text: t('community.write.uploadFailedText'),
+      title: t('community.write.imageValidationTitle'),
+      text: errorKind === 'size'
+        ? t('community.write.imageSizeErrorText')
+        : t('community.write.imageTypeErrorText'),
     };
     return [];
   }
+}
+
+function uploadFailureMessage(error) {
+  if (!error?.response || error.response.status >= 500) {
+    return t('community.write.uploadFailedText');
+  }
+  return getUserMessage(error, t('community.write.uploadFailedText'));
 }
 
 async function handlePostEditImageFiles(files = []) {
@@ -978,12 +989,12 @@ async function savePostEdit() {
       prefix: target.prefix,
       attachments,
     });
-  } catch {
+  } catch (error) {
     postActionLoading.value = false;
     postNotice.value = {
       tone: 'error',
       title: t('community.write.uploadFailedTitle'),
-      text: t('community.write.uploadFailedText'),
+      text: uploadFailureMessage(error),
     };
     return;
   }
