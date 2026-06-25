@@ -878,9 +878,9 @@
       "alreadyReviewedText": "この場所を訪れたら最初のレビューを残してください。",
       "reviewLoginTitle": "ログインが必要です。",
       "reviewLoginText": "この場所を訪れたら最初のレビューを残してください。",
-      "relatedContents": "関連スポット",
-      "relatedEmptyTitle": "まだ関連する撮影地がありません",
-      "relatedEmptyText": "関連スポットのデータがないため、詳細画面はそのまま表示されます。",
+      "relatedContents": "関連コンテンツ",
+      "relatedEmptyTitle": "関連コンテンツはまだありません",
+      "relatedEmptyText": "関連コンテンツがなくても、スポット情報とレビューは引き続き確認できます。",
       "createCourseFromPlace": "AIコースを作成",
       "visitReviews": "訪問レビュー"
     },

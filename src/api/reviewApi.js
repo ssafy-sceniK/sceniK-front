@@ -8,7 +8,7 @@ function firstDefined(...values) {
 function listFrom(data, key = 'items') {
   const payload = unwrapApiData(data);
   if (Array.isArray(payload)) return payload;
-  return payload?.[key] ?? payload?.items ?? payload?.data ?? [];
+  return payload?.[key] ?? payload?.reviews ?? payload?.items ?? payload?.data ?? [];
 }
 
 export function normalizeReview(review = {}) {

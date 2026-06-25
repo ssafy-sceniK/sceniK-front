@@ -878,9 +878,9 @@
       "alreadyReviewedText": "如果你去过这里，留下第一条评论吧。",
       "reviewLoginTitle": "需要登录。",
       "reviewLoginText": "如果你去过这里，留下第一条评论吧。",
-      "relatedContents": "相关地点",
-      "relatedEmptyTitle": "暂无关联取景地",
-      "relatedEmptyText": "相关地点数据为空，详情页仍保持可用。",
+      "relatedContents": "相关内容",
+      "relatedEmptyTitle": "暂无关联内容",
+      "relatedEmptyText": "即使暂无关联内容，也可以继续查看地点信息和评论。",
       "createCourseFromPlace": "创建 AI 行程",
       "visitReviews": "访问评论"
     },

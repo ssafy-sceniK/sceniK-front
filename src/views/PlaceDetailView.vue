@@ -61,23 +61,25 @@ const likePending = computed(() => Boolean(place.value)
   && uiStore.pendingPlaceLikes.some((id) => String(id) === String(place.value.placeId)));
 const visitPending = computed(() => Boolean(place.value)
   && uiStore.pendingVisitStatuses.some((id) => String(id) === String(place.value.placeId)));
+const visibleReviews = computed(() => reviews.value.filter((review) => Boolean(review?.reviewId)));
+const hasVisibleReviews = computed(() => visibleReviews.value.length > 0);
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
-  && reviews.value.some((review) => review.userId === uiStore.currentUser.userId));
-const myReview = computed(() => reviews.value.find((review) => (
+  && visibleReviews.value.some((review) => review.userId === uiStore.currentUser.userId));
+const myReview = computed(() => visibleReviews.value.find((review) => (
   Boolean(uiStore.currentUser?.userId) && String(review.userId) === String(uiStore.currentUser.userId)
 )) ?? null);
 const reviewCount = computed(() => (
-  reviewsLoaded.value ? reviews.value.length : Number(place.value?.reviewCount ?? 0)
+  reviewsLoaded.value ? visibleReviews.value.length : Number(place.value?.reviewCount ?? 0)
 ));
 const averageRating = computed(() => {
-  const rated = reviews.value.map((review) => Number(review.rating)).filter((rating) => Number.isFinite(rating));
+  const rated = visibleReviews.value.map((review) => Number(review.rating)).filter((rating) => Number.isFinite(rating));
   if (rated.length) return (rated.reduce((sum, rating) => sum + rating, 0) / rated.length).toFixed(1);
   if (reviewsLoaded.value) return '0.0';
   const fromPlace = Number(place.value?.averageRating ?? 0);
   return fromPlace > 0 ? fromPlace.toFixed(1) : '0.0';
 });
 const ratingSummary = computed(() => [5, 4, 3, 2, 1].map((score) => {
-  const count = reviews.value.filter((review) => Math.round(Number(review.rating)) === score).length;
+  const count = visibleReviews.value.filter((review) => Math.round(Number(review.rating)) === score).length;
   return {
     score,
     count,
@@ -93,6 +95,21 @@ function normalizeRating(value) {
 
 function setReviewRating(form, rating) {
   form.rating = normalizeRating(rating);
+}
+
+function syncPlaceReviewSummary() {
+  if (!place.value) return;
+  const rated = visibleReviews.value
+    .map((review) => Number(review.rating))
+    .filter((rating) => Number.isFinite(rating));
+  const nextAverage = rated.length
+    ? rated.reduce((sum, rating) => sum + rating, 0) / rated.length
+    : 0;
+  place.value = {
+    ...place.value,
+    reviewCount: visibleReviews.value.length,
+    averageRating: nextAverage,
+  };
 }
 
 function isReviewOwner(review) {
@@ -148,6 +165,7 @@ async function loadReviews() {
   try {
     reviews.value = await fetchPlaceReviews(placeId.value);
     reviewsLoaded.value = true;
+    syncPlaceReviewSummary();
   } catch (error) {
     reviewError.value = getUserMessage(error, t('place.detail.reviewLoadFailedMessage'));
     reviews.value = [];
@@ -193,6 +211,7 @@ async function submitReview() {
       content: reviewForm.value.content,
     });
     reviews.value = [created, ...reviews.value.filter((review) => review.reviewId !== created.reviewId)];
+    syncPlaceReviewSummary();
     reviewForm.value = { rating: 5, content: '' };
     reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewSavedToast'), 'success');
@@ -262,6 +281,7 @@ async function submitReviewEdit(review) {
       content: editReviewForm.value.content,
     });
     reviews.value = reviews.value.map((item) => (item.reviewId === updated.reviewId ? updated : item));
+    syncPlaceReviewSummary();
     cancelEditReview();
     reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewUpdatedToast'), 'success');
@@ -290,6 +310,7 @@ async function removeReview(review) {
   try {
     await deletePlaceReview(place.value.placeId, review.reviewId);
     reviews.value = reviews.value.filter((item) => item.reviewId !== review.reviewId);
+    syncPlaceReviewSummary();
     if (editingReviewId.value === review.reviewId) cancelEditReview();
     reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewDeletedToast'), 'success');
@@ -391,7 +412,7 @@ function markPlaceImageFailed() {
             <strong>★ {{ averageRating }}</strong>
             <span>{{ t('place.detail.reviewCount', { count: reviewCount }) }}</span>
             <small v-if="reviewCount === 0">{{ t('place.detail.reviewSummaryText') }}</small>
-            <div v-if="reviews.length" class="rating-distribution" :aria-label="t('place.detail.ratingDistributionAria')">
+            <div v-if="hasVisibleReviews" class="rating-distribution" :aria-label="t('place.detail.ratingDistributionAria')">
               <span v-for="item in ratingSummary" :key="item.score">
                 <b>{{ t('place.detail.ratingPoint', { score: item.score }) }}</b>
                 <i><em :style="{ width: `${item.percent}%` }"></em></i>
@@ -417,7 +438,7 @@ function markPlaceImageFailed() {
             :text="t('place.detail.reviewLoadingText')"
           />
           <EmptyState
-            v-else-if="reviewError && !reviews.length"
+            v-else-if="reviewError && !hasVisibleReviews"
             icon="!"
             tone="error"
             compact
@@ -428,8 +449,8 @@ function markPlaceImageFailed() {
           />
         </template>
         <template #list>
-          <div v-if="!reviewLoading && !(reviewError && !reviews.length)" class="review-list">
-            <article v-for="review in reviews" :key="review.reviewId" class="review-row">
+          <div v-if="!reviewLoading && !(reviewError && !hasVisibleReviews)" class="review-list">
+            <article v-for="review in visibleReviews" :key="review.reviewId" class="review-row">
               <div class="review-row-head">
                 <strong>{{ review.nickname }}</strong>
                 <span class="review-rating-value">★ {{ normalizeRating(review.rating) }}</span>
@@ -480,7 +501,7 @@ function markPlaceImageFailed() {
               </template>
             </article>
             <EmptyState
-              v-if="!reviews.length"
+              v-if="reviewsLoaded && !hasVisibleReviews"
               icon="R"
               tone="search"
               compact
