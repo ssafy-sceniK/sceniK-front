@@ -193,6 +193,19 @@
         "short": "Regional",
         "full": "Regional board"
       }
+    },
+    "edit": {
+      "attachmentsTitle": "Attached images",
+      "attachmentsHelp": "Remove images or change their order before saving.",
+      "imageFile": "Add images",
+      "imageFileHelp": "You can attach up to 10 images including existing images.",
+      "removeImage": "Remove image",
+      "movePrevious": "Move previous",
+      "moveNext": "Move next",
+      "existingImageAlt": "Attached image {index}",
+      "newImageAlt": "New image {index}",
+      "newImageBadge": "New",
+      "fallbackFile": "Attachment"
     }
   },
   "reviews": {

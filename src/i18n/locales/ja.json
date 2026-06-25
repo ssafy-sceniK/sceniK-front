@@ -193,6 +193,19 @@
         "short": "地域別",
         "full": "地域別掲示板"
       }
+    },
+    "edit": {
+      "attachmentsTitle": "添付画像",
+      "attachmentsHelp": "保存前に画像を削除したり順序を変更できます。",
+      "imageFile": "画像を追加",
+      "imageFileHelp": "既存の画像を含めて最大10枚まで追加できます。",
+      "removeImage": "画像を削除",
+      "movePrevious": "前へ移動",
+      "moveNext": "次へ移動",
+      "existingImageAlt": "添付画像 {index}",
+      "newImageAlt": "新しい画像 {index}",
+      "newImageBadge": "新規",
+      "fallbackFile": "添付ファイル"
     }
   },
   "reviews": {

@@ -193,6 +193,19 @@
         "short": "按地区",
         "full": "地区板块"
       }
+    },
+    "edit": {
+      "attachmentsTitle": "附加图片",
+      "attachmentsHelp": "保存前可以删除图片或调整顺序。",
+      "imageFile": "添加图片",
+      "imageFileHelp": "包括现有图片在内，最多可添加 10 张。",
+      "removeImage": "移除图片",
+      "movePrevious": "向前移动",
+      "moveNext": "向后移动",
+      "existingImageAlt": "附加图片 {index}",
+      "newImageAlt": "新图片 {index}",
+      "newImageBadge": "新",
+      "fallbackFile": "附件"
     }
   },
   "reviews": {

@@ -1943,3 +1943,176 @@
 .post-gallery + .attachment-preview-list {
   margin-top: 10px;
 }
+
+/* Community attachment UX: fixed feed thumbnails, bounded detail images, and edit controls. */
+.feed-thumb {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.feed-thumb--image {
+  background: var(--color-surface-soft);
+}
+
+.feed-thumb--image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.post-gallery--detail,
+.post-gallery--detail:has(.post-gallery-item + .post-gallery-item) {
+  margin: 14px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  column-count: initial;
+  column-gap: 0;
+}
+
+.post-gallery--detail .post-gallery-item {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.post-gallery--detail .post-gallery-item img {
+  width: auto;
+  max-width: 100%;
+  max-height: clamp(260px, 60vh, 420px);
+  object-fit: contain;
+}
+
+.post-edit-attachment-manager {
+  margin-top: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.post-edit-attachment-heading {
+  display: grid;
+  gap: 3px;
+}
+
+.post-edit-attachment-heading strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.post-edit-attachment-heading small,
+.post-edit-attachment-field small {
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.post-edit-image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.post-edit-image-item {
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.post-edit-image-frame {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.post-edit-image-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.post-edit-image-item figcaption {
+  overflow: hidden;
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-edit-image-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.post-edit-image-actions button {
+  min-height: 30px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.post-edit-image-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.post-edit-image-actions button.danger {
+  color: #b42318;
+}
+
+.post-edit-image-badge {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  padding: 3px 7px;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.72);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.post-edit-attachment-field {
+  margin-top: 12px;
+}
+
+.post-edit-attachment-field input[type="file"] {
+  margin-top: 6px;
+}
+
+@media (min-width: 560px) {
+  .post-gallery--detail,
+  .post-gallery--detail:has(.post-gallery-item + .post-gallery-item) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-count: initial;
+  }
+
+  .post-edit-image-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
