@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -27,6 +27,9 @@ const router = useRouter();
 const placeStore = usePlaceStore();
 const uiStore = useUiStore();
 const { t, locale } = useI18n();
+const PLACE_ID_ALIASES = Object.freeze({
+  P_0252: 'P_0027',
+});
 const place = ref(null);
 const loading = ref(false);
 const errorMessage = ref('');
@@ -47,7 +50,8 @@ const editReviewForm = ref({
   content: '',
 });
 const ratingOptions = [1, 2, 3, 4, 5];
-const placeId = computed(() => route.params.id || '');
+const rawPlaceId = computed(() => String(route.params.id || ''));
+const placeId = computed(() => PLACE_ID_ALIASES[rawPlaceId.value] ?? rawPlaceId.value);
 const placeImageUrl = computed(() => getPlaceImageUrl(place.value));
 const showPlaceImage = computed(() => Boolean(placeImageUrl.value) && !placeImageFailed.value);
 const relatedContents = computed(() => place.value?.relatedContents ?? []);
@@ -65,6 +69,7 @@ const visibleReviews = computed(() => reviews.value.filter((review) => Boolean(r
 const hasVisibleReviews = computed(() => visibleReviews.value.length > 0);
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
   && visibleReviews.value.some((review) => review.userId === uiStore.currentUser.userId));
+const reviewAuthPending = computed(() => uiStore.authLoading && !uiStore.currentUser);
 const reviewCount = computed(() => (
   reviewsLoaded.value ? visibleReviews.value.length : Number(place.value?.reviewCount ?? 0)
 ));
@@ -133,6 +138,10 @@ function reviewActionMessage(error, fallback) {
 }
 
 async function loadPlaceDetail() {
+  if (rawPlaceId.value && rawPlaceId.value !== placeId.value) {
+    await router.replace({ name: 'place-detail', params: { id: placeId.value } });
+    return;
+  }
   if (!placeId.value) {
     errorMessage.value = t('place.detail.notFoundMessage');
     return;
@@ -152,6 +161,9 @@ async function loadPlaceDetail() {
 }
 
 onMounted(loadPlaceDetail);
+watch(() => route.params.id, () => {
+  void loadPlaceDetail();
+});
 
 async function loadReviews() {
   if (!placeId.value) return;
@@ -507,7 +519,15 @@ function markPlaceImageFailed() {
           </div>
         </template>
         <template #form>
-          <form v-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
+          <EmptyState
+            v-if="reviewAuthPending"
+            icon="R"
+            tone="loading"
+            compact
+            :title="t('place.detail.reviewLoadingTitle')"
+            :text="t('place.detail.reviewLoadingText')"
+          />
+          <form v-else-if="uiStore.currentUser && !hasMyReview" class="review-form" @submit.prevent="submitReview">
             <div class="form-field star-rating-field">
   <span>{{ t('reviews.rating') }}</span>
   <div class="star-rating" role="radiogroup" :aria-label="t('place.detail.newRatingAria')">
@@ -534,7 +554,7 @@ function markPlaceImageFailed() {
             </BaseButton>
           </form>
           <EmptyState
-            v-else
+            v-else-if="!uiStore.currentUser"
             icon="K"
             tone="login"
             compact

@@ -945,7 +945,8 @@ export const places = [
     "indoorOutdoor": "indoor",
     "parkingAvailable": false,
     "relatedContentIds": [
-      "C_DRAMA_005"
+      "C_DRAMA_005",
+      "C_DRAMA_010"
     ],
     "tags": [
       "강원",
@@ -11183,48 +11184,6 @@ export const places = [
     "longitude": 126.3886616
   },
   {
-    "placeId": "P_0252",
-    "placeName": "운현궁 양관",
-    "region": "서울",
-    "district": "종로구",
-    "address": "서울 종로구 삼일대로 464",
-    "category": "관광지",
-    "description": "[21세기 대군부인] 최근 촬영지로 알려진 운현궁 인근 서양식 건물.",
-    "openingHours": "시설별 상이",
-    "closedDays": "시설별 상이",
-    "phoneNumber": "정보없음",
-    "imageUrl": "/images/onboarding-hero.jpg",
-    "indoorOutdoor": "outdoor",
-    "parkingAvailable": false,
-    "relatedContentIds": [
-      "C_DRAMA_010"
-    ],
-    "tags": [
-      "서울",
-      "종로구",
-      "관광지",
-      "촬영지",
-      "성지순례",
-      "감성",
-      "데이트",
-      "전통문화",
-      "사진찍기좋은",
-      "로맨틱한",
-      "친구",
-      "팬덤",
-      "연인",
-      "오전",
-      "오후",
-      "저예산",
-      "맑은날",
-      "사진",
-      "문화체험"
-    ],
-    "verified": true,
-    "latitude": 37.5762264,
-    "longitude": 126.9870856
-  },
-  {
     "placeId": "P_0253",
     "placeName": "선운각",
     "region": "서울",
@@ -14197,7 +14156,7 @@ export const contentPlaces = [
   },
   {
     "contentId": "C_DRAMA_010",
-    "placeId": "P_0252",
+    "placeId": "P_0027",
     "relationType": "촬영지",
     "relationDescription": "최근 촬영지로 알려진 운현궁 인근 서양식 건물.",
     "episodeInfo": "정보없음"
