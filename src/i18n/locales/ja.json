@@ -1185,13 +1185,13 @@
         "sizeErrorText": "5MB"
       },
       "crop": {
-        "title": "プロフィール編集",
-        "description": "プロフィール編集",
-        "previewAria": "自分のプロフィール画像",
-        "imageAlt": "自分のプロフィール画像",
-        "help": "プロフィール編集",
-        "zoom": "Zoom",
-        "rotate": "90",
+        "title": "プロフィール画像を編集",
+        "description": "ズームや回転を調整してから画像を保存してください。",
+        "previewAria": "プロフィール画像の円形プレビュー",
+        "imageAlt": "選択したプロフィール画像",
+        "help": "画像をドラッグして表示位置を調整してください。",
+        "zoom": "ズーム",
+        "rotate": "90°回転",
         "apply": "保存"
       },
       "save": {

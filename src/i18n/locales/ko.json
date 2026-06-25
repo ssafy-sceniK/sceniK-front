@@ -1185,13 +1185,13 @@
         "sizeErrorText": "5MB"
       },
       "crop": {
-        "title": "프로필 편집",
-        "description": "프로필 편집",
-        "previewAria": "내 프로필 이미지",
-        "imageAlt": "내 프로필 이미지",
-        "help": "프로필 편집",
-        "zoom": "Zoom",
-        "rotate": "90",
+        "title": "프로필 이미지 편집",
+        "description": "이미지를 확대/축소하거나 회전한 뒤 저장해 주세요.",
+        "previewAria": "프로필 이미지 원형 미리보기",
+        "imageAlt": "선택한 프로필 이미지",
+        "help": "이미지를 드래그해 원하는 위치에 맞춰 주세요.",
+        "zoom": "확대/축소",
+        "rotate": "90도 회전",
         "apply": "저장"
       },
       "save": {

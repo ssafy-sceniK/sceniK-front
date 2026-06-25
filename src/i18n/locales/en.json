@@ -1185,14 +1185,14 @@
         "sizeErrorText": "Profile images must be 5MB or smaller."
       },
       "crop": {
-        "title": "Adjust profile photo",
-        "description": "Position the image inside the circle, then apply it.",
+        "title": "Profile image editor",
+        "description": "Adjust the zoom or rotation, then save your image.",
         "previewAria": "Circular profile image preview",
-        "imageAlt": "Selected image",
-        "help": "Drag the photo inside the circle to position it.",
+        "imageAlt": "Selected profile image",
+        "help": "Drag the image to position it inside the circle.",
         "zoom": "Zoom",
-        "rotate": "Rotate 90 degrees",
-        "apply": "Apply"
+        "rotate": "Rotate 90°",
+        "apply": "Save"
       },
       "save": {
         "successTitle": "Profile saved.",

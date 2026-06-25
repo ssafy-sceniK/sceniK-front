@@ -1185,13 +1185,13 @@
         "sizeErrorText": "5MB"
       },
       "crop": {
-        "title": "编辑资料",
-        "description": "编辑资料",
-        "previewAria": "我的头像",
-        "imageAlt": "我的头像",
-        "help": "编辑资料",
-        "zoom": "Zoom",
-        "rotate": "90",
+        "title": "编辑个人头像",
+        "description": "调整缩放或旋转后保存图片。",
+        "previewAria": "圆形头像预览",
+        "imageAlt": "已选择的头像图片",
+        "help": "拖动图片，将头像调整到合适位置。",
+        "zoom": "缩放",
+        "rotate": "旋转 90°",
         "apply": "保存"
       },
       "save": {

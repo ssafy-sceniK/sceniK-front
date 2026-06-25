@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import AuthorAvatar from '../common/AuthorAvatar.vue';
 
 const { t } = useI18n();
 defineOptions({
@@ -17,6 +18,10 @@ const props = defineProps({
   },
   authorTo: {
     type: [String, Object],
+    default: '',
+  },
+  authorImageUrl: {
+    type: String,
     default: '',
   },
   meta: {
@@ -43,14 +48,14 @@ const emit = defineEmits(['toggle']);
 <template>
   <div class="user-row author-follow-card">
     <RouterLink v-if="props.authorTo" class="author-profile-link" :to="props.authorTo">
-      <span class="comment-avatar author-profile-avatar" aria-hidden="true">{{ props.authorInitial || props.authorName.slice(0, 1).toUpperCase() }}</span>
+      <AuthorAvatar class="comment-avatar author-profile-avatar" :image-url="props.authorImageUrl" :initial="props.authorInitial || props.authorName.slice(0, 1).toUpperCase()" alt="" />
       <span class="author-profile-copy">
         <b>{{ props.authorName }}</b>
         <span>{{ props.meta }}</span>
       </span>
     </RouterLink>
     <div v-else class="author-profile-link author-profile-link--static">
-      <span class="comment-avatar author-profile-avatar" aria-hidden="true">{{ props.authorInitial || props.authorName.slice(0, 1).toUpperCase() }}</span>
+      <AuthorAvatar class="comment-avatar author-profile-avatar" :image-url="props.authorImageUrl" :initial="props.authorInitial || props.authorName.slice(0, 1).toUpperCase()" alt="" />
       <span class="author-profile-copy">
         <b>{{ props.authorName }}</b>
         <span>{{ props.meta }}</span>

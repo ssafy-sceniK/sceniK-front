@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
+import AuthorAvatar from '../components/common/AuthorAvatar.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
@@ -732,6 +733,22 @@ function userInitial(entity) {
   return displayUserName(entity).slice(0, 1).toUpperCase();
 }
 
+function authorProfileImageUrl(entity) {
+  return [
+    entity?.authorProfileImageUrl,
+    entity?.profileImageUrl,
+    entity?.authorImageUrl,
+    entity?.userProfileImageUrl,
+    entity?.profile_image_url,
+    entity?.avatarUrl,
+    entity?.avatar_url,
+    entity?.author?.profileImageUrl,
+    entity?.author?.profile_image_url,
+    entity?.user?.profileImageUrl,
+    entity?.user?.profile_image_url,
+  ].find((value) => typeof value === 'string' && value.trim()) ?? '';
+}
+
 function userProfileTo(userId) {
   return userId ? { name: 'user-profile', params: { userId } } : '';
 }
@@ -1235,6 +1252,7 @@ async function nativeShare() {
                 class="post-detail-author"
                 :author-name="authorDisplayName(selectedPost)"
                 :author-initial="userInitial(selectedPost)"
+                :author-image-url="authorProfileImageUrl(selectedPost)"
                 :author-to="userProfileTo(selectedPost.userId)"
                 :meta="postMeta(selectedPost)"
                 :can-follow="canFollowSelectedAuthor"
@@ -1423,8 +1441,10 @@ async function nativeShare() {
                 class="comment-thread"
               >
                 <div class="comment-row">
-                  <RouterLink v-if="comment.userId" class="comment-avatar comment-profile-link" :to="userProfileTo(comment.userId)">{{ userInitial(comment) }}</RouterLink>
-                  <span v-else class="comment-avatar">{{ userInitial(comment) }}</span>
+                  <RouterLink v-if="comment.userId" class="comment-profile-link comment-avatar-link" :to="userProfileTo(comment.userId)">
+                    <AuthorAvatar class="comment-avatar" :image-url="authorProfileImageUrl(comment)" :initial="userInitial(comment)" alt="" />
+                  </RouterLink>
+                  <AuthorAvatar v-else class="comment-avatar" :image-url="authorProfileImageUrl(comment)" :initial="userInitial(comment)" alt="" />
                   <div class="comment-content">
                     <div class="comment-header">
                       <div class="comment-meta">
@@ -1511,8 +1531,10 @@ async function nativeShare() {
                     :key="commentKey(reply)"
                     class="comment-row comment-row--reply"
                   >
-                    <RouterLink v-if="reply.userId" class="comment-avatar comment-avatar--reply comment-profile-link" :to="userProfileTo(reply.userId)">{{ userInitial(reply) }}</RouterLink>
-                    <span v-else class="comment-avatar comment-avatar--reply">{{ userInitial(reply) }}</span>
+                    <RouterLink v-if="reply.userId" class="comment-profile-link comment-avatar-link" :to="userProfileTo(reply.userId)">
+                      <AuthorAvatar class="comment-avatar comment-avatar--reply" :image-url="authorProfileImageUrl(reply)" :initial="userInitial(reply)" alt="" />
+                    </RouterLink>
+                    <AuthorAvatar v-else class="comment-avatar comment-avatar--reply" :image-url="authorProfileImageUrl(reply)" :initial="userInitial(reply)" alt="" />
                     <div class="comment-content">
                       <div class="comment-header">
                         <div class="comment-meta">
@@ -1732,7 +1754,7 @@ async function nativeShare() {
             <div class="feed-card-author-row">
               <div class="user-row feed-author-copy">
                 <RouterLink v-if="post.userId" class="feed-author-profile-link" :to="userProfileTo(post.userId)">
-                  <span class="comment-avatar feed-author-avatar" aria-hidden="true">{{ userInitial(post) }}</span>
+                  <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
                   <b>{{ displayUserName(post) }}</b>
                 </RouterLink>
                 <b v-else>{{ displayUserName(post) }}</b>
