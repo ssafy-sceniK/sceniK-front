@@ -23,7 +23,7 @@ const activeTab = ref('courses');
 
 const user = computed(() => profile.value?.user ?? null);
 const isMe = computed(() => String(user.value?.userId ?? '') === String(uiStore.currentUser?.userId ?? ''));
-const initial = computed(() => user.value?.nickname?.slice(0, 1).toUpperCase() || 'U');
+const profileBio = computed(() => user.value?.bio?.trim() ?? '');
 const preferenceChips = computed(() => {
   const preferences = user.value?.preferences;
   if (!preferences) return [];
@@ -89,13 +89,13 @@ watch(() => route.params.userId, loadProfile);
       />
       <template v-else-if="user">
         <section class="profile-card public-profile-card">
-          <ProfileAvatar :image-url="user.profileImageUrl" :initial="initial" :alt="t('autoPass.ui_d4a0532b58')" />
+          <ProfileAvatar :image-url="user.profileImageUrl" :alt="t('autoPass.ui_d4a0532b58')" />
           <div class="profile-copy">
             <div class="profile-name-row">
               <h1>{{ user.nickname }}</h1>
               <span>{{ t('autoPass.ui_bcaf3ba329', { count: profile.followerCount }) }}</span>
             </div>
-            <p>{{ user.bio || t('autoPass.ui_dd4e92605a') }}</p>
+            <p v-if="profileBio">{{ profileBio }}</p>
             <small class="profile-meta">{{ t('autoPass.ui_1443036d4d', { count: profile.followingCount }) }}</small>
             <div v-if="preferenceChips.length" class="profile-preference-chips">
               <span v-for="item in preferenceChips" :key="item">{{ item }}</span>

@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import AuthorAvatar from '../common/AuthorAvatar.vue';
 
 defineOptions({
   name: 'FollowUserListItem',
@@ -35,7 +36,11 @@ const { t } = useI18n();
 <template>
   <article class="user-list-row follow-user-list-item">
     <RouterLink class="follow-user-link" :to="'/users/' + props.user.userId">
-      <span class="user-list-avatar">{{ props.initial }}</span>
+      <AuthorAvatar
+        class="user-list-avatar"
+        :image-url="props.user.profileImageUrl || props.user.profile_image_url || ''"
+        alt=""
+      />
       <span>
         <strong>
           {{ props.user.nickname }}

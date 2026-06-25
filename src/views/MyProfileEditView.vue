@@ -24,7 +24,7 @@ const regionOptions = PREFERENCE_REGIONS;
 const themeOptions = PREFERENCE_THEMES;
 
 const nickname = ref(uiStore.currentUser?.nickname ?? '');
-const bio = ref(uiStore.currentUser?.bio ?? t('my.profile.defaultBio'));
+const bio = ref(uiStore.currentUser?.bio ?? '');
 const currentPreferences = normalizePreferenceSelection(uiStore.currentUser?.preferences);
 const selectedTypes = ref([...currentPreferences.contentTypes]);
 const selectedRegions = ref([...currentPreferences.regions]);
@@ -50,7 +50,6 @@ const cropImageSize = ref({ width: 0, height: 0 });
 const cropPreviewSize = ref(0);
 const cropDrag = ref({ active: false });
 
-const profileInitial = computed(() => nickname.value?.slice(0, 1).toUpperCase() || 'K');
 const currentProfileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
 const profilePreviewUrl = computed(() => previewObjectUrl.value || (removeSavedProfileImage.value ? '' : currentProfileImageUrl.value));
 const canRemoveProfileImage = computed(() => Boolean(selectedImageFile.value || previewObjectUrl.value || (!removeSavedProfileImage.value && currentProfileImageUrl.value)));
@@ -411,7 +410,6 @@ onBeforeUnmount(() => {
           <div class="profile-image-control">
             <ProfileAvatar
               :image-url="profilePreviewUrl"
-              :initial="profileInitial"
               :alt="t('profile.edit.image.avatarAlt')"
               preview
               interactive

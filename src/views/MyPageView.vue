@@ -36,8 +36,7 @@ const myPosts = computed(() => uiStore.communityPosts.filter(ownsPost));
 const scrappedPosts = computed(() => uiStore.currentUser
   ? uiStore.communityPosts.filter((post) => (post.scrappedBy ?? []).includes(uiStore.currentUser.userId))
   : []);
-const profileInitial = computed(() => uiStore.currentUser?.nickname?.slice(0, 1).toUpperCase() ?? 'K');
-const profileBio = computed(() => uiStore.currentUser?.bio || t('my.profile.defaultBio'));
+const profileBio = computed(() => uiStore.currentUser?.bio?.trim() ?? '');
 const profileImageUrl = computed(() => uiStore.currentUser?.profileImageUrl ?? '');
 function preferenceChip(group, value) {
   return {
@@ -118,7 +117,6 @@ async function clearVisit(placeId) {
       <div class="profile-card my-profile-card">
         <ProfileAvatar
           :image-url="profileImageUrl"
-          :initial="profileInitial"
           :alt="t('my.profile.avatarAlt')"
           interactive
           :aria-label="t('my.profile.edit')"
@@ -128,7 +126,7 @@ async function clearVisit(placeId) {
           <div class="profile-name-row">
             <h1>{{ uiStore.currentUser.nickname }}</h1>
           </div>
-          <p>{{ profileBio }}</p>
+          <p v-if="profileBio">{{ profileBio }}</p>
           <small class="profile-meta">{{ uiStore.currentUser.email }}</small>
           <div v-if="profilePreferenceChips.length" class="profile-preference-chips" :aria-label="t('my.profile.preferencesAria')">
             <span v-for="item in profilePreferenceChips" :key="item.key">{{ item.label }}</span>

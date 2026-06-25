@@ -1,9 +1,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { resolveApiAssetUrl } from '../../api/http.js';
+import DefaultAvatarIcon from './DefaultAvatarIcon.vue';
 
-const { t } = useI18n();
 const props = defineProps({
   imageUrl: { type: String, default: '' },
   initial: { type: String, default: 'K' },
@@ -49,7 +48,7 @@ function handleClick(event) {
   >
     <span class="avatar-image-frame">
       <img v-if="resolvedImageUrl" :src="resolvedImageUrl" :alt="alt" @error="handleImageError" />
-      <span v-else class="avatar-initial">{{ initial }}</span>
+      <DefaultAvatarIcon v-else />
     </span>
     <span v-if="interactive" class="avatar-edit-badge large">{{ badgeLabel }}</span>
   </component>

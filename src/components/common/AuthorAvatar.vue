@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { resolveApiAssetUrl } from '../../api/http.js';
+import DefaultAvatarIcon from './DefaultAvatarIcon.vue';
 
 defineOptions({
   name: 'AuthorAvatar',
@@ -38,9 +39,9 @@ function handleImageError() {
 </script>
 
 <template>
-  <span class="author-avatar" :class="{ 'author-avatar--image': resolvedImageUrl }">
+  <span class="author-avatar" :class="{ 'author-avatar--image': resolvedImageUrl, 'author-avatar--default': !resolvedImageUrl }">
     <img v-if="resolvedImageUrl" :src="resolvedImageUrl" :alt="alt" @error="handleImageError" />
-    <span v-else class="author-avatar-initial" aria-hidden="true">{{ initial }}</span>
+    <DefaultAvatarIcon v-else />
   </span>
 </template>
 
@@ -63,7 +64,9 @@ function handleImageError() {
   background: #f4f6fb;
 }
 
-.author-avatar-initial {
-  line-height: 1;
+.author-avatar--default {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
 }
 </style>
