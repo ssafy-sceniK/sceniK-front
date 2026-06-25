@@ -857,7 +857,25 @@
     "errorTitle": "Could not load map places",
     "emptyTitle": "No places to show",
     "emptyText": "Change region or keyword to find places on the map.",
-    "placeDetailAction": "View place details"
+    "placeDetailAction": "View place details",
+    "preview": {
+      "countWithTotal": "{value0} of {value1} places mapped",
+      "count": "{value0} places mapped",
+      "placeFallback": "Place information",
+      "closePlaceDetails": "Close place details",
+      "openInKakaoMap": "Open in Kakao Map",
+      "relatedContent": "Related content",
+      "viewRelatedContent": "View related content {value0}",
+      "ariaLabel": "Course map",
+      "loadingTitle": "Loading map",
+      "missingKeyTitle": "Kakao Map",
+      "missingKeyText": " key is required to show the map.",
+      "emptyTitle": "No places to show on the map",
+      "emptyTextWithCount": "No places with coordinates were found among {count} places.",
+      "emptyText": "Select places with coordinates to show them on the map.",
+      "errorTitle": "Could not load map",
+      "errorText": "Try again in a moment."
+    }
   },
   "aiCourse": {
     "selection": {

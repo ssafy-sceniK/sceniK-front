@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { loadKakaoMaps } from '../../utils/kakaoMaps.js';
 import { fetchPlaceDetail } from '../../api/placeApi.js';
 import { localizeContent, localizePlace } from '../../i18n/systemContent.js';
+import { normalizeLocale } from '../../i18n/languages.js';
 
 const { t, locale } = useI18n();
 
@@ -17,6 +18,103 @@ const props = defineProps({
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
 const KAKAO_MAP_ICON_URL = 'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/1ca66319017800001.png';
+const MAP_LABEL_FALLBACKS = {
+  ko: {
+    countWithTotal: '\uc9c0\ub3c4\uc5d0 {value0} / {value1}\uac1c \uc7a5\uc18c \ud45c\uc2dc',
+    count: '\uc9c0\ub3c4\uc5d0 {value0}\uac1c \uc7a5\uc18c \ud45c\uc2dc',
+    placeFallback: '\uc7a5\uc18c \uc815\ubcf4',
+    closePlaceDetails: '\uc7a5\uc18c \uc0c1\uc138 \ub2eb\uae30',
+    openInKakaoMap: '\uce74\uce74\uc624\ub9f5\uc5d0\uc11c \ubcf4\uae30',
+    relatedContent: '\uad00\ub828 \ucf58\ud150\uce20',
+    viewRelatedContent: '\uad00\ub828 \ucf58\ud150\uce20 {value0} \ubcf4\uae30',
+    ariaLabel: '\ucf54\uc2a4 \uc9c0\ub3c4',
+    loadingTitle: '\uc9c0\ub3c4\ub97c \ubd88\ub7ec\uc624\ub294 \uc911',
+    missingKeyTitle: '\uce74\uce74\uc624\ub9f5',
+    missingKeyText: ' \ud0a4\ub97c \uc124\uc815\ud558\uba74 \uc9c0\ub3c4\uac00 \ud45c\uc2dc\ub429\ub2c8\ub2e4.',
+    emptyTitle: '\uc9c0\ub3c4\uc5d0 \ud45c\uc2dc\ud560 \uc7a5\uc18c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4',
+    emptyTextWithCount: '\uc88c\ud45c\uac00 \uc788\ub294 \uc7a5\uc18c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4. \uc804\uccb4 {count}\uac1c \uc7a5\uc18c \uc911 \uc9c0\ub3c4\uc5d0 \ud45c\uc2dc\ud560 \uc218 \uc788\ub294 \uc7a5\uc18c\ub97c \ucc3e\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.',
+    emptyText: '\uc88c\ud45c\uac00 \uc788\ub294 \uc7a5\uc18c\ub97c \uc120\ud0dd\ud558\uba74 \uc9c0\ub3c4\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.',
+    errorTitle: '\uc9c0\ub3c4\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4',
+    errorText: '\uc7a0\uc2dc \ud6c4 \ub2e4\uc2dc \uc2dc\ub3c4\ud574 \uc8fc\uc138\uc694.',
+    placeDetailAction: '\uc7a5\uc18c \uc0c1\uc138\ubcf4\uae30',
+  },
+  en: {
+    countWithTotal: '{value0} of {value1} places mapped',
+    count: '{value0} places mapped',
+    placeFallback: 'Place information',
+    closePlaceDetails: 'Close place details',
+    openInKakaoMap: 'Open in Kakao Map',
+    relatedContent: 'Related content',
+    viewRelatedContent: 'View related content {value0}',
+    ariaLabel: 'Course map',
+    loadingTitle: 'Loading map',
+    missingKeyTitle: 'Kakao Map',
+    missingKeyText: ' key is required to show the map.',
+    emptyTitle: 'No places to show on the map',
+    emptyTextWithCount: 'No places with coordinates were found among {count} places.',
+    emptyText: 'Select places with coordinates to show them on the map.',
+    errorTitle: 'Could not load map',
+    errorText: 'Try again in a moment.',
+    placeDetailAction: 'View place details',
+  },
+  ja: {
+    countWithTotal: '{value0} / {value1}件の場所を地図に表示',
+    count: '{value0}件の場所を地図に表示',
+    placeFallback: '場所情報',
+    closePlaceDetails: '場所の詳細を閉じる',
+    openInKakaoMap: 'Kakao Mapで開く',
+    relatedContent: '関連コンテンツ',
+    viewRelatedContent: '関連コンテンツ {value0} を見る',
+    ariaLabel: 'コース地図',
+    loadingTitle: '地図を読み込み中',
+    missingKeyTitle: 'Kakao Map',
+    missingKeyText: 'キーを設定すると地図が表示されます。',
+    emptyTitle: '地図に表示する場所がありません',
+    emptyTextWithCount: '全{count}件のうち、座標のある場所が見つかりませんでした。',
+    emptyText: '座標のある場所を選択すると地図に表示されます。',
+    errorTitle: '地図を読み込めませんでした',
+    errorText: 'しばらくしてからもう一度お試しください。',
+    placeDetailAction: '場所の詳細を見る',
+  },
+  'zh-CN': {
+    countWithTotal: '地图显示 {value0} / {value1} 个地点',
+    count: '地图显示 {value0} 个地点',
+    placeFallback: '地点信息',
+    closePlaceDetails: '关闭地点详情',
+    openInKakaoMap: '在 Kakao Map 中打开',
+    relatedContent: '相关内容',
+    viewRelatedContent: '查看相关内容 {value0}',
+    ariaLabel: '路线地图',
+    loadingTitle: '正在加载地图',
+    missingKeyTitle: 'Kakao Map',
+    missingKeyText: '密钥设置后即可显示地图。',
+    emptyTitle: '地图上没有可显示的地点',
+    emptyTextWithCount: '在 {count} 个地点中未找到带坐标的地点。',
+    emptyText: '选择带坐标的地点后即可显示在地图上。',
+    errorTitle: '无法加载地图',
+    errorText: '请稍后重试。',
+    placeDetailAction: '查看地点详情',
+  },
+};
+const MAP_LABEL_KEYS = {
+  countWithTotal: 'map.preview.countWithTotal',
+  count: 'map.preview.count',
+  placeFallback: 'map.preview.placeFallback',
+  closePlaceDetails: 'map.preview.closePlaceDetails',
+  openInKakaoMap: 'map.preview.openInKakaoMap',
+  relatedContent: 'map.preview.relatedContent',
+  viewRelatedContent: 'map.preview.viewRelatedContent',
+  ariaLabel: 'map.preview.ariaLabel',
+  loadingTitle: 'map.preview.loadingTitle',
+  missingKeyTitle: 'map.preview.missingKeyTitle',
+  missingKeyText: 'map.preview.missingKeyText',
+  emptyTitle: 'map.preview.emptyTitle',
+  emptyTextWithCount: 'map.preview.emptyTextWithCount',
+  emptyText: 'map.preview.emptyText',
+  errorTitle: 'map.preview.errorTitle',
+  errorText: 'map.preview.errorText',
+  placeDetailAction: 'map.placeDetailAction',
+};
 const appKey = (import.meta.env.VITE_KAKAO_MAP_APP_KEY || import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY)?.trim();
 const router = useRouter();
 const mapContainer = ref(null);
@@ -44,8 +142,8 @@ const totalPlaceCount = computed(() => {
 });
 const missingCoordinateCount = computed(() => Math.max(0, totalPlaceCount.value - validPlaces.value.length));
 const mapCountLabel = computed(() => (missingCoordinateCount.value > 0
-  ? t('autoPass.ui_f346dce058', { value0: validPlaces.value.length, value1: totalPlaceCount.value })
-  : t('autoPass.ui_37333dd7ed', { value0: validPlaces.value.length })));
+  ? mapLabel('countWithTotal', { value0: validPlaces.value.length, value1: totalPlaceCount.value })
+  : mapLabel('count', { value0: validPlaces.value.length })));
 const localizedSelectedPlace = computed(() => (selectedPlace.value ? displayPlace(selectedPlace.value) : null));
 
 let kakaoMaps;
@@ -66,7 +164,7 @@ function displayPlace(place) {
 
 function placeName(place) {
   const localized = displayPlace(place);
-  return localized.placeName || localized.name || t('autoPass.ui_7d31290a71');
+  return localized.placeName || localized.name || mapLabel('placeFallback');
 }
 
 function placeAddress(place) {
@@ -118,6 +216,29 @@ function appendButton(parent, className, text, onClick) {
   });
   parent.appendChild(button);
   return button;
+}
+
+function formatLabel(template, params = {}) {
+  return String(template ?? '').replace(/\{(\w+)\}/g, (match, key) => (
+    Object.prototype.hasOwnProperty.call(params, key) ? String(params[key]) : match
+  ));
+}
+
+function isBrokenUiLabel(value, key) {
+  const text = String(value ?? '').trim();
+  return !text || text === key || /^\?+$/.test(text) || /\?{2,}|\uFFFD/.test(text);
+}
+
+function mapLabel(name, params = {}) {
+  const key = MAP_LABEL_KEYS[name];
+  const normalized = normalizeLocale(locale.value) || 'ko';
+  const translated = key ? t(key, params) : '';
+  if (!isBrokenUiLabel(translated, key)) return translated;
+  const fallback = MAP_LABEL_FALLBACKS[normalized]?.[name] ?? MAP_LABEL_FALLBACKS.ko[name] ?? '';
+  if (import.meta.env.DEV && key) {
+    console.warn(`[i18n] Falling back for ${key}`);
+  }
+  return formatLabel(fallback, params);
 }
 
 function relatedContentItems(place) {
@@ -217,7 +338,7 @@ function createInfoWindowContent(place) {
   const closeButton = document.createElement('button');
   closeButton.className = 'kakao-place-info__close';
   closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', t('autoPass.ui_429f39711d'));
+  closeButton.setAttribute('aria-label', mapLabel('closePlaceDetails'));
   closeButton.textContent = '×';
   closeButton.addEventListener('click', (event) => {
     event.preventDefault();
@@ -242,7 +363,7 @@ function createInfoWindowContent(place) {
     `https://map.kakao.com/link/search/${encodeURIComponent(`${placeName(localizedPlace)} ${localizedPlace.address ?? ''}`.trim())}`,
     true,
   );
-  kakaoLink?.setAttribute('aria-label', t('autoPass.ui_2976925371'));
+  kakaoLink?.setAttribute('aria-label', mapLabel('openInKakaoMap'));
   if (kakaoLink) {
     const icon = document.createElement('img');
     icon.src = KAKAO_MAP_ICON_URL;
@@ -254,7 +375,7 @@ function createInfoWindowContent(place) {
   if (relatedContents.length) {
     const relatedScroller = document.createElement('div');
     relatedScroller.className = 'kakao-place-info__related-scroll';
-    relatedScroller.setAttribute('aria-label', t('autoPass.ui_0343cc46a7'));
+    relatedScroller.setAttribute('aria-label', mapLabel('relatedContent'));
     relatedContents.forEach((contentItem) => {
       const relatedButton = appendButton(
         relatedScroller,
@@ -265,7 +386,7 @@ function createInfoWindowContent(place) {
           router.push(`/contents/${encodeURIComponent(contentItem.contentId)}`);
         },
       );
-      relatedButton?.setAttribute('aria-label', t('autoPass.ui_c70234a765', { value0: contentItem.title }));
+      relatedButton?.setAttribute('aria-label', mapLabel('viewRelatedContent', { value0: contentItem.title }));
       relatedButton?.setAttribute('title', contentItem.title);
     });
     enableHorizontalChipScroll(relatedScroller);
@@ -397,21 +518,21 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="map-preview" :class="`map-preview--${mapStatus}`">
-    <div ref="mapContainer" class="kakao-map" role="img" :aria-label="t('autoPass.ui_b8d2758afe')"></div>
+    <div ref="mapContainer" class="kakao-map" role="img" :aria-label="mapLabel('ariaLabel')"></div>
     <div v-if="mapStatus !== 'ready'" class="map-status" role="status">
-      <strong v-if="mapStatus === 'loading'">{{ t('autoPass.ui_cf6c4fe1f6') }}</strong>
+      <strong v-if="mapStatus === 'loading'">{{ mapLabel('loadingTitle') }}</strong>
       <template v-else-if="mapStatus === 'missing-key'">
-        <strong>{{ t('autoPass.ui_5a852b5a97') }}</strong>
-        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>{{ t('autoPass.ui_ceef3b8e8b') }}</span>
+        <strong>{{ mapLabel('missingKeyTitle') }}</strong>
+        <span><code>VITE_KAKAO_MAP_JAVASCRIPT_KEY</code>{{ mapLabel('missingKeyText') }}</span>
       </template>
       <template v-else-if="mapStatus === 'empty'">
-        <strong>{{ t('autoPass.ui_333724b276') }}</strong>
-        <span v-if="totalPlaceCount">{{ t('autoPass.ui_74a3fd1bf9', { count: totalPlaceCount }) }}</span>
-        <span v-else>{{ t('autoPass.ui_caf0e366cc') }}</span>
+        <strong>{{ mapLabel('emptyTitle') }}</strong>
+        <span v-if="totalPlaceCount">{{ mapLabel('emptyTextWithCount', { count: totalPlaceCount }) }}</span>
+        <span v-else>{{ mapLabel('emptyText') }}</span>
       </template>
       <template v-else>
-        <strong>{{ t('autoPass.ui_e28793c8b2') }}</strong>
-        <span>{{ t('autoPass.ui_7eb34401bb') }}</span>
+        <strong>{{ mapLabel('errorTitle') }}</strong>
+        <span>{{ mapLabel('errorText') }}</span>
       </template>
     </div>
     <button
@@ -424,7 +545,7 @@ onBeforeUnmount(() => {
         <strong>{{ localizedSelectedPlace.placeName }}</strong>
         <span>{{ localizedSelectedPlace.address || [localizedSelectedPlace.region, localizedSelectedPlace.district].filter(Boolean).join(' ') }}</span>
       </span>
-      <small>{{ t('map.placeDetailAction') }}</small>
+      <small>{{ mapLabel('placeDetailAction') }}</small>
     </button>
     <span v-if="mapStatus === 'ready' && !infoOpen" class="map-label">{{ mapCountLabel }}</span>
   </div>

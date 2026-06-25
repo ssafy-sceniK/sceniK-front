@@ -857,7 +857,25 @@
     "errorTitle": "지도 장소를 불러오지 못했습니다",
     "emptyTitle": "표시할 장소가 없습니다",
     "emptyText": "지역이나 검색어를 바꿔 지도에 표시할 장소를 다시 찾아보세요.",
-    "placeDetailAction": "장소 상세보기"
+    "placeDetailAction": "장소 상세보기",
+    "preview": {
+      "countWithTotal": "지도에 {value0} / {value1}개 장소 표시",
+      "count": "지도에 {value0}개 장소 표시",
+      "placeFallback": "장소 정보",
+      "closePlaceDetails": "장소 상세 닫기",
+      "openInKakaoMap": "카카오맵에서 보기",
+      "relatedContent": "관련 콘텐츠",
+      "viewRelatedContent": "관련 콘텐츠 {value0} 보기",
+      "ariaLabel": "코스 지도",
+      "loadingTitle": "지도를 불러오는 중",
+      "missingKeyTitle": "카카오맵",
+      "missingKeyText": " 키를 설정하면 지도가 표시됩니다.",
+      "emptyTitle": "지도에 표시할 장소가 없습니다",
+      "emptyTextWithCount": "좌표가 있는 장소가 없습니다. 전체 {count}개 장소 중 지도에 표시할 수 있는 장소를 찾지 못했습니다.",
+      "emptyText": "좌표가 있는 장소를 선택하면 지도에 표시됩니다.",
+      "errorTitle": "지도를 불러오지 못했습니다",
+      "errorText": "잠시 후 다시 시도해 주세요."
+    }
   },
   "aiCourse": {
     "selection": {

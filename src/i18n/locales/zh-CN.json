@@ -857,7 +857,25 @@
     "errorTitle": "无法加载地图地点",
     "emptyTitle": "没有可显示的地点",
     "emptyText": "请更改地区或关键词后重新查找地图地点。",
-    "placeDetailAction": "查看地点详情"
+    "placeDetailAction": "查看地点详情",
+    "preview": {
+      "countWithTotal": "地图显示 {value0} / {value1} 个地点",
+      "count": "地图显示 {value0} 个地点",
+      "placeFallback": "地点信息",
+      "closePlaceDetails": "关闭地点详情",
+      "openInKakaoMap": "在 Kakao Map 中打开",
+      "relatedContent": "相关内容",
+      "viewRelatedContent": "查看相关内容 {value0}",
+      "ariaLabel": "路线地图",
+      "loadingTitle": "正在加载地图",
+      "missingKeyTitle": "Kakao Map",
+      "missingKeyText": "密钥设置后即可显示地图。",
+      "emptyTitle": "地图上没有可显示的地点",
+      "emptyTextWithCount": "在 {count} 个地点中未找到带坐标的地点。",
+      "emptyText": "选择带坐标的地点后即可显示在地图上。",
+      "errorTitle": "无法加载地图",
+      "errorText": "请稍后重试。"
+    }
   },
   "aiCourse": {
     "selection": {
