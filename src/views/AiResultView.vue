@@ -167,13 +167,9 @@ function matchingSavedCourse(targetRoute) {
   return uiStore.savedCourses.find((course) => routeAutoSaveSignature(course) === signature) ?? null;
 }
 
-function showSavedNotice() {
+function clearSavedNotice() {
   saveError.value = '';
-  saveNotice.value = {
-    tone: 'success',
-    title: t('aiCourse.result.courseSaved'),
-    text: t('aiCourse.result.courseSavedText'),
-  };
+  saveNotice.value = null;
 }
 
 async function restoreSavedRoute(savedRouteId) {
@@ -182,7 +178,7 @@ async function restoreSavedRoute(savedRouteId) {
   if (!loaded) return false;
   uiStore.generatedRoute = loaded;
   uiStore.persist();
-  showSavedNotice();
+  clearSavedNotice();
   return true;
 }
 
@@ -191,7 +187,7 @@ async function ensureAutoSaved({ force = false } = {}) {
   if (!currentRoute || savingRoute.value) return;
 
   if (!isGeneratedUnsavedRoute.value) {
-    if (isResultSaved.value) showSavedNotice();
+    if (isResultSaved.value) clearSavedNotice();
     return;
   }
 
@@ -219,7 +215,7 @@ async function ensureAutoSaved({ force = false } = {}) {
       uiStore.generatedRoute = existing;
       uiStore.persist();
       writeAutoSaveRecord(generationId, { status: 'saved', savedRouteId: existing.routeId, routeSignature: routeAutoSaveSignature(currentRoute) });
-      showSavedNotice();
+      clearSavedNotice();
       return;
     }
 
@@ -228,7 +224,7 @@ async function ensureAutoSaved({ force = false } = {}) {
       throw new Error(uiStore.routeError || t('aiCourse.result.saveFailedText'));
     }
     writeAutoSaveRecord(generationId, { status: 'saved', savedRouteId: saved.routeId, routeSignature: routeAutoSaveSignature(currentRoute) });
-    showSavedNotice();
+    clearSavedNotice();
   } catch (error) {
     saveError.value = error?.message || uiStore.routeError || t('aiCourse.result.saveFailedText');
     saveNotice.value = {
@@ -400,7 +396,7 @@ function postFromShareSheet() {
   <main class="app-shell ai-result-shell">
     <section v-if="route" class="ai-result-card">
       <header class="ai-result-topbar">
-        <h1>{{ t('autoPass.ui_3b79972fa5') }}</h1>
+        <h1>{{ t('aiCourse.result.resultTitle') }}</h1>
         <button
           type="button"
           class="result-menu-button"
@@ -442,9 +438,9 @@ function postFromShareSheet() {
         <p class="ai-result-meta">{{ resultMeta }}</p>
 
         <CourseSaveStatusPanel
-          :title="t('autoPass.ui_46f49a9bbc')"
+          :title="t('aiCourse.result.courseSummary')"
           eyebrow=""
-          description=""
+          :description="t('aiCourse.result.generatedFromConditions')"
           :rows="saveStatusRows"
           :notice="saveNotice"
         />

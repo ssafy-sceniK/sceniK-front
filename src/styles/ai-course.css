@@ -1088,13 +1088,14 @@
 .ai-result-footer {
   padding: 16px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   background: #ffffff;
   border-top: 1px solid var(--border);
 }
 
 .ai-result-footer .button {
+  width: 100%;
   min-height: 52px;
   font-weight: 900;
 }

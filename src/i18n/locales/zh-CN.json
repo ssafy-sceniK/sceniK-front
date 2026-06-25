@@ -968,14 +968,17 @@
     },
     "result": {
       "done": "完成",
-      "savingButton": "正在保存...",
-      "savingCourse": "正在保存你的行程...",
-      "savingCourseText": "正在将生成的 AI 行程添加到已保存列表。",
+      "savingButton": "??????...",
+      "savingCourse": "????????...",
+      "savingCourseText": "?????? AI ???????????",
       "courseSaved": "行程已保存。",
       "courseSavedText": "你可以在已保存的 AI 行程中再次查看。",
       "saveFailed": "无法保存行程。",
       "saveFailedText": "请检查网络状态后重试保存。",
-      "retrySave": "重试保存"
+      "retrySave": "??????",
+      "resultTitle": "AI ????",
+      "courseSummary": "????",
+      "generatedFromConditions": "??????????????????????"
     }
   },
   "my": {
