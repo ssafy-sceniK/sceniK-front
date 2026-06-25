@@ -172,6 +172,11 @@ export async function fetchRoute(routeId) {
   return normalizeRoutePayload(data);
 }
 
+export async function copyRoute(routeId) {
+  const { data } = await http.post(`/routes/${routeId}/copy`);
+  return normalizeRoutePayload(data);
+}
+
 export async function updateRoute(routeId, route) {
   const { data } = await http.patch(`/routes/${routeId}`, serializeRoutePayload(route));
   return normalizeRoutePayload(data);

@@ -29,8 +29,10 @@ const routeId = computed(() => route.params.routeId ?? '');
 const isMyCourseRoute = computed(() => route.path.startsWith('/my/course-manage'));
 const detail = computed(() => uiStore.resolveCourseDetail(routeId.value));
 const course = computed(() => detail.value?.route ?? null);
-const isSavedCourse = computed(() => isMyCourseRoute.value && detail.value?.source === 'saved');
-const canManageCourse = computed(() => isSavedCourse.value);
+const isSavedCourse = computed(() => detail.value?.source === 'saved');
+const canManageCourse = computed(() => Boolean(course.value?.canEdit || isSavedCourse.value));
+const canCopyCourse = computed(() => Boolean(course.value?.canCopy) && !canManageCourse.value);
+const canSaveTemplateCourse = computed(() => !isSavedCourse.value && !canCopyCourse.value);
 const shouldRequireLogin = computed(() => isMyCourseRoute.value && !uiStore.currentUser);
 const validationErrors = computed(() => detail.value?.validation?.errors ?? []);
 const displayValidationErrors = computed(() => validationErrors.value.filter((message) => !isMissingTravelTipMessage(message)));
@@ -65,12 +67,6 @@ const courseSummaryText = computed(() => {
   const summary = String(course.value?.summary ?? '').trim();
   if (summary && summary.length <= 72 && !isInternalCourseCopy(summary)) return summary;
   return '';
-});
-const courseTrustMessage = computed(() => {
-  if (isSavedCourse.value) return '';
-  const message = String(course.value?.trustMessage ?? '').trim();
-  if (isInternalCourseCopy(message)) return '';
-  return message;
 });
 const deleteLoading = computed(() => uiStore.routeActionLoading && showDeleteSheet.value);
 
@@ -148,7 +144,7 @@ watch(course, (value) => {
 function editCourse() {
   if (!course.value) return;
 
-  if (isSavedCourse.value) {
+  if (canManageCourse.value && course.value.routeId) {
     router.push({ name: 'my-course-edit-with-id', params: { routeId: course.value.routeId } });
     return;
   }
@@ -177,6 +173,30 @@ async function saveTemplateCourse() {
         title: t('course.detail.saveFailedTitle'),
         text: uiStore.routeError || t('course.detail.saveFailedText'),
       };
+}
+
+async function copyCourseToMine() {
+  if (!course.value?.routeId) return;
+  actionNotice.value = {
+    tone: 'info',
+    title: t('course.detail.copyProgressTitle'),
+    text: t('course.detail.copyProgressText'),
+  };
+  const copied = await uiStore.copySavedCourse(course.value.routeId);
+  if (!copied) {
+    actionNotice.value = {
+      tone: 'error',
+      title: t('course.detail.copyFailedTitle'),
+      text: uiStore.routeError || t('course.detail.copyFailed'),
+    };
+    return;
+  }
+  actionNotice.value = {
+    tone: 'success',
+    title: t('course.detail.copySuccessTitle'),
+    text: t('course.detail.copySuccessText'),
+  };
+  window.setTimeout(() => router.replace({ name: 'my-course-manage', params: { routeId: copied.routeId } }), 350);
 }
 
 function viewAsAiResult() {
@@ -228,7 +248,7 @@ async function shareCourse() {
 }
 
 async function deleteCourse() {
-  if (!isSavedCourse.value || !course.value?.routeId) return;
+  if (!canManageCourse.value || !course.value?.routeId) return;
   actionNotice.value = {
     tone: 'info',
     title: t('course.detail.deleteProgressTitle'),
@@ -278,9 +298,13 @@ async function deleteCourse() {
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
               {{ t('common.share') }}
             </button>
-            <button v-if="!isSavedCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
+            <button v-if="canSaveTemplateCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>
               {{ uiStore.routeActionLoading ? t('profile.edit.savingShort') : t('common.save') }}
+            </button>
+            <button v-if="canCopyCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(copyCourseToMine)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /><path d="M8 7h8" /><path d="M8 11h5" /></svg></span>
+              {{ uiStore.routeActionLoading ? t('profile.edit.savingShort') : t('course.detail.saveToMyCourses') }}
             </button>
             <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m5 10 7-7 7 7" /><path d="M5 21h14" /></svg></span>
@@ -329,9 +353,6 @@ async function deleteCourse() {
       <div v-if="displayValidationErrors.length" class="trust-panel course-warning">
         {{ displayValidationErrors[0] }}
       </div>
-      <div v-else-if="courseTrustMessage" class="trust-panel">
-        {{ courseTrustMessage }}
-      </div>
 
       <FormStatusNotice
         v-if="actionNotice"
@@ -348,7 +369,7 @@ async function deleteCourse() {
         </button>
       </div>
 
-      <Timeline :stops="stops" />
+      <Timeline :stops="stops" :show-transit-notes="false" />
 
       <AnimatePresence>
         <CourseDeleteActionSheet

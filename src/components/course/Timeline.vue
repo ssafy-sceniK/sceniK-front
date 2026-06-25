@@ -6,6 +6,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   stops: { type: Array, default: () => [] },
+  showTransitNotes: { type: Boolean, default: true },
 });
 
 const INTERNAL_TRAVEL_TIP_PATTERN = /missing\s+traveltip\s+for\s+day\s+\d+\.?/i;
@@ -14,7 +15,7 @@ const displayStops = computed(() => props.stops.map((stop) => ({
   ...stop,
   displayCategory: meaningfulCategory(stop),
   displayAddress: meaningfulAddress(stop),
-  displayTransit: usefulTransitInfo(stop),
+  displayTransit: props.showTransitNotes ? usefulTransitInfo(stop) : '',
 })));
 
 function cleanText(value) {

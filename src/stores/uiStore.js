@@ -22,6 +22,7 @@ import {
   fetchPlaceDetail,
 } from '../api/placeApi.js';
 import {
+  copyRoute,
   createRoute,
   deleteRoute,
   fetchMyRoutes,
@@ -1257,6 +1258,26 @@ export const useUiStore = defineStore('ui', {
         validation: validateRoute(route),
         source: saved ? 'saved' : cached ? 'public' : 'template',
       };
+    },
+    async copySavedCourse(routeId) {
+      if (!this.requireAuth(storeT('course.detail.loginRequiredToSave'))) return null;
+      if (!routeId) return null;
+      this.routeActionLoading = true;
+      this.routeError = '';
+      try {
+        const copied = normalizeCourseToRoute(await copyRoute(routeId));
+        this.savedCourses = [copied, ...this.savedCourses.filter((item) => item.routeId !== copied.routeId)];
+        this.courseDetailCache = this.courseDetailCache.filter((item) => item.routeId !== copied.routeId);
+        this.persist();
+        this.notify(storeT('course.detail.courseCopied'), 'success');
+        return copied;
+      } catch (error) {
+        this.routeError = apiErrorMessage(error, storeT('course.detail.copyFailed'));
+        this.notify(this.routeError);
+        return null;
+      } finally {
+        this.routeActionLoading = false;
+      }
     },
     async updateSavedCourse(route) {
       if (!this.requireAuth(storeT('errors.store.k1b'))) return false;

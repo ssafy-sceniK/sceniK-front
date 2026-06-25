@@ -724,7 +724,16 @@
       "deleteSuccessText": "Removed from your saved course list.",
       "notFoundTitle": "Course not found",
       "notFoundText": "It may have been removed from your saved list, or no course has been saved yet. Select a saved course again or create an AI course.",
-      "savedCoursesLink": "View saved courses"
+      "savedCoursesLink": "View saved courses",
+      "saveToMyCourses": "Save to my courses",
+      "copyProgressTitle": "Saving to your courses.",
+      "copyProgressText": "Copying this AI course into your saved courses.",
+      "copySuccessTitle": "Saved.",
+      "copySuccessText": "Opening the copied course detail.",
+      "copyFailedTitle": "Could not save.",
+      "copyFailed": "Could not save this AI course to your courses.",
+      "courseCopied": "Saved this AI course to your courses.",
+      "loginRequiredToSave": "Log in to save this course to your courses."
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
