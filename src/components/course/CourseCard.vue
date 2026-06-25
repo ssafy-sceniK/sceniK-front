@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { filterGenericAiCourseTags } from '../../utils/tags.js';
+
+const { t } = useI18n();
 
 const props = defineProps({
   course: { type: Object, required: true },
@@ -40,14 +43,13 @@ function courseDurationLabel(course) {
   if (value === null || value === undefined || value === '') return '';
   const text = String(value).trim();
   if (!text) return '';
-  if (/\d+\s*일/.test(text)) return text.replace(/\s+/g, '');
   const dayMatch = text.match(/\d+/);
-  if (dayMatch) return `${dayMatch[0]}\uC77C`;
+  if (dayMatch) return t('course.detail.durationDays', { count: Number(dayMatch[0]) });
   return text;
 }
 
 function courseMeta(course) {
-  return [course.region, courseDurationLabel(course), `\uC7A5\uC18C ${routePlaceIds(course).length}\uACF3`].filter(Boolean).join(' \u00B7 ');
+  return [course.region, courseDurationLabel(course), t('course.detail.placeCount', { count: routePlaceIds(course).length })].filter(Boolean).join(' \u00B7 ');
 }
 </script>
 

@@ -230,7 +230,7 @@ function selectLanguage(language) {
   padding: 0;
   justify-content: center;
   color: var(--text);
-  border: 1px solid var(--control-border);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--surface-elevated, var(--card));
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);

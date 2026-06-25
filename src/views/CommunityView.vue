@@ -16,6 +16,7 @@ import CommunityImageManager from '../components/community/CommunityImageManager
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import TranslatableText from '../components/translation/TranslatableText.vue';
+import TranslatablePostText from '../components/translation/TranslatablePostText.vue';
 import { uploadPostImage } from '../api/communityApi.js';
 import { resolveApiAssetUrl } from '../api/http.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -27,6 +28,7 @@ import {
   fallbackFileAttachments,
   isDisplayableImageAttachment,
 } from '../utils/communityAttachments.js';
+import { communityBoardIdFromTags, communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
 const route = useRoute();
@@ -58,6 +60,7 @@ const postEditBody = ref('');
 const postEditBoard = ref('drama');
 const postEditHashtags = ref([]);
 const postEditImageItems = ref([]);
+const postEditDraftSource = ref(null);
 const showPostDeleteSheet = ref(false);
 const shareTarget = ref(null);
 const failedPostImageKeys = ref(new Set());
@@ -69,6 +72,8 @@ const imageViewerIndex = ref(0);
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 const MAX_POST_BODY_LENGTH = 1000;
+const EDIT_DRAFT_PREFIX = 'community:edit:';
+const postEditDraftFilesByKey = new Map();
 
 const boards = computed(() => [
   { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
@@ -144,11 +149,17 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleBoardSelectorPointerDown);
   document.removeEventListener('keydown', handleImageViewerKeydown);
-  if (editingPost.value) resetPostEditState();
+  if (editingPost.value) {
+    persistPostEditDraft();
+    resetPostEditState();
+  }
 });
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}:${route.query.board ?? ''}`, loadCommunity);
 watch(() => `${route.name ?? ''}:${route.params.id ?? ''}`, (nextRouteKey, previousRouteKey) => {
-  if (editingPost.value && nextRouteKey !== previousRouteKey) resetPostEditState();
+  if (editingPost.value && nextRouteKey !== previousRouteKey) {
+    persistPostEditDraft();
+    resetPostEditState();
+  }
 });
 watch(() => route.query.board, () => {
   boardSelectorOpen.value = false;
@@ -166,12 +177,24 @@ watch(query, () => {
 });
 watch(visibleLimit, syncQueryState);
 
+watch([
+  editingPost,
+  postEditTitle,
+  postEditBody,
+  postEditBoard,
+  postEditHashtags,
+  postEditImageItems,
+], () => {
+  if (editingPost.value) persistPostEditDraft();
+}, { deep: true });
+
+
 const filteredPosts = computed(() => {
   const normalizedQuery = query.value.trim().toLowerCase();
   return uiStore.communityPosts.filter((post) => {
-    const haystack = `${post.title} ${post.body} ${(post.tags ?? []).join(' ')}`.toLowerCase();
+    const haystack = `${post.title} ${post.body} ${displayPostTags(post).join(' ')}`.toLowerCase();
     const matchesQuery = !normalizedQuery || haystack.includes(normalizedQuery);
-    const matchesBoard = !isBoardFeed.value || (post.tags ?? []).some((tag) => tag.includes(activeBoard.value.tag));
+    const matchesBoard = !isBoardFeed.value || postBelongsToBoard(post, activeBoard.value);
     return matchesQuery && matchesBoard;
   });
 });
@@ -267,8 +290,16 @@ async function retryCommentSection() {
   focusCommentSection();
 }
 
+function postBelongsToBoard(post, board) {
+  if (!board) return false;
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  const boardId = communityBoardIdFromTags(tags);
+  if (boardId) return boardId === board.id;
+  return tags.some((tag) => tag.includes(board.tag));
+}
+
 function boardPostCount(board) {
-  return uiStore.communityPosts.filter((post) => (post.tags ?? []).some((tag) => tag.includes(board.tag))).length;
+  return uiStore.communityPosts.filter((post) => postBelongsToBoard(post, board)).length;
 }
 
 function toggleBoardSelector() {
@@ -309,7 +340,7 @@ function isBoardTag(tag) {
 }
 
 function isSystemPostTag(tag) {
-  return isBoardTag(tag) || isGenericAiCourseTag(tag);
+  return isCommunityBoardTag(tag) || isBoardTag(tag) || isGenericAiCourseTag(tag);
 }
 
 function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
@@ -340,7 +371,7 @@ function removePostEditHashtag(tag) {
 
 function buildPostEditTags() {
   return uniqueValues([
-    boards.value.find((board) => board.id === postEditBoard.value)?.tag,
+    communityBoardTag(postEditBoard.value),
     ...postEditHashtags.value,
   ]);
 }
@@ -450,7 +481,7 @@ function hasLinkedCourse(post) {
 }
 
 function displayPostTags(post) {
-  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  const tags = (Array.isArray(post?.tags) ? post.tags : []).filter((tag) => !isSystemPostTag(tag));
   return hasLinkedCourse(post) ? filterGenericAiCourseTags(tags) : tags;
 }
 
@@ -690,7 +721,7 @@ function userProfileTo(userId) {
 }
 
 function postMeta(post) {
-  return [post?.date, post?.region].filter(Boolean).join(' / ');
+  return post?.date ?? '';
 }
 
 function authorDisplayName(post) {
@@ -712,7 +743,7 @@ async function createPost() {
   const created = await uiStore.createPost({
     title: title.value,
     body: body.value,
-    tags: [activeBoard.value.tag].filter(Boolean),
+    tags: [communityBoardTag(activeBoard.value.id)].filter(Boolean),
   });
   if (created) {
     title.value = '';
@@ -721,12 +752,102 @@ async function createPost() {
   }
 }
 
+function postEditDraftKey(post = postEditDraftSource.value || selectedPost.value) {
+  const key = postKey(post);
+  return key ? EDIT_DRAFT_PREFIX + key : '';
+}
+
+function hasPostEditDraftContent(post = postEditDraftSource.value || selectedPost.value) {
+  if (!post) return false;
+  const originalTags = uniqueValues((post.tags ?? []).map(normalizeHashtag).filter((tag) => tag && !isSystemPostTag(tag))).slice(0, MAX_HASHTAGS);
+  return Boolean(
+    postEditTitle.value !== (post.title ?? '')
+    || postEditBody.value !== (post.body ?? '')
+    || postEditBoard.value !== (communityBoardIdFromTags(post.tags ?? [])
+      || boards.value.find((board) => (post.tags ?? []).some((tag) => tag.includes(board.tag)))?.id
+      || 'drama')
+    || JSON.stringify(postEditHashtags.value) !== JSON.stringify(originalTags)
+    || postEditImageItems.value.some((item) => item.kind === 'new')
+    || postEditImageItems.value.length !== editablePostAttachments(post).length
+  );
+}
+
+function postEditDraftPayload(post = postEditDraftSource.value || selectedPost.value) {
+  return {
+    title: postEditTitle.value,
+    body: postEditBody.value,
+    board: postEditBoard.value,
+    tags: postEditHashtags.value,
+    existingAttachments: postEditImageItems.value
+      .filter((item) => item.kind === 'existing')
+      .map((item) => item.attachment ?? item),
+    updatedAt: Date.now(),
+  };
+}
+
+function persistPostEditDraft(post = postEditDraftSource.value || selectedPost.value) {
+  if (!editingPost.value || typeof sessionStorage === 'undefined') return;
+  const draftKey = postEditDraftKey(post);
+  if (!draftKey) return;
+  postEditDraftFilesByKey.set(draftKey, postEditImageItems.value
+    .filter((item) => item.kind === 'new' && item.file)
+    .map((item) => item.file));
+  if (!hasPostEditDraftContent(post)) {
+    sessionStorage.removeItem(draftKey);
+    postEditDraftFilesByKey.delete(draftKey);
+    return;
+  }
+  sessionStorage.setItem(draftKey, JSON.stringify(postEditDraftPayload(post)));
+}
+
+function clearPostEditDraft(post = postEditDraftSource.value || selectedPost.value) {
+  if (typeof sessionStorage === 'undefined') return;
+  const draftKey = postEditDraftKey(post);
+  if (!draftKey) return;
+  sessionStorage.removeItem(draftKey);
+  postEditDraftFilesByKey.delete(draftKey);
+}
+
+function restorePostEditDraft(post = postEditDraftSource.value || selectedPost.value) {
+  if (!post || typeof sessionStorage === 'undefined') return false;
+  const draftKey = postEditDraftKey(post);
+  const rawDraft = draftKey ? sessionStorage.getItem(draftKey) : '';
+  if (!rawDraft) return false;
+  try {
+    const draft = JSON.parse(rawDraft);
+    postEditTitle.value = draft.title ?? post.title ?? '';
+    postEditBody.value = draft.body ?? post.body ?? '';
+    postEditBoard.value = draft.board || communityBoardIdFromTags(post.tags ?? []) || 'drama';
+    postEditHashtagInput.value = '';
+    postEditHashtags.value = uniqueValues((draft.tags ?? [])
+      .map(normalizeHashtag)
+      .filter((tag) => tag && !isSystemPostTag(tag)))
+      .slice(0, MAX_HASHTAGS);
+    resetPostEditImageItems();
+    const existingItems = Array.isArray(draft.existingAttachments) ? draft.existingAttachments : [];
+    const newFiles = postEditDraftFilesByKey.get(draftKey) ?? [];
+    postEditImageItems.value = [
+      ...existingItems.map(createExistingPostEditImageItem),
+      ...newFiles.map(createNewPostEditImageItem),
+    ];
+    postNotice.value = null;
+    return true;
+  } catch {
+    clearPostEditDraft(post);
+    return false;
+  }
+}
+
 function startPostEdit() {
   if (!selectedPost.value) return;
+  postEditDraftSource.value = selectedPost.value;
   editingPost.value = true;
+  if (restorePostEditDraft(selectedPost.value)) return;
   postEditTitle.value = selectedPost.value.title ?? '';
   postEditBody.value = selectedPost.value.body ?? '';
-  postEditBoard.value = boards.value.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id ?? 'drama';
+  postEditBoard.value = communityBoardIdFromTags(selectedPost.value.tags ?? [])
+    || boards.value.find((board) => (selectedPost.value.tags ?? []).some((tag) => tag.includes(board.tag)))?.id
+    || 'drama';
   postEditHashtagInput.value = '';
   postEditHashtags.value = uniqueValues((selectedPost.value.tags ?? [])
     .map(normalizeHashtag)
@@ -737,18 +858,20 @@ function startPostEdit() {
   postNotice.value = null;
 }
 
-function resetPostEditState() {
+function resetPostEditState({ clearDraft = false } = {}) {
+  if (clearDraft) clearPostEditDraft(postEditDraftSource.value || selectedPost.value);
   editingPost.value = false;
   postEditTitle.value = '';
   postEditBody.value = '';
   postEditHashtags.value = [];
   postEditHashtagInput.value = '';
+  postEditDraftSource.value = null;
   resetPostEditImageItems();
   postNotice.value = null;
 }
 
 function cancelPostEdit() {
-  resetPostEditState();
+  resetPostEditState({ clearDraft: true });
 }
 
 async function savePostEdit() {
@@ -803,7 +926,7 @@ async function savePostEdit() {
   }
   postActionLoading.value = false;
   if (updated) {
-    resetPostEditState();
+    resetPostEditState({ clearDraft: true });
     return;
   }
   postNotice.value = {
@@ -1063,7 +1186,7 @@ async function nativeShare() {
             :to="{ name: 'community-drama-board', query: { board: board.id } }"
           >
             <span :class="['board-icon', `board-${board.id}`]" aria-hidden="true">
-              <span class="board-icon-symbol">{{ board.icon }}</span>
+              <span class="board-icon-symbol"><CommunityBoardIcon :type="board.id" /></span>
             </span>
             <span class="board-copy">
               <strong>{{ board.fullName }}</strong>
@@ -1168,8 +1291,13 @@ async function nativeShare() {
               </div>
             </template>
             <template v-else>
-              <h1>{{ selectedPost.title }}</h1>
-              <TranslatableText :text="selectedPost.body" :source-language="selectedPost.language" resource-type="POST" :resource-id="postKey(selectedPost)" field="content" />
+              <TranslatablePostText
+                :title="selectedPost.title"
+                :content="selectedPost.body"
+                :source-language="selectedPost.language"
+                resource-type="POST"
+                :resource-id="postKey(selectedPost)"
+              />
             </template>
             <div v-if="!editingPost && postImageSources(selectedPost).length" class="post-gallery post-gallery--detail" :aria-label="t('communityAuto.kfroizt')">
               <button
@@ -1504,7 +1632,7 @@ async function nativeShare() {
         <div v-if="isBoardFeed" class="board-selector">
           <div class="board-banner board-banner--selector">
             <span :class="['board-icon', `board-${activeBoard.id}`]" aria-hidden="true">
-              <span class="board-icon-symbol">{{ activeBoard.icon }}</span>
+              <span class="board-icon-symbol"><CommunityBoardIcon :type="activeBoard.id" /></span>
             </span>
             <div class="board-selector-copy">
               <strong>{{ activeBoard.name }}</strong>
@@ -1528,7 +1656,7 @@ async function nativeShare() {
               @click="selectBoard(board)"
             >
               <span :class="['board-icon', `board-${board.id}`]" aria-hidden="true">
-                <span class="board-icon-symbol">{{ board.icon }}</span>
+                <span class="board-icon-symbol"><CommunityBoardIcon :type="board.id" /></span>
               </span>
               <span class="board-option-copy">
                 <strong>{{ board.name }}</strong>
@@ -1581,17 +1709,6 @@ async function nativeShare() {
                 <b v-else>{{ displayUserName(post) }}</b>
                 <span>{{ post.date }}</span>
               </div>
-              <button
-                v-if="canShowAuthorFollow(post)"
-                type="button"
-                class="author-follow-button author-follow-button--compact"
-                :class="{ 'is-following': isAuthorFollowed(post) }"
-                :aria-pressed="isAuthorFollowed(post)"
-                :disabled="isAuthorFollowLoading(post)"
-                @click="toggleAuthorFollow(post)"
-              >
-                {{ isAuthorFollowLoading(post) ? t('communityAuto2.k1o') : isAuthorFollowed(post) ? t('communityAuto2.k1p') : t('communityAuto2.k1q') }}
-              </button>
             </div>
             <RouterLink
               class="feed-card-main"

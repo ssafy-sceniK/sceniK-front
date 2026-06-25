@@ -232,7 +232,7 @@
     }
   },
   "translation": {
-    "show": "Show translation",
+    "show": "Translate",
     "original": "Show original",
     "loading": "Translating...",
     "failed": "Could not load translation. Showing the original text.",

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -11,12 +11,16 @@ import CommunityImageManager from '../components/community/CommunityImageManager
 import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { isGenericAiCourseTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 const MAX_POST_BODY_LENGTH = 1000;
 const COURSE_PICKER_PAGE_SIZE = 5;
+const CREATE_DRAFT_KEY = 'community:create';
+const LEGACY_ROUTE_DRAFT_KEY = 'scenik-community-draft';
+let createDraftFiles = [];
 
 const route = useRoute();
 const router = useRouter();
@@ -43,8 +47,6 @@ const visibleCourseCount = ref(COURSE_PICKER_PAGE_SIZE);
 const posting = ref(false);
 const statusNotice = ref(null);
 
-const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
-const selectedBoardTag = computed(() => t(selectedBoardMeta.value.tagKey));
 const boardOptions = computed(() => boards.map((board) => ({
   id: board.id,
   icon: board.icon,
@@ -70,8 +72,21 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  persistDraft();
   revokeImagePreviews();
 });
+
+watch([
+  selectedBoard,
+  title,
+  body,
+  selectedRouteId,
+  selectedHashtags,
+  postImageItems,
+], () => {
+  persistDraft();
+}, { deep: true });
+
 
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
@@ -79,7 +94,7 @@ function uniqueValues(values) {
 
 function isSystemTag(tag) {
   const systemTags = boards.map((board) => t(board.tagKey));
-  return systemTags.includes(tag) || isGenericAiCourseTag(tag);
+  return systemTags.includes(tag) || isCommunityBoardTag(tag) || isGenericAiCourseTag(tag);
 }
 
 function normalizeHashtag(value) {
@@ -117,13 +132,58 @@ function removeHashtag(tag) {
   selectedHashtags.value = selectedHashtags.value.filter((item) => item !== tag);
 }
 
+function hasDraftContent() {
+  return Boolean(
+    title.value.trim()
+    || body.value.trim()
+    || selectedRouteId.value
+    || selectedHashtags.value.length
+    || postImageItems.value.length
+    || selectedBoard.value !== 'drama'
+  );
+}
+
+function draftPayload() {
+  return {
+    board: selectedBoard.value,
+    title: title.value,
+    body: body.value,
+    routeId: selectedRouteId.value,
+    tags: selectedHashtags.value,
+    updatedAt: Date.now(),
+  };
+}
+
+function persistDraft() {
+  if (typeof sessionStorage === 'undefined') return;
+  createDraftFiles = postImageItems.value
+    .filter((item) => item.kind === 'new' && item.file)
+    .map((item) => item.file);
+  if (!hasDraftContent()) {
+    sessionStorage.removeItem(CREATE_DRAFT_KEY);
+    createDraftFiles = [];
+    return;
+  }
+  sessionStorage.setItem(CREATE_DRAFT_KEY, JSON.stringify(draftPayload()));
+}
+
+function clearDraft() {
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.removeItem(CREATE_DRAFT_KEY);
+    sessionStorage.removeItem(LEGACY_ROUTE_DRAFT_KEY);
+  }
+  createDraftFiles = [];
+}
+
 function restoreDraft() {
-  const rawDraft = sessionStorage.getItem('scenik-community-draft');
+  const rawDraft = sessionStorage.getItem(CREATE_DRAFT_KEY) || sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY);
   if (!rawDraft && !route.query.routeId) return;
   try {
     const draft = rawDraft ? JSON.parse(rawDraft) : {};
-    sessionStorage.removeItem('scenik-community-draft');
-    selectedBoard.value = draft.board || 'region';
+    if (sessionStorage.getItem(LEGACY_ROUTE_DRAFT_KEY)) {
+      sessionStorage.removeItem(LEGACY_ROUTE_DRAFT_KEY);
+    }
+    selectedBoard.value = draft.board || (draft.routeId || route.query.routeId ? 'region' : 'drama');
     title.value = draft.title || title.value;
     body.value = draft.body || body.value;
     selectedRouteId.value = draft.routeId || String(route.query.routeId || '');
@@ -131,8 +191,11 @@ function restoreDraft() {
       .map(normalizeHashtag)
       .filter((tag) => tag && !isSystemTag(tag)))
       .slice(0, MAX_HASHTAGS);
+    if (createDraftFiles.length) {
+      postImageItems.value = createDraftFiles.map(createPostImageItem);
+    }
   } catch {
-    sessionStorage.removeItem('scenik-community-draft');
+    clearDraft();
   }
 }
 
@@ -242,7 +305,7 @@ async function resolveImagePayload() {
 
 function buildTags() {
   return uniqueValues([
-    selectedBoardTag.value,
+    communityBoardTag(selectedBoard.value),
     ...selectedHashtags.value,
     selectedCourse.value?.region ?? uiStore.courseConditions.region,
   ]);
@@ -308,6 +371,13 @@ async function createPost() {
     };
     return;
   }
+  clearDraft();
+  title.value = '';
+  body.value = '';
+  selectedHashtags.value = [];
+  selectedRouteId.value = '';
+  selectedBoard.value = 'drama';
+  revokeImagePreviews();
   statusNotice.value = {
     tone: 'success',
     title: t('community.write.savedTitle'),

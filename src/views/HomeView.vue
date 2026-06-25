@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -13,17 +13,22 @@ import EmptyState from '../components/common/EmptyState.vue';
 import { useContentStore } from '../stores/contentStore.js';
 import { usePlaceStore } from '../stores/placeStore.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { translateResource } from '../api/translationApi.js';
 import { courseTemplates } from '../data/mockData.js';
+import { normalizeLocale } from '../i18n/languages.js';
+import { localizeSystemLabel, localizeSystemTag } from '../i18n/systemContent.js';
 import { localizedNotices } from '../data/notices.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
 const placeStore = usePlaceStore();
 const uiStore = useUiStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const contentTab = ref('drama');
 const routeTab = ref('realtime');
 const homePopularRouteLimit = 3;
+const translatedCourseTitles = ref({});
+const courseTitleRequests = new Map();
 
 onMounted(() => {
   contentStore.load();
@@ -50,8 +55,65 @@ const contentItems = computed(() => contentStore.search({
 const routeItems = computed(() => routeTab.value === 'region'
   ? [...courseTemplates].reverse()
   : courseTemplates);
-const visibleRouteItems = computed(() => routeItems.value.slice(0, homePopularRouteLimit));
+const visibleRawRouteItems = computed(() => routeItems.value.slice(0, homePopularRouteLimit));
+const currentLocale = computed(() => normalizeLocale(locale.value) || 'ko');
+const visibleRouteItems = computed(() => visibleRawRouteItems.value.map(localizeHomeCourse));
 const noticeItems = computed(() => localizedNotices(t));
+
+function courseTitleCacheKey(course, targetLocale = currentLocale.value) {
+  return [targetLocale, course.routeId, 'title', course.title].join('::');
+}
+
+function localizeHomeCourse(course) {
+  const targetLocale = currentLocale.value;
+  const titleKey = courseTitleCacheKey(course, targetLocale);
+  return {
+    ...course,
+    title: targetLocale === 'ko' ? course.title : translatedCourseTitles.value[titleKey] || course.title,
+    region: localizeSystemLabel(course.region, 'region', t, targetLocale),
+    tags: (course.tags ?? []).map((tag) => localizeSystemTag(tag, t, targetLocale)),
+  };
+}
+
+async function loadCourseTitleTranslation(course) {
+  const targetLocale = currentLocale.value;
+  if (!course?.title || targetLocale === 'ko') return;
+  const cacheKey = courseTitleCacheKey(course, targetLocale);
+  if (translatedCourseTitles.value[cacheKey]) return;
+  if (courseTitleRequests.has(cacheKey)) return courseTitleRequests.get(cacheKey);
+  const request = translateResource({
+    resourceType: 'SYSTEM_TEXT',
+    resourceId: 'home-course:' + course.routeId,
+    field: 'title',
+    targetLanguage: targetLocale,
+    sourceText: course.title,
+    sourceLanguage: 'ko',
+  })
+    .then((result) => {
+      const translated = result?.translatedText;
+      if (translated) {
+        translatedCourseTitles.value = {
+          ...translatedCourseTitles.value,
+          [cacheKey]: translated,
+        };
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      courseTitleRequests.delete(cacheKey);
+    });
+  courseTitleRequests.set(cacheKey, request);
+  return request;
+}
+
+function loadVisibleCourseTranslations() {
+  visibleRawRouteItems.value.forEach((course) => {
+    void loadCourseTitleTranslation(course);
+  });
+}
+
+watch([currentLocale, visibleRawRouteItems], loadVisibleCourseTranslations, { immediate: true });
+
 
 function openCourse(course) {
   if (!course?.routeId) {

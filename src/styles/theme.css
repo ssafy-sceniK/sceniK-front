@@ -1222,7 +1222,6 @@ body {
 :root[data-theme="dark"] .settings-segment button,
 :root[data-theme="dark"] .sort-select,
 :root[data-theme="dark"] .list-control-row,
-:root[data-theme="dark"] .translation-toggle,
 :root[data-theme="dark"] .load-more-row button,
 :root[data-theme="dark"] .user-list-row,
 :root[data-theme="dark"] .visit-progress-card,
@@ -1247,7 +1246,6 @@ body {
 
 :root[data-theme="dark"] .settings-segment button.active,
 :root[data-theme="dark"] .sort-select:focus,
-:root[data-theme="dark"] .translation-toggle:focus-visible,
 :root[data-theme="dark"] .load-more-row button:focus-visible,
 :root[data-theme="dark"] .visit-control-row a.router-link-active,
 :root[data-theme="dark"] .visit-control-row a:focus-visible,
@@ -1323,9 +1321,9 @@ body {
   --dark-action-bg: rgba(255, 255, 255, 0.055);
   --dark-action-bg-strong: rgba(122, 48, 44, 0.30);
   --dark-action-border: rgba(226, 137, 121, 0.38);
-  --dark-action-text: #ffd8d0;
-  --dark-action-solid: #8f3833;
-  --dark-action-solid-hover: #a34740;
+  --dark-action-text: #fee2e2;
+  --dark-action-solid: #dc2626;
+  --dark-action-solid-hover: #ef4444;
 }
 
 :root[data-theme="dark"] .button-primary,
@@ -1403,7 +1401,6 @@ body {
 }
 
 :root[data-theme="dark"] .translation-toggle:not(:disabled):hover,
-:root[data-theme="dark"] .translation-toggle:focus-visible,
 :root[data-theme="dark"] .translation-toggle.is-active {
   color: var(--dark-action-text);
   background: var(--dark-action-bg-strong);
@@ -1463,9 +1460,9 @@ body {
   --community-dark-action-hover-border: rgba(237, 177, 165, 0.24);
   --community-dark-accent-soft: rgba(122, 48, 44, 0.30);
   --community-dark-accent-border: rgba(226, 137, 121, 0.38);
-  --community-dark-accent-text: #ffd8d0;
-  --community-dark-primary-bg: #8f3833;
-  --community-dark-primary-hover-bg: #a34740;
+  --community-dark-accent-text: #fee2e2;
+  --community-dark-primary-bg: #dc2626;
+  --community-dark-primary-hover-bg: #ef4444;
   --community-dark-danger-bg: rgba(239, 68, 68, 0.18);
   --community-dark-danger-border: rgba(248, 113, 113, 0.42);
   --community-dark-danger-text: #fecaca;
@@ -1481,7 +1478,6 @@ body {
 :root[data-theme="dark"] .community-screen .author-follow-button,
 :root[data-theme="dark"] .community-screen .community-tabs a,
 :root[data-theme="dark"] .community-screen .segmented-sort__option,
-:root[data-theme="dark"] .community-screen .translation-toggle,
 :root[data-theme="dark"] .community-screen .share-options button,
 :root[data-theme="dark"] .community-screen .linked-course-cta,
 :root[data-theme="dark"] .community-write-screen .button-secondary,
@@ -1532,8 +1528,7 @@ body {
   :root[data-theme="dark"] .community-screen .author-follow-button:hover,
   :root[data-theme="dark"] .community-screen .community-tabs a:hover,
   :root[data-theme="dark"] .community-screen .segmented-sort__option:hover,
-  :root[data-theme="dark"] .community-screen .translation-toggle:hover,
-  :root[data-theme="dark"] .community-screen .share-options button:hover,
+    :root[data-theme="dark"] .community-screen .share-options button:hover,
   :root[data-theme="dark"] .community-screen .linked-course-cta:hover,
   :root[data-theme="dark"] .community-write-screen .button-secondary:hover,
   :root[data-theme="dark"] .community-write-screen .button-ghost:hover,
@@ -1743,4 +1738,31 @@ body {
 :root[data-theme="dark"] .community-write-screen .hashtag-input-row button:focus-visible {
   outline-color: rgba(226, 137, 121, 0.46);
   box-shadow: 0 0 0 3px rgba(122, 48, 44, 0.24);
+}
+
+
+:root[data-theme="dark"] .translation-toggle,
+:root[data-theme="dark"] .community-screen .translation-toggle,
+:root[data-theme="dark"] .community-write-screen .translation-toggle {
+  color: var(--dark-action-text);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .translation-toggle:not(:disabled):hover,
+:root[data-theme="dark"] .translation-toggle:focus-visible,
+:root[data-theme="dark"] .translation-toggle.is-active,
+:root[data-theme="dark"] .community-screen .translation-toggle:not(:disabled):hover,
+:root[data-theme="dark"] .community-screen .translation-toggle:focus-visible,
+:root[data-theme="dark"] .community-screen .translation-toggle.is-active,
+:root[data-theme="dark"] .community-write-screen .translation-toggle:not(:disabled):hover,
+:root[data-theme="dark"] .community-write-screen .translation-toggle:focus-visible,
+:root[data-theme="dark"] .community-write-screen .translation-toggle.is-active {
+  color: #fee2e2;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

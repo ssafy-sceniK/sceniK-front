@@ -18,10 +18,10 @@ const iconType = computed(() => {
 <template>
   <svg class="community-board-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <g v-if="iconType === 'drama'">
-      <path d="M5 8.5h14v9.5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8.5Z" />
-      <path d="M7 4h10l2 4.5H5L7 4Z" />
-      <path d="M8.5 4 10 8.5M13 4l1.5 4.5" />
-      <path d="M8 13h8M8 16h5" />
+      <rect x="4" y="7" width="13" height="10" rx="2.2" />
+      <path d="M17 10.2 21 8v8l-4-2.2" />
+      <path d="M8.2 7 9.4 4.8h4.1L14.8 7" />
+      <circle cx="10.5" cy="12" r="2.2" />
     </g>
     <g v-else-if="iconType === 'movie'">
       <rect x="4" y="5" width="16" height="14" rx="2" />
@@ -31,7 +31,6 @@ const iconType = computed(() => {
     </g>
     <g v-else-if="iconType === 'idol'">
       <path d="m12 4 1.85 4.18 4.55.48-3.38 3.08.96 4.46L12 13.9 8.02 16.2l.96-4.46L5.6 8.66l4.55-.48L12 4Z" />
-      <path d="M18.5 15.5v3.2a1.8 1.8 0 1 1-1.2-1.7l1.2-.35" />
     </g>
     <g v-else-if="iconType === 'variety'">
       <rect x="4" y="7" width="16" height="11" rx="2.2" />
