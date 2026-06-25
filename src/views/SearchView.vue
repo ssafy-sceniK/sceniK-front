@@ -1,5 +1,5 @@
 ﻿<script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -12,10 +12,11 @@ import { useSearchStore } from '../stores/searchStore.js';
 const searchStore = useSearchStore();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const keyword = ref(searchStore.keyword);
 const searchInputRef = ref(null);
 const restoringQuery = ref(false);
+let focusFrame = 0;
 const hasResults = computed(() => (
   searchStore.results.contents.length + searchStore.results.places.length
 ) > 0);
@@ -52,16 +53,58 @@ function clearSearch() {
   router.replace({ query: { ...route.query, keyword: undefined } });
 }
 
-async function focusSearchInput() {
+function queryFocusRequested() {
+  return queryValue(route.query.focus) === '1';
+}
+
+function hasBlockingOverlay() {
+  return Boolean(document.querySelector('[aria-modal="true"], .modal-backdrop, .sheet-backdrop'));
+}
+
+function userIsEditingElsewhere() {
+  const active = document.activeElement;
+  if (!active || active === document.body || active === document.documentElement) return false;
+  if (active.closest?.('.search-screen .search-bar')) return false;
+  const tagName = active.tagName?.toLowerCase();
+  return active.isContentEditable || ['input', 'textarea', 'select'].includes(tagName);
+}
+
+async function focusSearchInput({ force = false } = {}) {
   await nextTick();
-  searchInputRef.value?.focus?.({ preventScroll: true });
+  await nextTick();
+  if (focusFrame) cancelAnimationFrame(focusFrame);
+
+  const applyFocus = () => {
+    if (hasBlockingOverlay()) return;
+    if (!force && userIsEditingElsewhere()) return;
+    searchInputRef.value?.focus?.({ preventScroll: true });
+  };
+
+  focusFrame = requestAnimationFrame(() => {
+    applyFocus();
+    focusFrame = requestAnimationFrame(() => {
+      applyFocus();
+      focusFrame = 0;
+    });
+  });
 }
 
 onMounted(() => {
   restoreQueryState();
-  focusSearchInput();
+  focusSearchInput({ force: true });
 });
+
+onBeforeUnmount(() => {
+  if (focusFrame) cancelAnimationFrame(focusFrame);
+});
+
 watch(() => route.query.keyword, restoreQueryState);
+watch(() => route.query.focus, () => {
+  if (queryFocusRequested()) focusSearchInput({ force: true });
+}, { flush: 'post' });
+watch(locale, () => {
+  focusSearchInput({ force: queryFocusRequested() });
+}, { flush: 'post' });
 </script>
 
 <template>
