@@ -63,20 +63,31 @@ async function toggleTranslation() {
   }
   loading.value = true;
   error.value = '';
+  translatedTitle.value = props.title;
+  translatedContent.value = props.content;
+  showingTranslation.value = true;
+  let hasTranslated = false;
   try {
     const [titleResult, contentResult] = await Promise.allSettled([
-      translateField('title', props.title),
-      translateField('content', props.content),
+      translateField('title', props.title).then((value) => {
+        translatedTitle.value = value || props.title;
+        hasTranslated = true;
+        return value;
+      }),
+      translateField('content', props.content).then((value) => {
+        translatedContent.value = value || props.content;
+        hasTranslated = true;
+        return value;
+      }),
     ]);
-    translatedTitle.value = titleResult.status === 'fulfilled' ? titleResult.value : props.title;
-    translatedContent.value = contentResult.status === 'fulfilled' ? contentResult.value : props.content;
-    if (titleResult.status === 'rejected' && contentResult.status === 'rejected') {
+    if (!hasTranslated && titleResult.status === 'rejected' && contentResult.status === 'rejected') {
       throw new Error('translation failed');
     }
-    showingTranslation.value = true;
   } catch {
     error.value = t('translation.failed');
     showingTranslation.value = false;
+    translatedTitle.value = '';
+    translatedContent.value = '';
   } finally {
     loading.value = false;
   }

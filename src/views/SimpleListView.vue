@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
+import AuthorAvatar from '../components/common/AuthorAvatar.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import FollowUserListItem from '../components/follow/FollowUserListItem.vue';
@@ -12,7 +13,8 @@ import CourseCard from '../components/course/CourseCard.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { courseTemplates, places } from '../data/mockData.js';
 import { localizedNotices } from '../data/notices.js';
-import { localizeSystemLabel } from '../i18n/systemContent.js';
+import { resolveApiAssetUrl } from '../api/http.js';
+import { attachmentUrl, displayableImageAttachments } from '../utils/communityAttachments.js';
 import { filterGenericAiCourseTags } from '../utils/tags.js';
 
 const LIST_CONFIG = {
@@ -77,9 +79,10 @@ const LIST_CONFIG = {
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const type = computed(() => route.meta.type);
 const listNotice = ref(null);
+const failedPostImageKeys = ref(new Set());
 const listConfig = computed(() => LIST_CONFIG[type.value] ?? LIST_CONFIG.default);
 const title = computed(() => route.meta.titleKey ? t(route.meta.titleKey) : t(listConfig.value.titleKey));
 const noticeItems = computed(() => localizedNotices(t));
@@ -89,7 +92,8 @@ onMounted(async () => {
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) {
     await uiStore.loadEngagementState();
   }
-  if (['posts', 'comments', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (['posts', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (type.value === 'comments') await uiStore.loadMyComments();
   if (type.value === 'reviews') await uiStore.loadMyReviews();
   if (['following', 'followers'].includes(type.value)) await uiStore.loadFollowState();
 });
@@ -99,23 +103,12 @@ function ownsPost(post) {
   return post.userId ? post.userId === uiStore.currentUser.userId : post.user === uiStore.currentUser.nickname;
 }
 
-function hasUserComment(post) {
-  if (!uiStore.currentUser) return false;
-  return (post.comments ?? []).some((comment) => (
-    comment.userId ? comment.userId === uiStore.currentUser.userId : comment.user === uiStore.currentUser.nickname
-  ));
-}
-
 const myPosts = computed(() => uiStore.communityPosts.filter(ownsPost));
-const commentedPosts = computed(() => uiStore.currentUser
-  ? uiStore.communityPosts.filter(hasUserComment)
-  : []);
 const scrappedPosts = computed(() => uiStore.currentUser
   ? uiStore.communityPosts.filter((item) => (item.scrappedBy ?? []).includes(uiStore.currentUser.userId))
   : []);
 const activityPosts = computed(() => {
   if (type.value === 'scraps') return scrappedPosts.value;
-  if (type.value === 'comments') return commentedPosts.value;
   return myPosts.value;
 });
 const visibleCount = computed(() => {
@@ -127,7 +120,7 @@ const visibleCount = computed(() => {
   if (type.value === 'saved-routes') return uiStore.savedCourses.length;
   if (type.value === 'routes') return courseTemplates.length;
   if (type.value === 'posts') return myPosts.value.length;
-  if (type.value === 'comments') return commentedPosts.value.length;
+  if (type.value === 'comments') return uiStore.myComments.length;
   if (type.value === 'scraps') return scrappedPosts.value.length;
   if (type.value === 'reviews') return uiStore.myReviews.length;
   if (type.value === 'following') return uiStore.followingUsers.length;
@@ -137,7 +130,8 @@ const visibleCount = computed(() => {
 const isLoading = computed(() => {
   if (type.value === 'saved-routes') return uiStore.savedCoursesLoading;
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) return uiStore.engagementLoading;
-  if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityLoading;
+  if (['posts', 'scraps'].includes(type.value)) return uiStore.communityLoading;
+  if (type.value === 'comments') return uiStore.myCommentsLoading;
   if (type.value === 'reviews') return uiStore.myReviewsLoading;
   if (['following', 'followers'].includes(type.value)) return uiStore.followLoading;
   return false;
@@ -145,7 +139,8 @@ const isLoading = computed(() => {
 const errorMessage = computed(() => {
   if (type.value === 'saved-routes') return uiStore.routeError;
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) return uiStore.engagementError;
-  if (['posts', 'comments', 'scraps'].includes(type.value)) return uiStore.communityError;
+  if (['posts', 'scraps'].includes(type.value)) return uiStore.communityError;
+  if (type.value === 'comments') return uiStore.myCommentsError;
   if (type.value === 'reviews') return uiStore.myReviewsError;
   if (['following', 'followers'].includes(type.value)) return uiStore.followError;
   return '';
@@ -169,7 +164,8 @@ async function reloadList() {
   if (['liked-content', 'liked-places', 'planned', 'completed'].includes(type.value)) {
     await uiStore.loadEngagementState();
   }
-  if (['posts', 'comments', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (['posts', 'scraps'].includes(type.value)) await uiStore.loadCommunityPosts();
+  if (type.value === 'comments') await uiStore.loadMyComments();
   if (type.value === 'reviews') await uiStore.loadMyReviews();
   if (['following', 'followers'].includes(type.value)) await uiStore.loadFollowState();
 }
@@ -179,37 +175,67 @@ function openCourse(course) {
   router.push({ name: target, params: { routeId: course.routeId } });
 }
 
-function containsAny(value, terms) {
-  const lower = String(value ?? '').toLowerCase();
-  return terms.some((term) => lower.includes(term));
-}
-
 function displayPostTags(post) {
   const tags = Array.isArray(post?.tags) ? post.tags : [];
   return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
 }
 
-function boardLabel(post) {
-  const tagText = displayPostTags(post).join(' ');
-  if (containsAny(tagText, ['drama', '\ub4dc\ub77c\ub9c8'])) return t('my.activity.boards.drama');
-  if (containsAny(tagText, ['movie', 'film', '\uc601\ud654'])) return t('my.activity.boards.movie');
-  if (containsAny(tagText, ['idol', 'k-pop', 'kpop', '\uc544\uc774\ub3cc'])) return t('my.activity.boards.idol');
-  if (containsAny(tagText, ['variety', '\uc608\ub2a5'])) return t('my.activity.boards.variety');
-  const region = localizeSystemLabel(post.region, 'region', t, locale.value);
-  return region ? t('my.activity.regionCourse', { region }) : t('my.activity.aiCourse');
+function postKey(post) {
+  return post?.postId ?? post?.id;
 }
 
-function postCommentPreview(post) {
-  if (!uiStore.currentUser) return '';
-  return (post.comments ?? []).find((comment) => comment.user === uiStore.currentUser.nickname)?.text ?? '';
+function displayUserName(post) {
+  return post?.user ?? post?.nickname ?? post?.authorNickname ?? uiStore.currentUser?.nickname ?? 'sceniK user';
+}
+
+function userInitial(post) {
+  return displayUserName(post).slice(0, 1).toUpperCase() || 'K';
+}
+
+function authorProfileImageUrl(post) {
+  return post?.authorProfileImageUrl ?? post?.profileImageUrl ?? post?.authorImageUrl ?? '';
+}
+
+function postTimeLabel(post) {
+  return post?.date ?? post?.createdAt?.slice?.(0, 10) ?? '';
+}
+
+function postImageFailureKey(post, url, index) {
+  return `${postKey(post)}:${index}:${url}`;
+}
+
+function markPostImageFailed(post, url, index) {
+  failedPostImageKeys.value = new Set([...failedPostImageKeys.value, postImageFailureKey(post, url, index)]);
+}
+
+function postImageSources(post) {
+  const attachments = displayableImageAttachments(post?.attachments ?? [])
+    .map((attachment) => resolveApiAssetUrl(attachmentUrl(attachment)))
+    .filter(Boolean);
+  const direct = [
+    post?.imageUrl,
+    post?.thumbnailUrl,
+    post?.coverImageUrl,
+    post?.attachmentUrl,
+  ].map(resolveApiAssetUrl).filter(Boolean);
+  return [...new Set([...attachments, ...direct])]
+    .filter((url, index) => !failedPostImageKeys.value.has(postImageFailureKey(post, url, index)));
 }
 
 function postCommentCount(post) {
   return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
 }
 
-function postMeta(post) {
-  return [post.date, localizeSystemLabel(post.region, 'region', t, locale.value)].filter(Boolean).join(' / ');
+function commentTimeLabel(comment) {
+  return comment?.date ?? comment?.createdAt?.slice?.(0, 10) ?? '';
+}
+
+function commentTo(comment) {
+  return comment?.to ?? (comment?.postId ? `/community/post/${comment.postId}#community-comments` : '/community');
+}
+
+function commentPreviewText(comment) {
+  return comment?.text ?? comment?.content ?? '';
 }
 
 function reviewDate(review) {
@@ -337,31 +363,50 @@ async function toggleFollowFromList(user) {
         </button>
       </div>
 
-      <div v-else-if="type === 'posts' || type === 'scraps' || type === 'comments'" class="my-post-list">
+      <div v-else-if="type === 'comments'" class="my-comment-list">
         <RouterLink
-          v-for="post in activityPosts"
-          :key="post.id"
-          class="my-post-card"
-          :to="'/community/post/' + post.id"
+          v-for="comment in uiStore.myComments"
+          :key="comment.commentId"
+          class="my-comment-card"
+          :to="commentTo(comment)"
         >
-          <div class="my-post-top">
-            <span class="my-post-board">{{ boardLabel(post) }}</span>
-            <small>{{ postMeta(post) }}</small>
+          <div>
+            <strong>{{ comment.postTitle || t('community.detail.title') }}</strong>
+            <small>{{ commentTimeLabel(comment) }}</small>
           </div>
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.body }}</p>
-          <blockquote v-if="type === 'comments' && postCommentPreview(post)">
-            {{ t('my.activity.commentPreview') }} / {{ postCommentPreview(post) }}
-          </blockquote>
-          <div class="tag-row">
-            <span v-for="tag in displayPostTags(post).slice(0, 3)" :key="tag">{{ tag }}</span>
+          <p>{{ commentPreviewText(comment) }}</p>
+        </RouterLink>
+      </div>
+
+      <div v-else-if="type === 'posts' || type === 'scraps'" class="feed-list compact-feed-list my-community-feed">
+        <article v-for="post in activityPosts" :key="postKey(post)" class="feed-card route-story-card">
+          <div class="feed-card-author-row">
+            <RouterLink class="feed-author-profile-link" :to="`/users/${post.userId}`">
+              <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
+              <span class="feed-author-copy">
+                <b>{{ displayUserName(post) }}</b>
+                <span>{{ postTimeLabel(post) }}</span>
+              </span>
+            </RouterLink>
           </div>
-          <div class="my-post-meta">
+          <RouterLink class="feed-card-main" :class="{ 'feed-card-main--text-only': !postImageSources(post).length }" :to="'/community/post/' + postKey(post)">
+            <span v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
+              <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0], 0)" />
+            </span>
+            <span class="feed-body">
+              <h2>{{ post.title }}</h2>
+              <p>{{ post.body }}</p>
+              <span class="tag-row">
+                <span v-for="tag in displayPostTags(post).slice(0, 3)" :key="tag">{{ tag }}</span>
+              </span>
+            </span>
+          </RouterLink>
+          <div class="feed-actions compact-actions" aria-label="post stats">
             <span>{{ t('my.activity.likes', { count: post.likes ?? 0 }) }}</span>
             <span>{{ t('my.activity.comments', { count: postCommentCount(post) }) }}</span>
             <span>{{ post.routeId ? t('my.activity.linkedAiCourse') : t('my.activity.generalStory') }}</span>
           </div>
-        </RouterLink>
+        </article>
       </div>
 
       <div v-else-if="type === 'reviews'" class="stack-list">

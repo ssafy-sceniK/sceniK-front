@@ -218,6 +218,9 @@
       "dragHint": "Drag thumbnails to change the display order.",
       "representative": "Cover",
       "empty": "No images selected yet."
+    },
+    "detail": {
+      "title": "Post"
     }
   },
   "reviews": {
@@ -733,7 +736,20 @@
       "copyFailedTitle": "Could not save.",
       "copyFailed": "Could not save this AI course to your courses.",
       "courseCopied": "Saved this AI course to your courses.",
-      "loginRequiredToSave": "Log in to save this course to your courses."
+      "loginRequiredToSave": "Log in to save this course to your courses.",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied.",
+      "copyLinkFailed": "Failed to copy link.",
+      "shareUnavailable": "A share link is available after the course is saved.",
+      "bulkVisitPlanned": "Add to planned visits",
+      "bulkVisitCompleted": "Mark as completed",
+      "bulkVisitDone": "Completed",
+      "bulkVisitProgressTitle": "Updating visit status.",
+      "bulkVisitProgressText": "Updating {count} places in this course.",
+      "bulkVisitSuccessTitle": "Visit status updated.",
+      "bulkVisitSuccessText": "Updated visit status for {count} places.",
+      "bulkVisitFailedTitle": "Could not update visit status.",
+      "bulkVisitFailedText": "Some places could not be updated."
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -1010,7 +1026,7 @@
     "tabs": {
       "activity": "My Activity",
       "visits": "Visit Management",
-      "posts": "Posts",
+      "posts": "Community",
       "aria": "My Page sections"
     },
     "stats": {
@@ -1027,7 +1043,7 @@
       "following": "Following",
       "followers": "Followers",
       "myPosts": "My posts",
-      "commentedPosts": "Commented posts",
+      "commentedPosts": "My comments",
       "scraps": "Saved posts"
     },
     "counts": {
@@ -1168,8 +1184,8 @@
       "loginText": "You need to log in to edit your profile.",
       "loginMethod": "Login method",
       "nicknamePlaceholder": "Nickname",
-      "intro": "Intro",
-      "introPlaceholder": "Traveling through K-content",
+      "intro": "Bio",
+      "introPlaceholder": "Introduce yourself.",
       "saveProfile": "Save profile",
       "savingProfile": "Saving profile",
       "savingShort": "Saving",

@@ -44,6 +44,7 @@ import {
   createPost as createCommunityPost,
   deleteComment as deleteCommunityComment,
   deletePost as deleteCommunityPost,
+  getMyComments as fetchMyComments,
   getPost as fetchCommunityPost,
   getPosts as fetchCommunityPosts,
   likeComment as likeCommunityComment,
@@ -145,6 +146,7 @@ function defaultState() {
     savedCourses: [],
     courseDetailCache: [],
     communityPosts: [],
+    myComments: [],
     notifications: [],
     unreadNotificationCount: 0,
     myReviews: [],
@@ -222,6 +224,7 @@ function readState() {
     state.completedVisitDetails = [];
     state.savedCourses = [];
     state.communityPosts = [];
+    state.myComments = [];
     return state;
   } catch {
     return defaultState();
@@ -538,6 +541,8 @@ export const useUiStore = defineStore('ui', {
     routeError: '',
     communityLoading: false,
     communityError: '',
+    myCommentsLoading: false,
+    myCommentsError: '',
     engagementLoading: false,
     engagementError: '',
     myReviewsLoading: false,
@@ -602,6 +607,9 @@ export const useUiStore = defineStore('ui', {
         completedVisitDetails,
         recentViewedPlaceDetails,
         communityPosts,
+        myComments,
+        myCommentsLoading,
+        myCommentsError,
         notifications,
         unreadNotificationCount,
         notificationsLoading,
@@ -806,6 +814,24 @@ export const useUiStore = defineStore('ui', {
         this.communityLoading = false;
       }
     },
+    async loadMyComments(params = {}) {
+      if (!this.currentUser || !readAccessToken()) {
+        this.myComments = [];
+        return [];
+      }
+      this.myCommentsLoading = true;
+      this.myCommentsError = '';
+      try {
+        this.myComments = await fetchMyComments(params);
+        return this.myComments;
+      } catch (error) {
+        this.myComments = [];
+        this.myCommentsError = apiErrorMessage(error, storeT('errors.store.k7'));
+        return [];
+      } finally {
+        this.myCommentsLoading = false;
+      }
+    },
     async loadEngagementState() {
       if (!this.currentUser || !readAccessToken()) return;
       this.engagementLoading = true;
@@ -987,6 +1013,7 @@ export const useUiStore = defineStore('ui', {
       this.courseDetailCache = [];
       this.generatedRoute = null;
       this.communityPosts = [];
+      this.myComments = [];
       this.notifications = [];
       this.unreadNotificationCount = 0;
       this.myReviews = [];

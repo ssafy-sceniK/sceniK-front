@@ -62,11 +62,6 @@ const profileCropImageStyle = computed(() => {
     transform: 'translate(calc(-50% + ' + cropOffsetX.value + 'px), calc(-50% + ' + cropOffsetY.value + 'px)) rotate(' + cropRotation.value + 'deg)',
   };
 });
-const providerLabel = computed(() => ({
-  google: t('profile.edit.provider.google'),
-  kakao: t('profile.edit.provider.kakao'),
-  email: t('profile.edit.provider.email'),
-})[uiStore.currentUser?.authProvider] ?? t('profile.edit.provider.email'));
 watch([cropScale, cropRotation, cropPreviewSize, () => cropImageSize.value.width, () => cropImageSize.value.height], () => {
   clampCropOffset();
 });
@@ -450,11 +445,6 @@ onBeforeUnmount(() => {
         <label class="form-field">
           {{ t('auth.fields.email') }}
           <input :value="uiStore.currentUser.email" readonly aria-readonly="true" />
-        </label>
-
-        <label class="form-field">
-          {{ t('profile.edit.loginMethod') }}
-          <input :value="providerLabel" readonly aria-readonly="true" />
         </label>
 
         <label class="form-field">

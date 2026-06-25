@@ -26,6 +26,16 @@ function normalizeComment(comment = {}) {
   };
 }
 
+function normalizeMyComment(comment = {}) {
+  const normalized = normalizeComment(comment);
+  const postTitle = firstDefined(comment.postTitle, comment.post_title, comment.title, '');
+  return {
+    ...normalized,
+    postTitle,
+    to: normalized.postId ? `/community/post/${normalized.postId}#community-comments` : '/community',
+  };
+}
+
 function normalizeAttachment(attachment = {}) {
   const url = firstDefined(
     attachment.url,
@@ -146,6 +156,11 @@ export async function deletePost(postId) {
 export async function getComments(postId) {
   const { data } = await http.get(`/posts/${postId}/comments`);
   return listFrom(data, 'comments').map(normalizeComment);
+}
+
+export async function getMyComments(params = {}) {
+  const { data } = await http.get('/users/me/comments', { params });
+  return listFrom(data, 'comments').map(normalizeMyComment);
 }
 
 export async function createComment(postId, payload) {

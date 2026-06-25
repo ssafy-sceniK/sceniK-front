@@ -5,15 +5,20 @@ import { useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
 import { localizePreferenceOption } from '../i18n/systemContent.js';
 import AppLayout from '../components/layout/AppLayout.vue';
+import AuthorAvatar from '../components/common/AuthorAvatar.vue';
 import PlaceCard from '../components/place/PlaceCard.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import ProfileAvatar from '../components/common/ProfileAvatar.vue';
+import { resolveApiAssetUrl } from '../api/http.js';
 import { normalizePreferenceSelection } from '../utils/preferences.js';
+import { attachmentUrl, displayableImageAttachments } from '../utils/communityAttachments.js';
+import { filterGenericAiCourseTags } from '../utils/tags.js';
 
 const router = useRouter();
 const uiStore = useUiStore();
 const { t, locale } = useI18n();
 const activeTab = ref('activity');
+const failedPostImageKeys = ref(new Set());
 
 onMounted(async () => {
   if (!uiStore.currentUser) return;
@@ -21,6 +26,7 @@ onMounted(async () => {
     uiStore.loadSavedCourses(),
     uiStore.loadEngagementState(),
     uiStore.loadCommunityPosts(),
+    uiStore.loadMyComments(),
     uiStore.loadMyReviews(),
     uiStore.loadFollowState(),
   ]);
@@ -31,17 +37,7 @@ function ownsPost(post) {
   return post.userId ? post.userId === uiStore.currentUser.userId : post.user === uiStore.currentUser.nickname;
 }
 
-function hasUserComment(post) {
-  if (!uiStore.currentUser) return false;
-  return (post.comments ?? []).some((comment) => (
-    comment.userId ? comment.userId === uiStore.currentUser.userId : comment.user === uiStore.currentUser.nickname
-  ));
-}
-
 const myPosts = computed(() => uiStore.communityPosts.filter(ownsPost));
-const commentedPosts = computed(() => uiStore.currentUser
-  ? uiStore.communityPosts.filter(hasUserComment)
-  : []);
 const scrappedPosts = computed(() => uiStore.currentUser
   ? uiStore.communityPosts.filter((post) => (post.scrappedBy ?? []).includes(uiStore.currentUser.userId))
   : []);
@@ -86,6 +82,69 @@ const tabs = computed(() => [
 async function logoutToLanding() {
   await uiStore.logout();
   router.replace('/');
+}
+
+function postKey(post) {
+  return post?.postId ?? post?.id;
+}
+
+function postCommentCount(post) {
+  return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
+}
+
+function displayPostTags(post) {
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
+  return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
+}
+
+function displayUserName(post) {
+  return post?.user ?? post?.nickname ?? post?.authorNickname ?? uiStore.currentUser?.nickname ?? 'sceniK user';
+}
+
+function userInitial(post) {
+  return displayUserName(post).slice(0, 1).toUpperCase() || 'K';
+}
+
+function authorProfileImageUrl(post) {
+  return post?.authorProfileImageUrl ?? post?.profileImageUrl ?? post?.authorImageUrl ?? '';
+}
+
+function postTimeLabel(post) {
+  return post?.date ?? post?.createdAt?.slice?.(0, 10) ?? '';
+}
+
+function postImageFailureKey(post, url, index) {
+  return `${postKey(post)}:${index}:${url}`;
+}
+
+function markPostImageFailed(post, url, index) {
+  failedPostImageKeys.value = new Set([...failedPostImageKeys.value, postImageFailureKey(post, url, index)]);
+}
+
+function postImageSources(post) {
+  const attachments = displayableImageAttachments(post?.attachments ?? [])
+    .map((attachment) => resolveApiAssetUrl(attachmentUrl(attachment)))
+    .filter(Boolean);
+  const direct = [
+    post?.imageUrl,
+    post?.thumbnailUrl,
+    post?.coverImageUrl,
+    post?.attachmentUrl,
+  ].map(resolveApiAssetUrl).filter(Boolean);
+  return [...new Set([...attachments, ...direct])]
+    .filter((url, index) => !failedPostImageKeys.value.has(postImageFailureKey(post, url, index)));
+}
+
+function commentTimeLabel(comment) {
+  return comment?.date ?? comment?.createdAt?.slice?.(0, 10) ?? '';
+}
+
+function commentTo(comment) {
+  return comment?.to ?? (comment?.postId ? `/community/post/${comment.postId}#community-comments` : '/community');
+}
+
+function commentPreviewText(comment) {
+  return comment?.text ?? comment?.content ?? '';
 }
 </script>
 
@@ -240,21 +299,81 @@ async function logoutToLanding() {
       </div>
 
       <div v-else class="my-section-panel">
+        <div class="section-mini-header">
+          <h2>{{ t('my.menu.myPosts') }}</h2>
+          <RouterLink to="/my/posts">{{ t('common.viewAll') }}</RouterLink>
+        </div>
+        <div v-if="myPosts.length" class="feed-list compact-feed-list my-community-feed">
+          <article v-for="post in myPosts.slice(0, 3)" :key="postKey(post)" class="feed-card route-story-card">
+            <div class="feed-card-author-row">
+              <RouterLink class="feed-author-profile-link" :to="`/users/${post.userId}`">
+                <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
+                <span class="feed-author-copy">
+                  <b>{{ displayUserName(post) }}</b>
+                  <span>{{ postTimeLabel(post) }}</span>
+                </span>
+              </RouterLink>
+            </div>
+            <RouterLink class="feed-card-main" :class="{ 'feed-card-main--text-only': !postImageSources(post).length }" :to="'/community/post/' + postKey(post)">
+              <span v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
+                <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0], 0)" />
+              </span>
+              <span class="feed-body">
+                <h2>{{ post.title }}</h2>
+                <p>{{ post.body }}</p>
+                <span class="tag-row">
+                  <span v-for="tag in displayPostTags(post).slice(0, 3)" :key="tag">{{ tag }}</span>
+                </span>
+              </span>
+            </RouterLink>
+            <div class="feed-actions compact-actions" aria-label="post stats">
+              <span>{{ t('my.activity.likes', { count: post.likes ?? 0 }) }}</span>
+              <span>{{ t('my.activity.comments', { count: postCommentCount(post) }) }}</span>
+              <span>{{ post.routeId ? t('my.activity.linkedAiCourse') : t('my.activity.generalStory') }}</span>
+            </div>
+          </article>
+        </div>
+        <EmptyState
+          v-else
+          icon="C"
+          tone="community"
+          compact
+          :title="t('my.activity.empty.posts.title')"
+          :text="t('my.activity.empty.posts.text')"
+          :action-label="t('my.activity.empty.posts.action')"
+          action-to="/community/write"
+        />
+
+        <div class="section-mini-header with-divider">
+          <h2>{{ t('my.menu.commentedPosts') }}</h2>
+          <RouterLink to="/my/comments">{{ t('common.viewAll') }}</RouterLink>
+        </div>
+        <div v-if="uiStore.myComments.length" class="my-comment-list">
+          <RouterLink
+            v-for="comment in uiStore.myComments.slice(0, 4)"
+            :key="comment.commentId"
+            class="my-comment-card"
+            :to="commentTo(comment)"
+          >
+            <div>
+              <strong>{{ comment.postTitle || t('community.detail.title') }}</strong>
+              <small>{{ commentTimeLabel(comment) }}</small>
+            </div>
+            <p>{{ commentPreviewText(comment) }}</p>
+          </RouterLink>
+        </div>
+        <EmptyState
+          v-else
+          icon="C"
+          tone="community"
+          compact
+          :title="t('my.activity.empty.comments.title')"
+          :text="t('my.activity.empty.comments.text')"
+          :action-label="t('my.activity.empty.comments.action')"
+          action-to="/community"
+        />
+
         <div class="my-menu-list">
-          <RouterLink class="my-menu-row" to="/my/posts">
-            <span class="my-menu-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="m14 7 3 3" /></svg>
-            </span>
-            <span><strong>{{ t('my.menu.myPosts') }}</strong><small>{{ t('my.counts.posts', { count: myPosts.length }) }}</small></span>
-            <em>›</em>
-          </RouterLink>
-          <RouterLink class="my-menu-row" to="/my/comments">
-            <span class="my-menu-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 5.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" /></svg>
-            </span>
-            <span><strong>{{ t('my.menu.commentedPosts') }}</strong><small>{{ t('my.counts.posts', { count: commentedPosts.length }) }}</small></span>
-            <em>›</em>
-          </RouterLink>
           <RouterLink class="my-menu-row" to="/my/scraps">
             <span class="my-menu-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M6 4.5h12v16l-6-3.6-6 3.6v-16Z" /></svg>

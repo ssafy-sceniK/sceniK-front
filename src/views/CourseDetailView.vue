@@ -46,6 +46,7 @@ const routeDays = computed(() => (course.value?.days ?? []).map((day) => ({
 const dayTabs = computed(() => routeDays.value.map((day) => day.dayNumber));
 const stops = computed(() => routeDays.value.find((day) => day.dayNumber === selectedDay.value)?.places ?? []);
 const routePlaces = computed(() => routeDays.value.flatMap((day) => day.places ?? []));
+const routePlaceIds = computed(() => [...new Set(routePlaces.value.map((place) => place.placeId).filter(Boolean))]);
 const selectedDayRoutePlaces = computed(() => stops.value);
 const displayRegionLabel = computed(() => localizeRegion(firstText(course.value?.region, routePlaces.value.find((place) => place.region)?.region)) || t('course.detail.unselectedRegion'));
 const displayDurationLabel = computed(() => t('course.detail.durationDays', { count: Number(course.value?.durationDays ?? dayTabs.value.length ?? 1) || 1 }));
@@ -69,6 +70,15 @@ const courseSummaryText = computed(() => {
   return '';
 });
 const deleteLoading = computed(() => uiStore.routeActionLoading && showDeleteSheet.value);
+const allCoursePlacesTracked = computed(() => Boolean(routePlaceIds.value.length)
+  && routePlaceIds.value.every((placeId) => uiStore.plannedVisits.includes(placeId) || uiStore.completedVisits.includes(placeId)));
+const allCoursePlacesCompleted = computed(() => Boolean(routePlaceIds.value.length)
+  && routePlaceIds.value.every((placeId) => uiStore.completedVisits.includes(placeId)));
+const courseVisitActionDisabled = computed(() => uiStore.engagementLoading || !routePlaceIds.value.length || allCoursePlacesCompleted.value);
+const courseVisitActionLabel = computed(() => {
+  if (allCoursePlacesCompleted.value) return t('course.detail.bulkVisitDone');
+  return allCoursePlacesTracked.value ? t('course.detail.bulkVisitCompleted') : t('course.detail.bulkVisitPlanned');
+});
 
 function firstText(...values) {
   return values.find((value) => value !== undefined && value !== null && String(value).trim() !== '') ?? '';
@@ -218,26 +228,51 @@ function openDeleteSheet() {
   showDeleteSheet.value = true;
 }
 
-function shareUrl() {
-  if (typeof window === 'undefined') return '';
-  return window.location.href;
+function courseShareRouteId() {
+  const id = firstText(course.value?.routeId, routeId.value);
+  return id && !String(id).startsWith('gen-') ? String(id) : '';
+}
+
+function courseShareUrl() {
+  const id = courseShareRouteId();
+  if (!id || typeof window === 'undefined') return '';
+  return new URL(router.resolve({ name: 'course-detail', params: { routeId: id } }).href, window.location.origin).toString();
+}
+
+async function copyCourseLink() {
+  const url = courseShareUrl();
+  if (!url || !navigator.clipboard?.writeText) {
+    uiStore.notify(t('course.detail.copyLinkFailed'));
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    uiStore.notify(t('course.detail.linkCopied'), 'success');
+  } catch {
+    uiStore.notify(t('course.detail.copyLinkFailed'));
+  }
 }
 
 async function shareCourse() {
   if (!uiStore.requireAuth(t('course.detail.shareLoginRequired'))) return;
   if (!course.value) return;
+  const url = courseShareUrl();
+  if (!url) {
+    uiStore.notify(t('course.detail.shareUnavailable'));
+    return;
+  }
 
   const payload = {
     title: course.value.title,
     text: courseSummaryText.value,
-    url: shareUrl(),
+    url,
   };
 
   try {
     if (navigator.share) {
       await navigator.share(payload);
     } else if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText((payload.title + '\n' + payload.text + '\n' + payload.url).trim());
+      await navigator.clipboard.writeText(payload.url);
     }
     actionNotice.value = null;
     uiStore.notify(t('course.detail.shareSuccess'), 'success');
@@ -245,6 +280,26 @@ async function shareCourse() {
     if (error?.name === 'AbortError') return;
     uiStore.notify(t('course.detail.shareFailed'));
   }
+}
+
+async function markCoursePlacesVisitStatus() {
+  if (!uiStore.requireAuth(t('course.detail.shareLoginRequired'))) return;
+  const placeIds = routePlaceIds.value;
+  if (!placeIds.length || allCoursePlacesCompleted.value) return;
+  const targetStatus = allCoursePlacesTracked.value ? 'completed' : 'planned';
+  actionNotice.value = {
+    tone: 'info',
+    title: t('course.detail.bulkVisitProgressTitle'),
+    text: t('course.detail.bulkVisitProgressText', { count: placeIds.length }),
+  };
+  for (const placeId of placeIds) {
+    await uiStore.setVisit(placeId, targetStatus);
+  }
+  actionNotice.value = {
+    tone: 'success',
+    title: t('course.detail.bulkVisitSuccessTitle'),
+    text: t('course.detail.bulkVisitSuccessText', { count: placeIds.length }),
+  };
 }
 
 async function deleteCourse() {
@@ -297,6 +352,14 @@ async function deleteCourse() {
             <button type="button" role="menuitem" @click="runCourseAction(shareCourse)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
               {{ t('common.share') }}
+            </button>
+            <button type="button" role="menuitem" @click="runCourseAction(copyCourseLink)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" /></svg></span>
+              {{ t('course.detail.copyLink') }}
+            </button>
+            <button type="button" role="menuitem" :disabled="courseVisitActionDisabled" @click="runCourseAction(markCoursePlacesVisitStatus)">
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11.2A7 7 0 0 0 5 9.8C5 15.6 12 21 12 21Z" /><circle cx="12" cy="9.8" r="2.3" /><path d="m9.3 13.2 1.8 1.8 3.8-4.2" /></svg></span>
+              {{ courseVisitActionLabel }}
             </button>
             <button v-if="canSaveTemplateCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /></svg></span>

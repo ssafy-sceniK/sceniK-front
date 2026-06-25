@@ -59,7 +59,14 @@ const shareSummary = computed(() => {
   if (!route.value) return '';
   return t('autoPass.ui_0c07a50b2a', { value0: placeCount.value, value1: route.value.durationDays });
 });
-const shareText = computed(() => route.value ? `${route.value.title}\n${route.value.summary}` : 'sceniK AI Course');
+const resultShareRouteId = computed(() => {
+  const id = String(route.value?.routeId ?? '');
+  return id && !id.startsWith('gen-') ? id : '';
+});
+const resultShareUrl = computed(() => {
+  if (!resultShareRouteId.value || typeof window === 'undefined') return '';
+  return new URL(router.resolve({ name: 'course-detail', params: { routeId: resultShareRouteId.value } }).href, window.location.origin).toString();
+});
 const saveStatusRows = computed(() => {
   if (!route.value) return [];
   return [
@@ -112,6 +119,16 @@ const resultActionLabel = computed(() => {
   return t('aiCourse.result.done');
 });
 const resultActionDisabled = computed(() => savingRoute.value || (!saveError.value && !isResultSaved.value));
+const routePlaceIds = computed(() => [...new Set(routePlaces.value.map((place) => place.placeId).filter(Boolean))]);
+const allRoutePlacesTracked = computed(() => Boolean(routePlaceIds.value.length)
+  && routePlaceIds.value.every((placeId) => uiStore.plannedVisits.includes(placeId) || uiStore.completedVisits.includes(placeId)));
+const allRoutePlacesCompleted = computed(() => Boolean(routePlaceIds.value.length)
+  && routePlaceIds.value.every((placeId) => uiStore.completedVisits.includes(placeId)));
+const bulkVisitActionDisabled = computed(() => !routePlaceIds.value.length || allRoutePlacesCompleted.value);
+const bulkVisitActionLabel = computed(() => {
+  if (allRoutePlacesCompleted.value) return t('course.detail.bulkVisitDone');
+  return allRoutePlacesTracked.value ? t('course.detail.bulkVisitCompleted') : t('course.detail.bulkVisitPlanned');
+});
 
 watch(route, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
@@ -352,38 +369,48 @@ function closeShareSheet() {
   showShareSheet.value = false;
 }
 
-function notifyShareOption(label) {
-  uiStore.notify(t('autoPass.ui_5b0badefe5', { value0: label }));
-}
-
 function copyShareLink() {
-  navigator.clipboard?.writeText?.(shareText.value)
-    .then(() => uiStore.notify(t('autoPass.ui_392adb2d97')))
-    .catch(() => uiStore.notify(t('autoPass.ui_c0ab1bb707')));
+  if (!resultShareUrl.value || !navigator.clipboard?.writeText) {
+    uiStore.notify(t('course.detail.shareUnavailable'));
+    closeShareSheet();
+    return;
+  }
+  navigator.clipboard.writeText(resultShareUrl.value)
+    .then(() => uiStore.notify(t('course.detail.linkCopied'), 'success'))
+    .catch(() => uiStore.notify(t('course.detail.copyLinkFailed')));
   closeShareSheet();
 }
 
 async function shareMessage() {
+  if (!resultShareUrl.value) {
+    uiStore.notify(t('course.detail.shareUnavailable'));
+    closeShareSheet();
+    return;
+  }
   if (navigator.share && route.value) {
     await navigator.share({
       title: route.value.title,
       text: route.value.summary,
+      url: resultShareUrl.value,
     }).catch(() => {});
   } else {
-    notifyShareOption(t('autoPass.ui_1cff363a9f'));
+    await navigator.clipboard?.writeText?.(resultShareUrl.value);
+    uiStore.notify(t('course.detail.linkCopied'), 'success');
   }
   closeShareSheet();
 }
 
-async function markRoutePlacesPlanned() {
+async function markRoutePlacesVisitStatus() {
   if (!route.value || !uiStore.requireAuth(t('autoPass.ui_5823398baa'))) return;
-  const placeIds = [...new Set(routePlaces.value.map((place) => place.placeId).filter(Boolean))];
+  const placeIds = routePlaceIds.value;
+  if (!placeIds.length || allRoutePlacesCompleted.value) return;
+  const targetStatus = allRoutePlacesTracked.value ? 'completed' : 'planned';
   showActionMenu.value = false;
   closeShareSheet();
   for (const placeId of placeIds) {
-    await uiStore.setVisit(placeId, 'planned');
+    await uiStore.setVisit(placeId, targetStatus);
   }
-  if (placeIds.length) uiStore.notify(t('autoPass.ui_348efca19c', { value0: placeIds.length }), 'success');
+  uiStore.notify(t('course.detail.bulkVisitSuccessText', { count: placeIds.length }), 'success');
 }
 
 function postFromShareSheet() {
@@ -416,11 +443,11 @@ function postFromShareSheet() {
               </span>
               {{ t('autoPass.ui_2598405791') }}
             </button>
-            <button type="button" role="menuitem" @click="markRoutePlacesPlanned">
+            <button type="button" role="menuitem" :disabled="bulkVisitActionDisabled" @click="markRoutePlacesVisitStatus">
               <span class="result-menu-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11.2A7 7 0 0 0 5 9.8C5 15.6 12 21 12 21Z" /><circle cx="12" cy="9.8" r="2.3" /></svg>
               </span>
-              {{ t('autoPass.ui_2beb8a68e0') }}
+              {{ bulkVisitActionLabel }}
             </button>
             <button type="button" role="menuitem" @click="editCourse">
               <span class="result-menu-icon" aria-hidden="true">
@@ -481,13 +508,13 @@ function postFromShareSheet() {
           <h2>{{ route.title }}</h2>
           <p>{{ shareSummary }}</p>
           <div class="ai-share-options">
-            <button type="button" @click="notifyShareOption(t('autoPass.ui_eb43aa3bc4')); closeShareSheet()"><b class="kakao">💬</b><span>{{ t('autoPass.ui_eb43aa3bc4') }}</span></button>
-            <button type="button" @click="notifyShareOption(t('autoPass.ui_bb40affdb7')); closeShareSheet()"><b class="instagram">📷</b><span>{{ t('autoPass.ui_bb40affdb7') }}</span></button>
+            <button type="button" @click="shareMessage"><b class="kakao">💬</b><span>{{ t('autoPass.ui_eb43aa3bc4') }}</span></button>
+            <button type="button" @click="shareMessage"><b class="instagram">📷</b><span>{{ t('autoPass.ui_bb40affdb7') }}</span></button>
             <button type="button" @click="shareMessage"><b class="message">💬</b><span>{{ t('autoPass.ui_1cff363a9f') }}</span></button>
             <button type="button" @click="copyShareLink"><b class="link">🔗</b><span>{{ t('autoPass.ui_8272efc57a') }}</span></button>
           </div>
           <div class="ai-share-actions">
-            <button type="button" @click="markRoutePlacesPlanned">{{ t('autoPass.ui_2beb8a68e0') }}</button>
+            <button type="button" :disabled="bulkVisitActionDisabled" @click="markRoutePlacesVisitStatus">{{ bulkVisitActionLabel }}</button>
             <button type="button" @click="postFromShareSheet">{{ t('autoPass.ui_74103ad724') }}</button>
           </div>
           <button type="button" class="ai-share-close" @click="closeShareSheet">{{ t('autoPass.ui_41e472961f') }}</button>

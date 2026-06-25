@@ -748,6 +748,90 @@
   font-weight: 700;
 }
 
+.section-mini-header a {
+  min-height: 30px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.my-community-feed .feed-card-main {
+  text-decoration: none;
+}
+
+.my-community-feed .feed-actions span {
+  min-height: 30px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+  background: var(--color-surface-soft);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.my-comment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.my-comment-card {
+  padding: 13px;
+  display: grid;
+  gap: 7px;
+  color: inherit;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.my-comment-card div {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.my-comment-card strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-comment-card small {
+  flex: 0 0 auto;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.my-comment-card p {
+  overflow: hidden;
+  display: -webkit-box;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .profile-edit-screen {
   padding-left: 16px;
   padding-right: 16px;
