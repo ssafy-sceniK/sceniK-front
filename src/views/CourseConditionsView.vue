@@ -13,6 +13,7 @@ import { dateAfter, ensureDateRange, formatDateRange, getTripDurationDays } from
 import { motionVariants } from '../utils/motion.js';
 import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 import { TRANSPORT_MODE_OPTIONS, TRANSPORT_MODES, normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
+import { canonicalizeCompanion, canonicalizeCourseRegions, canonicalizeTravelStyles } from '../utils/aiCourseCanonical.js';
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -92,7 +93,7 @@ const selectedRegions = computed(() => {
   const regions = Array.isArray(uiStore.courseConditions.regions)
     ? uiStore.courseConditions.regions.filter(Boolean)
     : [];
-  return regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean);
+  return canonicalizeCourseRegions(regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean));
 });
 const selectedRegionLabel = computed(() => selectedRegions.value.map((region) => localizeSystemLabel(region, 'region', t, locale.value)).join(', '));
 const today = dateAfter(0);
@@ -125,7 +126,7 @@ const selectedTravelStyles = computed(() => {
   const styles = Array.isArray(uiStore.courseConditions.travelStyles)
     ? uiStore.courseConditions.travelStyles.filter(Boolean)
     : [];
-  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
+  return canonicalizeTravelStyles(styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean));
 });
 const travelStyleLabel = computed(() => selectedTravelStyles.value.map(travelStyleOptionLabel).join(', ') || t('common.noneSelected'));
 const selectedTransportModes = computed(() => normalizeTransportModes(uiStore.courseConditions.transportModes, uiStore.courseConditions.transport));
@@ -250,10 +251,15 @@ function confirmGenerate() {
 }
 
 watchEffect(() => {
+  const normalizedCompanion = canonicalizeCompanion(uiStore.courseConditions.companion);
+  if (normalizedCompanion && normalizedCompanion !== uiStore.courseConditions.companion) {
+    uiStore.courseConditions.companion = normalizedCompanion;
+  }
   if (!Array.isArray(uiStore.courseConditions.regions) || !uiStore.courseConditions.regions.length) {
     uiStore.courseConditions.regions = [uiStore.courseConditions.region || regionOptions.value[0]].filter(Boolean);
   }
-  const validRegions = uiStore.courseConditions.regions.filter((region) => regionOptions.value.includes(region));
+  const normalizedRegions = canonicalizeCourseRegions(uiStore.courseConditions.regions);
+  const validRegions = normalizedRegions.filter((region) => regionOptions.value.includes(region));
   uiStore.courseConditions.regions = validRegions.length ? validRegions : [regionOptions.value[0]];
   uiStore.courseConditions.region = uiStore.courseConditions.regions.join(',');
 
@@ -265,6 +271,8 @@ watchEffect(() => {
   if (!Array.isArray(uiStore.courseConditions.travelStyles) || !uiStore.courseConditions.travelStyles.length) {
     uiStore.courseConditions.travelStyles = [uiStore.courseConditions.style].filter(Boolean);
   }
+  const normalizedTravelStyles = canonicalizeTravelStyles(uiStore.courseConditions.travelStyles);
+  uiStore.courseConditions.travelStyles = normalizedTravelStyles.length ? normalizedTravelStyles : [travelStyleOptions[0]];
   uiStore.courseConditions.style = uiStore.courseConditions.travelStyles.join(', ');
   syncTransportCondition();
 });

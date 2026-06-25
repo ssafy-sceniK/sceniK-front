@@ -14,8 +14,10 @@ import { useUiStore } from '../stores/uiStore.js';
 import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/routeValidation.js';
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
+import { canonicalizeCompanion, canonicalizeCourseRegions, canonicalizeTravelStyles } from '../utils/aiCourseCanonical.js';
+import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const router = useRouter();
 const contentStore = useContentStore();
@@ -78,7 +80,7 @@ const loadingContextRows = computed(() => [
   { label: t('autoPass.ui_1745c23c9e'), value: selectedRegionLabel() },
   { label: t('autoPass.ui_a5371dc25c'), value: t('autoPass.ui_43d3a63424', { value0: getTripDurationDays(uiStore.courseConditions) }) },
   { label: t('autoPass.ui_c86dd4bfe3'), value: selectedTransportLabel() },
-  { label: t('autoPass.ui_3811c2cccd'), value: selectedTravelStyles().join(', ') || uiStore.courseConditions.style },
+  { label: t('autoPass.ui_3811c2cccd'), value: selectedTravelStyleLabel() },
   { label: t('autoPass.ui_9eb0d6c311'), value: uiStore.courseConditions.budget },
   { label: t('autoPass.ui_4b0dfbc732'), value: uiStore.courseConditions.hotelAddress?.trim() || t('autoPass.ui_c3bf79c3a1') },
 ]);
@@ -151,18 +153,22 @@ function selectedTravelStyles() {
   const styles = Array.isArray(uiStore.courseConditions.travelStyles)
     ? uiStore.courseConditions.travelStyles.filter(Boolean)
     : [];
-  return styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean);
+  return canonicalizeTravelStyles(styles.length ? styles : [uiStore.courseConditions.style].filter(Boolean));
 }
 
 function selectedRegions() {
   const regions = Array.isArray(uiStore.courseConditions.regions)
     ? uiStore.courseConditions.regions.filter(Boolean)
     : [];
-  return regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean);
+  return canonicalizeCourseRegions(regions.length ? regions : [uiStore.courseConditions.region].filter(Boolean));
 }
 
 function selectedRegionLabel(separator = ', ') {
-  return selectedRegions().join(separator) || t('autoPass.ui_6ae0fbb904');
+  return selectedRegions().map((region) => localizeSystemLabel(region, 'region', t, locale.value)).join(separator) || t('autoPass.ui_6ae0fbb904');
+}
+
+function selectedTravelStyleLabel() {
+  return selectedTravelStyles().map((style) => localizePreferenceOption('themes', style, t, locale.value)).join(', ') || uiStore.courseConditions.style;
 }
 
 function compactContentTitle(selected = selectedContents()) {
@@ -294,6 +300,7 @@ async function generateRoute() {
   const transportModes = selectedTransportModes();
   const carDays = selectedCarDays();
   const transport = selectedTransportLabel();
+  const companion = canonicalizeCompanion(uiStore.courseConditions.companion);
 
   try {
     const backendRoute = await generateAiRoute({
@@ -308,7 +315,7 @@ async function generateRoute() {
       transport,
       transportModes,
       carDays,
-      companion: uiStore.courseConditions.companion,
+      companion,
       style: travelStyles.join(', '),
       travelStyles,
       budgetMin: uiStore.courseConditions.budgetMin,
@@ -345,7 +352,7 @@ async function generateRoute() {
       transport: backendRoute.transport ?? transport,
       transportModes,
       carDays,
-      companion: backendRoute.companion ?? uiStore.courseConditions.companion,
+      companion: backendRoute.companion ?? companion,
       style: backendRoute.style ?? travelStyles.join(', '),
       travelStyles: backendRoute.travelStyles ?? travelStyles,
       budgetMin: backendRoute.budgetMin ?? uiStore.courseConditions.budgetMin,
@@ -407,7 +414,7 @@ async function generateRoute() {
     transport,
     transportModes,
     carDays,
-    companion: uiStore.courseConditions.companion,
+    companion,
     style: travelStyles.join(', '),
     travelStyles,
     budgetMin: uiStore.courseConditions.budgetMin,

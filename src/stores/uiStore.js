@@ -75,6 +75,7 @@ import { AI_ROUTE_VALIDATION_USER_MESSAGE, validateAiRoute } from '../adapters/r
 import { dateAfter, ensureDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { flattenPreferenceSelection, hasCompletePreferences, normalizePreferenceSelection } from '../utils/preferences.js';
 import { normalizeCarDays, normalizeTransportModes, transportLabel } from '../utils/transport.js';
+import { canonicalizeCompanion, canonicalizeCourseRegions, canonicalizeTravelStyles } from '../utils/aiCourseCanonical.js';
 import { getCurrentLocale, i18n, normalizeLocale, setLocale } from '../i18n/index.js';
 
 const STORAGE_KEY = 'scenik-vue-mvp-state';
@@ -192,12 +193,15 @@ function readState() {
     const budgetMax = Number(state.courseConditions?.budgetMax ?? conditionDefaults.budgetMax);
     const normalizedBudgetMin = Math.min(budgetMin, budgetMax);
     const normalizedBudgetMax = Math.max(budgetMin, budgetMax);
-    const storedRegions = Array.isArray(state.courseConditions?.regions)
+    const storedRegionsRaw = Array.isArray(state.courseConditions?.regions)
       ? state.courseConditions.regions.filter(Boolean)
       : String(state.courseConditions?.region ?? conditionDefaults.region).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
-    const storedStyles = Array.isArray(state.courseConditions?.travelStyles)
+    const storedStylesRaw = Array.isArray(state.courseConditions?.travelStyles)
       ? state.courseConditions.travelStyles.filter(Boolean)
       : String(state.courseConditions?.style ?? conditionDefaults.style).split(/[,.·]/).map((item) => item.trim()).filter(Boolean);
+    const storedRegions = canonicalizeCourseRegions(storedRegionsRaw);
+    const storedStyles = canonicalizeTravelStyles(storedStylesRaw);
+    const storedCompanion = canonicalizeCompanion(state.courseConditions?.companion ?? conditionDefaults.companion);
     const normalizedDuration = getTripDurationDays({ ...state.courseConditions, ...dateRange });
     const storedTransportModes = normalizeTransportModes(state.courseConditions?.transportModes, state.courseConditions?.transport ?? conditionDefaults.transport);
     const storedCarDays = normalizeCarDays(state.courseConditions?.carDays, normalizedDuration, storedTransportModes);
@@ -209,6 +213,7 @@ function readState() {
       region: (storedRegions.length ? storedRegions : conditionDefaults.regions).join(','),
       travelStyles: storedStyles.length ? storedStyles : conditionDefaults.travelStyles,
       style: (storedStyles.length ? storedStyles : conditionDefaults.travelStyles).join(', '),
+      companion: storedCompanion || conditionDefaults.companion,
       transportModes: storedTransportModes,
       carDays: storedCarDays,
       transport: transportLabel(storedTransportModes, storedCarDays, normalizedDuration),

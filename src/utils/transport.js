@@ -8,18 +8,41 @@ export const TRANSPORT_MODE_OPTIONS = [
   { value: TRANSPORT_MODES.CAR, label: '\ucc28\ub7c9' },
 ];
 
+function normalizedTransportKey(value) {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_\-.,/()·]+/g, '');
+}
+
 export function normalizeTransportModes(value, fallback = '\ub300\uc911\uad50\ud1b5') {
   const source = Array.isArray(value) ? value : String(fallback ?? '').split(/[,+·]/);
   const normalized = new Set();
 
   source.forEach((item) => {
     const text = String(item ?? '').trim();
-    if (!text || text.includes('\ub3c4\ubcf4')) return;
-    if (text === TRANSPORT_MODES.CAR || text.includes('\ucc28\ub7c9') || text.toUpperCase() === 'CAR') {
+    const key = normalizedTransportKey(text);
+    if (!text || text.includes('\ub3c4\ubcf4') || key === 'walk' || key === 'walking') return;
+    if (
+      text === TRANSPORT_MODES.CAR
+      || text.includes('\ucc28\ub7c9')
+      || key === 'car'
+      || key === 'vehicle'
+      || key === '車'
+      || key === '车辆'
+    ) {
       normalized.add(TRANSPORT_MODES.CAR);
       return;
     }
-    if (text === TRANSPORT_MODES.PUBLIC_TRANSIT || text.includes('\ub300\uc911\uad50\ud1b5') || text.toUpperCase() === 'PUBLIC_TRANSIT') {
+    if (
+      text === TRANSPORT_MODES.PUBLIC_TRANSIT
+      || text.includes('\ub300\uc911\uad50\ud1b5')
+      || key === 'publictransit'
+      || key === 'publictransport'
+      || key === 'transit'
+      || key === '公共交通'
+    ) {
       normalized.add(TRANSPORT_MODES.PUBLIC_TRANSIT);
     }
   });
