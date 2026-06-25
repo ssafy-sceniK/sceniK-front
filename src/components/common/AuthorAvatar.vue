@@ -67,6 +67,8 @@ function handleImageError() {
 .author-avatar--default {
   display: grid;
   place-items: center;
-  color: #ffffff;
+  color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(0, 82, 255, 0.16), rgba(0, 82, 255, 0.07));
+  border: 1px solid rgba(0, 82, 255, 0.16);
 }
 </style>

@@ -61,11 +61,24 @@ const visibleCourseOptions = computed(() => courseOptions.value.slice(0, Math.mi
 const hasMoreCourseOptions = computed(() => visibleCourseOptions.value.length < courseOptions.value.length);
 const selectedCourseSummary = computed(() => {
   if (!selectedCourse.value) return t('community.write.courseLinkEmptyHelp');
-  return [
-    selectedCourse.value.region,
-    selectedCourse.value.durationDays || selectedCourse.value.duration || t('community.write.scheduleFallback'),
-  ].filter(Boolean).join(' / ');
+  return courseSummaryMeta(selectedCourse.value);
 });
+
+function courseDurationLabel(course) {
+  const value = course?.durationDays ?? course?.duration;
+  if (value === null || value === undefined || value === '') return '';
+  const text = String(value).trim();
+  if (!text) return '';
+  const dayMatch = text.match(/\d+/);
+  return dayMatch ? t('course.detail.durationDays', { count: Number(dayMatch[0]) }) : text;
+}
+
+function courseSummaryMeta(course) {
+  return [
+    course?.region,
+    courseDurationLabel(course),
+  ].filter(Boolean).join(' · ');
+}
 
 onMounted(() => {
   if (uiStore.currentUser) void uiStore.loadSavedCourses();
@@ -604,7 +617,7 @@ async function createPost() {
               @click="selectCourse(course.routeId)"
             >
               <strong>{{ course.title }}</strong>
-              <small>{{ [course.region, course.durationDays || course.duration || t('community.write.scheduleFallback')].filter(Boolean).join(' / ') }}</small>
+              <small>{{ courseSummaryMeta(course) }}</small>
             </button>
             <button v-if="hasMoreCourseOptions" type="button" class="course-picker-load-more" @click="loadMoreCourseOptions">
               {{ t('common.loadMore') }}

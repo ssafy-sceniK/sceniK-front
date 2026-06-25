@@ -495,6 +495,21 @@ function linkedCourseTo(post) {
     : '/ai/result';
 }
 
+function durationDaysLabel(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const text = String(value).trim();
+  if (!text) return '';
+  const dayMatch = text.match(/\d+/);
+  return dayMatch ? t('course.detail.durationDays', { count: Number(dayMatch[0]) }) : text;
+}
+
+function linkedCourseMeta(post) {
+  return t('community.linkedCourse.meta', {
+    region: post?.region,
+    duration: durationDaysLabel(post?.durationDays ?? post?.duration),
+  });
+}
+
 function hasLinkedCourse(post) {
   return Boolean(post?.routeId);
 }
@@ -1397,7 +1412,7 @@ async function nativeShare() {
               <div>
                 <small class="course-kicker">{{ t('communityAuto.k166mo55') }}</small>
                 <strong>{{ t('community.linkedCourse.title', { region: selectedPost.region }) }}</strong>
-                <small>{{ t('community.linkedCourse.meta', { region: selectedPost.region, duration: selectedPost.duration }) }}</small>
+                <small>{{ linkedCourseMeta(selectedPost) }}</small>
               </div>
               <span class="linked-course-cta">{{ t('communityAuto.k1nbnyzt') }}</span>
             </RouterLink>
