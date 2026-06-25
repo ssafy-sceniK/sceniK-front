@@ -13,6 +13,7 @@ import CommunityPostDetailPanel from '../components/community/CommunityPostDetai
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import TranslatableText from '../components/translation/TranslatableText.vue';
+import { resolveApiAssetUrl } from '../api/http.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
@@ -440,7 +441,7 @@ function displayPostTags(post) {
 }
 
 function attachmentImageUrl(attachment) {
-  return attachment?.url
+  return resolveApiAssetUrl(attachment?.url
     ?? attachment?.imageUrl
     ?? attachment?.image_url
     ?? attachment?.fileUrl
@@ -449,7 +450,7 @@ function attachmentImageUrl(attachment) {
     ?? attachment?.preview_url
     ?? attachment?.thumbnailUrl
     ?? attachment?.thumbnail_url
-    ?? '';
+    ?? '');
 }
 
 function postImageSources(post) {
@@ -462,7 +463,7 @@ function postImageSources(post) {
     post?.cover_image_url,
     post?.attachmentUrl,
     post?.attachment_url,
-  ].filter(Boolean);
+  ].map(resolveApiAssetUrl).filter(Boolean);
   const attachmentImages = (post?.attachments ?? [])
     .map(attachmentImageUrl)
     .filter(Boolean);
