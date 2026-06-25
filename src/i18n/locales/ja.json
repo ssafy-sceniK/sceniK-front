@@ -236,7 +236,7 @@
     "writeTitle": "レビューを投稿",
     "cleanup": {
       "kb5ce265d40": "平均評価",
-      "k5f145dcdd7": "{count}?",
+      "k5f145dcdd7": "レビュー{count}件",
       "k11e333b564": "平均 {count}"
     }
   },
@@ -822,7 +822,7 @@
       "plannedVisit": "訪問予定",
       "completedVisit": "訪問完了",
       "reviewSummaryAria": "レビュー",
-      "reviewCount": "{count}",
+      "reviewCount": "レビュー{count}件",
       "reviewSummaryText": "この場所を訪れたら最初のレビューを残してください。",
       "ratingDistributionAria": "評価",
       "ratingPoint": "{score}",
@@ -858,7 +858,7 @@
       "reviewDeletedToast": "削除",
       "reviewDeleteFailedTitle": "サーバーに接続できません。",
       "reviewDeleteFailedMessage": "サーバーに接続できません。",
-      "reviewStats": "{count} / {rating}",
+      "reviewStats": "レビュー{count}件 · 平均 {rating}",
       "reviewDuplicateMessage": "まだレビューがありません",
       "reviewForbiddenMessage": "ログインが必要です。",
       "reviewAuthMessage": "ログインが必要です。",

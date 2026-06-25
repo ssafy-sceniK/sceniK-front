@@ -1029,6 +1029,22 @@
   padding-bottom: 22px;
 }
 
+.prototype-timeline-item--selectable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+
+.prototype-timeline-item--selectable:focus-visible {
+  outline: 3px solid rgba(0, 82, 255, 0.22);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prototype-timeline-item--selectable:hover strong {
+    color: var(--color-primary);
+  }
+}
+
 .prototype-timeline-item::before {
   content: "";
   position: absolute;

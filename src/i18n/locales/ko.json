@@ -236,7 +236,7 @@
     "writeTitle": "리뷰 등록",
     "cleanup": {
       "kb5ce265d40": "평균 별점",
-      "k5f145dcdd7": "{count}?",
+      "k5f145dcdd7": "리뷰 {count}개",
       "k11e333b564": "평균 {count}"
     }
   },
@@ -822,7 +822,7 @@
       "plannedVisit": "방문 예정",
       "completedVisit": "방문 완료",
       "reviewSummaryAria": "리뷰",
-      "reviewCount": "{count}",
+      "reviewCount": "리뷰 {count}개",
       "reviewSummaryText": "이 장소를 다녀왔다면 첫 리뷰를 남겨보세요.",
       "ratingDistributionAria": "평점",
       "ratingPoint": "{score}",
@@ -858,7 +858,7 @@
       "reviewDeletedToast": "삭제",
       "reviewDeleteFailedTitle": "서버에 연결할 수 없습니다.",
       "reviewDeleteFailedMessage": "서버에 연결할 수 없습니다.",
-      "reviewStats": "{count} / {rating}",
+      "reviewStats": "리뷰 {count}개 · 평균 {rating}",
       "reviewDuplicateMessage": "아직 등록된 리뷰가 없습니다",
       "reviewForbiddenMessage": "로그인이 필요합니다.",
       "reviewAuthMessage": "로그인이 필요합니다.",

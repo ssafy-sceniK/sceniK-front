@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { AnimatePresence, motion } from 'motion-v';
@@ -25,6 +25,8 @@ const showDeleteSheet = ref(false);
 const loadingDetail = ref(false);
 const actionNotice = ref(null);
 const showActionMenu = ref(false);
+const courseMapSection = ref(null);
+const selectedMapPlaceId = ref('');
 
 const routeId = computed(() => route.params.routeId ?? '');
 const isMyCourseRoute = computed(() => route.path.startsWith('/my/course-manage'));
@@ -277,6 +279,15 @@ async function markCoursePlacesVisitStatus() {
   };
 }
 
+async function focusCoursePlaceOnMap(place) {
+  const placeId = String(place?.placeId ?? place?.id ?? '');
+  if (!placeId) return;
+  selectedMapPlaceId.value = '';
+  await nextTick();
+  selectedMapPlaceId.value = placeId;
+  courseMapSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 async function deleteCourse() {
   if (!canManageCourse.value || !course.value?.routeId) return;
   actionNotice.value = {
@@ -391,7 +402,9 @@ async function deleteCourse() {
         :text="actionNotice.text"
       />
 
-      <MapPreview :route-places="selectedDayRoutePlaces" :total-places="stops.length" />
+      <div ref="courseMapSection">
+        <MapPreview :route-places="selectedDayRoutePlaces" :total-places="stops.length" :selected-place-id="selectedMapPlaceId" />
+      </div>
 
       <div v-if="dayTabs.length > 1" class="day-tabs">
         <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
@@ -399,7 +412,7 @@ async function deleteCourse() {
         </button>
       </div>
 
-      <Timeline :stops="stops" :show-transit-notes="false" />
+      <Timeline :stops="stops" :show-transit-notes="false" @select="focusCoursePlaceOnMap" />
 
       <AnimatePresence>
         <CourseDeleteActionSheet

@@ -821,12 +821,33 @@
 }
 
 .timeline-card {
+  width: 100%;
   margin-bottom: 14px;
   padding: 12px;
+  display: block;
+  text-align: left;
+  color: inherit;
+  font: inherit;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: #ffffff;
   box-shadow: var(--shadow-sm);
+}
+
+.timeline-card--selectable {
+  cursor: pointer;
+}
+
+.timeline-card--selectable:focus-visible {
+  outline: 3px solid rgba(0, 82, 255, 0.22);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .timeline-card--selectable:hover {
+    border-color: rgba(0, 82, 255, 0.24);
+    transform: translateY(-1px);
+  }
 }
 
 .timeline-card small {

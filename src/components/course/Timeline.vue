@@ -9,6 +9,8 @@ const props = defineProps({
   showTransitNotes: { type: Boolean, default: true },
 });
 
+const emit = defineEmits(['select']);
+
 const INTERNAL_TRAVEL_TIP_PATTERN = /missing\s+traveltip\s+for\s+day\s+\d+\.?/i;
 
 const displayStops = computed(() => props.stops.map((stop) => ({
@@ -93,14 +95,14 @@ function usefulTransitInfo(stop) {
       <div class="timeline-marker">
         <span>{{ index + 1 }}</span>
       </div>
-      <div class="timeline-card">
+      <button type="button" class="timeline-card timeline-card--selectable" @click="emit('select', stop)">
         <div class="timeline-card__meta">
           <span v-if="stop.displayCategory">{{ stop.displayCategory }}</span>
         </div>
         <strong>{{ stop.placeName || stop.name || t('course.cleanup.k5b847da9ce') }}</strong>
         <p v-if="stop.displayAddress">{{ stop.displayAddress }}</p>
         <p v-if="stop.displayTransit" class="timeline-note">{{ stop.displayTransit }}</p>
-      </div>
+      </button>
     </article>
   </div>
 </template>

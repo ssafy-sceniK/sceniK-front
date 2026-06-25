@@ -100,10 +100,6 @@ function isReviewOwner(review) {
     && String(review?.userId ?? '') === String(uiStore.currentUser.userId);
 }
 
-function reviewStatsText() {
-  return t('place.detail.reviewStats', { count: reviewCount.value, rating: averageRating.value });
-}
-
 function reviewActionMessage(error, fallback) {
   const status = error?.response?.status;
   const code = error?.response?.data?.code;
@@ -198,11 +194,7 @@ async function submitReview() {
     });
     reviews.value = [created, ...reviews.value.filter((review) => review.reviewId !== created.reviewId)];
     reviewForm.value = { rating: 5, content: '' };
-    reviewNotice.value = {
-      tone: 'success',
-      title: t('place.detail.reviewSavedTitle'),
-      text: t('place.detail.reviewSavedText', { stats: reviewStatsText() }),
-    };
+    reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewSavedToast'), 'success');
   } catch (error) {
     reviewError.value = reviewActionMessage(error, t('place.detail.reviewSaveFailedMessage'));
@@ -271,11 +263,7 @@ async function submitReviewEdit(review) {
     });
     reviews.value = reviews.value.map((item) => (item.reviewId === updated.reviewId ? updated : item));
     cancelEditReview();
-    reviewNotice.value = {
-      tone: 'success',
-      title: t('place.detail.reviewUpdatedTitle'),
-      text: t('place.detail.reviewUpdatedText', { stats: reviewStatsText() }),
-    };
+    reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewUpdatedToast'), 'success');
   } catch (error) {
     reviewError.value = reviewActionMessage(error, t('place.detail.reviewUpdateFailedMessage'));
@@ -303,11 +291,7 @@ async function removeReview(review) {
     await deletePlaceReview(place.value.placeId, review.reviewId);
     reviews.value = reviews.value.filter((item) => item.reviewId !== review.reviewId);
     if (editingReviewId.value === review.reviewId) cancelEditReview();
-    reviewNotice.value = {
-      tone: 'success',
-      title: t('place.detail.reviewDeletedTitle'),
-      text: t('place.detail.reviewDeletedText', { stats: reviewStatsText() }),
-    };
+    reviewNotice.value = null;
     uiStore.notify(t('place.detail.reviewDeletedToast'), 'success');
   } catch (error) {
     reviewError.value = reviewActionMessage(error, t('place.detail.reviewDeleteFailedMessage'));
@@ -406,7 +390,7 @@ function markPlaceImageFailed() {
           <div class="review-summary-panel" :aria-label="t('place.detail.reviewSummaryAria')">
             <strong>★ {{ averageRating }}</strong>
             <span>{{ t('place.detail.reviewCount', { count: reviewCount }) }}</span>
-            <small>{{ t('place.detail.reviewSummaryText') }}</small>
+            <small v-if="reviewCount === 0">{{ t('place.detail.reviewSummaryText') }}</small>
             <div v-if="reviews.length" class="rating-distribution" :aria-label="t('place.detail.ratingDistributionAria')">
               <span v-for="item in ratingSummary" :key="item.score">
                 <b>{{ t('place.detail.ratingPoint', { score: item.score }) }}</b>

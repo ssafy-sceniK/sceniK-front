@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { AnimatePresence, motion } from 'motion-v';
 import BaseButton from '../components/common/BaseButton.vue';
@@ -26,6 +26,8 @@ const savingRoute = ref(false);
 const saveError = ref('');
 const saveNotice = ref(null);
 const autoSaveGenerationKey = ref('');
+const resultMapSection = ref(null);
+const selectedMapPlaceId = ref('');
 const routeCandidateMap = computed(() => new Map((route.value?.candidatePlaces ?? [])
   .map((place) => [place.placeId, place])));
 const selectedRegions = computed(() => {
@@ -424,6 +426,15 @@ function postFromShareSheet() {
   closeShareSheet();
   post();
 }
+
+async function focusResultPlaceOnMap(stop) {
+  const placeId = String(stop?.placeId ?? stop?.id ?? '');
+  if (!placeId) return;
+  selectedMapPlaceId.value = '';
+  await nextTick();
+  selectedMapPlaceId.value = placeId;
+  resultMapSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 </script>
 
 <template>
@@ -479,7 +490,9 @@ function postFromShareSheet() {
           :notice="saveNotice"
         />
 
-        <KakaoRouteMap :stops="stops" :regions="selectedRegions" />
+        <div ref="resultMapSection">
+          <KakaoRouteMap :stops="stops" :regions="selectedRegions" :selected-place-id="selectedMapPlaceId" />
+        </div>
 
         <div v-if="dayTabs.length > 1" class="day-tabs result-day-tabs">
           <button v-for="day in dayTabs" :key="day" type="button" :class="{ active: day === selectedDay }" @click="selectedDay = day">
@@ -488,7 +501,16 @@ function postFromShareSheet() {
         </div>
 
         <div class="prototype-timeline">
-          <article v-for="(stop, index) in stops" :key="`${stop.placeId}-${index}`" class="prototype-timeline-item">
+          <article
+            v-for="(stop, index) in stops"
+            :key="`${stop.placeId}-${index}`"
+            class="prototype-timeline-item prototype-timeline-item--selectable"
+            role="button"
+            tabindex="0"
+            @click="focusResultPlaceOnMap(stop)"
+            @keydown.enter.prevent="focusResultPlaceOnMap(stop)"
+            @keydown.space.prevent="focusResultPlaceOnMap(stop)"
+          >
             <span class="prototype-timeline-dot"></span>
             <div>
               <strong>{{ stop.placeName }}</strong>

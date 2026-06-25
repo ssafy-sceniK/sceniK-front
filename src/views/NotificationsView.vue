@@ -75,7 +75,7 @@ onMounted(loadNotifications);
 </script>
 
 <template>
-  <AppLayout :title="t('notifications.title')" back>
+  <AppLayout :title="t('notifications.title')" back back-to="/home" back-replace>
     <section class="utility-screen">
       <div class="utility-header">
         <p>{{ t('notifications.description') }}</p>

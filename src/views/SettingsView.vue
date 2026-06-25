@@ -83,7 +83,7 @@ async function confirmAccountDelete() {
 </script>
 
 <template>
-  <AppLayout :title="t('settings.title')" back>
+  <AppLayout :title="t('settings.title')" back back-to="/home" back-replace>
     <section class="utility-screen">
       <div class="settings-section">
         <h2>{{ t('language.selectorTitle') }}</h2>

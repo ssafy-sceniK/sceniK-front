@@ -14,6 +14,7 @@ const props = defineProps({
   totalPlaces: { type: Number, default: null },
   showDetailLink: { type: Boolean, default: true },
   drawPath: { type: Boolean, default: true },
+  selectedPlaceId: { type: [String, Number], default: '' },
 });
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
@@ -149,6 +150,7 @@ const localizedSelectedPlace = computed(() => (selectedPlace.value ? displayPlac
 let kakaoMaps;
 let map;
 let markers = [];
+let markerEntries = [];
 let routePathLine;
 let resizeObserver;
 let infoOverlay;
@@ -437,6 +439,22 @@ function clearMarkers() {
   clearRoutePath();
   markers.forEach((marker) => marker.setMap(null));
   markers = [];
+  markerEntries = [];
+}
+
+function placeIdOf(place) {
+  return String(place?.placeId ?? place?.id ?? '');
+}
+
+function selectPlaceOnMap(placeId, { openInfo = true } = {}) {
+  if (!map || !kakaoMaps || !placeId) return false;
+  const entry = markerEntries.find((item) => placeIdOf(item.place) === String(placeId));
+  if (!entry) return false;
+  selectedPlace.value = entry.place;
+  selectedMarker.value = entry.marker;
+  map.panTo(entry.position);
+  if (openInfo) void openPlaceInfo();
+  return true;
 }
 
 function renderPlaces() {
@@ -466,6 +484,7 @@ function renderPlaces() {
       void openPlaceInfo();
     });
     markers.push(marker);
+    markerEntries.push({ place, marker, position });
     bounds.extend(position);
   });
 
@@ -487,6 +506,9 @@ function renderPlaces() {
     map.setBounds(bounds, 48, 48, 48, 48);
   }
   mapStatus.value = 'ready';
+  if (props.selectedPlaceId) {
+    selectPlaceOnMap(props.selectedPlaceId);
+  }
 }
 
 async function initializeMap() {
@@ -509,6 +531,10 @@ async function initializeMap() {
 }
 
 watch(validPlaces, renderPlaces);
+watch(() => props.selectedPlaceId, (placeId) => {
+  if (!placeId) return;
+  selectPlaceOnMap(placeId);
+});
 onMounted(initializeMap);
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();

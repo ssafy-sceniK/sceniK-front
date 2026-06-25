@@ -9,6 +9,7 @@ const props = defineProps({
   title: { type: String, default: '' },
   back: { type: Boolean, default: false },
   backTo: { type: String, default: '' },
+  backReplace: { type: Boolean, default: false },
 });
 
 const router = useRouter();
@@ -26,6 +27,10 @@ watch(() => uiStore.currentUser?.userId, (userId) => {
 
 function handleBack() {
   if (props.backTo) {
+    if (props.backReplace) {
+      router.replace(props.backTo);
+      return;
+    }
     router.push(props.backTo);
     return;
   }

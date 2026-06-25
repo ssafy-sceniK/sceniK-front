@@ -18,15 +18,21 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selectedPlaceId: {
+    type: [String, Number],
+    default: '',
+  },
 });
 
 const mapElement = ref(null);
 const statusMessage = ref('');
 let map;
 let markers = [];
+let markerEntries = [];
 let polyline;
 let infoOverlay;
 let themeObserver;
+let kakaoMapsApi;
 
 const appKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY || import.meta.env.VITE_KAKAO_MAP_JAVASCRIPT_KEY;
 const mapStops = computed(() => props.stops.filter((stop) => (
@@ -101,6 +107,7 @@ function createStopInfo(stop) {
 
 function openStopInfo(kakaoMaps, marker, stop) {
   closeInfoOverlay();
+  map?.panTo(marker.getPosition());
   infoOverlay = new kakaoMaps.CustomOverlay({
     map,
     position: marker.getPosition(),
@@ -112,6 +119,18 @@ function openStopInfo(kakaoMaps, marker, stop) {
   });
 }
 
+function stopId(stop) {
+  return String(stop?.placeId ?? stop?.id ?? '');
+}
+
+function selectStopOnMap(placeId) {
+  if (!map || !kakaoMapsApi || !placeId) return false;
+  const entry = markerEntries.find((item) => stopId(item.stop) === String(placeId));
+  if (!entry) return false;
+  openStopInfo(kakaoMapsApi, entry.marker, entry.stop);
+  return true;
+}
+
 function routeStrokeColor() {
   if (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark') return '#DC2626';
   return '#1455ff';
@@ -121,6 +140,7 @@ function clearMapObjects() {
   closeInfoOverlay();
   markers.forEach((marker) => marker.setMap(null));
   markers = [];
+  markerEntries = [];
   if (polyline) {
     polyline.setMap(null);
     polyline = null;
@@ -141,6 +161,7 @@ async function renderMap() {
 
   try {
     const kakaoMaps = await loadKakaoMaps(appKey);
+    kakaoMapsApi = kakaoMaps;
     const first = mapStops.value[0];
     if (!map) {
       map = new kakaoMaps.Map(mapElement.value, {
@@ -160,6 +181,7 @@ async function renderMap() {
       });
       kakaoMaps.event.addListener(marker, 'click', () => openStopInfo(kakaoMaps, marker, stop));
       markers.push(marker);
+      markerEntries.push({ stop, marker });
       return position;
     });
 
@@ -175,6 +197,9 @@ async function renderMap() {
     }
 
     map.setBounds(bounds);
+    if (props.selectedPlaceId) {
+      selectStopOnMap(props.selectedPlaceId);
+    }
     statusMessage.value = hasHiddenStops.value ? t('autoPass.ui_93eb87ab9d') : '';
   } catch (error) {
     console.warn('Kakao route map render failed', error);
@@ -183,6 +208,10 @@ async function renderMap() {
 }
 
 watch(() => [props.stops, props.region, props.regions], renderMap, { deep: true });
+watch(() => props.selectedPlaceId, (placeId) => {
+  if (!placeId) return;
+  selectStopOnMap(placeId);
+});
 
 onMounted(() => {
   void renderMap();

@@ -68,7 +68,7 @@ onBeforeUnmount(() => {
       class="community-board-picker__toggle"
       :aria-label="ariaLabel"
       :aria-expanded="open"
-      @click="toggleOpen"
+      @click.stop="toggleOpen"
     >
       <span
         :class="['board-icon', selectedBoard ? `board-${selectedBoard.id}` : '', 'community-board-picker__icon']"
@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
         type="button"
         class="community-board-picker__option"
         :class="{ 'is-selected': board.id === modelValue }"
-        @click="selectBoard(board)"
+        @click.stop="selectBoard(board)"
       >
         <span :class="['board-icon', `board-${board.id}`, 'community-board-picker__option-icon']" aria-hidden="true">
           <span class="board-icon-symbol"><CommunityBoardIcon :type="board.id" /></span>

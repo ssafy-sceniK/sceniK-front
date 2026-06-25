@@ -236,7 +236,7 @@
     "writeTitle": "Write review",
     "cleanup": {
       "kb5ce265d40": "Average rating",
-      "k5f145dcdd7": "{count} reviews",
+      "k5f145dcdd7": "Reviews {count}",
       "k11e333b564": "Avg {count}"
     }
   },
@@ -822,7 +822,7 @@
       "plannedVisit": "Planned visits",
       "completedVisit": "Completed visits",
       "reviewSummaryAria": "Reviews",
-      "reviewCount": "{count} visit records",
+      "reviewCount": "Reviews {count}",
       "reviewSummaryText": "If you visited this place, leave the first review.",
       "ratingDistributionAria": "Rating",
       "ratingPoint": "{score} points",
@@ -858,7 +858,7 @@
       "reviewDeletedToast": "Delete",
       "reviewDeleteFailedTitle": "Could not delete review",
       "reviewDeleteFailedMessage": "Could not delete review.",
-      "reviewStats": "Updated with {count} reviews and an average rating of {rating}.",
+      "reviewStats": "Reviews {count} · Avg. {rating}",
       "reviewDuplicateMessage": "You already wrote a review for this place. Edit or delete your review below instead.",
       "reviewForbiddenMessage": "Only the review author can edit or delete it.",
       "reviewAuthMessage": "Log in is required.",

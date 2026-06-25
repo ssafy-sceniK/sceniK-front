@@ -236,7 +236,7 @@
     "writeTitle": "提交评论",
     "cleanup": {
       "kb5ce265d40": "平均评分",
-      "k5f145dcdd7": "{count} ?",
+      "k5f145dcdd7": "{count} 条评论",
       "k11e333b564": "平均 {count}"
     }
   },
@@ -822,7 +822,7 @@
       "plannedVisit": "计划访问",
       "completedVisit": "已访问",
       "reviewSummaryAria": "评论",
-      "reviewCount": "{count}",
+      "reviewCount": "{count} 条评论",
       "reviewSummaryText": "如果你去过这里，留下第一条评论吧。",
       "ratingDistributionAria": "评分",
       "ratingPoint": "{score}",
@@ -858,7 +858,7 @@
       "reviewDeletedToast": "删除",
       "reviewDeleteFailedTitle": "无法连接服务器。",
       "reviewDeleteFailedMessage": "无法连接服务器。",
-      "reviewStats": "{count} / {rating}",
+      "reviewStats": "{count} 条评论 · 平均 {rating}",
       "reviewDuplicateMessage": "还没有评论",
       "reviewForbiddenMessage": "需要登录。",
       "reviewAuthMessage": "需要登录。",

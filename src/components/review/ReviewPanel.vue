@@ -31,7 +31,7 @@ const displayTitle = computed(() => props.title || t('place.detail.visitReviews'
       <h2 id="review-panel-title">{{ displayTitle }}</h2>
       <span>
         {{ t('reviews.cleanup.k5f145dcdd7', { count: props.reviewCount }) }}
-        <span v-if="props.reviewCount"> / {{ t('reviews.cleanup.k11e333b564', { count: props.averageRating }) }}</span>
+        <span v-if="props.reviewCount"> · {{ t('reviews.cleanup.k11e333b564', { count: props.averageRating }) }}</span>
       </span>
     </div>
     <slot name="summary"></slot>
