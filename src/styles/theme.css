@@ -363,9 +363,14 @@ body {
 /* These only group labels and controls; keep them on the page canvas. */
 :root[data-theme="dark"] .condition-block,
 :root[data-theme="dark"] .preference-block,
-:root[data-theme="dark"] .community-screen > section,
-:root[data-theme="dark"] .explore-sort-row {
+:root[data-theme="dark"] .community-screen > section {
   background: #212121;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .explore-sort-row {
+  background: transparent;
   border-color: transparent;
   box-shadow: none;
 }
