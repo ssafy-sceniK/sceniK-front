@@ -2237,3 +2237,216 @@
   width: 100%;
   max-width: 260px;
 }
+/* Shared community image attachment manager. */
+.community-image-manager {
+  display: grid;
+  gap: 10px;
+}
+
+.community-image-manager__heading {
+  display: grid;
+  gap: 3px;
+}
+
+.community-image-manager__heading strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.community-image-manager__heading small,
+.community-image-manager__hint,
+.community-image-manager__empty {
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.community-image-manager__empty {
+  margin: 0;
+}
+
+.community-image-manager__dropzone {
+  min-height: 74px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 92% 18%, rgba(0, 82, 255, 0.12), transparent 28%),
+    var(--color-surface-soft);
+  border: 1px dashed rgba(0, 82, 255, 0.34);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease;
+}
+
+.community-image-manager__dropzone:hover,
+.community-image-manager__dropzone:focus-within {
+  border-color: rgba(0, 82, 255, 0.56);
+  background:
+    radial-gradient(circle at 92% 18%, rgba(0, 82, 255, 0.16), transparent 28%),
+    var(--card);
+}
+
+.community-image-manager__dropzone.is-full {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.community-image-manager__dropzone input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.community-image-manager__upload-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: 14px;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.community-image-manager__upload-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.community-image-manager__upload-copy strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.community-image-manager__upload-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.community-image-manager__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.community-image-manager__item {
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  gap: 7px;
+  cursor: grab;
+}
+
+.community-image-manager__item:active {
+  cursor: grabbing;
+}
+
+.community-image-manager__item.is-dragging {
+  opacity: 0.48;
+}
+
+.community-image-manager__item.is-drag-over .community-image-manager__frame {
+  border-color: rgba(0, 82, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+}
+
+.community-image-manager__frame {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.community-image-manager__frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.community-image-manager__fallback {
+  padding: 10px;
+  word-break: break-word;
+}
+
+.community-image-manager__remove {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.community-image-manager__remove:hover,
+.community-image-manager__remove:focus-visible {
+  background: rgba(207, 32, 47, 0.92);
+  outline: none;
+}
+
+.community-image-manager__badge,
+.community-image-manager__representative {
+  position: absolute;
+  left: 7px;
+  padding: 3px 7px;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.72);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.community-image-manager__badge {
+  top: 7px;
+}
+
+.community-image-manager__representative {
+  bottom: 7px;
+}
+
+.community-image-manager__item figcaption {
+  overflow: hidden;
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 560px) {
+  .community-image-manager__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.community-image-manager__grid--manual {
+  grid-template-columns: minmax(0, 170px);
+}

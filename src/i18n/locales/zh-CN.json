@@ -129,12 +129,12 @@
       "bodyPlaceholder": "Content",
       "imageUrl": "Image URL",
       "imageUrlHelp": "Image files take priority over URL.",
-      "imageFile": "Image file",
-      "imageFileHelp": "JPG, PNG, WEBP, GIF / max 10",
-      "attachmentListAria": "Selected attachments",
+      "imageFile": "????",
+      "imageFileHelp": "????? 10 ? JPG?PNG?WEBP ? GIF ???",
+      "attachmentListAria": "????????",
       "photo": "Photo",
-      "previewAria": "Post image preview",
-      "removeSelection": "取消",
+      "previewAria": "??????",
+      "removeSelection": "????",
       "submit": "发布帖子",
       "submitting": "加载中",
       "submitReady": "分享第一篇旅行故事吧。",
@@ -197,7 +197,7 @@
     },
     "edit": {
       "attachmentsTitle": "附加图片",
-      "attachmentsHelp": "保存前可以删除图片或调整顺序。",
+      "attachmentsHelp": "????????????? X ???????",
       "imageFile": "添加图片",
       "imageFileHelp": "包括现有图片在内，最多可添加 10 张。",
       "removeImage": "移除图片",
@@ -207,6 +207,13 @@
       "newImageAlt": "新图片 {index}",
       "newImageBadge": "新",
       "fallbackFile": "附件"
+    },
+    "imageManager": {
+      "addImages": "????",
+      "dropHint": "???????????",
+      "dragHint": "?????????????",
+      "representative": "??",
+      "empty": "???????"
     }
   },
   "reviews": {

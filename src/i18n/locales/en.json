@@ -129,12 +129,12 @@
       "bodyPlaceholder": "Share your course experience.",
       "imageUrl": "Image URL",
       "imageUrlHelp": "Uploaded image files take priority over the URL.",
-      "imageFile": "Image file",
+      "imageFile": "Add images",
       "imageFileHelp": "Upload up to 10 JPG, PNG, WEBP, or GIF images.",
-      "attachmentListAria": "Selected attachments",
+      "attachmentListAria": "Selected images",
       "photo": "Photo",
       "previewAria": "Post image preview",
-      "removeSelection": "Remove selection",
+      "removeSelection": "Remove image",
       "submit": "Post",
       "submitting": "Posting...",
       "submitReady": "Publish directly to the community feed.",
@@ -197,7 +197,7 @@
     },
     "edit": {
       "attachmentsTitle": "Attached images",
-      "attachmentsHelp": "Remove images or change their order before saving.",
+      "attachmentsHelp": "Drag images to reorder them, or use the X button to remove one.",
       "imageFile": "Add images",
       "imageFileHelp": "You can attach up to 10 images including existing images.",
       "removeImage": "Remove image",
@@ -207,6 +207,13 @@
       "newImageAlt": "New image {index}",
       "newImageBadge": "New",
       "fallbackFile": "Attachment"
+    },
+    "imageManager": {
+      "addImages": "Choose images",
+      "dropHint": "Click or drag images here.",
+      "dragHint": "Drag thumbnails to change the display order.",
+      "representative": "Cover",
+      "empty": "No images selected yet."
     }
   },
   "reviews": {

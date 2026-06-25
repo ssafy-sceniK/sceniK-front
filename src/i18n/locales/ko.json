@@ -129,12 +129,12 @@
       "bodyPlaceholder": "Content",
       "imageUrl": "Image URL",
       "imageUrlHelp": "Image files take priority over URL.",
-      "imageFile": "Image file",
-      "imageFileHelp": "JPG, PNG, WEBP, GIF / max 10",
-      "attachmentListAria": "Selected attachments",
+      "imageFile": "??? ??",
+      "imageFileHelp": "JPG, PNG, WEBP, GIF ???? ?? 10??? ??? ? ????.",
+      "attachmentListAria": "??? ??? ??",
       "photo": "Photo",
-      "previewAria": "Post image preview",
-      "removeSelection": "취소",
+      "previewAria": "??? ??? ????",
+      "removeSelection": "??? ??",
       "submit": "게시글 작성",
       "submitting": "불러오는 중입니다",
       "submitReady": "첫 여행 이야기를 남겨보세요.",
@@ -197,7 +197,7 @@
     },
     "edit": {
       "attachmentsTitle": "첨부 이미지",
-      "attachmentsHelp": "저장 전에 이미지를 삭제하거나 순서를 바꿀 수 있습니다.",
+      "attachmentsHelp": "???? ??? ??? ???? X ???? ??? ? ????.",
       "imageFile": "이미지 추가",
       "imageFileHelp": "기존 이미지를 포함해 최대 10개까지 추가할 수 있습니다.",
       "removeImage": "이미지 제거",
@@ -207,6 +207,13 @@
       "newImageAlt": "새 이미지 {index}",
       "newImageBadge": "새 이미지",
       "fallbackFile": "첨부 파일"
+    },
+    "imageManager": {
+      "addImages": "??? ??",
+      "dropHint": "????? ???? ??? ????.",
+      "dragHint": "???? ??? ?? ??? ?? ? ????.",
+      "representative": "??",
+      "empty": "??? ???? ????."
     }
   },
   "reviews": {

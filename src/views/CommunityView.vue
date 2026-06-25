@@ -10,6 +10,7 @@ import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import CommentThread from '../components/community/CommentThread.vue';
 import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
+import CommunityImageManager from '../components/community/CommunityImageManager.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
 import TranslatableText from '../components/translation/TranslatableText.vue';
@@ -23,7 +24,6 @@ import {
   displayableImageAttachments,
   fallbackFileAttachments,
   isDisplayableImageAttachment,
-  moveArrayItem,
 } from '../utils/communityAttachments.js';
 import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
 
@@ -595,13 +595,9 @@ function resetPostEditImageItems() {
   postEditImageItems.value = [];
 }
 
-function handlePostEditImageFiles(event) {
-  const input = event.target;
-  const files = Array.from(input?.files ?? []).filter((file) => file.type.startsWith('image/'));
-  if (!files.length) {
-    if (input) input.value = '';
-    return;
-  }
+function handlePostEditImageFiles(files = []) {
+  const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+  if (!imageFiles.length) return;
 
   const currentImageCount = postEditImageItems.value.filter((item) => item.isImage).length;
   const availableCount = Math.max(0, MAX_POST_IMAGES - currentImageCount);
@@ -611,18 +607,16 @@ function handlePostEditImageFiles(event) {
       title: t('community.write.imageLimitTitle'),
       text: t('community.write.imageLimitText'),
     };
-    if (input) input.value = '';
     return;
   }
 
   const existingIds = new Set(postEditImageItems.value
     .filter((item) => item.kind === 'new' && item.file)
     .map((item) => postEditImageFileId(item.file)));
-  const acceptedFiles = files
-    .filter((file) => !existingIds.has(postEditImageFileId(file)))
-    .slice(0, availableCount);
+  const uniqueFiles = imageFiles.filter((file) => !existingIds.has(postEditImageFileId(file)));
+  const acceptedFiles = uniqueFiles.slice(0, availableCount);
 
-  if (files.length > availableCount) {
+  if (uniqueFiles.length > availableCount) {
     postNotice.value = {
       tone: 'warning',
       title: t('community.write.imageLimitTitle'),
@@ -634,7 +628,6 @@ function handlePostEditImageFiles(event) {
     ...postEditImageItems.value,
     ...acceptedFiles.map(createNewPostEditImageItem),
   ];
-  if (input) input.value = '';
 }
 
 function removePostEditImageItem(localKey) {
@@ -643,9 +636,6 @@ function removePostEditImageItem(localKey) {
   postEditImageItems.value = postEditImageItems.value.filter((item) => item.localKey !== localKey);
 }
 
-function movePostEditImageItem(index, offset) {
-  postEditImageItems.value = moveArrayItem(postEditImageItems.value, index, offset);
-}
 
 async function uploadPostEditImages() {
   const uploadPairs = await Promise.all(postEditImageItems.value
@@ -1147,42 +1137,24 @@ async function nativeShare() {
               </label>
               <label class="form-field compact">{{ t('communityAuto.k1supta6') }}<textarea v-model="postEditBody" maxlength="500" :placeholder="t('communityAuto.k99wxgm')"></textarea>
               </label>
-              <div v-if="postEditImageItems.length" class="post-edit-attachment-manager">
-                <div class="post-edit-attachment-heading">
-                  <strong>{{ t('community.edit.attachmentsTitle') }}</strong>
-                  <small>{{ t('community.edit.attachmentsHelp') }}</small>
-                </div>
-                <div class="post-edit-image-grid">
-                  <figure
-                    v-for="(item, index) in postEditImageItems"
-                    :key="item.localKey"
-                    class="post-edit-image-item"
-                    :class="{ 'post-edit-image-item--new': item.kind === 'new' }"
-                  >
-                    <div class="post-edit-image-frame">
-                      <img
-                        v-if="item.isImage && item.previewUrl"
-                        :src="item.previewUrl"
-                        :alt="item.kind === 'new' ? t('community.edit.newImageAlt', { index: index + 1 }) : t('community.edit.existingImageAlt', { index: index + 1 })"
-                        :title="postEditImageItemName(item, index)"
-                      />
-                      <span v-else>{{ postEditImageItemName(item, index) }}</span>
-                      <span v-if="item.kind === 'new'" class="post-edit-image-badge">{{ t('community.edit.newImageBadge') }}</span>
-                    </div>
-                    <figcaption>{{ postEditImageItemName(item, index) }}</figcaption>
-                    <div class="post-edit-image-actions">
-                      <button type="button" :disabled="index === 0" :aria-label="t('community.edit.movePrevious')" :title="t('community.edit.movePrevious')" @click="movePostEditImageItem(index, -1)">&lt;</button>
-                      <button type="button" :disabled="index === postEditImageItems.length - 1" :aria-label="t('community.edit.moveNext')" :title="t('community.edit.moveNext')" @click="movePostEditImageItem(index, 1)">&gt;</button>
-                      <button type="button" class="danger" :aria-label="t('community.edit.removeImage')" :title="t('community.edit.removeImage')" @click="removePostEditImageItem(item.localKey)">x</button>
-                    </div>
-                  </figure>
-                </div>
-              </div>
-              <label class="form-field compact attachment-field post-edit-attachment-field">
-                <span>{{ t('community.edit.imageFile') }}</span>
-                <input type="file" accept="image/*" multiple @change="handlePostEditImageFiles" />
-                <small>{{ t('community.edit.imageFileHelp') }}</small>
-              </label>
+              <CommunityImageManager
+                v-model="postEditImageItems"
+                :max="MAX_POST_IMAGES"
+                :title="t('community.edit.attachmentsTitle')"
+                :help="t('community.edit.attachmentsHelp')"
+                :add-label="t('community.edit.imageFile')"
+                :add-help="t('community.edit.imageFileHelp')"
+                :drag-hint="t('community.imageManager.dragHint')"
+                :remove-label="t('community.edit.removeImage')"
+                :new-badge="t('community.edit.newImageBadge')"
+                :representative-label="t('community.imageManager.representative')"
+                :existing-alt="t('community.edit.existingImageAlt', { index: '{index}' })"
+                :new-alt="t('community.edit.newImageAlt', { index: '{index}' })"
+                :empty-text="t('community.imageManager.empty')"
+                input-id-prefix="community-edit"
+                @add-files="handlePostEditImageFiles"
+                @remove="removePostEditImageItem"
+              />
               <div class="post-owner-actions post-edit-actions">
                 <BaseButton :disabled="postActionLoading || postEditTitle.trim().length < 2 || postEditBody.trim().length < 5" @click="savePostEdit">
                   {{ postActionLoading ? t('communityAuto2.k1m') : t('common.save') }}

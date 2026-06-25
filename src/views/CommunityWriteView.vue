@@ -6,6 +6,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import CommunityImageManager from '../components/community/CommunityImageManager.vue';
 import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
@@ -34,8 +35,7 @@ const hashtagInput = ref('');
 const title = ref('');
 const body = ref('');
 const imageUrl = ref('');
-const selectedImageFiles = ref([]);
-const imagePreviewItems = ref([]);
+const postImageItems = ref([]);
 const selectedRouteId = ref('');
 const coursePickerOpen = ref(false);
 const visibleCourseCount = ref(COURSE_PICKER_PAGE_SIZE);
@@ -50,17 +50,6 @@ const courseOptions = computed(() => uiStore.savedCourses.filter((course) => cou
 const selectedCourse = computed(() => courseOptions.value.find((course) => course.routeId === selectedRouteId.value) ?? null);
 const visibleCourseOptions = computed(() => courseOptions.value.slice(0, Math.min(visibleCourseCount.value, courseOptions.value.length)));
 const hasMoreCourseOptions = computed(() => visibleCourseOptions.value.length < courseOptions.value.length);
-const selectedAttachmentMetas = computed(() => selectedImageFiles.value.map((file) => ({
-  id: imageFileId(file),
-  name: file.name,
-  type: 'image',
-  sizeLabel: Math.max(1, Math.round(file.size / 1024)) + 'KB',
-})));
-const imagePreviewSources = computed(() => {
-  if (imagePreviewItems.value.length) return imagePreviewItems.value;
-  const manualUrl = imageUrl.value.trim();
-  return manualUrl ? [{ id: 'manual-url', url: manualUrl, name: t('community.write.imageUrl'), manual: true }] : [];
-});
 const selectedCourseSummary = computed(() => {
   if (!selectedCourse.value) return t('community.write.courseLinkEmptyHelp');
   return [
@@ -169,15 +158,27 @@ function imageFileId(file) {
   return file.name + '-' + file.size + '-' + file.lastModified;
 }
 
-function handleAttachments(event) {
-  const incomingFiles = [...(event.target.files ?? [])]
-    .filter((file) => file.type.startsWith('image/'));
-  event.target.value = '';
+function createPostImageItem(file) {
+  const id = imageFileId(file);
+  return {
+    localKey: `new-${id}`,
+    kind: 'new',
+    file,
+    previewUrl: URL.createObjectURL(file),
+    name: file.name,
+    isImage: true,
+  };
+}
+
+function handleAttachments(files = []) {
+  const incomingFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
   if (!incomingFiles.length) return;
 
-  const existingIds = new Set(selectedImageFiles.value.map(imageFileId));
+  const existingIds = new Set(postImageItems.value
+    .filter((item) => item.kind === 'new' && item.file)
+    .map((item) => imageFileId(item.file)));
   const uniqueIncoming = incomingFiles.filter((file) => !existingIds.has(imageFileId(file)));
-  const availableSlots = Math.max(0, MAX_POST_IMAGES - selectedImageFiles.value.length);
+  const availableSlots = Math.max(0, MAX_POST_IMAGES - postImageItems.value.length);
   const acceptedFiles = uniqueIncoming.slice(0, availableSlots);
 
   if (uniqueIncoming.length > availableSlots) {
@@ -189,35 +190,32 @@ function handleAttachments(event) {
   }
   if (!acceptedFiles.length) return;
 
-  selectedImageFiles.value = [...selectedImageFiles.value, ...acceptedFiles];
-  imagePreviewItems.value = [
-    ...imagePreviewItems.value,
-    ...acceptedFiles.map((file) => ({
-      id: imageFileId(file),
-      url: URL.createObjectURL(file),
-      name: file.name,
-    })),
+  postImageItems.value = [
+    ...postImageItems.value,
+    ...acceptedFiles.map(createPostImageItem),
   ];
 }
 
 function revokeImagePreviews() {
-  imagePreviewItems.value.forEach((item) => URL.revokeObjectURL(item.url));
-  imagePreviewItems.value = [];
+  postImageItems.value.forEach((item) => {
+    if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+  postImageItems.value = [];
 }
 
-function removeSelectedImage(id) {
-  const target = imagePreviewItems.value.find((item) => item.id === id);
-  if (target) URL.revokeObjectURL(target.url);
-  selectedImageFiles.value = selectedImageFiles.value.filter((file) => imageFileId(file) !== id);
-  imagePreviewItems.value = imagePreviewItems.value.filter((item) => item.id !== id);
+function removeSelectedImage(localKey) {
+  const target = postImageItems.value.find((item) => item.localKey === localKey);
+  if (target?.kind === 'new' && target.previewUrl) URL.revokeObjectURL(target.previewUrl);
+  postImageItems.value = postImageItems.value.filter((item) => item.localKey !== localKey);
 }
 
 function clearManualImageUrl() {
   imageUrl.value = '';
 }
 
+
 async function resolveImagePayload() {
-  if (!selectedImageFiles.value.length) {
+  if (!postImageItems.value.length) {
     const manualUrl = imageUrl.value.trim();
     return {
       imageUrl: manualUrl || null,
@@ -225,14 +223,14 @@ async function resolveImagePayload() {
     };
   }
 
-  const uploadedUrls = await Promise.all(selectedImageFiles.value.map((file) => uploadPostImage(file)));
+  const uploadedUrls = await Promise.all(postImageItems.value.map((item) => uploadPostImage(item.file)));
   const attachments = uploadedUrls
     .map((url, index) => ({
       url,
       imageUrl: url,
       thumbnailUrl: url,
       type: 'image',
-      name: selectedImageFiles.value[index]?.name || 'image-' + (index + 1),
+      name: postImageItems.value[index]?.name || postImageItems.value[index]?.file?.name || 'image-' + (index + 1),
     }))
     .filter((attachment) => attachment.imageUrl);
   return {
@@ -411,24 +409,33 @@ async function createPost() {
           <small>{{ t('community.write.imageUrlHelp') }}</small>
         </label>
 
-        <label class="form-field attachment-field">
-          {{ t('community.write.imageFile') }}
-          <input type="file" accept="image/*" multiple @change="handleAttachments" />
-          <small>{{ t('community.write.imageFileHelp') }}</small>
-        </label>
+        <CommunityImageManager
+          v-model="postImageItems"
+          :max="MAX_POST_IMAGES"
+          :title="t('community.write.imageFile')"
+          :help="t('community.write.imageFileHelp')"
+          :add-label="t('community.imageManager.addImages')"
+          :add-help="t('community.imageManager.dropHint')"
+          :drag-hint="t('community.imageManager.dragHint')"
+          :remove-label="t('community.edit.removeImage')"
+          :new-badge="t('community.edit.newImageBadge')"
+          :representative-label="t('community.imageManager.representative')"
+          :existing-alt="t('community.edit.existingImageAlt', { index: '{index}' })"
+          :new-alt="t('community.edit.newImageAlt', { index: '{index}' })"
+          :empty-text="imageUrl.trim() ? '' : t('community.imageManager.empty')"
+          input-id-prefix="community-write"
+          @add-files="handleAttachments"
+          @remove="removeSelectedImage"
+        />
 
-        <div v-if="selectedAttachmentMetas.length" class="attachment-list" :aria-label="t('community.write.attachmentListAria')">
-          <span v-for="attachment in selectedAttachmentMetas" :key="attachment.id">
-            <b>{{ t('community.write.photo') }}</b>
-            {{ attachment.name }}
-            <small>{{ attachment.sizeLabel }}</small>
-          </span>
-        </div>
-
-        <div v-if="imagePreviewSources.length" class="post-image-preview post-image-preview-grid" :aria-label="t('community.write.previewAria')">
-          <figure v-for="preview in imagePreviewSources" :key="preview.id">
-            <img :src="preview.url" :alt="preview.name" />
-            <button type="button" @click="preview.manual ? clearManualImageUrl() : removeSelectedImage(preview.id)">{{ t('community.write.removeSelection') }}</button>
+        <div v-if="!postImageItems.length && imageUrl.trim()" class="community-image-manager__grid community-image-manager__grid--manual" :aria-label="t('community.write.previewAria')">
+          <figure class="community-image-manager__item">
+            <div class="community-image-manager__frame">
+              <img :src="imageUrl.trim()" :alt="t('community.write.imageUrl')" draggable="false" />
+              <span class="community-image-manager__representative">{{ t('community.imageManager.representative') }}</span>
+              <button type="button" class="community-image-manager__remove" :aria-label="t('community.write.removeSelection')" :title="t('community.write.removeSelection')" @click="clearManualImageUrl">x</button>
+            </div>
+            <figcaption>{{ t('community.write.imageUrl') }}</figcaption>
           </figure>
         </div>
 

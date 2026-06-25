@@ -1425,3 +1425,31 @@ body {
   background: rgba(59, 130, 246, 0.08);
   border-color: var(--dark-action-border);
 }
+:root[data-theme="dark"] .community-image-manager__dropzone {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.2), transparent 28%),
+    var(--control-bg);
+  border-color: var(--dark-action-border);
+}
+
+:root[data-theme="dark"] .community-image-manager__dropzone:hover,
+:root[data-theme="dark"] .community-image-manager__dropzone:focus-within {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.26), transparent 28%),
+    var(--card);
+  border-color: var(--dark-action-solid-hover);
+}
+
+:root[data-theme="dark"] .community-image-manager__upload-icon {
+  background: var(--dark-action-solid);
+}
+
+:root[data-theme="dark"] .community-image-manager__frame {
+  background: var(--control-bg);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .community-image-manager__item.is-drag-over .community-image-manager__frame {
+  border-color: var(--dark-action-solid-hover);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
