@@ -14,7 +14,7 @@ import { useUiStore } from '../stores/uiStore.js';
 import { motionVariants } from '../utils/motion.js';
 import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
-import { buildCourseShareUrl, copyCourseUrl, resolvedCourseShareRouteId, shareCourseUrl } from '../utils/courseShare.js';
+import { buildCourseShareUrl, resolvedCourseShareRouteId, shareCourseUrl } from '../utils/courseShare.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -210,11 +210,6 @@ async function copyCourseToMine() {
   window.setTimeout(() => router.replace({ name: 'my-course-manage', params: { routeId: copied.routeId } }), 350);
 }
 
-function viewAsAiResult() {
-  if (!course.value) return;
-  if (uiStore.openCourse(course.value)) router.push('/ai/result');
-}
-
 function closeActionMenu() {
   showActionMenu.value = false;
 }
@@ -235,19 +230,6 @@ function courseShareRouteId() {
 
 function courseShareUrl() {
   return buildCourseShareUrl(router, courseShareRouteId());
-}
-
-async function copyCourseLink() {
-  const url = courseShareUrl();
-  if (!url) {
-    uiStore.notify(t('course.detail.copyLinkFailed'));
-    return;
-  }
-  if (await copyCourseUrl(url)) {
-    uiStore.notify(t('course.detail.linkCopied'), 'success');
-    return;
-  }
-  uiStore.notify(t('course.detail.copyLinkFailed'));
 }
 
 async function shareCourse() {
@@ -346,12 +328,8 @@ async function deleteCourse() {
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.8 6.8-4.1M8.6 13.2l6.8 4.1" /></svg></span>
               {{ t('common.share') }}
             </button>
-            <button type="button" role="menuitem" @click="runCourseAction(copyCourseLink)">
-              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" /></svg></span>
-              {{ t('course.detail.copyLink') }}
-            </button>
             <button type="button" role="menuitem" :disabled="courseVisitActionDisabled" @click="runCourseAction(markCoursePlacesVisitStatus)">
-              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11.2A7 7 0 0 0 5 9.8C5 15.6 12 21 12 21Z" /><circle cx="12" cy="9.8" r="2.3" /><path d="m9.3 13.2 1.8 1.8 3.8-4.2" /></svg></span>
+              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg></span>
               {{ courseVisitActionLabel }}
             </button>
             <button v-if="canSaveTemplateCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(saveTemplateCourse)">
@@ -361,10 +339,6 @@ async function deleteCourse() {
             <button v-if="canCopyCourse" type="button" role="menuitem" :disabled="uiStore.routeActionLoading" @click="runCourseAction(copyCourseToMine)">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" /><path d="M8 7h8" /><path d="M8 11h5" /></svg></span>
               {{ uiStore.routeActionLoading ? t('profile.edit.savingShort') : t('course.detail.saveToMyCourses') }}
-            </button>
-            <button v-if="canManageCourse" type="button" role="menuitem" @click="runCourseAction(viewAsAiResult)">
-              <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m5 10 7-7 7 7" /><path d="M5 21h14" /></svg></span>
-              {{ t('course.detail.viewAsAiResult') }}
             </button>
             <button v-if="canManageCourse" type="button" role="menuitem" class="danger" :disabled="uiStore.routeActionLoading" @click="openDeleteSheet">
               <span class="result-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m10 11 .4 6" /><path d="m14 11-.4 6" /><path d="M5 6l1 15h12l1-15" /></svg></span>

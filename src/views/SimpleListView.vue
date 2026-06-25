@@ -385,26 +385,32 @@ async function toggleFollowFromList(user) {
             type="button"
             class="visit-complete-button"
             :disabled="isVisitPending(place.placeId)"
+            :aria-label="isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.markCompleted')"
+            :title="isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.markCompleted')"
             @click="completeVisit(place.placeId)"
           >
-            {{ isVisitPending(place.placeId) ? t('my.visits.markingCompleted') : t('my.visits.markCompleted') }}
+            <span aria-hidden="true">{{ isVisitPending(place.placeId) ? '…' : '✓' }}</span>
           </button>
           <div v-else-if="type === 'completed'" class="visit-card-actions">
             <button
               type="button"
               class="visit-complete-button"
               :disabled="isVisitPending(place.placeId)"
+              :aria-label="isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.undoCompleted')"
+              :title="isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.undoCompleted')"
               @click="planVisit(place.placeId)"
             >
-              {{ isVisitPending(place.placeId) ? t('my.visits.updating') : t('my.visits.undoCompleted') }}
+              <span aria-hidden="true">{{ isVisitPending(place.placeId) ? '…' : '↺' }}</span>
             </button>
             <button
               type="button"
               class="visit-remove-button"
               :disabled="isVisitPending(place.placeId)"
+              :aria-label="t('my.visits.remove')"
+              :title="t('my.visits.remove')"
               @click="clearVisit(place.placeId)"
             >
-              {{ t('my.visits.remove') }}
+              <span aria-hidden="true">×</span>
             </button>
           </div>
         </div>

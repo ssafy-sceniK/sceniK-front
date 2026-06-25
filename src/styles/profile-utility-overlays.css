@@ -844,7 +844,7 @@
 }
 
 .visit-place-action-card .place-card {
-  padding-right: 112px;
+  padding-right: 56px;
 }
 
 .visit-place-action-card > .visit-complete-button {
@@ -859,18 +859,22 @@
   top: 50%;
   right: 12px;
   display: grid;
-  gap: 6px;
+  gap: 5px;
   justify-items: end;
   transform: translateY(-50%);
 }
 
 .visit-complete-button,
 .visit-remove-button {
-  min-width: 68px;
-  min-height: 32px;
-  padding: 0 10px;
+  width: 34px;
+  min-width: 34px;
+  min-height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-pill);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1.25;
   white-space: nowrap;
@@ -943,20 +947,6 @@
 
 .my-community-feed .feed-card-main {
   text-decoration: none;
-}
-
-.my-community-feed .feed-actions span {
-  min-height: 30px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--dim);
-  background: var(--color-surface-soft);
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
 }
 
 .my-comment-list {

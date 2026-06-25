@@ -272,6 +272,10 @@ function openShareSheet() {
     return;
   }
   showActionMenu.value = false;
+  if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) {
+    void shareMessage();
+    return;
+  }
   showShareSheet.value = true;
 }
 

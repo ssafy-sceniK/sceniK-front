@@ -1,8 +1,8 @@
 ﻿import { createI18n } from 'vue-i18n';
-import ko from './locales/ko.json';
-import en from './locales/en.json';
-import ja from './locales/ja.json';
-import zhCN from './locales/zh-CN.json';
+import ko from './locales/ko.json' with { type: 'json' };
+import en from './locales/en.json' with { type: 'json' };
+import ja from './locales/ja.json' with { type: 'json' };
+import zhCN from './locales/zh-CN.json' with { type: 'json' };
 import { normalizeLocale, resolveInitialLocale, writeStoredLocale } from './languages.js';
 
 export { languageOptions, normalizeLocale, supportedLocales } from './languages.js';
