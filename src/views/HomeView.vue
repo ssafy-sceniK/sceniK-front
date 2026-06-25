@@ -23,7 +23,6 @@ const placeStore = usePlaceStore();
 const uiStore = useUiStore();
 const { t, locale } = useI18n();
 const contentTab = ref('drama');
-const routeTab = ref('realtime');
 const homePopularRouteLimit = 3;
 
 const HOME_COURSE_DISPLAY = {
@@ -88,21 +87,14 @@ const contentTabs = computed(() => [
   { value: 'variety', label: t('content.category.variety'), categoryKey: 'variety' },
   { value: 'ai', label: t('home.tabs.aiRecommended'), categoryKey: '' },
 ]);
-const routeTabs = computed(() => [
-  { value: 'realtime', label: t('home.tabs.realtime') },
-  { value: 'region', label: t('home.tabs.byRegion') },
-  { value: 'theme', label: t('home.tabs.byTheme') },
-]);
+
 const activeContentTab = computed(() => contentTabs.value.find((tab) => tab.value === contentTab.value) ?? contentTabs.value[0]);
 const recentPlaces = computed(() => uiStore.recentPlaceItems.length ? uiStore.recentPlaceItems : placeStore.items.slice(0, 3));
 const contentItems = computed(() => contentStore.search({
   categoryKey: activeContentTab.value.categoryKey,
   popular: contentTab.value === 'ai' ? undefined : true,
 }).slice(0, 6));
-const routeItems = computed(() => routeTab.value === 'region'
-  ? [...courseTemplates].reverse()
-  : courseTemplates);
-const visibleRawRouteItems = computed(() => routeItems.value.slice(0, homePopularRouteLimit));
+const visibleRawRouteItems = computed(() => courseTemplates.slice(0, homePopularRouteLimit));
 const currentLocale = computed(() => normalizeLocale(locale.value) || 'ko');
 const visibleRouteItems = computed(() => visibleRawRouteItems.value.map(localizeHomeCourse));
 const noticeItems = computed(() => localizedNotices(t));
@@ -152,8 +144,7 @@ function openCourse(course) {
       </DraggableRail>
 
       <div class="section-divider"></div>
-      <SectionHeader :title="t('home.sections.popularCourses')" to="/home/routes-all" />
-      <ChipGroup v-model="routeTab" :items="routeTabs" />
+      <SectionHeader :title="t('home.sections.popularCourses')" />
       <div class="stack-list">
         <button v-for="(course, index) in visibleRouteItems" :key="course.routeId" type="button" class="course-link-card" @click="openCourse(course)">
           <CourseCard :course="course" variant="text" :rank="index + 1" hide-generic-ai-tag />
