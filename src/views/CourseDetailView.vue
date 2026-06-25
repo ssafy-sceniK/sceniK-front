@@ -300,11 +300,7 @@ async function deleteCourse() {
     };
     return;
   }
-  actionNotice.value = {
-    tone: 'success',
-    title: t('course.detail.deleteSuccessTitle'),
-    text: t('course.detail.deleteSuccessText'),
-  };
+  actionNotice.value = null;
   showDeleteSheet.value = false;
   window.setTimeout(() => router.replace('/my/activity/saved-routes'), 450);
 }

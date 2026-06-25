@@ -377,11 +377,7 @@ async function saveProfile() {
   });
   saving.value = false;
   saveNotice.value = ok
-    ? {
-        tone: 'success',
-        title: t('profile.edit.save.successTitle'),
-        text: t('profile.edit.save.successText'),
-      }
+    ? null
     : {
         tone: 'error',
         title: t('profile.edit.save.failedTitle'),

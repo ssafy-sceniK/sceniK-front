@@ -1134,11 +1134,7 @@ async function deletePost() {
   postActionLoading.value = false;
   showPostDeleteSheet.value = false;
   if (deleted) {
-    postNotice.value = {
-      tone: 'success',
-      title: t('communityAuto2.ky'),
-      text: t('communityAuto2.kz'),
-    };
+    postNotice.value = null;
     window.setTimeout(() => router.replace('/community'), 450);
     return;
   }

@@ -1173,7 +1173,7 @@ export const useUiStore = defineStore('ui', {
         this.language = applyLanguage(this.currentUser.language);
         this.languagePendingAuth = false;
         this.persist();
-        this.notify(storeT('toast.store.kx'));
+        this.notify(storeT('toast.store.kx'), 'success');
         return true;
       } catch (error) {
         this.authError = apiErrorMessage(error, storeT('errors.store.ky'));
@@ -1449,7 +1449,7 @@ export const useUiStore = defineStore('ui', {
       }
       this.persist();
       this.routeActionLoading = false;
-      this.notify(storeT('toast.store.k1i'));
+      this.notify(storeT('toast.store.k1i'), 'success');
       return true;
     },
     openCourse(course) {
@@ -1474,7 +1474,7 @@ export const useUiStore = defineStore('ui', {
           tags: payload.tags || [this.courseConditions.region].filter(Boolean),
         });
         this.communityPosts = mergeCommunityPost(this.communityPosts, post);
-        this.notify(storeT('toast.store.k1l'));
+        this.notify(storeT('toast.store.k1l'), 'success');
         return post;
       } catch (error) {
         this.communityError = apiErrorMessage(error, storeT('errors.store.k1m'));

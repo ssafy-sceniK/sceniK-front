@@ -456,11 +456,7 @@ async function createPost() {
   selectedRouteId.value = '';
   selectedBoard.value = 'drama';
   revokeImagePreviews();
-  statusNotice.value = {
-    tone: 'success',
-    title: t('community.write.savedTitle'),
-    text: t('community.write.savedText'),
-  };
+  statusNotice.value = null;
   window.setTimeout(() => router.push('/community'), 450);
 }
 </script>
