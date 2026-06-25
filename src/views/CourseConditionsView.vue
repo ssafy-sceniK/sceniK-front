@@ -271,7 +271,7 @@ watchEffect(() => {
 
 <template>
   <AppLayout :title="t('aiCourse.conditions.title')" back>
-    <section class="course-step">
+    <section class="course-step course-conditions-screen">
       <div class="progress-line"><b style="width: 50%"></b><span>2/4</span></div>
       <div class="selected-summary compact-selected-summary">
         <span class="badge ai">{{ t('aiCourse.context.selectedContent') }}</span>

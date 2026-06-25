@@ -217,10 +217,11 @@
       "dropHint": "클릭하거나 이미지를 이곳으로 드래그하세요.",
       "dragHint": "썸네일을 드래그해 표시 순서를 바꿀 수 있습니다.",
       "representative": "대표",
-      "empty": "아직 선택한 이미지가 없습니다."
+      "empty": "아직 선택한 이미지가 없습니다.",
+      "reorderImage": "이미지 순서 변경"
     },
     "detail": {
-      "title": "???"
+      "title": "게시글"
     }
   },
   "reviews": {
@@ -728,28 +729,28 @@
       "notFoundTitle": "코스 상세를 열 수 없습니다.",
       "notFoundText": "코스 상세를 열 수 없습니다.",
       "savedCoursesLink": "저장한 AI 코스",
-      "saveToMyCourses": "? ??? ??",
-      "copyProgressTitle": "? ??? ???? ????.",
-      "copyProgressText": "??? AI ??? ? ?? ??? ???? ????.",
-      "copySuccessTitle": "???????.",
-      "copySuccessText": "??? ?? ??? ?????.",
-      "copyFailedTitle": "???? ?????.",
-      "copyFailed": "AI ??? ? ??? ???? ?????.",
-      "courseCopied": "AI ??? ? ??? ??????.",
-      "loginRequiredToSave": "????? ? ??? ? ??? ??? ? ????.",
-      "copyLink": "?? ??",
-      "linkCopied": "??? ???????.",
-      "copyLinkFailed": "?? ??? ??????.",
-      "shareUnavailable": "??? ????? ?? ??? ?? ? ????.",
-      "bulkVisitPlanned": "?? ???? ??",
-      "bulkVisitCompleted": "?? ??? ??",
-      "bulkVisitDone": "?? ???",
-      "bulkVisitProgressTitle": "?? ??? ???? ????.",
-      "bulkVisitProgressText": "?? ?? {count}?? ?????? ???.",
-      "bulkVisitSuccessTitle": "?? ??? ???????.",
-      "bulkVisitSuccessText": "?? ?? {count}?? ?? ??? ????????.",
-      "bulkVisitFailedTitle": "?? ?? ??? ??????.",
-      "bulkVisitFailedText": "?? ??? ?? ??? ???? ?????."
+      "saveToMyCourses": "내 코스에 저장",
+      "copyProgressTitle": "내 코스에 저장하는 중입니다.",
+      "copyProgressText": "이 AI 코스를 내 저장 코스에 복사하고 있습니다.",
+      "copySuccessTitle": "저장되었습니다.",
+      "copySuccessText": "복사한 코스 상세로 이동합니다.",
+      "copyFailedTitle": "저장하지 못했습니다.",
+      "copyFailed": "이 AI 코스를 내 코스에 저장하지 못했습니다.",
+      "courseCopied": "AI 코스를 내 코스에 저장했습니다.",
+      "loginRequiredToSave": "로그인 후 이 코스를 내 코스에 저장할 수 있습니다.",
+      "copyLink": "링크 복사",
+      "linkCopied": "링크가 복사되었습니다.",
+      "copyLinkFailed": "링크 복사에 실패했습니다.",
+      "shareUnavailable": "코스를 저장한 뒤 공유 링크를 사용할 수 있습니다.",
+      "bulkVisitPlanned": "방문 예정으로 등록",
+      "bulkVisitCompleted": "방문 완료로 변경",
+      "bulkVisitDone": "방문 완료됨",
+      "bulkVisitProgressTitle": "방문 상태를 업데이트하고 있습니다.",
+      "bulkVisitProgressText": "코스 내 장소 {count}곳의 방문 상태를 변경합니다.",
+      "bulkVisitSuccessTitle": "방문 상태가 업데이트되었습니다.",
+      "bulkVisitSuccessText": "코스 내 장소 {count}곳의 방문 상태를 업데이트했습니다.",
+      "bulkVisitFailedTitle": "방문 상태를 변경하지 못했습니다.",
+      "bulkVisitFailedText": "일부 장소의 방문 상태를 변경하지 못했습니다."
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -784,6 +785,11 @@
       "kd97a76eb1c": "자동 저장됨",
       "k30ff523c4c": "선택한 조건을 바탕으로 생성된 여행 코스입니다.",
       "k9f2b9841d5": "AI 코스 정보"
+    },
+    "edit": {
+      "titleLabel": "코스 제목",
+      "titlePlaceholder": "코스 이름을 입력해 주세요",
+      "titleRequired": "코스 제목을 입력해 주세요."
     }
   },
   "place": {
@@ -1026,7 +1032,7 @@
     "tabs": {
       "activity": "내 활동",
       "visits": "방문 관리",
-      "posts": "????",
+      "posts": "커뮤니티",
       "aria": "마이페이지 섹션"
     },
     "stats": {
@@ -1043,7 +1049,7 @@
       "following": "팔로잉",
       "followers": "팔로워",
       "myPosts": "내가 쓴 글",
-      "commentedPosts": "?? ? ??",
+      "commentedPosts": "내가 쓴 댓글",
       "scraps": "스크랩"
     },
     "counts": {
@@ -1184,8 +1190,8 @@
       "loginText": "저장한 코스, 댓글, 좋아요 소식을 한곳에서 볼 수 있어요.",
       "loginMethod": "로그인",
       "nicknamePlaceholder": "닉네임",
-      "intro": "??",
-      "introPlaceholder": "??? ??? ???.",
+      "intro": "소개",
+      "introPlaceholder": "소개를 입력해 주세요.",
       "saveProfile": "저장",
       "savingProfile": "불러오는 중입니다",
       "savingShort": "불러오는 중입니다",

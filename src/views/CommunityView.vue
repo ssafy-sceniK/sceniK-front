@@ -1326,6 +1326,7 @@ async function nativeShare() {
                 :representative-label="t('community.imageManager.representative')"
                 :existing-alt="t('community.edit.existingImageAlt', { index: '{index}' })"
                 :new-alt="t('community.edit.newImageAlt', { index: '{index}' })"
+                :reorder-label="t('community.imageManager.reorderImage')"
                 :empty-text="t('community.imageManager.empty')"
                 input-id-prefix="community-edit"
                 @add-files="handlePostEditImageFiles"

@@ -96,6 +96,15 @@
   padding-top: 10px;
 }
 
+.course-conditions-screen {
+  padding-bottom: calc(var(--bottom-nav-height) + 48px + env(safe-area-inset-bottom));
+}
+
+.course-conditions-screen .sticky-actions {
+  bottom: var(--bottom-nav-height);
+  padding: 10px 16px calc(8px + env(safe-area-inset-bottom));
+}
+
 .course-crud-hint {
   margin: 0;
   color: var(--muted);

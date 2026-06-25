@@ -217,7 +217,8 @@
       "dropHint": "Click or drag images here.",
       "dragHint": "Drag thumbnails to change the display order.",
       "representative": "Cover",
-      "empty": "No images selected yet."
+      "empty": "No images selected yet.",
+      "reorderImage": "Reorder image"
     },
     "detail": {
       "title": "Post"
@@ -784,6 +785,11 @@
       "kd97a76eb1c": "Auto-saved",
       "k30ff523c4c": "This itinerary was generated from your selected conditions.",
       "k9f2b9841d5": "AI course information"
+    },
+    "edit": {
+      "titleLabel": "Course title",
+      "titlePlaceholder": "Enter a course name",
+      "titleRequired": "Enter a course title."
     }
   },
   "place": {

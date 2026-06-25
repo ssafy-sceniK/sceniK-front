@@ -3,6 +3,7 @@
   position: relative;
   width: min(100%, 430px);
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   background: linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas) 42%, var(--page) 100%);
   overflow-x: hidden;
@@ -203,10 +204,11 @@
 }
 
 .splash-screen {
-  padding: 120px 16px 48px;
+  padding: clamp(76px, 13dvh, 120px) 16px max(22px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 18px;
 }
 
 .splash-mark {
@@ -244,7 +246,23 @@
 .splash-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+
+@media (max-height: 700px) {
+  .splash-screen {
+    padding-top: max(58px, env(safe-area-inset-top));
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    gap: 12px;
+  }
+
+  .splash-mark p {
+    margin-top: 4px;
+  }
+
+  .splash-actions {
+    gap: 8px;
+  }
 }
 
 

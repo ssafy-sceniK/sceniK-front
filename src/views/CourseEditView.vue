@@ -607,7 +607,7 @@ async function saveEdit() {
   if (!course.value) return;
   saveError.value = '';
   if (!draftTitle.value.trim()) {
-    saveError.value = t('autoPass.ui_f8d75bf3ea');
+    saveError.value = t('course.edit.titleRequired');
     editToast.value = {
       tone: 'warning',
       title: t('autoPass.ui_4817c4caf4'),
@@ -731,8 +731,8 @@ onBeforeUnmount(() => {
           <span>{{ isAiEdit ? t('autoPass.ui_f1b45f05e1') : t('autoPass.ui_d91f63e6be') }}</span>
         </div>
         <label class="form-field">
-          {{ t('autoPass.ui_e13bbd67a4') }}
-          <input v-model="draftTitle" maxlength="48" :placeholder="t('autoPass.ui_e13bbd67a4')" />
+          {{ t('course.edit.titleLabel') }}
+          <input v-model="draftTitle" maxlength="48" :placeholder="t('course.edit.titlePlaceholder')" />
         </label>
       </section>
       <div class="all-day-edit-list">

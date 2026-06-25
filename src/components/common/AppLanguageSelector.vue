@@ -192,11 +192,14 @@ function selectLanguage(language) {
   margin-left: auto;
   flex: 0 0 auto;
   border: 2px solid var(--border-strong);
+  background: transparent;
   border-radius: 999px;
 }
 
 .app-language-selector .selected b {
-  border: 6px solid var(--color-teal);
+  border-color: var(--color-teal);
+  background: var(--color-teal);
+  box-shadow: inset 0 0 0 4px var(--card);
 }
 
 .app-language-selector button:focus-visible {
@@ -232,9 +235,9 @@ function selectLanguage(language) {
   color: var(--text);
   border: 0;
   border-radius: var(--radius-pill);
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 .app-language-selector--splash .app-language-selector__trigger svg {
@@ -288,6 +291,12 @@ function selectLanguage(language) {
   background: var(--control-bg-selected);
 }
 
+.app-language-selector--splash .app-language-selector__option.selected b {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 4px var(--surface-elevated, var(--card));
+}
+
 @media (hover: hover) {
   .app-language-selector--splash .app-language-selector__trigger:hover {
     color: var(--color-primary-deep);
@@ -313,9 +322,9 @@ function selectLanguage(language) {
 }
 
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__trigger {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__menu {
@@ -327,6 +336,12 @@ function selectLanguage(language) {
 :global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__option.selected {
   color: var(--dark-soft-red-text);
   background: var(--control-bg-selected);
+}
+
+:global(:root[data-theme="dark"]) .app-language-selector--splash .app-language-selector__option.selected b {
+  border-color: var(--dark-soft-red-text);
+  background: var(--dark-soft-red-text);
+  box-shadow: inset 0 0 0 4px var(--surface-elevated);
 }
 
 @media (hover: hover) {

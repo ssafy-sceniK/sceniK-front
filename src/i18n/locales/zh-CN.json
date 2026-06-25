@@ -217,10 +217,11 @@
       "dropHint": "点击或将图片拖到这里。",
       "dragHint": "拖动缩略图可更改显示顺序。",
       "representative": "封面",
-      "empty": "尚未选择图片。"
+      "empty": "尚未选择图片。",
+      "reorderImage": "调整图片顺序"
     },
     "detail": {
-      "title": "??"
+      "title": "帖子"
     }
   },
   "reviews": {
@@ -728,28 +729,28 @@
       "notFoundTitle": "无法打开路线详情。",
       "notFoundText": "无法打开路线详情。",
       "savedCoursesLink": "保存的 AI 路线",
-      "saveToMyCourses": "???????",
-      "copyProgressTitle": "??????????",
-      "copyProgressText": "???? AI ?????????????",
-      "copySuccessTitle": "????",
-      "copySuccessText": "?????????????",
-      "copyFailedTitle": "?????",
-      "copyFailed": "???? AI ??????????",
-      "courseCopied": "??? AI ??????????",
-      "loginRequiredToSave": "????????????????",
-      "copyLink": "????",
-      "linkCopied": "??????",
-      "copyLinkFailed": "???????",
-      "shareUnavailable": "??????????????",
-      "bulkVisitPlanned": "??????",
-      "bulkVisitCompleted": "??????",
-      "bulkVisitDone": "???",
-      "bulkVisitProgressTitle": "?????????",
-      "bulkVisitProgressText": "???????? {count} ????",
-      "bulkVisitSuccessTitle": "????????",
-      "bulkVisitSuccessText": "??? {count} ?????????",
-      "bulkVisitFailedTitle": "?????????",
-      "bulkVisitFailedText": "??????????????"
+      "saveToMyCourses": "保存到我的路线",
+      "copyProgressTitle": "正在保存到我的路线。",
+      "copyProgressText": "正在将此 AI 路线复制到你的保存列表。",
+      "copySuccessTitle": "已保存。",
+      "copySuccessText": "正在打开复制后的路线详情。",
+      "copyFailedTitle": "保存失败。",
+      "copyFailed": "无法将此 AI 路线保存到我的路线。",
+      "courseCopied": "已将 AI 路线保存到我的路线。",
+      "loginRequiredToSave": "登录后可以保存此路线。",
+      "copyLink": "复制链接",
+      "linkCopied": "链接已复制。",
+      "copyLinkFailed": "复制链接失败。",
+      "shareUnavailable": "保存路线后可使用分享链接。",
+      "bulkVisitPlanned": "添加到计划访问",
+      "bulkVisitCompleted": "标记为已完成",
+      "bulkVisitDone": "已完成",
+      "bulkVisitProgressTitle": "正在更新访问状态。",
+      "bulkVisitProgressText": "正在更新路线中的 {count} 个地点。",
+      "bulkVisitSuccessTitle": "访问状态已更新。",
+      "bulkVisitSuccessText": "已更新路线中的 {count} 个地点。",
+      "bulkVisitFailedTitle": "无法更新访问状态。",
+      "bulkVisitFailedText": "部分地点未能更新。"
     },
     "cleanup": {
       "k4a43dd6f90": "코스 관리",
@@ -784,6 +785,11 @@
       "kd97a76eb1c": "已自动保存",
       "k30ff523c4c": "这是根据你选择的条件生成的旅行行程。",
       "k9f2b9841d5": "AI 行程信息"
+    },
+    "edit": {
+      "titleLabel": "路线名称",
+      "titlePlaceholder": "请输入路线名称",
+      "titleRequired": "请输入路线名称。"
     }
   },
   "place": {
@@ -1026,7 +1032,7 @@
     "tabs": {
       "activity": "我的活动",
       "visits": "访问管理",
-      "posts": "??",
+      "posts": "社区",
       "aria": "我的页面分区"
     },
     "stats": {
@@ -1043,7 +1049,7 @@
       "following": "正在关注",
       "followers": "粉丝",
       "myPosts": "我写的帖子",
-      "commentedPosts": "????",
+      "commentedPosts": "我的评论",
       "scraps": "收藏"
     },
     "counts": {
@@ -1184,8 +1190,8 @@
       "loginText": "可集中查看已保存路线、评论和点赞消息。",
       "loginMethod": "登录",
       "nicknamePlaceholder": "昵称",
-      "intro": "??",
-      "introPlaceholder": "??????",
+      "intro": "简介",
+      "introPlaceholder": "请输入简介。",
       "saveProfile": "保存",
       "savingProfile": "加载中",
       "savingShort": "加载中",

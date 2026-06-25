@@ -2530,6 +2530,7 @@
   display: grid;
   gap: 7px;
   cursor: grab;
+  user-select: none;
 }
 
 .community-image-manager__item:active {
@@ -2538,6 +2539,12 @@
 
 .community-image-manager__item.is-dragging {
   opacity: 0.48;
+}
+
+.community-image-manager__item.is-touch-reordering {
+  position: relative;
+  z-index: 2;
+  transform: scale(0.98);
 }
 
 .community-image-manager__item.is-drag-over .community-image-manager__frame {
@@ -2558,6 +2565,7 @@
   font-size: 12px;
   font-weight: 800;
   text-align: center;
+  touch-action: manipulation;
 }
 
 .community-image-manager__frame img {

@@ -1281,6 +1281,16 @@ body {
   fill: #fee500;
 }
 
+:root[data-theme="dark"] .app-language-selector--splash .app-language-selector__trigger,
+:root[data-theme="dark"] .app-language-selector--splash .app-language-selector__trigger:hover,
+:root[data-theme="dark"] .app-language-selector--splash .app-language-selector__trigger:active {
+  color: var(--text);
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 :root[data-theme="dark"] .sheet-backdrop,
 :root[data-theme="dark"] .condition-confirm-backdrop,
 :root[data-theme="dark"] .result-menu-backdrop,

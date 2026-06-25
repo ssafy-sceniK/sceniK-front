@@ -164,6 +164,49 @@ function selectedRegionLabel(separator = ', ') {
   return selectedRegions().join(separator) || t('autoPass.ui_6ae0fbb904');
 }
 
+function compactContentTitle(selected = selectedContents()) {
+  const titles = selected.map((content) => String(content?.title ?? '').trim()).filter(Boolean);
+  if (!titles.length) return t('autoPass.ui_4aeafb9db3');
+  if (titles.length === 1) return titles[0];
+  return `${titles[0]} \uc678 ${titles.length - 1}\uac1c`;
+}
+
+function cleanStyleLabel(styles = selectedTravelStyles()) {
+  const style = String(styles[0] ?? uiStore.courseConditions.style ?? '\uac10\uc131 \uc5ec\ud589').trim();
+  return style.replace(/\s*\uc5ec\ud589$/u, '').replace(/\s+/g, ' ');
+}
+
+function cleanCourseTitle(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*\uca0c\s*/g, ' · ')
+    .trim();
+}
+
+function isUsableCourseTitle(value) {
+  const title = cleanCourseTitle(value);
+  if (!title || title.length < 5) return false;
+  if (/[?�]/.test(title)) return false;
+  return !/^(sceniK\s*)?(AI\s*)?(course|\ucf54\uc2a4|\ucd94\ucc9c \ucf54\uc2a4|\uc5ec\ud589 \ucf54\uc2a4)$/i.test(title);
+}
+
+function buildAutoCourseTitle({
+  backendTitle = '',
+  selected = selectedContents(),
+  regions = selectedRegions(),
+  styles = selectedTravelStyles(),
+  durationDays = getTripDurationDays(uiStore.courseConditions),
+} = {}) {
+  if (isUsableCourseTitle(backendTitle)) return cleanCourseTitle(backendTitle);
+  const contentTitle = compactContentTitle(selected);
+  const regionTitle = regions.slice(0, 2).join('·') || 'Korea';
+  const styleTitle = cleanStyleLabel(styles);
+  const durationTitle = `${Math.max(1, Number(durationDays) || 1)}\uc77c \ucf54\uc2a4`;
+  const fullTitle = [contentTitle, regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ');
+  if (fullTitle.length <= 42) return fullTitle;
+  return [regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ');
+}
+
 function candidateFromPlace(place, selectedContent) {
   return {
     placeId: place.placeId,
@@ -271,7 +314,13 @@ async function generateRoute() {
     }
     uiStore.generatedRoute = {
       ...backendRoute,
-            title: `${selectedContentTitle} ${selectedRegionLabel('?')} ${(travelStyles[0] ?? uiStore.courseConditions.style ?? '\uac10\uc131 \uc5ec\ud589').replace(' \uc5ec\ud589', '')} \uc5ec\ud589 \ucf54\uc2a4`,
+      title: buildAutoCourseTitle({
+        backendTitle: backendRoute.title,
+        selected,
+        regions,
+        styles: travelStyles,
+        durationDays: backendRoute.durationDays ?? requestedDuration,
+      }),
       contentTitle: selectedContentTitle,
       regions: backendRoute.regions ?? regions,
       region: backendRoute.region ?? regions.join(','),
@@ -308,8 +357,6 @@ async function generateRoute() {
   const dayCount = Math.max(1, Math.min(requestedDuration, resolved.candidatePlaces.length));
   const contentTitle = selected.map((content) => content.title).join(' · ');
   const dateRangeLabel = formatDateRange(uiStore.courseConditions);
-  const styleLabel = (travelStyles[0] ?? '\uac10\uc131 \uc5ec\ud589').replace(' \uc5ec\ud589', '');
-  const durationLabel = dayCount > 1 ? `${dayCount - 1}\ubc15 ${dayCount}\uc77c` : '1\uc77c \ucf54\uc2a4';
   const request = {
     contentId: primaryContent.contentId,
     region: resolved.region,
@@ -323,7 +370,12 @@ async function generateRoute() {
   });
   const route = {
     routeId: `route-${Date.now()}`,
-    title: `${contentTitle} ${request.region} ${styleLabel} ${durationLabel}`,
+    title: buildAutoCourseTitle({
+      selected,
+      regions: request.regions,
+      styles: travelStyles,
+      durationDays: dayCount,
+    }),
     summary: `${dateRangeLabel} \uc77c\uc815\uc5d0 \ub9de\ucdb0 ${contentTitle}\uc640 \uac19\uc740 \uc9c0\uc5ed\uc758 \uc2e4\uc81c \uc7a5\uc18c\ub97c \uc5f0\uacb0\ud55c ${dayCount}\uc77c \uc5ec\ud589 \ucf54\uc2a4\uc785\ub2c8\ub2e4.`,
     contentId: primaryContent.contentId,
     contentIds,
