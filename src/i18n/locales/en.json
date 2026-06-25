@@ -154,7 +154,9 @@
       "savedTitle": "Save",
       "savedText": "The post was added to the community feed.",
       "addHashtag": "Add hashtag",
-      "createAiCourse": "Create AI Course"
+      "createAiCourse": "Create AI Course",
+      "contentLimitTitle": "Content can be up to 1,000 characters.",
+      "contentLimitText": "Shorten the content and try again."
     },
     "a11y": {
       "postImageOpen": "Open post image {index}",

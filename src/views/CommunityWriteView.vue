@@ -15,6 +15,7 @@ import { isGenericAiCourseTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
+const MAX_POST_BODY_LENGTH = 1000;
 const COURSE_PICKER_PAGE_SIZE = 5;
 
 const route = useRoute();
@@ -44,7 +45,6 @@ const posting = ref(false);
 const statusNotice = ref(null);
 
 const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
-const selectedBoardLabel = computed(() => t(selectedBoardMeta.value.labelKey));
 const selectedBoardTag = computed(() => t(selectedBoardMeta.value.tagKey));
 const boardOptions = computed(() => boards.map((board) => ({
   id: board.id,
@@ -52,7 +52,7 @@ const boardOptions = computed(() => boards.map((board) => ({
   name: t(board.labelKey),
   description: t(board.fullLabelKey),
 })));
-const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5);
+const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5 && body.value.length <= MAX_POST_BODY_LENGTH);
 const courseOptions = computed(() => uiStore.savedCourses.filter((course) => course?.routeId));
 const selectedCourse = computed(() => courseOptions.value.find((course) => course.routeId === selectedRouteId.value) ?? null);
 const visibleCourseOptions = computed(() => courseOptions.value.slice(0, Math.min(visibleCourseCount.value, courseOptions.value.length)));
@@ -256,6 +256,15 @@ function buildTags() {
 
 async function createPost() {
   if (posting.value) return;
+  if (body.value.length > MAX_POST_BODY_LENGTH) {
+    statusNotice.value = {
+      tone: 'warning',
+      title: t('community.write.contentLimitTitle'),
+      text: t('community.write.contentLimitText'),
+    };
+    return;
+  }
+
   if (!canSubmit.value) {
     statusNotice.value = {
       tone: 'warning',
@@ -368,7 +377,6 @@ async function createPost() {
               #{{ tag }} <span aria-hidden="true">x</span>
             </button>
           </div>
-          <small>{{ selectedHashtags.length }}/{{ MAX_HASHTAGS }}</small>
         </div>
 
         <div class="form-field course-select-field">
@@ -400,7 +408,7 @@ async function createPost() {
 
         <label class="form-field">
           {{ t('community.write.bodyLabel') }}
-          <textarea v-model="body" maxlength="500" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
+          <textarea v-model="body" :maxlength="MAX_POST_BODY_LENGTH" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
         </label>
 
         <label class="form-field">
@@ -437,11 +445,6 @@ async function createPost() {
             </div>
             <figcaption>{{ t('community.write.imageUrl') }}</figcaption>
           </figure>
-        </div>
-
-        <div class="write-helper">
-          <span>{{ body.length }}/500</span>
-          <span>{{ selectedBoardLabel }}{{ selectedHashtags.length ? ' / #' + selectedHashtags.join(' #') : '' }}</span>
         </div>
       </div>
 

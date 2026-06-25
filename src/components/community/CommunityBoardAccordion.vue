@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import CommunityBoardIcon from './CommunityBoardIcon.vue';
 
 const props = defineProps({
   modelValue: { type: String, required: true },
@@ -73,7 +74,7 @@ onBeforeUnmount(() => {
         :class="['board-icon', selectedBoard ? `board-${selectedBoard.id}` : '', 'community-board-picker__icon']"
         aria-hidden="true"
       >
-        <span class="board-icon-symbol">{{ selectedBoard?.icon }}</span>
+        <span class="board-icon-symbol"><CommunityBoardIcon :type="selectedBoard?.id" /></span>
       </span>
       <span class="community-board-picker__copy">
         <strong>{{ boardLabel(selectedBoard) }}</strong>
@@ -92,7 +93,7 @@ onBeforeUnmount(() => {
         @click="selectBoard(board)"
       >
         <span :class="['board-icon', `board-${board.id}`, 'community-board-picker__option-icon']" aria-hidden="true">
-          <span class="board-icon-symbol">{{ board.icon }}</span>
+          <span class="board-icon-symbol"><CommunityBoardIcon :type="board.id" /></span>
         </span>
         <span class="community-board-picker__copy">
           <strong>{{ boardLabel(board) }}</strong>

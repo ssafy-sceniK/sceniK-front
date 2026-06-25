@@ -11,6 +11,7 @@ import SortSegmentedControl from '../components/common/SortSegmentedControl.vue'
 import CommentThread from '../components/community/CommentThread.vue';
 import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
 import CommunityBoardAccordion from '../components/community/CommunityBoardAccordion.vue';
+import CommunityBoardIcon from '../components/community/CommunityBoardIcon.vue';
 import CommunityImageManager from '../components/community/CommunityImageManager.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
@@ -67,6 +68,7 @@ const imageViewerIndex = ref(0);
 
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
+const MAX_POST_BODY_LENGTH = 1000;
 
 const boards = computed(() => [
   { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
@@ -752,11 +754,20 @@ function cancelPostEdit() {
 async function savePostEdit() {
   const target = selectedPost.value;
   if (!target || postActionLoading.value) return;
+  if (postEditBody.value.length > MAX_POST_BODY_LENGTH) {
+    postNotice.value = {
+      tone: 'warning',
+      title: t('community.write.contentLimitTitle'),
+      text: t('community.write.contentLimitText'),
+    };
+    return;
+  }
+
   if (postEditTitle.value.trim().length < 2 || postEditBody.value.trim().length < 5) {
     postNotice.value = {
       tone: 'warning',
-      title: t('communityAuto2.ko'),
-      text: t('communityAuto2.kp'),
+      title: t('community.write.validationTitle'),
+      text: t('community.write.validationText'),
     };
     return;
   }
@@ -1092,23 +1103,23 @@ async function nativeShare() {
             />
             <template v-if="editingPost">
               <div class="form-field compact post-edit-board-field">
-                <span>{{ t('communityAuto.k7vl8in') }}</span>
+                <span>{{ t('community.write.board') }}</span>
                 <CommunityBoardAccordion
                   v-model="postEditBoard"
                   :boards="boards"
-                  :aria-label="t('communityAuto.k7vl8in')"
+                  :aria-label="t('community.write.board')"
                   compact
                 />
               </div>
               <div class="form-field compact">
-                <span>{{ t('communityAuto.k1e5ef9d') }}</span>
+                <span>{{ t('community.write.hashtag') }}</span>
                 <div class="hashtag-input-row">
                   <span aria-hidden="true">#</span>
                   <input
                     v-model="postEditHashtagInput"
                     type="text"
                     maxlength="24"
-                    :placeholder="t('communityAuto.kctwhf1')"
+                    :placeholder="t('community.write.tagPlaceholder')"
                     @keydown="handlePostEditHashtagKeydown"
                     @blur="addPostEditHashtag()"
                   />
@@ -1120,17 +1131,16 @@ async function nativeShare() {
                     :key="tag"
                     type="button"
                     class="chip selected"
-                    :aria-label="tag + t('communityAuto2.k1l')"
+                    :aria-label="t('community.write.removeHashtagAria', { tag })"
                     @click="removePostEditHashtag(tag)"
                   >
                     #{{ tag }} <span aria-hidden="true">×</span>
                   </button>
                 </div>
-                <small>{{ postEditHashtags.length }}/{{ MAX_HASHTAGS }}</small>
               </div>
-              <label class="form-field compact">{{ t('communityAuto.k1ub2ks6') }}<input v-model="postEditTitle" maxlength="50" :placeholder="t('communityAuto.k5d9iwe')" />
+              <label class="form-field compact">{{ t('community.write.titleLabel') }}<input v-model="postEditTitle" maxlength="50" :placeholder="t('community.write.titlePlaceholder')" />
               </label>
-              <label class="form-field compact">{{ t('communityAuto.k1supta6') }}<textarea v-model="postEditBody" maxlength="500" :placeholder="t('communityAuto.k99wxgm')"></textarea>
+              <label class="form-field compact">{{ t('community.write.bodyLabel') }}<textarea v-model="postEditBody" :maxlength="MAX_POST_BODY_LENGTH" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
               </label>
               <CommunityImageManager
                 v-model="postEditImageItems"
@@ -1154,7 +1164,7 @@ async function nativeShare() {
                 <BaseButton :disabled="postActionLoading || postEditTitle.trim().length < 2 || postEditBody.trim().length < 5" @click="savePostEdit">
                   {{ postActionLoading ? t('communityAuto2.k1m') : t('common.save') }}
                 </BaseButton>
-                <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">{{ t('communityAuto.kjiry9t') }}</BaseButton>
+                <BaseButton variant="secondary" :disabled="postActionLoading" @click="cancelPostEdit">{{ t('common.cancel') }}</BaseButton>
               </div>
             </template>
             <template v-else>
@@ -1178,7 +1188,7 @@ async function nativeShare() {
                 {{ t('community.edit.fallbackFile') }} · {{ attachmentDisplayName(attachment, t('community.edit.fallbackFile')) }}
               </span>
             </div>
-            <div v-if="displayPostTags(selectedPost).length" class="tag-row"><span v-for="tag in displayPostTags(selectedPost)" :key="tag">{{ tag }}</span></div>
+            <div v-if="!editingPost && displayPostTags(selectedPost).length" class="tag-row"><span v-for="tag in displayPostTags(selectedPost)" :key="tag">{{ tag }}</span></div>
             <RouterLink v-if="hasLinkedCourse(selectedPost)" class="linked-course" :to="linkedCourseTo(selectedPost)">
               <span class="course-dot">AI</span>
               <div>

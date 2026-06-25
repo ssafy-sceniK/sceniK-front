@@ -1700,3 +1700,46 @@ body {
   border-color: var(--community-dark-accent-border);
   box-shadow: 0 0 0 3px rgba(122, 48, 44, 0.22);
 }
+
+
+/* Community write/edit final dark-mode overrides: no blue accents inside Community forms. */
+:root[data-theme="dark"] .community-screen .hashtag-input-row button,
+:root[data-theme="dark"] .community-write-screen .hashtag-input-row button {
+  color: #fff7f4;
+  background: var(--community-dark-primary-bg);
+  border-color: var(--community-dark-primary-bg);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .community-screen .hashtag-input-row button:not(:disabled):hover,
+  :root[data-theme="dark"] .community-write-screen .hashtag-input-row button:not(:disabled):hover {
+    color: #ffffff;
+    background: var(--community-dark-primary-hover-bg);
+    border-color: var(--community-dark-primary-hover-bg);
+  }
+}
+
+:root[data-theme="dark"] .community-screen .chip.selected,
+:root[data-theme="dark"] .community-write-screen .chip.selected {
+  color: var(--community-dark-accent-text);
+  background: var(--community-dark-accent-soft);
+  border-color: var(--community-dark-accent-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-screen .community-image-manager__upload-icon,
+:root[data-theme="dark"] .community-write-screen .community-image-manager__upload-icon {
+  color: #fff7f4;
+  background: var(--community-dark-primary-bg);
+}
+
+:root[data-theme="dark"] .community-screen .community-board-picker__toggle:focus-visible,
+:root[data-theme="dark"] .community-screen .community-board-picker__option:focus-visible,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__toggle:focus-visible,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__option:focus-visible,
+:root[data-theme="dark"] .community-screen .hashtag-input-row button:focus-visible,
+:root[data-theme="dark"] .community-write-screen .hashtag-input-row button:focus-visible {
+  outline-color: rgba(226, 137, 121, 0.46);
+  box-shadow: 0 0 0 3px rgba(122, 48, 44, 0.24);
+}
