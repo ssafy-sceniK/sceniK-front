@@ -13,7 +13,7 @@ import { getUserMessage } from '../api/error.js';
 import { useUiStore } from '../stores/uiStore.js';
 import { communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
-import { isGenericAiCourseTag } from '../utils/tags.js';
+import { isGenericAiCourseTag, isInternalSystemTag } from '../utils/tags.js';
 
 const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
@@ -121,7 +121,7 @@ function uniqueValues(values) {
 
 function isSystemTag(tag) {
   const systemTags = boards.map((board) => t(board.tagKey));
-  return systemTags.includes(tag) || isCommunityBoardTag(tag) || isGenericAiCourseTag(tag);
+  return isInternalSystemTag(tag) || systemTags.includes(tag) || isCommunityBoardTag(tag) || isGenericAiCourseTag(tag);
 }
 
 function normalizeHashtag(value) {

@@ -12,7 +12,7 @@ import MapPreview from '../components/course/MapPreview.vue';
 import Timeline from '../components/course/Timeline.vue';
 import { useUiStore } from '../stores/uiStore.js';
 import { motionVariants } from '../utils/motion.js';
-import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
+import { localizePlace, localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
 import { buildCourseShareUrl, resolvedCourseShareRouteId, shareCourseUrl } from '../utils/courseShare.js';
 
@@ -113,20 +113,24 @@ function localizeTransport(value) {
 
 function enrichStop(stop = {}) {
   const candidate = routeCandidateMap.value.get(stop.placeId) ?? {};
-  const placeName = firstText(stop.placeName, stop.name, candidate.placeName, candidate.name, t('course.detail.placeFallback'));
-  const category = firstText(stop.category, stop.placeCategory, stop.type, candidate.category);
-  return {
+  const source = {
     ...candidate,
     ...stop,
-    name: firstText(stop.name, stop.placeName, candidate.name, candidate.placeName, placeName),
+  };
+  const localized = localizePlace(source, locale.value, t) ?? source;
+  const placeName = firstText(localized.placeName, localized.name, source.placeName, source.name, candidate.placeName, candidate.name, t('course.detail.placeFallback'));
+  const category = firstText(localized.category, source.category, source.placeCategory, source.type, candidate.category);
+  return {
+    ...source,
+    name: firstText(localized.name, localized.placeName, source.name, source.placeName, candidate.name, candidate.placeName, placeName),
     placeName,
-    category: category ? localizeSystemLabel(category, 'category', t, locale.value) : t('course.detail.placeFallback'),
-    address: firstText(stop.address, candidate.address),
-    region: localizeRegion(firstText(stop.region, candidate.region)),
-    district: firstText(stop.district, candidate.district),
-    latitude: firstText(stop.latitude, candidate.latitude),
-    longitude: firstText(stop.longitude, candidate.longitude),
-    imageUrl: firstText(getPlaceImageUrl(stop), getPlaceImageUrl(candidate)),
+    category: category || t('course.detail.placeFallback'),
+    address: firstText(localized.address, source.address, candidate.address),
+    region: firstText(localized.region, localizeRegion(firstText(source.region, candidate.region))),
+    district: firstText(localized.district, localizeRegion(firstText(source.district, candidate.district))),
+    latitude: firstText(source.latitude, candidate.latitude),
+    longitude: firstText(source.longitude, candidate.longitude),
+    imageUrl: firstText(getPlaceImageUrl(source), getPlaceImageUrl(candidate)),
   };
 }
 

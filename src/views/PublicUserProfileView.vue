@@ -3,13 +3,16 @@ import { useI18n } from 'vue-i18n';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
+import AuthorAvatar from '../components/common/AuthorAvatar.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 import CourseCard from '../components/course/CourseCard.vue';
 import { fetchPublicProfile } from '../api/followApi.js';
 import { getUserMessage } from '../api/error.js';
+import { resolveApiAssetUrl } from '../api/http.js';
 import { useUiStore } from '../stores/uiStore.js';
-import { filterGenericAiCourseTags } from '../utils/tags.js';
+import { attachmentUrl, displayableImageAttachments } from '../utils/communityAttachments.js';
+import { filterDisplayTags } from '../utils/tags.js';
 
 const { t } = useI18n();
 
@@ -20,6 +23,7 @@ const profile = ref(null);
 const loading = ref(false);
 const error = ref('');
 const activeTab = ref('courses');
+const failedPostImageKeys = ref(new Set());
 
 const user = computed(() => profile.value?.user ?? null);
 const isMe = computed(() => String(user.value?.userId ?? '') === String(uiStore.currentUser?.userId ?? ''));
@@ -55,12 +59,99 @@ function openCourse(course) {
 }
 
 function displayPostTags(post) {
-  const tags = Array.isArray(post?.tags) ? post.tags : [];
-  return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
+  return filterDisplayTags(Array.isArray(post?.tags) ? post.tags : []);
 }
 
-function publicPostBoardLabel(post) {
-  return displayPostTags(post)[0] || post.region || t('autoPass.ui_1f458d0b46');
+function postKey(post) {
+  return post?.postId ?? post?.id;
+}
+
+function displayUserName(post) {
+  return post?.nickname || post?.user || post?.authorName || user.value?.nickname || 'sceniK user';
+}
+
+function userInitial(post) {
+  return displayUserName(post).slice(0, 1).toUpperCase() || 'K';
+}
+
+function authorProfileImageUrl(post) {
+  return [
+    post?.authorProfileImageUrl,
+    post?.profileImageUrl,
+    post?.authorImageUrl,
+    post?.userProfileImageUrl,
+    post?.profile_image_url,
+    post?.avatarUrl,
+    post?.avatar_url,
+    user.value?.profileImageUrl,
+  ].find((value) => typeof value === 'string' && value.trim()) ?? '';
+}
+
+function userProfileTo(userId) {
+  return userId ? { name: 'user-profile', params: { userId } } : '';
+}
+
+function postTimeLabel(post) {
+  return post?.date ?? post?.createdAt?.slice?.(0, 10) ?? '';
+}
+
+function postImageFailureKey(post, image) {
+  return `${postKey(post) || 'post'}::${image}`;
+}
+
+function markPostImageFailed(post, image) {
+  const next = new Set(failedPostImageKeys.value);
+  next.add(postImageFailureKey(post, image));
+  failedPostImageKeys.value = next;
+}
+
+function postImageSources(post) {
+  const directImages = [
+    post?.imageUrl,
+    post?.image_url,
+    post?.thumbnailUrl,
+    post?.thumbnail_url,
+    post?.coverImageUrl,
+    post?.cover_image_url,
+    post?.attachmentUrl,
+    post?.attachment_url,
+  ].map(resolveApiAssetUrl).filter(Boolean);
+  const attachmentImages = displayableImageAttachments(post?.attachments ?? [])
+    .map((attachment) => resolveApiAssetUrl(attachmentUrl(attachment)))
+    .filter(Boolean);
+  return [...new Set([...directImages, ...attachmentImages])]
+    .filter((image) => !failedPostImageKeys.value.has(postImageFailureKey(post, image)));
+}
+
+function postCommentCount(post) {
+  return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
+}
+
+function isPostLiked(post) {
+  return Boolean(post?.isLiked || (uiStore.currentUser?.userId && (post.likedBy ?? []).includes(uiStore.currentUser.userId)));
+}
+
+function isPostScrapped(post) {
+  return Boolean(uiStore.currentUser?.userId && (post.scrappedBy ?? []).includes(uiStore.currentUser.userId));
+}
+
+function isPostLikePending(post) {
+  const key = postKey(post);
+  return uiStore.pendingPostLikes.some((id) => String(id) === String(key));
+}
+
+async function togglePostLike(post) {
+  const key = postKey(post);
+  if (!key) return;
+  await uiStore.togglePostLike(key);
+  await loadProfile();
+}
+
+async function togglePostScrap(post) {
+  const key = postKey(post);
+  if (!key) return;
+  await uiStore.togglePostScrap(key);
+  await loadProfile();
 }
 
 onMounted(loadProfile);
@@ -137,20 +228,56 @@ watch(() => route.params.userId, loadProfile);
           />
         </div>
 
-        <div v-else class="my-post-list">
-          <RouterLink
-            v-for="post in profile.posts"
-            :key="post.postId"
-            class="my-post-card"
-            :to="`/community/post/${post.postId}`"
-          >
-            <div class="my-post-top">
-              <span class="my-post-board">{{ publicPostBoardLabel(post) }}</span>
-              <small>{{ post.date }}</small>
+        <div v-else class="feed-list compact-feed-list public-profile-feed">
+          <article v-for="post in profile.posts" :key="postKey(post)" class="feed-card route-story-card">
+            <div class="feed-card-author-row">
+              <div class="user-row feed-author-copy">
+                <RouterLink v-if="post.userId" class="feed-author-profile-link" :to="userProfileTo(post.userId)">
+                  <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
+                  <b>{{ displayUserName(post) }}</b>
+                </RouterLink>
+                <b v-else>{{ displayUserName(post) }}</b>
+                <span>{{ postTimeLabel(post) }}</span>
+              </div>
             </div>
-            <h2>{{ post.title }}</h2>
-            <p>{{ post.body }}</p>
-          </RouterLink>
+            <RouterLink
+              class="feed-card-main"
+              :class="{ 'feed-card-main--text-only': !postImageSources(post).length }"
+              :to="'/community/post/' + postKey(post)"
+            >
+              <div v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
+                <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0])" />
+                <span v-if="postImageSources(post).length > 1" class="feed-thumb-count">+{{ postImageSources(post).length - 1 }}</span>
+              </div>
+              <div class="feed-body">
+                <h2>{{ post.title }}</h2>
+                <p>{{ post.body }}</p>
+                <div v-if="displayPostTags(post).length" class="tag-row">
+                  <span v-for="tag in displayPostTags(post)" :key="tag">{{ tag }}</span>
+                </div>
+              </div>
+            </RouterLink>
+            <div class="feed-actions compact-actions">
+              <button
+                type="button"
+                :class="{ 'is-active': isPostLiked(post) }"
+                :aria-pressed="isPostLiked(post)"
+                :disabled="isPostLikePending(post)"
+                @click="togglePostLike(post)"
+              >
+                <span class="action-icon">{{ isPostLiked(post) ? '♥' : '♡' }}</span>
+                {{ post.likes }}
+              </button>
+              <RouterLink :to="'/community/post/' + postKey(post)">{{ t('communityAuto2.k1v', { count: postCommentCount(post) }) }}</RouterLink>
+              <button
+                type="button"
+                :class="{ 'is-active': isPostScrapped(post) }"
+                @click="togglePostScrap(post)"
+              >
+                {{ isPostScrapped(post) ? t('communityAuto.ksf2n5k') : t('communityAuto.k1y81wz0') }}
+              </button>
+            </div>
+          </article>
           <EmptyState
             v-if="!profile.posts.length"
             icon="C"

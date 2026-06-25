@@ -15,8 +15,7 @@ import { courseTemplates, places } from '../data/mockData.js';
 import { localizedNotices } from '../data/notices.js';
 import { resolveApiAssetUrl } from '../api/http.js';
 import { attachmentUrl, displayableImageAttachments } from '../utils/communityAttachments.js';
-import { filterGenericAiCourseTags } from '../utils/tags.js';
-import { isCommunityBoardTag } from '../utils/communityBoardTags.js';
+import { filterDisplayTags } from '../utils/tags.js';
 
 const LIST_CONFIG = {
   'liked-content': {
@@ -177,9 +176,7 @@ function openCourse(course) {
 }
 
 function displayPostTags(post) {
-  const tags = (Array.isArray(post?.tags) ? post.tags : [])
-    .filter((tag) => !isCommunityBoardTag(tag) && !String(tag ?? '').startsWith('__'));
-  return post?.routeId ? filterGenericAiCourseTags(tags) : tags;
+  return filterDisplayTags(Array.isArray(post?.tags) ? post.tags : []);
 }
 
 function postKey(post) {

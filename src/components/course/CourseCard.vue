@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { filterGenericAiCourseTags } from '../../utils/tags.js';
+import { filterGenericAiCourseTags, filterPublicUserTags } from '../../utils/tags.js';
 
 const { t } = useI18n();
 
@@ -13,7 +13,7 @@ const props = defineProps({
 });
 
 const visibleTags = computed(() => {
-  const tags = Array.isArray(props.course.tags) ? props.course.tags : [];
+  const tags = filterPublicUserTags(Array.isArray(props.course.tags) ? props.course.tags : []);
   return props.hideGenericAiTag ? filterGenericAiCourseTags(tags) : tags;
 });
 

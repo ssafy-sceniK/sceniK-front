@@ -24,3 +24,20 @@ export function isGenericAiCourseTag(tag) {
 export function filterGenericAiCourseTags(tags = []) {
   return tags.filter((tag) => !isGenericAiCourseTag(tag));
 }
+
+export function isInternalSystemTag(tag) {
+  return String(tag ?? '').trim().startsWith('__');
+}
+
+export function isPublicUserTag(tag) {
+  const value = String(tag ?? '').trim();
+  return Boolean(value) && !isInternalSystemTag(value);
+}
+
+export function filterPublicUserTags(tags = []) {
+  return tags.filter(isPublicUserTag);
+}
+
+export function filterDisplayTags(tags = []) {
+  return filterGenericAiCourseTags(filterPublicUserTags(tags));
+}

@@ -32,7 +32,7 @@ import {
 } from '../utils/communityAttachments.js';
 import { communityBoardIdFromTags, communityBoardTag, isCommunityBoardTag } from '../utils/communityBoardTags.js';
 import { communityImageErrorKind, isCommunityImageCandidateFile, normalizeCommunityImageFile } from '../utils/communityImageFiles.js';
-import { filterGenericAiCourseTags, isGenericAiCourseTag } from '../utils/tags.js';
+import { filterDisplayTags, isGenericAiCourseTag, isInternalSystemTag } from '../utils/tags.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -343,7 +343,7 @@ function isBoardTag(tag) {
 }
 
 function isSystemPostTag(tag) {
-  return isCommunityBoardTag(tag) || isBoardTag(tag) || isGenericAiCourseTag(tag);
+  return isInternalSystemTag(tag) || isCommunityBoardTag(tag) || isBoardTag(tag) || isGenericAiCourseTag(tag);
 }
 
 function addPostEditHashtag(rawValue = postEditHashtagInput.value) {
@@ -515,8 +515,7 @@ function hasLinkedCourse(post) {
 }
 
 function displayPostTags(post) {
-  const tags = (Array.isArray(post?.tags) ? post.tags : []).filter((tag) => !isSystemPostTag(tag));
-  return hasLinkedCourse(post) ? filterGenericAiCourseTags(tags) : tags;
+  return filterDisplayTags(Array.isArray(post?.tags) ? post.tags : []);
 }
 
 function attachmentImageUrl(attachment) {
