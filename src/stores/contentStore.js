@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { fetchContentDetail, fetchContentPlaces, fetchContents } from '../api/contentApi.js';
-import { matchesSearchText, normalizeSearchText } from '../utils/searchText.js';
+import { i18n } from '../i18n/index.js';
+import { localizeContent, localizeSystemLabel, localizeSystemTag } from '../i18n/systemContent.js';
+import { buildContentSearchFields, matchesSearchText, normalizeSearchText } from '../utils/searchText.js';
 
 const CATEGORY_CODE_ALIASES = new Map([
   ['\ub4dc\ub77c\ub9c8', 'drama'], ['Drama', 'drama'], ['\u30c9\u30e9\u30de', 'drama'], ['\u5267\u96c6', 'drama'], ['\u7535\u89c6\u5267', 'drama'],
@@ -19,6 +21,13 @@ function contentCategoryCode(content) {
   return categoryCode(content?.originalCategory) || categoryCode(content?.category);
 }
 
+
+const CONTENT_SEARCH_HELPERS = {
+  localizeContent,
+  localizeSystemLabel,
+  localizeSystemTag,
+  t: i18n.global.t,
+};
 function filterContents(list, { category, categoryKey, keyword, popular } = {}) {
   const query = normalizeSearchText(keyword);
   const requestedCategory = String(category ?? '').trim();
@@ -30,24 +39,7 @@ function filterContents(list, { category, categoryKey, keyword, popular } = {}) 
       || (requestedCategoryCode ? contentCategoryCode(content) === requestedCategoryCode : false)
       || (!requestedCategoryCode && (content.category === requestedCategory || stableCategory === requestedCategory));
     const matchesPopular = popular === undefined || popular === null || popular === '' ? true : Boolean(content.isPopular) === Boolean(popular);
-    const searchableValues = [
-      content.contentId,
-      content.title,
-      content.originalTitle,
-      content.category,
-      content.originalCategory,
-      content.subcategory,
-      content.originalSubcategory,
-      content.description,
-      content.originalDescription,
-      content.castNames,
-      content.originalCastNames,
-      content.country,
-      content.ottPlatform,
-      content.tags,
-      content.originalTags,
-    ];
-    return matchesCategory && matchesPopular && matchesSearchText(searchableValues, query);
+    return matchesCategory && matchesPopular && matchesSearchText(buildContentSearchFields(content, CONTENT_SEARCH_HELPERS), query);
   });
 }
 export const useContentStore = defineStore('content', {

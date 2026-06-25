@@ -1,33 +1,24 @@
 import { defineStore } from 'pinia';
 import { fetchPlaceDetail, fetchPlaces } from '../api/placeApi.js';
+import { i18n } from '../i18n/index.js';
+import { localizePlace, localizeSystemLabel, localizeSystemTag } from '../i18n/systemContent.js';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
-import { matchesSearchText, normalizeSearchText } from '../utils/searchText.js';
+import { buildPlaceSearchFields, matchesSearchText, normalizeSearchText } from '../utils/searchText.js';
 
+
+const PLACE_SEARCH_HELPERS = {
+  localizePlace,
+  localizeSystemLabel,
+  localizeSystemTag,
+  t: i18n.global.t,
+};
 function filterPlaces(list, { region, district, category, keyword } = {}) {
   const query = normalizeSearchText(keyword);
   return list.filter((place) => {
     const matchesRegion = !region || region === '\uc804\uccb4' || place.region === region;
     const matchesDistrict = !district || place.district === district;
     const matchesCategory = !category || category === '\uc804\uccb4' || place.category === category;
-    const searchableValues = [
-      place.placeId,
-      place.name,
-      place.originalName,
-      place.placeName,
-      place.originalPlaceName,
-      place.address,
-      place.region,
-      place.originalRegion,
-      place.district,
-      place.originalDistrict,
-      place.category,
-      place.originalCategory,
-      place.description,
-      place.originalDescription,
-      place.tags,
-      place.relatedContents?.map((content) => [content.title, content.originalTitle, content.contentId]),
-    ];
-    return matchesRegion && matchesDistrict && matchesCategory && matchesSearchText(searchableValues, query);
+    return matchesRegion && matchesDistrict && matchesCategory && matchesSearchText(buildPlaceSearchFields(place, PLACE_SEARCH_HELPERS), query);
   });
 }
 
