@@ -1,7 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useUiStore } from '../stores/uiStore.js';
 import { localizePreferenceOption } from '../i18n/systemContent.js';
 import AppLayout from '../components/layout/AppLayout.vue';
@@ -11,9 +11,14 @@ import ProfileAvatar from '../components/common/ProfileAvatar.vue';
 import { normalizePreferenceSelection } from '../utils/preferences.js';
 
 const router = useRouter();
+const route = useRoute();
 const uiStore = useUiStore();
 const { t, locale } = useI18n();
 const activeTab = ref('activity');
+const MY_PAGE_TABS = new Set(['activity', 'visits', 'posts']);
+const MY_PAGE_TAB_ALIASES = {
+  community: 'posts',
+};
 
 onMounted(async () => {
   if (!uiStore.currentUser) return;
@@ -72,6 +77,32 @@ const tabs = computed(() => [
     label: t('my.tabs.posts'),
   },
 ]);
+
+function normalizeTab(value) {
+  const source = Array.isArray(value) ? value[0] : value;
+  const tab = MY_PAGE_TAB_ALIASES[source] ?? source;
+  return MY_PAGE_TABS.has(tab) ? tab : 'activity';
+}
+
+function tabQueryValue(tabId) {
+  if (tabId === 'posts') return 'community';
+  return tabId;
+}
+
+function selectTab(tabId) {
+  const nextTab = normalizeTab(tabId);
+  activeTab.value = nextTab;
+  router.replace({
+    query: {
+      ...route.query,
+      tab: nextTab === 'activity' ? undefined : tabQueryValue(nextTab),
+    },
+  });
+}
+
+watch(() => route.query.tab, (tab) => {
+  activeTab.value = normalizeTab(tab);
+}, { immediate: true });
 
 async function logoutToLanding() {
   await uiStore.logout();
@@ -159,7 +190,7 @@ async function clearVisit(placeId) {
           :key="tab.id"
           type="button"
           :class="{ active: activeTab === tab.id }"
-          @click="activeTab = tab.id"
+          @click="selectTab(tab.id)"
         >
           <strong>{{ tab.label }}</strong>
         </button>

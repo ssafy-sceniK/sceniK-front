@@ -180,11 +180,7 @@ async function saveTemplateCourse() {
   };
   const saved = await uiStore.saveCourse(course.value);
   actionNotice.value = saved
-    ? {
-        tone: 'success',
-        title: t('course.detail.saveSuccessTitle'),
-        text: t('course.detail.saveSuccessText'),
-      }
+    ? null
     : {
         tone: 'error',
         title: t('course.detail.saveFailedTitle'),
@@ -208,11 +204,7 @@ async function copyCourseToMine() {
     };
     return;
   }
-  actionNotice.value = {
-    tone: 'success',
-    title: t('course.detail.copySuccessTitle'),
-    text: t('course.detail.copySuccessText'),
-  };
+  actionNotice.value = null;
   window.setTimeout(() => router.replace({ name: 'my-course-manage', params: { routeId: copied.routeId } }), 350);
 }
 

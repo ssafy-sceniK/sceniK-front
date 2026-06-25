@@ -1,6 +1,7 @@
 ﻿<script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../components/layout/AppLayout.vue';
 import SearchBar from '../components/common/SearchBar.vue';
 import ChipGroup from '../components/common/ChipGroup.vue';
@@ -11,10 +12,13 @@ import { usePlaceStore } from '../stores/placeStore.js';
 
 const placeStore = usePlaceStore();
 placeStore.prepareExplore();
+const route = useRoute();
+const router = useRouter();
 const { t, locale } = useI18n();
 const ALL_FILTER = '전체';
 const query = ref('');
 const region = ref(ALL_FILTER);
+const restoringQuery = ref(false);
 const filterDrag = {
   active: false,
   startX: 0,
@@ -46,8 +50,45 @@ const filteredPlaces = computed(() => placeStore.search({
   region: region.value === ALL_FILTER ? undefined : region.value,
   keyword: query.value,
 }));
+const contentExploreRoute = computed(() => ({
+  name: 'explore',
+  query: {
+    keyword: query.value.trim() || undefined,
+  },
+}));
 
-onMounted(() => placeStore.load());
+onMounted(() => {
+  restoreQueryState();
+  placeStore.load();
+});
+
+function queryValue(value, fallback = '') {
+  if (Array.isArray(value)) return value[0] ?? fallback;
+  return value ?? fallback;
+}
+
+function restoreQueryState() {
+  restoringQuery.value = true;
+  query.value = queryValue(route.query.keyword);
+  region.value = queryValue(route.query.region, ALL_FILTER);
+  queueMicrotask(() => {
+    restoringQuery.value = false;
+  });
+}
+
+function syncQueryState() {
+  if (restoringQuery.value) return;
+  router.replace({
+    query: {
+      ...route.query,
+      keyword: query.value.trim() || undefined,
+      region: region.value !== ALL_FILTER ? region.value : undefined,
+    },
+  });
+}
+
+watch([query, region], syncQueryState);
+watch(() => route.query, restoreQueryState);
 
 function resetFilters() {
   query.value = '';
@@ -109,8 +150,8 @@ function onFilterClick(event) {
     <section class="map-screen">
       <SearchBar v-model="query" :placeholder="t('map.searchPlaceholder')" />
       <div class="mode-toggle">
-        <RouterLink to="/explore">{{ t('content.list.contentMode') }}</RouterLink>
-        <RouterLink class="active" to="/explore/map">{{ t('content.list.mapMode') }}</RouterLink>
+        <RouterLink :to="contentExploreRoute">{{ t('content.list.contentMode') }}</RouterLink>
+        <RouterLink class="active" :to="{ name: 'explore-map', query: route.query }">{{ t('content.list.mapMode') }}</RouterLink>
       </div>
       <div
         class="map-filter-scroll"

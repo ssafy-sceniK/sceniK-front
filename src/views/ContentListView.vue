@@ -96,6 +96,15 @@ function resetFilters() {
   sort.value = 'popular';
 }
 
+function openMapExplore() {
+  router.push({
+    name: 'explore-map',
+    query: {
+      keyword: query.value.trim() || undefined,
+    },
+  });
+}
+
 function loadMore() {
   visibleLimit.value += 12;
 }
@@ -107,7 +116,7 @@ function loadMore() {
       <SearchBar v-model="query" :placeholder="t('content.list.searchPlaceholder')" @focus="router.push({ name: 'search', query: { focus: '1' } })" />
       <div class="mode-toggle">
         <button :class="{ active: mode === 'content' }" @click="mode = 'content'">{{ t('content.list.contentMode') }}</button>
-        <button :class="{ active: mode === 'map' }" @click="router.push('/explore/map')">{{ t('content.list.mapMode') }}</button>
+        <button :class="{ active: mode === 'map' }" @click="openMapExplore">{{ t('content.list.mapMode') }}</button>
       </div>
       <h3 class="subsection-title">{{ t('content.list.category') }}</h3>
       <ChipGroup v-model="category" :items="exploreCategories" />
