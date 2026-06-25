@@ -10,6 +10,7 @@ import CourseSaveStatusPanel from '../components/course/CourseSaveStatusPanel.vu
 import { useUiStore } from '../stores/uiStore.js';
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { motionVariants } from '../utils/motion.js';
+import { buildCourseShareUrl, copyCourseUrl, resolvedCourseShareRouteId, shareCourseUrl } from '../utils/courseShare.js';
 
 const AUTO_SAVE_RECORDS_KEY = 'scenik-ai-course-auto-save-records';
 
@@ -60,12 +61,10 @@ const shareSummary = computed(() => {
   return t('autoPass.ui_0c07a50b2a', { value0: placeCount.value, value1: route.value.durationDays });
 });
 const resultShareRouteId = computed(() => {
-  const id = String(route.value?.routeId ?? '');
-  return id && !id.startsWith('gen-') ? id : '';
+  return resolvedCourseShareRouteId(route.value?.routeId);
 });
 const resultShareUrl = computed(() => {
-  if (!resultShareRouteId.value || typeof window === 'undefined') return '';
-  return new URL(router.resolve({ name: 'course-detail', params: { routeId: resultShareRouteId.value } }).href, window.location.origin).toString();
+  return buildCourseShareUrl(router, resultShareRouteId.value);
 });
 const saveStatusRows = computed(() => {
   if (!route.value) return [];
@@ -369,15 +368,14 @@ function closeShareSheet() {
   showShareSheet.value = false;
 }
 
-function copyShareLink() {
-  if (!resultShareUrl.value || !navigator.clipboard?.writeText) {
+async function copyShareLink() {
+  if (!resultShareUrl.value) {
     uiStore.notify(t('course.detail.shareUnavailable'));
     closeShareSheet();
     return;
   }
-  navigator.clipboard.writeText(resultShareUrl.value)
-    .then(() => uiStore.notify(t('course.detail.linkCopied'), 'success'))
-    .catch(() => uiStore.notify(t('course.detail.copyLinkFailed')));
+  const copied = await copyCourseUrl(resultShareUrl.value);
+  uiStore.notify(copied ? t('course.detail.linkCopied') : t('course.detail.copyLinkFailed'), copied ? 'success' : 'info');
   closeShareSheet();
 }
 
@@ -387,15 +385,15 @@ async function shareMessage() {
     closeShareSheet();
     return;
   }
-  if (navigator.share && route.value) {
-    await navigator.share({
-      title: route.value.title,
-      text: route.value.summary,
-      url: resultShareUrl.value,
-    }).catch(() => {});
-  } else {
-    await navigator.clipboard?.writeText?.(resultShareUrl.value);
-    uiStore.notify(t('course.detail.linkCopied'), 'success');
+  const result = await shareCourseUrl({
+    title: route.value?.title,
+    text: route.value?.summary,
+    url: resultShareUrl.value,
+  });
+  if (result.ok) {
+    uiStore.notify(t('course.detail.shareSuccess'), 'success');
+  } else if (result.reason !== 'aborted') {
+    uiStore.notify(t('course.detail.shareUnavailable'));
   }
   closeShareSheet();
 }

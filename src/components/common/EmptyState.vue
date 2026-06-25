@@ -21,18 +21,23 @@ defineEmits(['action', 'secondary']);
 const iconLabel = computed(() => {
   if (props.icon) return props.icon;
   const map = {
-    route: 'AI',
-    community: 'C',
-    notification: '!',
-    search: '?',
+    route: '',
+    community: '',
+    notification: '',
+    search: '',
     error: '!',
     loading: '',
-    login: 'K',
+    login: '',
   };
-  return map[props.tone] ?? 'SK';
+  return map[props.tone] ?? '';
 });
 
 const bodyText = computed(() => props.description || props.text);
+const shouldShowVisual = computed(() => {
+  if (!props.showVisual) return false;
+  if (props.tone === 'loading') return true;
+  return ['!', '?'].includes(iconLabel.value);
+});
 </script>
 
 <template>
@@ -44,7 +49,7 @@ const bodyText = computed(() => props.description || props.text);
       { 'empty-state--compact': compact },
     ]"
   >
-    <div v-if="showVisual" class="empty-state__visual" aria-hidden="true">
+    <div v-if="shouldShowVisual" class="empty-state__visual" aria-hidden="true">
       <span v-if="iconLabel">{{ iconLabel }}</span>
     </div>
 

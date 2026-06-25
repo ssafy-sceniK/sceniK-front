@@ -1307,6 +1307,13 @@ body {
   backdrop-filter: none !important;
 }
 
+:root[data-theme="dark"] .app-language-selector.app-language-selector--splash {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 :root[data-theme="dark"] .sheet-backdrop,
 :root[data-theme="dark"] .condition-confirm-backdrop,
 :root[data-theme="dark"] .result-menu-backdrop,

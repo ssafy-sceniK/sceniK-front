@@ -647,7 +647,7 @@ async function saveEdit() {
       title: t('autoPass.ui_b51f3b3121'),
       text: t('autoPass.ui_46b501361e'),
     };
-    window.setTimeout(() => router.push('/ai/result'), 450);
+    window.setTimeout(() => router.replace('/ai/result'), 450);
     return;
   }
 
@@ -666,7 +666,7 @@ async function saveEdit() {
     title: t('autoPass.ui_b51f3b3121'),
     text: t('autoPass.ui_99a63996fa'),
   };
-  window.setTimeout(() => router.push({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
+  window.setTimeout(() => router.replace({ name: 'my-course-manage', params: { routeId: editedRoute.routeId } }), 450);
 }
 
 function cancelEdit() {

@@ -226,6 +226,23 @@ function postCommentCount(post) {
   return Number(post?.commentCount ?? post?.commentsCount ?? post?.comments?.length ?? 0);
 }
 
+function isPostLiked(post) {
+  return Boolean(post?.isLiked || (uiStore.currentUser?.userId && (post.likedBy ?? []).includes(uiStore.currentUser.userId)));
+}
+
+function isPostScrapped(post) {
+  return Boolean(uiStore.currentUser?.userId && (post.scrappedBy ?? []).includes(uiStore.currentUser.userId));
+}
+
+function isPostLikePending(post) {
+  const key = postKey(post);
+  return uiStore.pendingPostLikes.some((id) => String(id) === String(key));
+}
+
+function userProfileTo(userId) {
+  return `/users/${userId}`;
+}
+
 function commentTimeLabel(comment) {
   return comment?.date ?? comment?.createdAt?.slice?.(0, 10) ?? '';
 }
@@ -346,7 +363,7 @@ async function toggleFollowFromList(user) {
         <div
           v-for="place in type === 'completed' ? uiStore.completedVisitItems : type === 'planned' ? uiStore.plannedVisitItems : type === 'recent' ? uiStore.recentPlaceItems : uiStore.likedPlaceItems"
           :key="place.placeId"
-          :class="{ 'visit-place-action-row': type === 'planned' }"
+          :class="{ 'visit-place-action-card': type === 'planned' }"
         >
           <RouterLink class="visit-place-card-link" :to="'/places/' + place.placeId">
             <PlaceCard :place="place" compact />
@@ -405,30 +422,51 @@ async function toggleFollowFromList(user) {
       <div v-else-if="type === 'posts' || type === 'scraps'" class="feed-list compact-feed-list my-community-feed">
         <article v-for="post in activityPosts" :key="postKey(post)" class="feed-card route-story-card">
           <div class="feed-card-author-row">
-            <RouterLink class="feed-author-profile-link" :to="`/users/${post.userId}`">
-              <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
-              <span class="feed-author-copy">
+            <div class="user-row feed-author-copy">
+              <RouterLink v-if="post.userId" class="feed-author-profile-link" :to="userProfileTo(post.userId)">
+                <AuthorAvatar class="comment-avatar feed-author-avatar" :image-url="authorProfileImageUrl(post)" :initial="userInitial(post)" alt="" />
                 <b>{{ displayUserName(post) }}</b>
-                <span>{{ postTimeLabel(post) }}</span>
-              </span>
-            </RouterLink>
+              </RouterLink>
+              <b v-else>{{ displayUserName(post) }}</b>
+              <span>{{ postTimeLabel(post) }}</span>
+            </div>
           </div>
-          <RouterLink class="feed-card-main" :class="{ 'feed-card-main--text-only': !postImageSources(post).length }" :to="'/community/post/' + postKey(post)">
-            <span v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
+          <RouterLink
+            class="feed-card-main"
+            :class="{ 'feed-card-main--text-only': !postImageSources(post).length }"
+            :to="'/community/post/' + postKey(post)"
+          >
+            <div v-if="postImageSources(post).length" class="feed-thumb feed-thumb--image">
               <img :src="postImageSources(post)[0]" alt="" @error="markPostImageFailed(post, postImageSources(post)[0], 0)" />
-            </span>
-            <span class="feed-body">
+              <span v-if="postImageSources(post).length > 1" class="feed-thumb-count">+{{ postImageSources(post).length - 1 }}</span>
+            </div>
+            <div class="feed-body">
               <h2>{{ post.title }}</h2>
               <p>{{ post.body }}</p>
-              <span class="tag-row">
-                <span v-for="tag in displayPostTags(post).slice(0, 3)" :key="tag">{{ tag }}</span>
-              </span>
-            </span>
+              <div v-if="displayPostTags(post).length" class="tag-row">
+                <span v-for="tag in displayPostTags(post)" :key="tag">{{ tag }}</span>
+              </div>
+            </div>
           </RouterLink>
-          <div class="feed-actions compact-actions" aria-label="post stats">
-            <span>{{ t('my.activity.likes', { count: post.likes ?? 0 }) }}</span>
-            <span>{{ t('my.activity.comments', { count: postCommentCount(post) }) }}</span>
-            <span>{{ post.routeId ? t('my.activity.linkedAiCourse') : t('my.activity.generalStory') }}</span>
+          <div class="feed-actions compact-actions">
+            <button
+              type="button"
+              :class="{ 'is-active': isPostLiked(post) }"
+              :aria-pressed="isPostLiked(post)"
+              :disabled="isPostLikePending(post)"
+              @click="uiStore.togglePostLike(postKey(post))"
+            >
+              <span class="action-icon">{{ isPostLiked(post) ? '♥' : '♡' }}</span>
+              {{ post.likes }}
+            </button>
+            <RouterLink :to="'/community/post/' + postKey(post)">{{ t('communityAuto2.k1v', { count: postCommentCount(post) }) }}</RouterLink>
+            <button
+              type="button"
+              :class="{ 'is-active': isPostScrapped(post) }"
+              @click="uiStore.togglePostScrap(postKey(post))"
+            >
+              {{ isPostScrapped(post) ? t('communityAuto.ksf2n5k') : t('communityAuto.k1y81wz0') }}
+            </button>
           </div>
         </article>
       </div>

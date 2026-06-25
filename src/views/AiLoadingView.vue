@@ -179,14 +179,14 @@ function cleanStyleLabel(styles = selectedTravelStyles()) {
 function cleanCourseTitle(value) {
   return String(value ?? '')
     .replace(/\s+/g, ' ')
-    .replace(/\s*\uca0c\s*/g, ' · ')
+    .replace(/\s*(?:\uca0c|·)\s*/g, ' · ')
     .trim();
 }
 
 function isUsableCourseTitle(value) {
   const title = cleanCourseTitle(value);
   if (!title || title.length < 5) return false;
-  if (/[?�]/.test(title)) return false;
+  if (/[?�]/.test(title) || title.includes('\ufffd') || title.includes('\u5360')) return false;
   return !/^(sceniK\s*)?(AI\s*)?(course|\ucf54\uc2a4|\ucd94\ucc9c \ucf54\uc2a4|\uc5ec\ud589 \ucf54\uc2a4)$/i.test(title);
 }
 
@@ -199,12 +199,12 @@ function buildAutoCourseTitle({
 } = {}) {
   if (isUsableCourseTitle(backendTitle)) return cleanCourseTitle(backendTitle);
   const contentTitle = compactContentTitle(selected);
-  const regionTitle = regions.slice(0, 2).join('·') || 'Korea';
+  const regionTitle = regions.slice(0, 2).join(' · ') || 'Korea';
   const styleTitle = cleanStyleLabel(styles);
   const durationTitle = `${Math.max(1, Number(durationDays) || 1)}\uc77c \ucf54\uc2a4`;
-  const fullTitle = [contentTitle, regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ');
+  const fullTitle = [contentTitle, regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
   if (fullTitle.length <= 42) return fullTitle;
-  return [regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ');
+  return [regionTitle, styleTitle, durationTitle].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 }
 
 function candidateFromPlace(place, selectedContent) {

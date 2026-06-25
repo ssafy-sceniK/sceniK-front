@@ -33,8 +33,8 @@ let longPressTimer = 0;
 const fileInputId = computed(() => `${props.inputIdPrefix}-file-input`);
 const remainingCount = computed(() => Math.max(0, props.max - props.modelValue.length));
 const isFull = computed(() => remainingCount.value <= 0);
-const LONG_PRESS_DELAY = 180;
-const TOUCH_MOVE_CANCEL_DISTANCE = 9;
+const LONG_PRESS_DELAY = 220;
+const TOUCH_MOVE_CANCEL_DISTANCE = 24;
 
 function formatLabel(template, index) {
   return String(template || '').replace('{index}', String(index + 1));
@@ -103,6 +103,7 @@ function clearPointerDragState() {
 function beginTouchReorder(item, event) {
   if (event.pointerType === 'mouse' || event.button !== 0) return;
   if (event.target?.closest?.('button, input, label, a')) return;
+  event.preventDefault();
 
   pointerDragState = {
     pointerId: event.pointerId,
@@ -125,6 +126,7 @@ function beginTouchReorder(item, event) {
 
 function handleTouchReorderMove(event) {
   if (!pointerDragState || pointerDragState.pointerId !== event.pointerId) return;
+  event.preventDefault();
   const deltaX = event.clientX - pointerDragState.startX;
   const deltaY = event.clientY - pointerDragState.startY;
   const distance = Math.hypot(deltaX, deltaY);
@@ -135,7 +137,6 @@ function handleTouchReorderMove(event) {
   }
 
   if (!pointerDragState.dragging) return;
-  event.preventDefault();
   const targetKey = itemKeyFromPoint(event.clientX, event.clientY);
   pointerDragState.targetKey = targetKey;
   dragOverKey.value = targetKey && targetKey !== pointerDragState.sourceKey ? targetKey : '';

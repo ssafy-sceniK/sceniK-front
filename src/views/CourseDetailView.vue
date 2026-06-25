@@ -14,6 +14,7 @@ import { useUiStore } from '../stores/uiStore.js';
 import { motionVariants } from '../utils/motion.js';
 import { localizePreferenceOption, localizeSystemLabel } from '../i18n/systemContent.js';
 import { getPlaceImageUrl } from '../utils/placeImages.js';
+import { buildCourseShareUrl, copyCourseUrl, resolvedCourseShareRouteId, shareCourseUrl } from '../utils/courseShare.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -229,28 +230,24 @@ function openDeleteSheet() {
 }
 
 function courseShareRouteId() {
-  const id = firstText(course.value?.routeId, routeId.value);
-  return id && !String(id).startsWith('gen-') ? String(id) : '';
+  return resolvedCourseShareRouteId(firstText(course.value?.routeId, routeId.value));
 }
 
 function courseShareUrl() {
-  const id = courseShareRouteId();
-  if (!id || typeof window === 'undefined') return '';
-  return new URL(router.resolve({ name: 'course-detail', params: { routeId: id } }).href, window.location.origin).toString();
+  return buildCourseShareUrl(router, courseShareRouteId());
 }
 
 async function copyCourseLink() {
   const url = courseShareUrl();
-  if (!url || !navigator.clipboard?.writeText) {
+  if (!url) {
     uiStore.notify(t('course.detail.copyLinkFailed'));
     return;
   }
-  try {
-    await navigator.clipboard.writeText(url);
+  if (await copyCourseUrl(url)) {
     uiStore.notify(t('course.detail.linkCopied'), 'success');
-  } catch {
-    uiStore.notify(t('course.detail.copyLinkFailed'));
+    return;
   }
+  uiStore.notify(t('course.detail.copyLinkFailed'));
 }
 
 async function shareCourse() {
@@ -268,18 +265,14 @@ async function shareCourse() {
     url,
   };
 
-  try {
-    if (navigator.share) {
-      await navigator.share(payload);
-    } else if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(payload.url);
-    }
+  const result = await shareCourseUrl(payload);
+  if (result.ok) {
     actionNotice.value = null;
     uiStore.notify(t('course.detail.shareSuccess'), 'success');
-  } catch (error) {
-    if (error?.name === 'AbortError') return;
-    uiStore.notify(t('course.detail.shareFailed'));
+    return;
   }
+  if (result.reason === 'aborted') return;
+  uiStore.notify(t('course.detail.shareFailed'));
 }
 
 async function markCoursePlacesVisitStatus() {

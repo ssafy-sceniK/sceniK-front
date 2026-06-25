@@ -10,13 +10,18 @@
   align-items: center;
   gap: 12px;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .utility-header p {
   margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .utility-header button {
@@ -35,7 +40,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .utility-header .notification-delete-all-button {
@@ -817,31 +824,37 @@
   font-weight: 700;
 }
 
-.visit-place-action-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 8px;
+.visit-place-action-card {
+  position: relative;
+  min-width: 0;
 }
 
 .visit-place-card-link {
   min-width: 0;
+  display: block;
   color: inherit;
 }
 
+.visit-place-action-card .place-card {
+  padding-right: 96px;
+}
+
 .visit-complete-button {
-  min-width: 86px;
-  min-height: 44px;
-  align-self: stretch;
-  padding: 0 12px;
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  min-width: 68px;
+  min-height: 32px;
+  padding: 0 10px;
   color: var(--color-primary);
   background: rgba(0, 82, 255, 0.08);
   border: 1px solid rgba(0, 82, 255, 0.26);
-  border-radius: var(--radius-lg);
-  font-size: 12px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.25;
   white-space: nowrap;
+  transform: translateY(-50%);
 }
 
 .visit-complete-button:disabled {

@@ -12,7 +12,7 @@
 
 .screen-content {
   min-height: 100vh;
-  padding: calc(var(--top-nav-height) + var(--screen-top-gap)) 0 calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  padding: calc(var(--top-nav-height) + var(--screen-top-gap)) 0 calc(var(--bottom-nav-height) + 32px + env(safe-area-inset-bottom));
 }
 
 .screen-content.without-bottom {
