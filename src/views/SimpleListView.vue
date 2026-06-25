@@ -277,6 +277,19 @@ function isFollowingUser(user) {
   return user.followedByMe || followingIdSet.value.has(String(user.userId));
 }
 
+function sameId(left, right) {
+  return String(left) === String(right);
+}
+
+function isVisitPending(placeId) {
+  return uiStore.pendingVisitStatuses.some((id) => sameId(id, placeId));
+}
+
+async function completeVisit(placeId) {
+  if (!placeId || isVisitPending(placeId)) return;
+  await uiStore.setVisit(placeId, 'completed');
+}
+
 function followButtonLabel(user) {
   if (isFollowActionPending(user.userId)) return t('my.activity.follow.pending');
   return isFollowingUser(user) ? t('my.activity.follow.following') : t('my.activity.follow.follow');
@@ -330,13 +343,24 @@ async function toggleFollowFromList(user) {
       </div>
 
       <div v-else-if="type === 'liked-places' || type === 'recent' || type === 'planned' || type === 'completed'" class="stack-list">
-        <RouterLink
+        <div
           v-for="place in type === 'completed' ? uiStore.completedVisitItems : type === 'planned' ? uiStore.plannedVisitItems : type === 'recent' ? uiStore.recentPlaceItems : uiStore.likedPlaceItems"
           :key="place.placeId"
-          :to="'/places/' + place.placeId"
+          :class="{ 'visit-place-action-row': type === 'planned' }"
         >
-          <PlaceCard :place="place" compact />
-        </RouterLink>
+          <RouterLink class="visit-place-card-link" :to="'/places/' + place.placeId">
+            <PlaceCard :place="place" compact />
+          </RouterLink>
+          <button
+            v-if="type === 'planned'"
+            type="button"
+            class="visit-complete-button"
+            :disabled="isVisitPending(place.placeId)"
+            @click="completeVisit(place.placeId)"
+          >
+            {{ isVisitPending(place.placeId) ? t('my.visits.markingCompleted') : t('my.visits.markCompleted') }}
+          </button>
+        </div>
       </div>
 
       <div v-else-if="type === 'saved-routes'" class="stack-list">

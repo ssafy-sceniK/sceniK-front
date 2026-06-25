@@ -1059,6 +1059,7 @@
       "reviews": "评论 {count} 条",
       "users": "用户 {count} 名",
       "posts": "帖子 {count} 个",
+      "comments": "评论 {count} 条",
       "scraps": "收藏 {count} 个"
     },
     "visits": {
@@ -1068,7 +1069,9 @@
       "progressPercent": "完成 {percent}%",
       "emptyTitle": "还没有访问记录",
       "emptyText": "在地点详情中点击计划访问或已访问，开始记录你的旅行。",
-      "totalCompleted": "共 {total} 个中已完成 {completed} 个访问"
+      "totalCompleted": "共 {total} 个中已完成 {completed} 个访问",
+      "markCompleted": "标记已访问",
+      "markingCompleted": "处理中"
     },
     "activity": {
       "title": {

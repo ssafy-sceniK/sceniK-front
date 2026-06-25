@@ -721,6 +721,43 @@
   font-weight: 700;
 }
 
+.visit-place-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.visit-place-card-link {
+  min-width: 0;
+  color: inherit;
+}
+
+.visit-complete-button {
+  min-width: 86px;
+  min-height: 44px;
+  align-self: stretch;
+  padding: 0 12px;
+  color: var(--color-primary);
+  background: rgba(0, 82, 255, 0.08);
+  border: 1px solid rgba(0, 82, 255, 0.26);
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.visit-complete-button:disabled {
+  cursor: progress;
+  opacity: 0.58;
+}
+
+.visit-complete-button:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.35);
+  outline-offset: 2px;
+}
+
 .section-mini-header {
   display: flex;
   align-items: center;

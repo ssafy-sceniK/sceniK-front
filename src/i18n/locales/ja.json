@@ -1059,6 +1059,7 @@
       "reviews": "作成レビュー {count}件",
       "users": "ユーザー {count}人",
       "posts": "投稿 {count}件",
+      "comments": "コメント {count}件",
       "scraps": "スクラップ {count}件"
     },
     "visits": {
@@ -1068,7 +1069,9 @@
       "progressPercent": "{percent}%完了",
       "emptyTitle": "まだ訪問記録がありません",
       "emptyText": "場所詳細で訪問予定または訪問完了を押して旅行記録を始めましょう。",
-      "totalCompleted": "全{total}件中{completed}件の訪問完了"
+      "totalCompleted": "全{total}件中{completed}件の訪問完了",
+      "markCompleted": "訪問完了",
+      "markingCompleted": "更新中"
     },
     "activity": {
       "title": {

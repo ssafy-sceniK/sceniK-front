@@ -1059,6 +1059,7 @@
       "reviews": "{count} reviews",
       "users": "{count} users",
       "posts": "{count} posts",
+      "comments": "{count} comments",
       "scraps": "{count} saved"
     },
     "visits": {
@@ -1068,7 +1069,9 @@
       "progressPercent": "{percent}% complete",
       "emptyTitle": "No visit records yet",
       "emptyText": "Start your travel record by marking planned or completed visits on place detail pages.",
-      "totalCompleted": "{completed} of {total} visits completed"
+      "totalCompleted": "{completed} of {total} visits completed",
+      "markCompleted": "Mark completed",
+      "markingCompleted": "Updating"
     },
     "activity": {
       "title": {

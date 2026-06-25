@@ -1059,6 +1059,7 @@
       "reviews": "작성 리뷰 {count}개",
       "users": "사용자 {count}명",
       "posts": "게시글 {count}개",
+      "comments": "댓글 {count}개",
       "scraps": "스크랩 {count}개"
     },
     "visits": {
@@ -1068,7 +1069,9 @@
       "progressPercent": "{percent}% 완료",
       "emptyTitle": "아직 방문 기록이 없어요",
       "emptyText": "장소 상세에서 방문 예정이나 방문 완료를 눌러 여행 기록을 시작해보세요.",
-      "totalCompleted": "총 {total}개 중 {completed}개 방문 완료"
+      "totalCompleted": "총 {total}개 중 {completed}개 방문 완료",
+      "markCompleted": "방문 완료",
+      "markingCompleted": "처리 중"
     },
     "activity": {
       "title": {
