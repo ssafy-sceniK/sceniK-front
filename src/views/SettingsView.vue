@@ -72,6 +72,7 @@ async function confirmAccountDelete() {
   accountDeleteError.value = '';
   try {
     await uiStore.deleteAccount();
+    uiStore.notify(t('settings.deleteAccountSuccess'), 'success');
     await router.replace('/');
   } catch {
     accountDeleteError.value = t('settings.deleteAccountFailed');
@@ -150,6 +151,7 @@ async function confirmAccountDelete() {
       <section class="account-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="account-delete-title">
         <h2 id="account-delete-title">{{ t('settings.deleteAccount') }}</h2>
         <p>{{ t('settings.deleteAccountWarning') }}</p>
+        <p>{{ t('settings.deleteAccountDescription') }}</p>
         <p v-if="accountDeleteError" class="account-delete-error" role="alert">{{ accountDeleteError }}</p>
         <div class="account-delete-actions">
           <button type="button" :disabled="accountDeleting" @click="closeAccountDeleteDialog">{{ t('common.cancel') }}</button>

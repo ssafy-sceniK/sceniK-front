@@ -45,7 +45,9 @@
       "k97b4fb7567": "이 기기에서 세션이 종료되었습니다. 다시 이용하려면 로그인해 주세요.",
       "k8ca345a8bc": "로그아웃 상태를 확인해 주세요",
       "k03215b6cf5": "로컬 세션은 정리했습니다. 화면이 갱신되지 않으면 다시 로그인해 주세요."
-    }
+    },
+    "deleteAccountDescription": "Your account will be deactivated and profile information will be anonymized. Some posts and comments may remain as Deleted user for service integrity.",
+    "deleteAccountSuccess": "Your account has been deleted."
   },
   "common": {
     "loading": "Loading",

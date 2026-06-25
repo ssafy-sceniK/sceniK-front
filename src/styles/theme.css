@@ -1795,9 +1795,11 @@ body {
   color: #ffffff;
   background: rgba(2, 6, 23, 0.92);
   border-color: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
+  box-shadow: none;
+  filter: none;
+  backdrop-filter: none;
   font-size: 12px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  text-shadow: none;
 }
 
 :root[data-theme="dark"] .feed-thumb-count {

@@ -974,12 +974,23 @@ export const useUiStore = defineStore('ui', {
       clearAccessToken();
       clearCommunityDraftStorage();
       this.currentUser = null;
+      this.likedContent = [];
+      this.likedPlaces = [];
+      this.likedContentDetails = [];
+      this.likedPlaceDetails = [];
+      this.plannedVisits = [];
+      this.completedVisits = [];
+      this.plannedVisitDetails = [];
+      this.completedVisitDetails = [];
       this.savedCourses = [];
+      this.courseDetailCache = [];
+      this.generatedRoute = null;
+      this.communityPosts = [];
+      this.notifications = [];
+      this.unreadNotificationCount = 0;
       this.myReviews = [];
       this.followingUsers = [];
       this.followerUsers = [];
-      this.notifications = [];
-      this.unreadNotificationCount = 0;
       this.persist();
     },
     async savePreferences(preferences) {
