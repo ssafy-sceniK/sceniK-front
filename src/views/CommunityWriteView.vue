@@ -36,7 +36,6 @@ const selectedHashtags = ref([]);
 const hashtagInput = ref('');
 const title = ref('');
 const body = ref('');
-const imageUrl = ref('');
 const postImageItems = ref([]);
 const selectedRouteId = ref('');
 const coursePickerOpen = ref(false);
@@ -216,17 +215,12 @@ function removeSelectedImage(localKey) {
   postImageItems.value = postImageItems.value.filter((item) => item.localKey !== localKey);
 }
 
-function clearManualImageUrl() {
-  imageUrl.value = '';
-}
-
 
 async function resolveImagePayload() {
   if (!postImageItems.value.length) {
-    const manualUrl = imageUrl.value.trim();
     return {
-      imageUrl: manualUrl || null,
-      attachments: manualUrl ? [{ url: manualUrl, imageUrl: manualUrl, thumbnailUrl: manualUrl, type: 'image', name: t('community.write.imageUrl') }] : [],
+      imageUrl: null,
+      attachments: [],
     };
   }
 
@@ -411,12 +405,6 @@ async function createPost() {
           <textarea v-model="body" :maxlength="MAX_POST_BODY_LENGTH" :placeholder="t('community.write.bodyPlaceholder')"></textarea>
         </label>
 
-        <label class="form-field">
-          {{ t('community.write.imageUrl') }}
-          <input v-model="imageUrl" type="url" placeholder="https://example.com/photo.jpg" />
-          <small>{{ t('community.write.imageUrlHelp') }}</small>
-        </label>
-
         <CommunityImageManager
           v-model="postImageItems"
           :max="MAX_POST_IMAGES"
@@ -430,22 +418,11 @@ async function createPost() {
           :representative-label="t('community.imageManager.representative')"
           :existing-alt="t('community.edit.existingImageAlt', { index: '{index}' })"
           :new-alt="t('community.edit.newImageAlt', { index: '{index}' })"
-          :empty-text="imageUrl.trim() ? '' : t('community.imageManager.empty')"
+          :empty-text="t('community.imageManager.empty')"
           input-id-prefix="community-write"
           @add-files="handleAttachments"
           @remove="removeSelectedImage"
         />
-
-        <div v-if="!postImageItems.length && imageUrl.trim()" class="community-image-manager__grid community-image-manager__grid--manual" :aria-label="t('community.write.previewAria')">
-          <figure class="community-image-manager__item">
-            <div class="community-image-manager__frame">
-              <img :src="imageUrl.trim()" :alt="t('community.write.imageUrl')" draggable="false" />
-              <span class="community-image-manager__representative">{{ t('community.imageManager.representative') }}</span>
-              <button type="button" class="community-image-manager__remove" :aria-label="t('community.write.removeSelection')" :title="t('community.write.removeSelection')" @click="clearManualImageUrl">x</button>
-            </div>
-            <figcaption>{{ t('community.write.imageUrl') }}</figcaption>
-          </figure>
-        </div>
       </div>
 
       <FormStatusNotice

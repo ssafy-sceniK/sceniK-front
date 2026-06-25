@@ -19,7 +19,6 @@ const loading = ref(false);
 const error = ref('');
 const translatedText = ref('');
 const showingTranslation = ref(false);
-const cached = ref(false);
 
 const sourceLocale = computed(() => normalizeLocale(props.sourceLanguage) || detectTextLanguage(props.text, 'unknown'));
 const targetLocale = computed(() => normalizeLocale(locale.value) || 'ko');
@@ -37,7 +36,6 @@ watch(() => [props.text, props.resourceId, targetLocale.value], () => {
   error.value = '';
   translatedText.value = '';
   showingTranslation.value = false;
-  cached.value = false;
 });
 
 async function toggleTranslation() {
@@ -59,7 +57,6 @@ async function toggleTranslation() {
       targetLanguage: targetLocale.value,
     });
     translatedText.value = result?.translatedText || props.text;
-    cached.value = Boolean(result?.cached);
     showingTranslation.value = true;
   } catch {
     error.value = t('translation.failed');
@@ -74,10 +71,9 @@ async function toggleTranslation() {
   <component :is="tag" class="translatable-text">
     <span>{{ displayText }}</span>
     <span v-if="canTranslate" class="translation-control-row">
-      <button type="button" class="translation-toggle" :disabled="loading" @click="toggleTranslation">
+      <button type="button" class="translation-toggle" :class="{ 'is-active': showingTranslation }" :aria-pressed="showingTranslation" :disabled="loading" @click="toggleTranslation">
         {{ loading ? t('translation.loading') : showingTranslation ? t('translation.original') : t('translation.show') }}
       </button>
-      <small v-if="cached && showingTranslation">{{ t('translation.cached') }}</small>
       <small v-if="error" class="translation-error">{{ error }}</small>
     </span>
   </component>
