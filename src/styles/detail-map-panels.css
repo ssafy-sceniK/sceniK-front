@@ -699,10 +699,6 @@
   box-shadow: 0 -10px 30px rgba(10, 11, 13, 0.05);
   backdrop-filter: blur(12px);
 }
-.review-duplicate-notice {
-  margin: 14px 0 4px;
-}
-
 /* Place detail UX polish */
 .place-description-copy {
   margin: 0;
@@ -765,12 +761,6 @@
   outline-offset: 2px;
 }
 
-.star-rating-text {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
 .review-rating-value {
   display: inline-flex;
   align-items: center;
@@ -791,9 +781,18 @@
   margin-top: 16px;
 }
 
+.place-related-content-header {
+  margin-top: 30px;
+  padding-top: 2px;
+}
+
 @media (max-width: 360px) {
   .place-detail-body .meta-line + .map-preview {
     margin-top: 14px;
+  }
+
+  .place-related-content-header {
+    margin-top: 26px;
   }
 }
 

@@ -65,9 +65,6 @@ const visibleReviews = computed(() => reviews.value.filter((review) => Boolean(r
 const hasVisibleReviews = computed(() => visibleReviews.value.length > 0);
 const hasMyReview = computed(() => Boolean(uiStore.currentUser?.userId)
   && visibleReviews.value.some((review) => review.userId === uiStore.currentUser.userId));
-const myReview = computed(() => visibleReviews.value.find((review) => (
-  Boolean(uiStore.currentUser?.userId) && String(review.userId) === String(uiStore.currentUser.userId)
-)) ?? null);
 const reviewCount = computed(() => (
   reviewsLoaded.value ? visibleReviews.value.length : Number(place.value?.reviewCount ?? 0)
 ));
@@ -471,7 +468,6 @@ function markPlaceImageFailed() {
       ★
     </button>
   </div>
-  <small class="star-rating-text">{{ t('place.detail.ratingPoint', { score: normalizeRating(editReviewForm.rating) }) }}</small>
 </div>
                 <label class="form-field compact">
                   {{ t('reviews.title') }}
@@ -527,7 +523,6 @@ function markPlaceImageFailed() {
       ★
     </button>
   </div>
-  <small class="star-rating-text">{{ t('place.detail.ratingPoint', { score: normalizeRating(reviewForm.rating) }) }}</small>
 </div>
             <label class="form-field">
               {{ t('reviews.title') }}
@@ -538,14 +533,6 @@ function markPlaceImageFailed() {
               {{ reviewSubmitting ? t('place.detail.reviewSubmitting') : t('reviews.submit') }}
             </BaseButton>
           </form>
-          <FormStatusNotice
-            v-else-if="uiStore.currentUser"
-            class="review-duplicate-notice"
-            tone="info"
-            compact
-            :title="t('place.detail.alreadyReviewedTitle')"
-            :text="myReview ? t('place.detail.alreadyReviewedWithMineText') : t('place.detail.alreadyReviewedText')"
-          />
           <EmptyState
             v-else
             icon="K"
@@ -559,7 +546,7 @@ function markPlaceImageFailed() {
         </template>
       </ReviewPanel>
 
-      <div class="section-header"><h2>{{ t('place.detail.relatedContents') }}</h2></div>
+      <div class="section-header place-related-content-header"><h2>{{ t('place.detail.relatedContents') }}</h2></div>
       <EmptyState
         v-if="!relatedContents.length"
         compact
