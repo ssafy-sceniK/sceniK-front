@@ -11,6 +11,8 @@ import { useUiStore } from '../stores/uiStore.js';
 import { formatDateRange, getTripDurationDays } from '../utils/tripDates.js';
 import { motionVariants } from '../utils/motion.js';
 
+const AUTO_SAVE_RECORDS_KEY = 'scenik-ai-course-auto-save-records';
+
 const { t } = useI18n();
 
 const router = useRouter();
@@ -22,6 +24,7 @@ const showShareSheet = ref(false);
 const savingRoute = ref(false);
 const saveError = ref('');
 const saveNotice = ref(null);
+const autoSaveGenerationKey = ref('');
 const routeCandidateMap = computed(() => new Map((route.value?.candidatePlaces ?? [])
   .map((place) => [place.placeId, place])));
 const selectedRegions = computed(() => {
@@ -99,33 +102,154 @@ const lodgingInfo = computed(() => {
   return { name, address };
 });
 const isSaved = computed(() => Boolean(route.value?.routeId && uiStore.savedCourses.some((course) => course.routeId === route.value.routeId)));
+const generationRouteId = computed(() => route.value?.generationId || (String(route.value?.routeId ?? '').startsWith('gen-') ? route.value.routeId : ''));
+const isGeneratedUnsavedRoute = computed(() => Boolean(route.value && generationRouteId.value && route.value.routeId === generationRouteId.value));
+const isPersistedSavedRoute = computed(() => Boolean(route.value?.routeId && !isGeneratedUnsavedRoute.value && (route.value.createdAt || String(route.value.routeId).startsWith('route-'))));
+const isResultSaved = computed(() => isSaved.value || isPersistedSavedRoute.value);
+const resultActionLabel = computed(() => {
+  if (saveError.value) return t('aiCourse.result.retrySave');
+  if (savingRoute.value) return t('aiCourse.result.savingButton');
+  return t('aiCourse.result.done');
+});
+const resultActionDisabled = computed(() => savingRoute.value || (!saveError.value && !isResultSaved.value));
 
 watch(route, (value) => {
   selectedDay.value = value?.days?.[0]?.dayNumber ?? 1;
+  if (value) void ensureAutoSaved();
 }, { immediate: true });
 
-async function saveRoute() {
-  if (!route.value || savingRoute.value) return;
+function readAutoSaveRecords() {
+  if (typeof sessionStorage === 'undefined') return {};
+  try {
+    return JSON.parse(sessionStorage.getItem(AUTO_SAVE_RECORDS_KEY) || '{}') || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeAutoSaveRecord(generationId, record) {
+  if (!generationId || typeof sessionStorage === 'undefined') return;
+  const records = readAutoSaveRecords();
+  records[generationId] = {
+    ...record,
+    updatedAt: Date.now(),
+  };
+  sessionStorage.setItem(AUTO_SAVE_RECORDS_KEY, JSON.stringify(records));
+}
+
+function autoSaveRecord(generationId) {
+  return generationId ? readAutoSaveRecords()[generationId] : null;
+}
+
+function routePlaceSignature(targetRoute) {
+  return (targetRoute?.days ?? [])
+    .flatMap((day) => (day.places ?? []).map((place, index) => [day.dayNumber, place.visitOrder ?? index + 1, place.placeId].join(':')))
+    .join('|');
+}
+
+function routeAutoSaveSignature(targetRoute) {
+  if (!targetRoute) return '';
+  return [
+    targetRoute.title,
+    targetRoute.summary,
+    Array.isArray(targetRoute.contentIds) ? targetRoute.contentIds.join(',') : targetRoute.contentId,
+    Array.isArray(targetRoute.regions) ? targetRoute.regions.join(',') : targetRoute.region,
+    targetRoute.durationDays,
+    targetRoute.startDate,
+    targetRoute.endDate,
+    routePlaceSignature(targetRoute),
+  ].map((value) => String(value ?? '').trim()).join('::');
+}
+
+function matchingSavedCourse(targetRoute) {
+  const signature = routeAutoSaveSignature(targetRoute);
+  if (!signature) return null;
+  return uiStore.savedCourses.find((course) => routeAutoSaveSignature(course) === signature) ?? null;
+}
+
+function showSavedNotice() {
+  saveError.value = '';
+  saveNotice.value = {
+    tone: 'success',
+    title: t('aiCourse.result.courseSaved'),
+    text: t('aiCourse.result.courseSavedText'),
+  };
+}
+
+async function restoreSavedRoute(savedRouteId) {
+  if (!savedRouteId) return false;
+  const loaded = await uiStore.loadCourseDetail(savedRouteId);
+  if (!loaded) return false;
+  uiStore.generatedRoute = loaded;
+  uiStore.persist();
+  showSavedNotice();
+  return true;
+}
+
+async function ensureAutoSaved({ force = false } = {}) {
+  const currentRoute = route.value;
+  if (!currentRoute || savingRoute.value) return;
+
+  if (!isGeneratedUnsavedRoute.value) {
+    if (isResultSaved.value) showSavedNotice();
+    return;
+  }
+
+  const generationId = generationRouteId.value;
+  if (!generationId) return;
+  const record = autoSaveRecord(generationId);
+  if (!force && record?.savedRouteId && await restoreSavedRoute(record.savedRouteId)) return;
+  if (!force && autoSaveGenerationKey.value === generationId) return;
+
+  autoSaveGenerationKey.value = generationId;
   showActionMenu.value = false;
   saveError.value = '';
   saveNotice.value = {
     tone: 'info',
-    title: t('autoPass.ui_8ead915dc8'),
-    text: t('autoPass.ui_91c7efc47b'),
+    title: t('aiCourse.result.savingCourse'),
+    text: t('aiCourse.result.savingCourseText'),
   };
   savingRoute.value = true;
-  const saved = await uiStore.saveCourse(route.value);
-  savingRoute.value = false;
-  if (!saved) {
-    saveError.value = uiStore.routeError || t('autoPass.ui_d3728ac3ae');
+  writeAutoSaveRecord(generationId, { status: 'saving', routeSignature: routeAutoSaveSignature(currentRoute) });
+
+  try {
+    await uiStore.loadSavedCourses();
+    const existing = matchingSavedCourse(currentRoute);
+    if (existing) {
+      uiStore.generatedRoute = existing;
+      uiStore.persist();
+      writeAutoSaveRecord(generationId, { status: 'saved', savedRouteId: existing.routeId, routeSignature: routeAutoSaveSignature(currentRoute) });
+      showSavedNotice();
+      return;
+    }
+
+    const saved = await uiStore.saveCourse(currentRoute);
+    if (!saved) {
+      throw new Error(uiStore.routeError || t('aiCourse.result.saveFailedText'));
+    }
+    writeAutoSaveRecord(generationId, { status: 'saved', savedRouteId: saved.routeId, routeSignature: routeAutoSaveSignature(currentRoute) });
+    showSavedNotice();
+  } catch (error) {
+    saveError.value = error?.message || uiStore.routeError || t('aiCourse.result.saveFailedText');
     saveNotice.value = {
       tone: 'error',
-      title: t('autoPass.ui_3126a73522'),
+      title: t('aiCourse.result.saveFailed'),
       text: saveError.value,
     };
+    writeAutoSaveRecord(generationId, { status: 'failed', routeSignature: routeAutoSaveSignature(currentRoute), message: saveError.value });
+  } finally {
+    savingRoute.value = false;
+    autoSaveGenerationKey.value = '';
+  }
+}
+
+function handleResultAction() {
+  if (saveError.value) {
+    void ensureAutoSaved({ force: true });
     return;
   }
-  saveNotice.value = null;
+  if (!isResultSaved.value || !route.value?.routeId) return;
+  router.push({ name: 'my-course-manage', params: { routeId: route.value.routeId } });
 }
 
 function openShareSheet() {
@@ -148,10 +272,10 @@ function post() {
     body: route.value.summary,
     region: selectedRegion.value,
     duration: `${route.value.durationDays}\uc77c`,
-    routeId: isSaved.value ? route.value.routeId : '',
+    routeId: isResultSaved.value ? route.value.routeId : '',
     tags: [selectedRegion.value, route.value.style].filter(Boolean),
   }));
-  router.push({ name: 'community-write', query: { from: 'ai', routeId: isSaved.value ? route.value.routeId : undefined } });
+  router.push({ name: 'community-write', query: { from: 'ai', routeId: isResultSaved.value ? route.value.routeId : undefined } });
 }
 
 function stopPlace(stop) {
@@ -349,10 +473,9 @@ function postFromShareSheet() {
       </div>
 
       <footer class="ai-result-footer">
-        <BaseButton class="ai-result-save-button" :variant="isSaved ? 'secondary' : 'primary'" block :disabled="savingRoute || isSaved" @click="saveRoute">
-          {{ isSaved ? t('autoPass.ui_5c83f8f13c') : savingRoute ? t('autoPass.ui_c994c2d8a1') : t('autoPass.ui_927f3a61f0') }}
+        <BaseButton class="ai-result-done-button" block :disabled="resultActionDisabled" @click="handleResultAction">
+          {{ resultActionLabel }}
         </BaseButton>
-        <BaseButton block @click="router.push('/home')">{{ t('autoPass.ui_6dd1ed962b') }}</BaseButton>
       </footer>
 
       <AnimatePresence>

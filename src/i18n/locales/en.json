@@ -965,6 +965,17 @@
     },
     "loading": {
       "progressAria": "AI course generation progress"
+    },
+    "result": {
+      "done": "Done",
+      "savingButton": "Saving...",
+      "savingCourse": "Saving your course...",
+      "savingCourseText": "Adding the generated AI course to your saved list.",
+      "courseSaved": "Course saved.",
+      "courseSavedText": "You can find it again in your saved AI courses.",
+      "saveFailed": "Could not save the course.",
+      "saveFailedText": "Please check your connection and try saving again.",
+      "retrySave": "Retry save"
     }
   },
   "my": {

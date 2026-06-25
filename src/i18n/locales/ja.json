@@ -965,6 +965,17 @@
     },
     "loading": {
       "progressAria": "AIコース生成の進捗率"
+    },
+    "result": {
+      "done": "完了",
+      "savingButton": "保存中...",
+      "savingCourse": "コースを保存しています...",
+      "savingCourseText": "生成されたAIコースを保存済みリストに追加しています。",
+      "courseSaved": "コースを保存しました。",
+      "courseSavedText": "保存済みAIコースで再度確認できます。",
+      "saveFailed": "コースを保存できませんでした。",
+      "saveFailedText": "接続状況を確認して、もう一度保存してください。",
+      "retrySave": "保存を再試行"
     }
   },
   "my": {

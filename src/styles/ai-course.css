@@ -1118,12 +1118,12 @@
   }
 }
 
-.ai-result-footer .ai-result-save-button:active {
+.ai-result-footer .ai-result-done-button:active {
   background: #dde3ea;
   border-color: #dde3ea;
 }
 
-.ai-result-footer .ai-result-save-button:disabled {
+.ai-result-footer .ai-result-done-button:disabled {
   color: #475467;
   background: #eef2f6;
   border-color: #eef2f6;

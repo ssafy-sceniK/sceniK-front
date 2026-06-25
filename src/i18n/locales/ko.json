@@ -965,6 +965,17 @@
     },
     "loading": {
       "progressAria": "AI 코스 생성 진행률"
+    },
+    "result": {
+      "done": "완료",
+      "savingButton": "저장 중...",
+      "savingCourse": "코스를 저장하는 중입니다.",
+      "savingCourseText": "생성된 AI 코스를 저장 목록에 추가하고 있습니다.",
+      "courseSaved": "코스가 저장되었습니다.",
+      "courseSavedText": "마이페이지의 저장한 AI 코스에서 다시 확인할 수 있습니다.",
+      "saveFailed": "코스를 저장하지 못했습니다.",
+      "saveFailedText": "네트워크 상태를 확인한 뒤 다시 저장해 주세요.",
+      "retrySave": "다시 저장"
     }
   },
   "my": {
