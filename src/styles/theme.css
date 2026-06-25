@@ -375,6 +375,12 @@ body {
   box-shadow: none;
 }
 
+:root[data-theme="dark"] .profile-edit-form .preference-block.compact {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
 :root[data-theme="dark"] .date-field input,
 :root[data-theme="dark"] .hotel-address-field input,
 :root[data-theme="dark"] .budget-range-card input,

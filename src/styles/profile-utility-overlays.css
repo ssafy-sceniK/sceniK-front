@@ -1046,6 +1046,17 @@
   font-size: 13px;
 }
 
+.profile-edit-form .preference-block.compact {
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.profile-edit-form .preference-block.compact .chip-row {
+  margin-bottom: 0;
+}
+
 .top-save-button {
   min-height: 36px;
   padding: 0 14px;
