@@ -1453,3 +1453,250 @@ body {
   border-color: var(--dark-action-solid-hover);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
+/* Community dark-mode polish: neutral actions, warm selected states, danger only for destructive controls. */
+:root[data-theme="dark"] {
+  --community-dark-action-bg: rgba(255, 255, 255, 0.055);
+  --community-dark-action-border: rgba(255, 255, 255, 0.12);
+  --community-dark-action-text: #ebe3df;
+  --community-dark-action-hover-bg: rgba(255, 255, 255, 0.085);
+  --community-dark-action-hover-border: rgba(237, 177, 165, 0.24);
+  --community-dark-accent-soft: rgba(122, 48, 44, 0.30);
+  --community-dark-accent-border: rgba(226, 137, 121, 0.38);
+  --community-dark-accent-text: #ffd8d0;
+  --community-dark-primary-bg: #8f3833;
+  --community-dark-primary-hover-bg: #a34740;
+  --community-dark-danger-bg: rgba(239, 68, 68, 0.18);
+  --community-dark-danger-border: rgba(248, 113, 113, 0.42);
+  --community-dark-danger-text: #fecaca;
+}
+
+:root[data-theme="dark"] .community-screen .feed-actions button,
+:root[data-theme="dark"] .community-screen .feed-actions a,
+:root[data-theme="dark"] .community-screen .detail-actions button,
+:root[data-theme="dark"] .community-screen .detail-actions a,
+:root[data-theme="dark"] .community-screen .detail-actions > span,
+:root[data-theme="dark"] .community-screen .comment-action-button,
+:root[data-theme="dark"] .community-screen .comment-reply-box button,
+:root[data-theme="dark"] .community-screen .author-follow-button,
+:root[data-theme="dark"] .community-screen .community-tabs a,
+:root[data-theme="dark"] .community-screen .segmented-sort__option,
+:root[data-theme="dark"] .community-screen .translation-toggle,
+:root[data-theme="dark"] .community-screen .share-options button,
+:root[data-theme="dark"] .community-screen .linked-course-cta,
+:root[data-theme="dark"] .community-write-screen .button-secondary,
+:root[data-theme="dark"] .community-write-screen .button-ghost,
+:root[data-theme="dark"] .community-write-screen .chip,
+:root[data-theme="dark"] .community-write-screen .course-picker-trigger,
+:root[data-theme="dark"] .community-write-screen .course-picker-option,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__toggle,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__option,
+:root[data-theme="dark"] .community-screen .community-board-picker__toggle,
+:root[data-theme="dark"] .community-screen .community-board-picker__option {
+  color: var(--community-dark-action-text);
+  background: var(--community-dark-action-bg);
+  border-color: var(--community-dark-action-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-screen .community-tabs,
+:root[data-theme="dark"] .community-screen .segmented-sort,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__list,
+:root[data-theme="dark"] .community-screen .community-board-picker__list {
+  background: var(--card);
+  border-color: var(--community-dark-action-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-write-screen .community-board-picker__copy strong,
+:root[data-theme="dark"] .community-screen .community-board-picker__copy strong,
+:root[data-theme="dark"] .community-write-screen .course-picker-option strong,
+:root[data-theme="dark"] .community-write-screen .course-picker-copy strong {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .community-write-screen .community-board-picker__copy small,
+:root[data-theme="dark"] .community-screen .community-board-picker__copy small,
+:root[data-theme="dark"] .community-write-screen .course-picker-option small,
+:root[data-theme="dark"] .community-write-screen .course-picker-copy small {
+  color: #d4cbc7;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .community-screen .feed-actions button:hover,
+  :root[data-theme="dark"] .community-screen .feed-actions a:hover,
+  :root[data-theme="dark"] .community-screen .detail-actions button:hover,
+  :root[data-theme="dark"] .community-screen .detail-actions a:hover,
+  :root[data-theme="dark"] .community-screen .comment-action-button:hover,
+  :root[data-theme="dark"] .community-screen .comment-reply-box button:hover,
+  :root[data-theme="dark"] .community-screen .author-follow-button:hover,
+  :root[data-theme="dark"] .community-screen .community-tabs a:hover,
+  :root[data-theme="dark"] .community-screen .segmented-sort__option:hover,
+  :root[data-theme="dark"] .community-screen .translation-toggle:hover,
+  :root[data-theme="dark"] .community-screen .share-options button:hover,
+  :root[data-theme="dark"] .community-screen .linked-course-cta:hover,
+  :root[data-theme="dark"] .community-write-screen .button-secondary:hover,
+  :root[data-theme="dark"] .community-write-screen .button-ghost:hover,
+  :root[data-theme="dark"] .community-write-screen .chip:hover,
+  :root[data-theme="dark"] .community-write-screen .course-picker-trigger:hover,
+  :root[data-theme="dark"] .community-write-screen .course-picker-option:hover,
+  :root[data-theme="dark"] .community-write-screen .community-board-picker__toggle:hover,
+  :root[data-theme="dark"] .community-write-screen .community-board-picker__option:hover,
+  :root[data-theme="dark"] .community-screen .community-board-picker__toggle:hover,
+  :root[data-theme="dark"] .community-screen .community-board-picker__option:hover {
+    color: var(--text);
+    background: var(--community-dark-action-hover-bg);
+    border-color: var(--community-dark-action-hover-border);
+  }
+}
+
+:root[data-theme="dark"] .community-screen .feed-actions button.is-active,
+:root[data-theme="dark"] .community-screen .feed-actions a.is-active,
+:root[data-theme="dark"] .community-screen .detail-actions button.is-active,
+:root[data-theme="dark"] .community-screen .detail-actions a.is-active,
+:root[data-theme="dark"] .community-screen .comment-action-button.is-active,
+:root[data-theme="dark"] .community-screen .author-follow-button.is-following,
+:root[data-theme="dark"] .community-screen .community-tabs a.active,
+:root[data-theme="dark"] .community-screen .segmented-sort__option.active,
+:root[data-theme="dark"] .community-write-screen .chip.selected,
+:root[data-theme="dark"] .community-write-screen .course-picker-option.selected,
+:root[data-theme="dark"] .community-write-screen .community-board-picker.is-open .community-board-picker__toggle,
+:root[data-theme="dark"] .community-write-screen .community-board-picker__option.is-selected,
+:root[data-theme="dark"] .community-screen .community-board-picker.is-open .community-board-picker__toggle,
+:root[data-theme="dark"] .community-screen .community-board-picker__option.is-selected {
+  color: var(--community-dark-accent-text);
+  background: var(--community-dark-accent-soft);
+  border-color: var(--community-dark-accent-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-write-screen .community-board-picker__option.is-selected .board-icon,
+:root[data-theme="dark"] .community-screen .community-board-picker__option.is-selected .board-icon,
+:root[data-theme="dark"] .community-write-screen .community-board-picker.is-open .community-board-picker__icon,
+:root[data-theme="dark"] .community-screen .community-board-picker.is-open .community-board-picker__icon {
+  color: var(--community-dark-accent-text);
+  background: rgba(255, 216, 208, 0.10);
+  border-color: var(--community-dark-accent-border);
+}
+
+:root[data-theme="dark"] .community-write-screen .button-primary,
+:root[data-theme="dark"] .community-write-screen .top-save-button,
+:root[data-theme="dark"] .community-write-screen .hashtag-input-row button,
+:root[data-theme="dark"] .community-write-screen .course-picker-load-more,
+:root[data-theme="dark"] .community-screen .fab {
+  color: #fff7f4;
+  background: var(--community-dark-primary-bg);
+  border-color: var(--community-dark-primary-bg);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .community-write-screen .button-primary:not(:disabled):hover,
+  :root[data-theme="dark"] .community-write-screen .top-save-button:not(:disabled):hover,
+  :root[data-theme="dark"] .community-write-screen .hashtag-input-row button:not(:disabled):hover,
+  :root[data-theme="dark"] .community-write-screen .course-picker-load-more:not(:disabled):hover,
+  :root[data-theme="dark"] .community-screen .fab:hover {
+    background: var(--community-dark-primary-hover-bg);
+    border-color: var(--community-dark-primary-hover-bg);
+  }
+}
+
+:root[data-theme="dark"] .community-write-screen .community-image-manager__dropzone {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(161, 81, 72, 0.18), transparent 30%),
+    var(--community-dark-action-bg);
+  border-color: var(--community-dark-action-border);
+}
+
+:root[data-theme="dark"] .community-write-screen .community-image-manager__dropzone:hover,
+:root[data-theme="dark"] .community-write-screen .community-image-manager__dropzone:focus-within {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(180, 92, 80, 0.24), transparent 30%),
+    var(--community-dark-action-hover-bg);
+  border-color: var(--community-dark-action-hover-border);
+}
+
+:root[data-theme="dark"] .community-write-screen .community-image-manager__upload-icon {
+  background: var(--community-dark-primary-bg);
+}
+
+:root[data-theme="dark"] .community-write-screen .community-image-manager__item.is-drag-over .community-image-manager__frame {
+  border-color: var(--community-dark-accent-border);
+  box-shadow: 0 0 0 3px rgba(122, 48, 44, 0.22);
+}
+
+:root[data-theme="dark"] .community-screen .button-danger,
+:root[data-theme="dark"] .community-screen .post-owner-button.button-danger,
+:root[data-theme="dark"] .community-screen .comment-action-button.is-danger,
+:root[data-theme="dark"] .community-write-screen .button-danger,
+:root[data-theme="dark"] .community-write-screen .community-image-manager__remove {
+  color: var(--community-dark-danger-text);
+  background: var(--community-dark-danger-bg);
+  border-color: var(--community-dark-danger-border);
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .community-screen .button-danger:hover,
+  :root[data-theme="dark"] .community-screen .post-owner-button.button-danger:hover,
+  :root[data-theme="dark"] .community-screen .comment-action-button.is-danger:hover,
+  :root[data-theme="dark"] .community-write-screen .button-danger:hover,
+  :root[data-theme="dark"] .community-write-screen .community-image-manager__remove:hover {
+    color: #ffffff;
+    background: rgba(220, 38, 38, 0.30);
+    border-color: rgba(248, 113, 113, 0.58);
+  }
+}
+:root[data-theme="dark"] .community-screen .comment-heart-button,
+:root[data-theme="dark"] .community-screen .comment-box button,
+:root[data-theme="dark"] .community-screen .community-image-manager__frame {
+  color: var(--community-dark-action-text);
+  background: var(--community-dark-action-bg);
+  border-color: var(--community-dark-action-border);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .community-screen .comment-heart-button.is-active {
+  color: var(--community-dark-accent-text);
+  background: var(--community-dark-accent-soft);
+  border-color: var(--community-dark-accent-border);
+}
+
+:root[data-theme="dark"] .community-screen .button-primary,
+:root[data-theme="dark"] .community-screen .comment-box button:not(:disabled) {
+  color: #fff7f4;
+  background: var(--community-dark-primary-bg);
+  border-color: var(--community-dark-primary-bg);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .community-screen .button-primary:not(:disabled):hover,
+  :root[data-theme="dark"] .community-screen .comment-box button:not(:disabled):hover {
+    color: #ffffff;
+    background: var(--community-dark-primary-hover-bg);
+    border-color: var(--community-dark-primary-hover-bg);
+  }
+}
+
+:root[data-theme="dark"] .community-screen .community-image-manager__dropzone {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(161, 81, 72, 0.18), transparent 30%),
+    var(--community-dark-action-bg);
+  border-color: var(--community-dark-action-border);
+}
+
+:root[data-theme="dark"] .community-screen .community-image-manager__dropzone:hover,
+:root[data-theme="dark"] .community-screen .community-image-manager__dropzone:focus-within {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(180, 92, 80, 0.24), transparent 30%),
+    var(--community-dark-action-hover-bg);
+  border-color: var(--community-dark-action-hover-border);
+}
+
+:root[data-theme="dark"] .community-screen .community-image-manager__upload-icon {
+  background: var(--community-dark-primary-bg);
+}
+
+:root[data-theme="dark"] .community-screen .community-image-manager__item.is-drag-over .community-image-manager__frame {
+  border-color: var(--community-dark-accent-border);
+  box-shadow: 0 0 0 3px rgba(122, 48, 44, 0.22);
+}

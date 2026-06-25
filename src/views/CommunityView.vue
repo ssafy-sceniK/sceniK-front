@@ -10,6 +10,7 @@ import FormStatusNotice from '../components/common/FormStatusNotice.vue';
 import SortSegmentedControl from '../components/common/SortSegmentedControl.vue';
 import CommentThread from '../components/community/CommentThread.vue';
 import CommunityPostDetailPanel from '../components/community/CommunityPostDetailPanel.vue';
+import CommunityBoardAccordion from '../components/community/CommunityBoardAccordion.vue';
 import CommunityImageManager from '../components/community/CommunityImageManager.vue';
 import DetailNotFoundPanel from '../components/detail/DetailNotFoundPanel.vue';
 import AuthorFollowCard from '../components/follow/AuthorFollowCard.vue';
@@ -68,11 +69,11 @@ const MAX_HASHTAGS = 10;
 const MAX_POST_IMAGES = 10;
 
 const boards = computed(() => [
-  { id: 'drama', icon: '\u{1F3AD}', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
-  { id: 'movie', icon: '\u{1F3AC}', name: t('community.boardLabels.movie.short'), fullName: t('community.boardLabels.movie.full'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
-  { id: 'idol', icon: '\u2605', name: t('community.boardLabels.idol.short'), fullName: t('community.boardLabels.idol.full'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
-  { id: 'variety', icon: '\u2726', name: t('community.boardLabels.variety.short'), fullName: t('community.boardLabels.variety.full'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
-  { id: 'region', icon: '\u2316', name: t('community.boardLabels.region.short'), fullName: t('community.boardLabels.region.full'), description: t('communityAuto.k2glxru'), tag: '\uc9c0\uc5ed' },
+  { id: 'drama', icon: 'DR', name: t('community.boardLabels.drama.short'), fullName: t('community.boardLabels.drama.full'), description: t('communityAuto.koyw4yb'), tag: '\ub4dc\ub77c\ub9c8' },
+  { id: 'movie', icon: 'MV', name: t('community.boardLabels.movie.short'), fullName: t('community.boardLabels.movie.full'), description: t('communityAuto.k16vm9dk'), tag: '\uc601\ud654' },
+  { id: 'idol', icon: 'ID', name: t('community.boardLabels.idol.short'), fullName: t('community.boardLabels.idol.full'), description: t('communityAuto.k1mwcls6'), tag: '\uc544\uc774\ub3cc' },
+  { id: 'variety', icon: 'TV', name: t('community.boardLabels.variety.short'), fullName: t('community.boardLabels.variety.full'), description: t('communityAuto.k1gtppnx'), tag: '\uc608\ub2a5' },
+  { id: 'region', icon: 'RG', name: t('community.boardLabels.region.short'), fullName: t('community.boardLabels.region.full'), description: t('communityAuto.k2glxru'), tag: '\uc9c0\uc5ed' },
 ]);
 
 const isBoardList = computed(() => route.name === 'community-boards');
@@ -1092,18 +1093,12 @@ async function nativeShare() {
             <template v-if="editingPost">
               <div class="form-field compact post-edit-board-field">
                 <span>{{ t('communityAuto.k7vl8in') }}</span>
-                <div class="write-board-grid write-board-grid--edit">
-                  <button
-                    v-for="board in boards"
-                    :key="board.id"
-                    type="button"
-                    :class="{ active: postEditBoard === board.id }"
-                    @click="postEditBoard = board.id"
-                  >
-                    <span class="write-board-icon" aria-hidden="true">{{ board.icon }}</span>
-                    <span>{{ board.name }}</span>
-                  </button>
-                </div>
+                <CommunityBoardAccordion
+                  v-model="postEditBoard"
+                  :boards="boards"
+                  :aria-label="t('communityAuto.k7vl8in')"
+                  compact
+                />
               </div>
               <div class="form-field compact">
                 <span>{{ t('communityAuto.k1e5ef9d') }}</span>

@@ -6,6 +6,7 @@ import AppLayout from '../components/layout/AppLayout.vue';
 import BaseButton from '../components/common/BaseButton.vue';
 import EmptyState from '../components/common/EmptyState.vue';
 import FormStatusNotice from '../components/common/FormStatusNotice.vue';
+import CommunityBoardAccordion from '../components/community/CommunityBoardAccordion.vue';
 import CommunityImageManager from '../components/community/CommunityImageManager.vue';
 import { uploadPostImage } from '../api/communityApi.js';
 import { getUserMessage } from '../api/error.js';
@@ -22,11 +23,11 @@ const uiStore = useUiStore();
 const { t } = useI18n();
 
 const boards = [
-  { id: 'drama', icon: '\u{1F3AD}', labelKey: 'community.boardLabels.drama.short', tagKey: 'content.category.drama' },
-  { id: 'movie', icon: '\u{1F3AC}', labelKey: 'community.boardLabels.movie.short', tagKey: 'content.category.movie' },
-  { id: 'idol', icon: '\u2605', labelKey: 'community.boardLabels.idol.short', tagKey: 'content.category.idol' },
-  { id: 'variety', icon: '\u2726', labelKey: 'community.boardLabels.variety.short', tagKey: 'content.category.variety' },
-  { id: 'region', icon: '\u2316', labelKey: 'community.boardLabels.region.short', tagKey: 'community.write.boards.region' },
+  { id: 'drama', icon: 'DR', labelKey: 'community.boardLabels.drama.short', fullLabelKey: 'community.boardLabels.drama.full', tagKey: 'content.category.drama' },
+  { id: 'movie', icon: 'MV', labelKey: 'community.boardLabels.movie.short', fullLabelKey: 'community.boardLabels.movie.full', tagKey: 'content.category.movie' },
+  { id: 'idol', icon: 'ID', labelKey: 'community.boardLabels.idol.short', fullLabelKey: 'community.boardLabels.idol.full', tagKey: 'content.category.idol' },
+  { id: 'variety', icon: 'TV', labelKey: 'community.boardLabels.variety.short', fullLabelKey: 'community.boardLabels.variety.full', tagKey: 'content.category.variety' },
+  { id: 'region', icon: 'RG', labelKey: 'community.boardLabels.region.short', fullLabelKey: 'community.boardLabels.region.full', tagKey: 'community.write.boards.region' },
 ];
 
 const selectedBoard = ref('drama');
@@ -45,6 +46,12 @@ const statusNotice = ref(null);
 const selectedBoardMeta = computed(() => boards.find((board) => board.id === selectedBoard.value) ?? boards[0]);
 const selectedBoardLabel = computed(() => t(selectedBoardMeta.value.labelKey));
 const selectedBoardTag = computed(() => t(selectedBoardMeta.value.tagKey));
+const boardOptions = computed(() => boards.map((board) => ({
+  id: board.id,
+  icon: board.icon,
+  name: t(board.labelKey),
+  description: t(board.fullLabelKey),
+})));
 const canSubmit = computed(() => title.value.trim().length >= 2 && body.value.trim().length >= 5);
 const courseOptions = computed(() => uiStore.savedCourses.filter((course) => course?.routeId));
 const selectedCourse = computed(() => courseOptions.value.find((course) => course.routeId === selectedRouteId.value) ?? null);
@@ -327,21 +334,14 @@ async function createPost() {
       </div>
 
       <div class="write-card">
-        <label class="form-field">
-          {{ t('community.write.board') }}
-          <div class="write-board-grid">
-            <button
-              v-for="board in boards"
-              :key="board.id"
-              type="button"
-              :class="{ active: selectedBoard === board.id }"
-              @click="selectedBoard = board.id"
-            >
-              <span class="write-board-icon" aria-hidden="true">{{ board.icon }}</span>
-              <span>{{ t(board.labelKey) }}</span>
-            </button>
-          </div>
-        </label>
+        <div class="form-field">
+          <span>{{ t('community.write.board') }}</span>
+          <CommunityBoardAccordion
+            v-model="selectedBoard"
+            :boards="boardOptions"
+            :aria-label="t('community.write.board')"
+          />
+        </div>
 
         <div class="form-field hashtag-editor-field">
           <span>{{ t('community.write.hashtag') }}</span>
